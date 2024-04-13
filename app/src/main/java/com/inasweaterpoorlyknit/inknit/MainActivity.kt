@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.inknit
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -61,6 +62,16 @@ class MainActivity : AppCompatActivity() {
             intent.type = "image/*"
             startActivityForResult(intent, REQUEST_IMAGE_PICKER)
         }
+        processDebugImage()
+    }
+
+    fun processDebugImage() {
+        val uri = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(packageName)
+            .appendPath("${R.raw.test_image_army_jacket}")
+            .build()
+        processImage(uri)
     }
 
     fun processImage(imageUri: Uri) {
@@ -69,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         val mlkitImage = InputImage.fromFilePath(this, imageUri)
         subjectSegmenter.process(mlkitImage).addOnSuccessListener { result: SubjectSegmentationResult ->
             graphicOverlay.setImageSourceInfo(mlkitImage.width, mlkitImage.height, false)
-            graphicOverlay.add(SubjectSegmentationGraphic(graphicOverlay, result, mlkitImage.width, mlkitImage.height))
+            graphicOverlay.add(SubjectSegmentationGraphic(result, mlkitImage.width, mlkitImage.height))
         }.addOnFailureListener {
             Toast.makeText(this, "Looking rough boys", Toast.LENGTH_SHORT).show()
         }
@@ -79,8 +90,12 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(resultCode == RESULT_OK) {
             when(requestCode) {
-                REQUEST_IMAGE_CAPTURE -> resultImageUri?.let{ processImage(it) }
-                REQUEST_IMAGE_PICKER -> data?.data?.let{ processImage(it) }
+                REQUEST_IMAGE_CAPTURE -> resultImageUri?.let{
+                    processImage(it)
+                }
+                REQUEST_IMAGE_PICKER -> data?.data?.let{
+                    processImage(it)
+                }
                 else -> Log.i("We fucking did it boys", "???") }
         } else {
             Log.e("We fucking did it boys", "Image capture result not returned")

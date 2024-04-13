@@ -10,30 +10,33 @@ import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
 import com.inasweaterpoorlyknit.inknit.GraphicOverlay.Graphic
 
 class SubjectSegmentationGraphic(
-    overlay: GraphicOverlay,
     segmentationResult: SubjectSegmentationResult,
     private val imageWidth: Int,
-    private val imageHeight: Int
-) : Graphic(overlay) {
+    private val imageHeight: Int,
+) : Graphic() {
     private val subjects: List<Subject> = segmentationResult.subjects
-    private val isRawSizeMaskEnabled = imageWidth != overlay.imageWidth || imageHeight != overlay.imageHeight
-    private val scaleX = overlay.imageWidth * 1f / imageWidth
-    private val scaleY = overlay.imageHeight * 1f / imageHeight
 
     /** Draws the segmented background on the supplied canvas.  */
-    override fun draw(canvas: Canvas) {
+    override fun draw(
+        canvas: Canvas,
+        overlayWidth: Int,
+        overlayHeight: Int,
+        transformationMatrix: Matrix) {
         val bitmap = Bitmap.createBitmap(
                         maskColorsFromFloatBuffer(),
                         imageWidth,
                         imageHeight,
                         Bitmap.Config.ARGB_8888
             )
+        val isRawSizeMaskEnabled = imageWidth != overlayWidth || imageHeight != overlayHeight
+        val scaleX = overlayWidth * 1f / imageWidth
+        val scaleY = overlayHeight * 1f / imageHeight
         if (isRawSizeMaskEnabled) {
-            val matrix = Matrix(getTransformationMatrix())
+            val matrix = Matrix(transformationMatrix)
             matrix.preScale(scaleX, scaleY)
             canvas.drawBitmap(bitmap, matrix, null)
         } else {
-            canvas.drawBitmap(bitmap, getTransformationMatrix(), null)
+            canvas.drawBitmap(bitmap, transformationMatrix, null)
         }
 
         bitmap.recycle()
@@ -49,7 +52,7 @@ class SubjectSegmentationGraphic(
             subject.confidenceMask?.let { mask ->
                 for (j in 0 until subject.height) {
                     for (i in 0 until subject.width) {
-                        if (mask.get() > 0.5) {
+                        if (mask.get() > CONFIDENCE_THRESHOLD) {
                             colors[(subject.startY + j) * imageWidth + subject.startX + i] = color
                         }
                     }
@@ -61,6 +64,7 @@ class SubjectSegmentationGraphic(
     }
 
     companion object {
+        private val CONFIDENCE_THRESHOLD = 0.5
         private val ALPHA = 128
         private val COLORS = arrayOf(
             Color.argb(ALPHA, 255, 0, 255), Color.argb(ALPHA, 0, 255, 255), Color.argb(ALPHA, 255, 255, 0),

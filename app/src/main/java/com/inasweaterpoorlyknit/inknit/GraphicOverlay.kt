@@ -37,15 +37,8 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
      * this and implement the [Graphic.draw] method to define the graphics element. Add
      * instances to the overlay using [GraphicOverlay.add].
      */
-    abstract class Graphic(private val overlay: GraphicOverlay) {
-        abstract fun draw(canvas: Canvas)
-
-        /**
-         * Returns a [Matrix] for transforming from image coordinates to overlay view coordinates.
-         */
-        fun getTransformationMatrix(): Matrix {
-            return overlay.transformationMatrix
-        }
+    abstract class Graphic {
+        abstract fun draw(canvas: Canvas, overlayWidth: Int, overlayHeight: Int, transformationMatrix: Matrix)
     }
 
     init {
@@ -103,7 +96,7 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) : View(context, at
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         updateTransformationIfNeeded()
-        graphics.forEach { it.draw(canvas) }
+        graphics.forEach { it.draw(canvas, imageWidth, imageHeight, transformationMatrix) }
         val three = intArrayOf(1, 2, 3)
     }
 }
