@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.0-alpha17"
+agp = "8.3.2"
 camerax = "1.4.0-alpha04"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
@@ -11,6 +11,8 @@ activityCompose = "1.7.0"
 composeBom = "2023.08.00"
 navigationFragmentKtx = "2.7.7"
 playServicesMlkitSubjectSegmentation = "16.0.0-beta1"
+guava-android = "27.1-android"
+glide = "4.16.0"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
@@ -40,6 +42,8 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 play-services-mlkit-subject-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "playServicesMlkitSubjectSegmentation" }
+guava-android = {module = "com.google.guava:guava", version.ref = "guava-android"}
+glide = {module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
