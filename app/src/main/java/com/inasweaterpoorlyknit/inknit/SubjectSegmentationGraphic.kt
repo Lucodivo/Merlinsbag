@@ -9,12 +9,19 @@ import com.google.mlkit.vision.segmentation.subject.Subject
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
 import com.inasweaterpoorlyknit.inknit.GraphicOverlay.Graphic
 
+private val DEFAULT_CONFIDENCE_THRESHOLD = 0.5f
+
 class SubjectSegmentationGraphic(
     segmentationResult: SubjectSegmentationResult,
     private val imageWidth: Int,
     private val imageHeight: Int,
+    private var confidenceThreshold: Float = DEFAULT_CONFIDENCE_THRESHOLD
 ) : Graphic() {
     private val subjects: List<Subject> = segmentationResult.subjects
+
+    fun changeConfidenceThreshold(confidenceThreshold: Float) {
+        this.confidenceThreshold = confidenceThreshold
+    }
 
     /** Draws the segmented background on the supplied canvas.  */
     override fun draw(
@@ -52,7 +59,7 @@ class SubjectSegmentationGraphic(
             subject.confidenceMask?.let { mask ->
                 for (j in 0 until subject.height) {
                     for (i in 0 until subject.width) {
-                        if (mask.get() > CONFIDENCE_THRESHOLD) {
+                        if (mask.get() > confidenceThreshold) {
                             colors[(subject.startY + j) * imageWidth + subject.startX + i] = color
                         }
                     }
@@ -64,7 +71,6 @@ class SubjectSegmentationGraphic(
     }
 
     companion object {
-        private val CONFIDENCE_THRESHOLD = 0.5
         private val ALPHA = 128
         private val COLORS = arrayOf(
             Color.argb(ALPHA, 255, 0, 255), Color.argb(ALPHA, 0, 255, 255), Color.argb(ALPHA, 255, 255, 0),

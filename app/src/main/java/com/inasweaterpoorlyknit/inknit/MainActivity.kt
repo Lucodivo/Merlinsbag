@@ -3,6 +3,7 @@ package com.inasweaterpoorlyknit.inknit
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -31,13 +32,25 @@ class MainActivity : AppCompatActivity() {
     lateinit var graphicOverlay: GraphicOverlay
     lateinit var imageFromCameraButton: Button
     lateinit var imageFromAlbumButton: Button
+    lateinit var decreaseThresholdButton: Button
+    lateinit var increaseThresholdButton: Button
+    lateinit var prevButton: Button
+    lateinit var nextButton: Button
+    var subjectIndex: Int = 0
+    var subjectSegmentationResult: SubjectSegmentationResult? = null
 
     var resultImageUri: Uri? = null
+
+    // TODO: Not currently taking advantage of the range of confidence given from the confidence
+    //  mask. Bitmaps would have to be manually constructed to allow user to fluctuate the threshold
+    //  confidence for each subject. It may also seems like it could be worth smoothing out the literal
+    //  edges of each subject
     val subjectSegmenter = SubjectSegmentation.getClient(
         SubjectSegmenterOptions.Builder()
             .enableMultipleSubjects(
                 SubjectSegmenterOptions.SubjectResultOptions.Builder()
                     .enableConfidenceMask()
+                    .enableSubjectBitmap()
                     .build())
             .build()
     )
@@ -49,6 +62,10 @@ class MainActivity : AppCompatActivity() {
         graphicOverlay = findViewById(R.id.graphic_overlay)
         imageFromCameraButton = findViewById(R.id.image_from_camera)
         imageFromAlbumButton = findViewById(R.id.image_from_album)
+        decreaseThresholdButton = findViewById(R.id.decrease_threshold)
+        increaseThresholdButton = findViewById(R.id.increase_threshold)
+        prevButton = findViewById(R.id.prev)
+        nextButton = findViewById(R.id.next)
         imageFromCameraButton.setOnClickListener{ _ ->
             createImageFileUri(this).let { imageUri ->
                 resultImageUri = imageUri
@@ -62,7 +79,26 @@ class MainActivity : AppCompatActivity() {
             intent.type = "image/*"
             startActivityForResult(intent, REQUEST_IMAGE_PICKER)
         }
-        processDebugImage()
+        decreaseThresholdButton.setOnClickListener {}
+        increaseThresholdButton.setOnClickListener {}
+        prevButton.setOnClickListener{
+            subjectSegmentationResult?.let {
+                subjectIndex = (subjectIndex - 1 + it.subjects.size) % it.subjects.size
+                it.subjects[subjectIndex].bitmap?.let { bitmap ->
+//                    val subBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width / 2, bitmap.height / 2)
+                    preview.setImageBitmap(bitmap)
+                }
+            }
+        }
+        nextButton.setOnClickListener{
+            subjectSegmentationResult?.let {
+                subjectIndex = (subjectIndex + 1) % it.subjects.size
+                it.subjects[subjectIndex].bitmap?.let { bitmap ->
+                    preview.setImageBitmap(bitmap)
+                }
+            }
+        }
+        imageFromAlbumButton.performClick()
     }
 
     fun processDebugImage() {
@@ -75,12 +111,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun processImage(imageUri: Uri) {
-        graphicOverlay.clear()
-        preview.setImageURI(imageUri)
+//        graphicOverlay.clear()
+//        preview.setImageURI(imageUri)
+        subjectSegmentationResult = null
+        subjectIndex = 0
         val mlkitImage = InputImage.fromFilePath(this, imageUri)
         subjectSegmenter.process(mlkitImage).addOnSuccessListener { result: SubjectSegmentationResult ->
-            graphicOverlay.setImageSourceInfo(mlkitImage.width, mlkitImage.height, false)
-            graphicOverlay.add(SubjectSegmentationGraphic(result, mlkitImage.width, mlkitImage.height))
+            subjectSegmentationResult = result
+            preview.setImageBitmap(result.subjects.first().bitmap)
         }.addOnFailureListener {
             Toast.makeText(this, "Looking rough boys", Toast.LENGTH_SHORT).show()
         }

@@ -12,7 +12,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:adjustViewBounds="true"
-      app:layout_constraintBottom_toTopOf="@+id/control"
+      app:layout_constraintBottom_toTopOf="@+id/control_container"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent" />
@@ -27,7 +27,7 @@
       app:layout_constraintBottom_toBottomOf="@id/preview"/>
 
   <LinearLayout
-      android:id="@id/control"
+      android:id="@+id/control_container"
       style="?android:attr/buttonBarStyle"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -35,22 +35,78 @@
       android:background="#000"
       android:orientation="vertical">
 
-    <Button
-        android:id="@+id/image_from_album"
-        style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/control_row1"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="12dp"
-        android:text="Album" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#000"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/image_from_camera"
-        style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="wrap_content"
+      <Button
+          android:id="@+id/image_from_album"
+          style="?android:attr/buttonBarButtonStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:layout_margin="12dp"
+          android:text="Album" />
+
+      <Button
+          android:id="@+id/prev"
+          style="?android:attr/buttonBarButtonStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:layout_margin="12dp"
+          android:text="prev"/>
+
+      <Button
+          android:id="@+id/next"
+          style="?android:attr/buttonBarButtonStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:layout_margin="12dp"
+          android:text="next"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/control_row2"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="12dp"
-        android:text="Camera"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#000"
+        android:orientation="horizontal">
+
+      <Button
+          android:id="@+id/image_from_camera"
+          style="?android:attr/buttonBarButtonStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:layout_margin="12dp"
+          android:text="Camera"/>
+
+      <Button
+          android:id="@+id/decrease_threshold"
+          style="?android:attr/buttonBarButtonStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:layout_margin="12dp"
+          android:text="-"/>
+
+      <Button
+          android:id="@+id/increase_threshold"
+          style="?android:attr/buttonBarButtonStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:layout_margin="12dp"
+          android:text="+"/>
+    </LinearLayout>
   </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
