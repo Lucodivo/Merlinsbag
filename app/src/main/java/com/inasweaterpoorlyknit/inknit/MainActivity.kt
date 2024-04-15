@@ -17,62 +17,127 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.decodeBitmap
 import androidx.core.graphics.set
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.segmentation.subject.Subject
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
 import java.io.File
 import java.io.IOException
+import java.nio.FloatBuffer
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
-const val REQUEST_IMAGE_CAPTURE = 1;
-const val REQUEST_IMAGE_PICKER = 2;
 
-val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+class SegmentedImage {
+    private var rawBitmap: Bitmap = PLACEHOLDER_BITMAP
+    val originalBitmap get() = rawBitmap
+    var subjectBitmap: Bitmap = PLACEHOLDER_BITMAP
+        private set
+    var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
+    var subjectIndex: Int = 0
+    var segmentationResult= PLACEHOLDER_RESULT
+    val subjectCount get() = segmentationResult.subjects.size
 
-private const val THRESHHOLD_INCREMENTS = 0.1f
-private const val DEFAULT_CONFIDENCE_THRESHOLD = 0.5f
+    companion object {
+        private const val THRESHHOLD_INCREMENTS = 0.1f
+        private const val DEFAULT_CONFIDENCE_THRESHOLD = 0.5f
+        private val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        private val EMPTY_FLOAT_BUFFER = FloatBuffer.allocate(1)
+        private val PLACEHOLDER_SUBJECT = Subject(EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP, 1, 1, 0, 0, )
+        private val PLACEHOLDER_RESULT = SubjectSegmentationResult(listOf(PLACEHOLDER_SUBJECT), EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP)
+
+        // TODO: Not currently taking advantage of the range of confidence given from the confidence
+        //  mask. Bitmaps would have to be manually constructed to allow user to fluctuate the threshold
+        //  confidence for each subject. It may also seems like it could be worth smoothing out the literal
+        //  edges of each subject
+        private val subjectSegmenter = SubjectSegmentation.getClient(
+            SubjectSegmenterOptions.Builder()
+                .enableMultipleSubjects(
+                    SubjectSegmenterOptions.SubjectResultOptions.Builder()
+                        .enableConfidenceMask()
+                        .enableSubjectBitmap()
+                        .build())
+                .build()
+        )
+    }
+
+    fun process(bitmap: Bitmap, successCallback: (Boolean) -> Unit){
+        rawBitmap = bitmap
+        val mlkitImage = InputImage.fromBitmap(rawBitmap, 0)
+        subjectSegmenter.process(mlkitImage).addOnSuccessListener { result: SubjectSegmentationResult ->
+            segmentationResult = result
+            prepareSubjectBitmap()
+            successCallback(true)
+        }.addOnFailureListener {
+            successCallback(false)
+        }
+    }
+
+    fun decreaseTheshold() {
+        confidenceThreshold -= THRESHHOLD_INCREMENTS
+        confidenceThreshold = max(THRESHHOLD_INCREMENTS, confidenceThreshold)
+        prepareSubjectBitmap()
+    }
+
+    fun increaseTheshold() {
+        confidenceThreshold += THRESHHOLD_INCREMENTS
+        confidenceThreshold = min(0.9f, confidenceThreshold)
+        prepareSubjectBitmap()
+    }
+
+    fun prevSubject() {
+        subjectIndex = (subjectIndex - 1 + subjectCount) % subjectCount
+        prepareSubjectBitmap()
+    }
+
+    fun nextSubject() {
+        subjectIndex = (subjectIndex + 1) % subjectCount
+        prepareSubjectBitmap()
+    }
+
+    private fun prepareSubjectBitmap() {
+        val subject = segmentationResult.subjects[subjectIndex]
+        subjectBitmap = Bitmap.createBitmap(
+            rawBitmap,
+            subject.startX,
+            subject.startY,
+            subject.width,
+            subject.height
+        ).copy(Bitmap.Config.ARGB_8888, true) // copied for mutability
+        for(x in 0..<subject.width) {
+            for(y in 0..<subject.height) {
+                val pixelIndex = x + y*subject.width
+                if(subject.confidenceMask!![pixelIndex] <= confidenceThreshold){
+                    subjectBitmap[x, y] = 0
+                }
+            }
+        }
+    }
+}
 
 class MainActivity : AppCompatActivity() {
     lateinit var preview: ImageView
-    lateinit var graphicOverlay: GraphicOverlay
     lateinit var imageFromCameraButton: Button
     lateinit var imageFromAlbumButton: Button
     lateinit var decreaseThresholdButton: Button
     lateinit var increaseThresholdButton: Button
     lateinit var prevButton: Button
     lateinit var nextButton: Button
-    var subjectIndex: Int = 0
-    var subjectSegmentationResult: SubjectSegmentationResult? = null
-
     var resultImageUri: Uri? = null
-    var rawBitmap: Bitmap = PLACEHOLDER_BITMAP
-    var subjectBitmap: Bitmap = PLACEHOLDER_BITMAP
+    val segmentedImage = SegmentedImage()
 
-    var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
-
-    // TODO: Not currently taking advantage of the range of confidence given from the confidence
-    //  mask. Bitmaps would have to be manually constructed to allow user to fluctuate the threshold
-    //  confidence for each subject. It may also seems like it could be worth smoothing out the literal
-    //  edges of each subject
-    val subjectSegmenter = SubjectSegmentation.getClient(
-        SubjectSegmenterOptions.Builder()
-            .enableMultipleSubjects(
-                SubjectSegmenterOptions.SubjectResultOptions.Builder()
-                    .enableConfidenceMask()
-                    .enableSubjectBitmap()
-                    .build())
-            .build()
-    )
+    companion object {
+        private const val REQUEST_IMAGE_CAPTURE = 1
+        private const val REQUEST_IMAGE_PICKER = 2
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_still_image)
         preview = findViewById(R.id.preview)
-        graphicOverlay = findViewById(R.id.graphic_overlay)
         imageFromCameraButton = findViewById(R.id.image_from_camera)
         imageFromAlbumButton = findViewById(R.id.image_from_album)
         decreaseThresholdButton = findViewById(R.id.decrease_threshold)
@@ -93,77 +158,46 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, REQUEST_IMAGE_PICKER)
         }
         decreaseThresholdButton.setOnClickListener {
-            confidenceThreshold -= THRESHHOLD_INCREMENTS
-            confidenceThreshold = max(THRESHHOLD_INCREMENTS, confidenceThreshold)
+            segmentedImage.decreaseTheshold()
             drawSubject()
         }
         increaseThresholdButton.setOnClickListener {
-            confidenceThreshold += THRESHHOLD_INCREMENTS
-            confidenceThreshold = min(0.9f, confidenceThreshold)
+            segmentedImage.increaseTheshold()
             drawSubject()
         }
         prevButton.setOnClickListener{
-            subjectSegmentationResult?.let {
-                subjectIndex = (subjectIndex - 1 + it.subjects.size) % it.subjects.size
-                drawSubject()
-            }
+            segmentedImage.prevSubject()
+            drawSubject()
         }
         nextButton.setOnClickListener{
-            subjectSegmentationResult?.let {
-                subjectIndex = (subjectIndex + 1) % it.subjects.size
-                drawSubject()
-            }
+            segmentedImage.nextSubject()
+            drawSubject()
         }
         imageFromAlbumButton.performClick()
     }
 
-    private fun drawSubject() {
-        subjectSegmentationResult?.let { segmentationResult ->
-            val subject = segmentationResult.subjects[subjectIndex]
-            subjectBitmap = Bitmap.createBitmap(
-                rawBitmap,
-                subject.startX,
-                subject.startY,
-                subject.width,
-                subject.height
-            ).copy(Bitmap.Config.ARGB_8888, true) // copied for mutability
-            for(x in 0..<subject.width) {
-                for(y in 0..<subject.height) {
-                    val pixelIndex = x + y*subject.width
-                    if(subject.confidenceMask!![pixelIndex] <= confidenceThreshold){
-                        subjectBitmap[x, y] = 0
-                    }
-                }
-            }
-            preview.setImageBitmap(subjectBitmap)
+    private fun drawSubject() = preview.setImageBitmap(segmentedImage.subjectBitmap)
+
+    fun processCurrentImage(uri: Uri) {
+        val bitmap = ImageDecoder.createSource(contentResolver, uri).decodeBitmap{_, _ ->}
+        preview.setImageBitmap(bitmap)
+        segmentedImage.process(bitmap){ success ->
+            if(success){ drawSubject() }
+            else{ Toast.makeText(this, "Looking rough boys", Toast.LENGTH_SHORT).show() }
         }
     }
 
-    fun processCurrentImage() {
-        subjectSegmentationResult = null
-        subjectIndex = 0
-        preview.setImageBitmap(rawBitmap)
-        val mlkitImage = InputImage.fromBitmap(rawBitmap, 0)
-        subjectSegmenter.process(mlkitImage).addOnSuccessListener { result: SubjectSegmentationResult ->
-            subjectSegmentationResult = result
-            drawSubject()
-        }.addOnFailureListener {
-            Toast.makeText(this, "Looking rough boys", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
+    // TODO: It is recommended to use registerActivityForResult()
+    @Deprecated("We fucking did it boys")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(resultCode == RESULT_OK) {
             when(requestCode) {
                 REQUEST_IMAGE_CAPTURE -> resultImageUri?.let{ uri ->
-                    rawBitmap = ImageDecoder.createSource(contentResolver, uri).decodeBitmap{_, _ ->}
-                    processCurrentImage()
+                    processCurrentImage(uri)
                 }
                 REQUEST_IMAGE_PICKER -> data?.data?.let{ uri ->
-                    rawBitmap = ImageDecoder.createSource(contentResolver, uri).decodeBitmap{_, _ ->}
-                    processCurrentImage()
+                    processCurrentImage(uri)
                 }
                 else -> Log.i("We fucking did it boys", "???") }
         } else {
