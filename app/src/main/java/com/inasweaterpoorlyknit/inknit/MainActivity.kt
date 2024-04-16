@@ -3,7 +3,6 @@ package com.inasweaterpoorlyknit.inknit
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -14,7 +13,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.core.graphics.set
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.subject.Subject
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
@@ -23,6 +21,7 @@ import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
 import java.io.File
 import java.io.IOException
 import java.nio.FloatBuffer
+import java.nio.IntBuffer
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,16 +34,19 @@ fun Context.toast(message: String) {
 }
 
 class SegmentedImage {
-    private var rawBitmap: Bitmap = PLACEHOLDER_BITMAP
-    val originalBitmap get() = rawBitmap
+    private var rawImageColors = PLACEHOLDER_INT_ARRAY
+    private var rawImageWidth = 1
+    private var rawImageHeight = 1
+    var subjectColors = PLACEHOLDER_INT_ARRAY
     var subjectBitmap: Bitmap = PLACEHOLDER_BITMAP
         private set
     var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
     var subjectIndex: Int = 0
     var segmentationResult= PLACEHOLDER_RESULT
-    val subjectCount get() = segmentationResult.subjects.size
 
     companion object {
+        private val PLACEHOLDER_INT_BUFFER = IntBuffer.allocate(1)
+        private val PLACEHOLDER_INT_ARRAY = IntArray(1)
         private const val THRESHHOLD_INCREMENTS = 0.1f
         private const val DEFAULT_CONFIDENCE_THRESHOLD = 0.5f
         private val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
@@ -68,7 +70,7 @@ class SegmentedImage {
 
     init {
         // warm up the ML Kit Model
-        val mlkitImage = InputImage.fromBitmap(rawBitmap, 0)
+        val mlkitImage = InputImage.fromBitmap(PLACEHOLDER_BITMAP, 0)
         subjectSegmenter.process(mlkitImage)
             .addOnSuccessListener { segmentationResult = it }
             .addOnFailureListener{ Log.e("SegmentedImage", "ML Kit failed to process placeholder bitmap image") }
@@ -76,13 +78,18 @@ class SegmentedImage {
 
     fun process(mlkitInputImage: InputImage, successCallback: (Boolean) -> Unit) {
         mlkitInputImage.bitmapInternal?.also { bitmap ->
-            rawBitmap = if(bitmap.config == Bitmap.Config.ARGB_8888 && bitmap.isMutable){
-                bitmap
-            } else {
-                bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            }
+            val bitmapSize = bitmap.width * bitmap.height
+            if(rawImageColors.size < bitmapSize){ rawImageColors = IntArray(bitmapSize) }
+            bitmap.getPixels(rawImageColors, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+            rawImageWidth = bitmap.width
+            rawImageHeight = bitmap.height
+            subjectIndex = 0
+            confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
             subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
                 segmentationResult = result
+                val subject = segmentationResult.subjects[subjectIndex]
+                val subjectColorsSize = subject.width * subject.height
+                if(subjectColors.size < subjectColorsSize){ subjectColors = IntArray(subjectColorsSize) }
                 prepareSubjectBitmap()
                 successCallback(true)
             }.addOnFailureListener {
@@ -106,36 +113,79 @@ class SegmentedImage {
     }
 
     fun prevSubject() {
+        val subjectCount = segmentationResult.subjects.size
         subjectIndex = (subjectIndex - 1 + subjectCount) % subjectCount
+        val subject = segmentationResult.subjects[subjectIndex]
+        val subjectColorsSize = subject.width * subject.height
+        if(subjectColors.size < subjectColorsSize){ subjectColors = IntArray(subjectColorsSize) }
         prepareSubjectBitmap()
     }
 
     fun nextSubject() {
+        val subjectCount = segmentationResult.subjects.size
         subjectIndex = (subjectIndex + 1) % subjectCount
+        val subject = segmentationResult.subjects[subjectIndex]
+        val subjectColorsSize = subject.width * subject.height
+        if(subjectColors.size < subjectColorsSize){ subjectColors = IntArray(subjectColorsSize) }
         prepareSubjectBitmap()
     }
 
     private fun prepareSubjectBitmap() {
-        val subject = segmentationResult.subjects[subjectIndex]
-        val hasAlpha = true
-        subjectBitmap = Bitmap.createBitmap(subject.width, subject.height, Bitmap.Config.ARGB_8888, hasAlpha)
         val alphaMaskZero = 0x00ffffff
         val alphaMaskOne = 0xff000000.toInt()
-        if(subjectBitmap.isMutable) {
-            for (x in 0..<subject.width) {
-                for (y in 0..<subject.height) {
-                    val subjectPixelIndex = x + y * subject.width
-                    subjectBitmap.setPixel(x, y, if (subject.confidenceMask!![subjectPixelIndex] <= confidenceThreshold) {
-                        rawBitmap.getPixel(x + subject.startX, subject.startY + y) and alphaMaskZero
-                    } else {
-                        rawBitmap.getPixel(x + subject.startX, subject.startY + y) or alphaMaskOne
-                    })
+        val subject = segmentationResult.subjects[subjectIndex]
+        val subjectConfidenceMask = subject.confidenceMask!!
+        subjectConfidenceMask.rewind()
+        for(y in 0 ..< subject.height) {
+            val rawRowOffset = ((y + subject.startY) * rawImageWidth) + subject.startX
+            val subjectRowOffset = y * subject.width
+            for(x in 0 ..< subject.width) {
+                subjectColors[subjectRowOffset + x] = if(subjectConfidenceMask.get() <= confidenceThreshold) {
+                    rawImageColors[rawRowOffset + x] and alphaMaskZero
+                } else {
+                    rawImageColors[rawRowOffset + x] or alphaMaskOne
                 }
             }
-        } else {
-            Log.e("SegmentedImage", "Subject bitmap is not mutable")
+        }
+        // NOTE: try/catch essentially used as an if/else. Unfortunately, determining whether the new bitmap will fit is not simple or well defined.
+        try{
+            subjectBitmap.reconfigure(subject.width, subject.height, Bitmap.Config.ARGB_8888)
+        } catch (e: IllegalArgumentException) {
+            subjectBitmap = Bitmap.createBitmap(subject.width, subject.height, Bitmap.Config.ARGB_8888, true)
+        }
+        subjectBitmap.setPixels(subjectColors, 0, subject.width, 0, 0, subject.width, subject.height)
+    }
+}
+
+const val NANOSECONDS_PER_MICROSECOND = 1_000
+const val NANOSECONDS_PER_MILLISECOND = 1_000_000
+const val NANOSECONDS_PER_SECOND = 1_000_000_000
+fun nanosecondsToString(nanoseconds: Long): String  {
+    return when(nanoseconds) {
+        in 0..<1_000 -> { "${nanoseconds}ns" }
+        in 0..<1_000_000 -> {
+            val microseconds = nanoseconds.toDouble() / NANOSECONDS_PER_MICROSECOND.toDouble()
+            "${"%.2f".format(microseconds)}µs"
+        }
+        in 0..<1_000_000_000 -> {
+            val milliseconds = nanoseconds.toDouble() / NANOSECONDS_PER_MILLISECOND.toDouble()
+            "${"%.2f".format(milliseconds)}ms"
+        }
+        else -> {
+            val seconds = nanoseconds.toDouble() / NANOSECONDS_PER_SECOND.toDouble()
+            "${"%.2f".format(seconds)}s"
         }
     }
+}
+
+class Timer {
+    var startNs = System.nanoTime()
+    fun elapsedNs(): Long = System.nanoTime() - startNs
+    fun logElapsed(tag: String) {
+        val elapsedNs = elapsedNs()
+        Log.i("InKnit", "$tag: ${nanosecondsToString(elapsedNs)}")
+    }
+    fun reset(){ startNs = System.nanoTime() }
 }
 
 class MainActivity : AppCompatActivity() {
@@ -148,6 +198,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var nextButton: Button
     var resultImageUri: Uri? = null
     val segmentedImage = SegmentedImage()
+    val timer = Timer()
 
     companion object {
         private const val REQUEST_IMAGE_CAPTURE = 1
@@ -196,7 +247,10 @@ class MainActivity : AppCompatActivity() {
         imageFromAlbumButton.performClick()
     }
 
-    private fun drawSubject() = preview.setImageBitmap(segmentedImage.subjectBitmap)
+    private fun drawSubject(){
+        timer.logElapsed("ML Kit Subject Segmentation Post-Processing")
+        preview.setImageBitmap(segmentedImage.subjectBitmap)
+    }
 
     fun processImage(uri: Uri) {
         try {
@@ -209,16 +263,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: IOException) {
             toast("ML Kit failed to open image")
         }
-/*
-        contentResolver.openInputStream(uri)?.also { imageInputStream ->
-            segmentedImage.process(imageInputStream){ success ->
-                if(success){ drawSubject() }
-                else{ toast("ML Kit failed to process image") }
-            }
-        } ?: run {
-            toast("Failed to open image")
-        }
-*/
     }
 
     // TODO: It is recommended to use registerActivityForResult()
@@ -228,10 +272,14 @@ class MainActivity : AppCompatActivity() {
         if(resultCode == RESULT_OK) {
             when(requestCode) {
                 REQUEST_IMAGE_CAPTURE -> resultImageUri?.let { uri ->
+                    timer.reset()
+                    // TODO: move to separate thread
                     processImage(uri)
                 }
 
                 REQUEST_IMAGE_PICKER -> data?.data?.let { uri ->
+                    timer.reset()
+                    // TODO: move to separate thread
                     processImage(uri)
                 }
                 else -> toast("Failed to get image from request.")
