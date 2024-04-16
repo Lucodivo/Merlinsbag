@@ -3,7 +3,7 @@ package com.inasweaterpoorlyknit.inknit
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -14,7 +14,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.core.graphics.decodeBitmap
 import androidx.core.graphics.set
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.subject.Subject
@@ -30,6 +29,10 @@ import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
+
+fun Context.toast(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
 
 class SegmentedImage {
     private var rawBitmap: Bitmap = PLACEHOLDER_BITMAP
@@ -58,20 +61,34 @@ class SegmentedImage {
                 .enableMultipleSubjects(
                     SubjectSegmenterOptions.SubjectResultOptions.Builder()
                         .enableConfidenceMask()
-                        .enableSubjectBitmap()
                         .build())
                 .build()
         )
     }
 
-    fun process(bitmap: Bitmap, successCallback: (Boolean) -> Unit){
-        rawBitmap = bitmap
+    init {
+        // warm up the ML Kit Model
         val mlkitImage = InputImage.fromBitmap(rawBitmap, 0)
-        subjectSegmenter.process(mlkitImage).addOnSuccessListener { result: SubjectSegmentationResult ->
-            segmentationResult = result
-            prepareSubjectBitmap()
-            successCallback(true)
-        }.addOnFailureListener {
+        subjectSegmenter.process(mlkitImage)
+            .addOnSuccessListener { segmentationResult = it }
+            .addOnFailureListener{ Log.e("SegmentedImage", "ML Kit failed to process placeholder bitmap image") }
+    }
+
+    fun process(mlkitInputImage: InputImage, successCallback: (Boolean) -> Unit) {
+        mlkitInputImage.bitmapInternal?.also { bitmap ->
+            rawBitmap = if(bitmap.config == Bitmap.Config.ARGB_8888 && bitmap.isMutable){
+                bitmap
+            } else {
+                bitmap.copy(Bitmap.Config.ARGB_8888, true)
+            }
+            subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
+                segmentationResult = result
+                prepareSubjectBitmap()
+                successCallback(true)
+            }.addOnFailureListener {
+                successCallback(false)
+            }
+        } ?: run {
             successCallback(false)
         }
     }
@@ -100,20 +117,23 @@ class SegmentedImage {
 
     private fun prepareSubjectBitmap() {
         val subject = segmentationResult.subjects[subjectIndex]
-        subjectBitmap = Bitmap.createBitmap(
-            rawBitmap,
-            subject.startX,
-            subject.startY,
-            subject.width,
-            subject.height
-        ).copy(Bitmap.Config.ARGB_8888, true) // copied for mutability
-        for(x in 0..<subject.width) {
-            for(y in 0..<subject.height) {
-                val pixelIndex = x + y*subject.width
-                if(subject.confidenceMask!![pixelIndex] <= confidenceThreshold){
-                    subjectBitmap[x, y] = 0
+        val hasAlpha = true
+        subjectBitmap = Bitmap.createBitmap(subject.width, subject.height, Bitmap.Config.ARGB_8888, hasAlpha)
+        val alphaMaskZero = 0x00ffffff
+        val alphaMaskOne = 0xff000000.toInt()
+        if(subjectBitmap.isMutable) {
+            for (x in 0..<subject.width) {
+                for (y in 0..<subject.height) {
+                    val subjectPixelIndex = x + y * subject.width
+                    subjectBitmap.setPixel(x, y, if (subject.confidenceMask!![subjectPixelIndex] <= confidenceThreshold) {
+                        rawBitmap.getPixel(x + subject.startX, subject.startY + y) and alphaMaskZero
+                    } else {
+                        rawBitmap.getPixel(x + subject.startX, subject.startY + y) or alphaMaskOne
+                    })
                 }
             }
+        } else {
+            Log.e("SegmentedImage", "Subject bitmap is not mutable")
         }
     }
 }
@@ -178,13 +198,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun drawSubject() = preview.setImageBitmap(segmentedImage.subjectBitmap)
 
-    fun processCurrentImage(uri: Uri) {
-        val bitmap = ImageDecoder.createSource(contentResolver, uri).decodeBitmap{_, _ ->}
-        preview.setImageBitmap(bitmap)
-        segmentedImage.process(bitmap){ success ->
-            if(success){ drawSubject() }
-            else{ Toast.makeText(this, "Looking rough boys", Toast.LENGTH_SHORT).show() }
+    fun processImage(uri: Uri) {
+        try {
+            val inputImage = InputImage.fromFilePath(this, uri)
+            inputImage.byteBuffer
+            segmentedImage.process(inputImage) { success ->
+                if(success){ drawSubject() }
+                else{ toast("ML Kit failed to process image") }
+            }
+        } catch (e: IOException) {
+            toast("ML Kit failed to open image")
         }
+/*
+        contentResolver.openInputStream(uri)?.also { imageInputStream ->
+            segmentedImage.process(imageInputStream){ success ->
+                if(success){ drawSubject() }
+                else{ toast("ML Kit failed to process image") }
+            }
+        } ?: run {
+            toast("Failed to open image")
+        }
+*/
     }
 
     // TODO: It is recommended to use registerActivityForResult()
@@ -193,16 +227,16 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(resultCode == RESULT_OK) {
             when(requestCode) {
-                REQUEST_IMAGE_CAPTURE -> resultImageUri?.let{ uri ->
-                    processCurrentImage(uri)
+                REQUEST_IMAGE_CAPTURE -> resultImageUri?.let { uri ->
+                    processImage(uri)
                 }
-                REQUEST_IMAGE_PICKER -> data?.data?.let{ uri ->
-                    processCurrentImage(uri)
+
+                REQUEST_IMAGE_PICKER -> data?.data?.let { uri ->
+                    processImage(uri)
                 }
-                else -> Log.i("We fucking did it boys", "???") }
-        } else {
-            Log.e("We fucking did it boys", "Image capture result not returned")
-        }
+                else -> toast("Failed to get image from request.")
+            }
+        } else { toast("Image capture result not returned") }
     }
 }
 
@@ -213,7 +247,7 @@ fun createImageFileUri(context: Context): Uri? {
         val file = File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
         FileProvider.getUriForFile(context, "com.inasweaterpoorlyknit.inknit.fileprovider", file)
     } catch (ex: IOException) {
-        Toast.makeText(context, "Error creating file", Toast.LENGTH_SHORT).show()
+        context.toast("Error creating file")
         null
     }
 }
