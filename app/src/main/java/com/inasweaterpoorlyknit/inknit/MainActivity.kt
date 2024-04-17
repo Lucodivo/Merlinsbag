@@ -16,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -135,8 +134,7 @@ class MainActivity : AppCompatActivity() {
     private fun processImage(uri: Uri) {
         lifecycleScope.launch(Dispatchers.Default) {
             try {
-                val inputImage = InputImage.fromFilePath(this@MainActivity, uri)
-                segmentedImage.process(inputImage) { success ->
+                segmentedImage.process(this@MainActivity, uri) { success ->
                     if (success) drawSubject()
                     else Log.e("processImage()", "ML Kit failed to process image")
                 }

@@ -35,12 +35,23 @@ fun nanosecondsToString(nanoseconds: Long): String  {
 
 class Timer {
     var startNs = System.nanoTime()
-    fun elapsedNs(): Long = System.nanoTime() - startNs
-    fun logElapsed(tag: String) {
-        val elapsedNs = elapsedNs()
-        Log.i("InKnit", "$tag: ${nanosecondsToString(elapsedNs)}")
+    var milestoneStartNs = startNs
+    fun totalElapsedNs(): Long = System.nanoTime() - startNs
+    fun milestoneElapsedNS(): Long {
+        val result = System.nanoTime() - milestoneStartNs
+        milestoneStartNs = System.nanoTime()
+        return result
     }
-    fun reset(){ startNs = System.nanoTime() }
+    fun logMilestone(tag: String, msg: String) {
+        Log.i(tag, "$msg: ${nanosecondsToString(milestoneElapsedNS())}")
+    }
+    fun logElapsed(tag: String, msg: String) {
+        Log.i(tag, "$msg: ${nanosecondsToString(totalElapsedNs())}")
+    }
+    fun reset(){
+        startNs = System.nanoTime()
+        milestoneStartNs = startNs
+    }
 }
 
 // Context extensions

@@ -1,6 +1,8 @@
 package com.inasweaterpoorlyknit.inknit
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.subject.Subject
@@ -11,6 +13,22 @@ import java.nio.FloatBuffer
 import kotlin.math.max
 import kotlin.math.min
 
+// PERFORMANCE TESTS
+// Quick performance test on Samsung Galaxy A23 5G with 3060x4080 image of a single subject (denim jacket)
+// Cold pass (first image processed)
+//     Total Processing Time: 1.17s
+//          Create InputImage: 399ms
+//          Copy bitmap from InputImage to IntArray: 24ms
+//          Image successfully processed by ML Kit: 687ms
+//          Subject alpha masked to IntArray: 54ms
+//          Subject alpha masked IntArray to bitmap: 10ms
+// Hot pass (5th image processed)
+//     Total Processing Time: 895.47ms
+//          Create InputImage: 390ms
+//          Copy bitmap from InputImage to IntArray: 8ms
+//          Image successfully processed by ML Kit: 466ms
+//          Subject alpha masked to IntArray: 27ms
+//          Subject alpha masked IntArray to bitmap: 4ms
 class SegmentedImage {
     private var rawImageColors = PLACEHOLDER_INT_ARRAY
     private var rawImageWidth = 1
@@ -52,11 +70,20 @@ class SegmentedImage {
             .addOnFailureListener{ Log.e("SegmentedImage", "ML Kit failed to process placeholder bitmap image") }
     }
 
+    val timer = Timer()
+    fun process(context: Context, uri: Uri, successCallback: (Boolean) -> Unit) {
+        timer.reset()
+        val mlkitInputImage = InputImage.fromFilePath(context, uri)
+        timer.logMilestone("SegmentedImage", "Create Input Image")
+        process(mlkitInputImage, successCallback)
+    }
+
     fun process(mlkitInputImage: InputImage, successCallback: (Boolean) -> Unit) {
         mlkitInputImage.bitmapInternal?.also { bitmap ->
             val bitmapSize = bitmap.width * bitmap.height
             if(rawImageColors.size < bitmapSize){ rawImageColors = IntArray(bitmapSize) }
             bitmap.getPixels(rawImageColors, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+            timer.logMilestone("SegmentedImage", "copy bitmap from input image")
             rawImageWidth = bitmap.width
             rawImageHeight = bitmap.height
             subjectIndex = 0
@@ -66,6 +93,7 @@ class SegmentedImage {
                 val subject = segmentationResult.subjects[subjectIndex]
                 val subjectColorsSize = subject.width * subject.height
                 if(subjectColors.size < subjectColorsSize){ subjectColors = IntArray(subjectColorsSize) }
+                timer.logMilestone("SegmentedImage", "image successfully processed")
                 prepareSubjectBitmap()
                 successCallback(true)
             }.addOnFailureListener {
@@ -125,11 +153,11 @@ class SegmentedImage {
         // regardless a minimum of 36.5 MB is required and far exceeding any available cache on any modern system.
         // I don't know the exact cache sizes but they are in the ballpark of 64KiB L1, 256KiB L2, and 2 MiB.
         // If this function is called multiple times on the same raw image, confidence mask, or subject,
-        // the cache would not do us any favors unless the images were reduced 20 fold.
+        // the cache would not do us any favors unless the image sizes were reduced 20 fold.
         // That said...
         // Since the fetching of memory in the inner loop is going to be our bottleneck, there are essentially
         // free cycles in their for other things. Like post-processing type effects that does not itself access
-        // any large amounts of data.
+        // any large amounts of data. On the Samsung Galaxy A23 5G for the tested image above, it took ~32ms.
 
         val subject = segmentationResult.subjects[subjectIndex]
         val subjectConfidenceMask = subject.confidenceMask!!
@@ -143,6 +171,7 @@ class SegmentedImage {
                     else rawImageColors[rawRowOffset + x]
             }
         }
+        timer.logMilestone("SubjectImage", "alpha mask applied to subject int array")
 
         // NOTE: this try/catch essentially used as an if/else.
         // Unfortunately, determining whether the new bitmap will fit is not simple or well-defined.
@@ -152,5 +181,7 @@ class SegmentedImage {
             subjectBitmap = Bitmap.createBitmap(subject.width, subject.height, Bitmap.Config.ARGB_8888, true)
         }
         subjectBitmap.setPixels(subjectColors, 0, subject.width, 0, 0, subject.width, subject.height)
+        timer.logMilestone("SubjectImage", "alpha masked subject int array converted to bitmap")
+        timer.logElapsed("SubjectImage", "entire processed time")
     }
 }
