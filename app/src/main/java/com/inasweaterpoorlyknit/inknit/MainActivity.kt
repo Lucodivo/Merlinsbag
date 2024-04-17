@@ -1,21 +1,25 @@
 package com.inasweaterpoorlyknit.inknit
 
-import android.content.Context
+import android.Manifest.permission
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
+import android.provider.Settings
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts.GetContent
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.mlkit.vision.common.InputImage
-import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     lateinit var preview: ImageView
@@ -25,13 +29,83 @@ class MainActivity : AppCompatActivity() {
     lateinit var increaseThresholdButton: Button
     lateinit var prevButton: Button
     lateinit var nextButton: Button
-    var resultImageUri: Uri? = null
     val segmentedImage = SegmentedImage()
-    val timer = Timer()
 
-    companion object {
-        private const val REQUEST_IMAGE_CAPTURE = 1
-        private const val REQUEST_IMAGE_PICKER = 2
+    val externalStoragePermissionRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
+
+    val _appSettingsLauncher = registerForActivityResult(StartActivityForResult()){}
+    fun openAppSettings() = _appSettingsLauncher.launch(
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+        }
+    )
+
+    val _cameraLauncher = registerForActivityResult(RequestMultiplePermissions()){ permissions ->
+        var permissionsGranted = true
+        var userCheckedNeverAskAgain = false
+        permissions.entries.forEach { entry ->
+            if(!entry.value) {
+                userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(entry.key)
+                permissionsGranted = false
+            }
+        }
+        if(permissionsGranted) {
+            pendingCameraImageUri = createImageFileUri()
+            pendingCameraImageUri?.let{ _getCameraImageLauncher.launch(pendingCameraImageUri) }
+        } else {
+            if(userCheckedNeverAskAgain) {
+                val alertMessage = if(externalStoragePermissionRequired) {
+                    "Camera and storage permission required to use camera in app. " +
+                        "Enable camera permission in settings to use camera feature."
+                } else {
+                    "Camera permission required to use camera in app. " +
+                        "Enable camera permission in settings to use camera feature."
+                }
+                AlertDialog.Builder(this)
+                    .setTitle("Permissions Required")
+                    .setMessage(alertMessage)
+                    .setNegativeButton("No Thanks"){ _, _ -> }
+                    .setPositiveButton("App Permissions"){ _, _ -> openAppSettings() }
+                    .show()
+            } else {
+                toast("Camera permissions required")
+            }
+        }
+    }
+
+    fun handleActivityResult(uri: Uri) = processImage(uri)
+
+    val _getContentLauncher = registerForActivityResult(GetContent()){ uri ->
+        if(uri != null) handleActivityResult(uri)
+        else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+    }
+    fun selectAlbumImage() = _getContentLauncher.launch("image/*")
+
+    var pendingCameraImageUri: Uri? = null
+    val _getCameraImageLauncher = registerForActivityResult(TakePicture()){ pictureTaken ->
+        if(pictureTaken) handleActivityResult(pendingCameraImageUri!!)
+        else Log.i("TakePicture ActivityResultContract", "Picture not returned from camera")
+    }
+    fun selectCameraImage() = _cameraLauncher.launch(REQUIRED_PERMISSIONS)
+
+    fun decreaseThreshold() = lifecycleScope.launch(Dispatchers.Default) {
+        segmentedImage.decreaseTheshold()
+        drawSubject()
+    }
+
+    fun increaseThreshold() = lifecycleScope.launch(Dispatchers.Default) {
+        segmentedImage.increaseTheshold()
+        drawSubject()
+    }
+
+    fun prevSubject() = lifecycleScope.launch(Dispatchers.Default) {
+        segmentedImage.prevSubject()
+        drawSubject()
+    }
+
+    fun nextSubject() = lifecycleScope.launch(Dispatchers.Default) {
+        segmentedImage.nextSubject()
+        drawSubject()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,87 +118,38 @@ class MainActivity : AppCompatActivity() {
         increaseThresholdButton = findViewById(R.id.increase_threshold)
         prevButton = findViewById(R.id.prev)
         nextButton = findViewById(R.id.next)
-        imageFromCameraButton.setOnClickListener{ _ ->
-            createImageFileUri(this).let { imageUri ->
-                resultImageUri = imageUri
-                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
-                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-            }
-        }
-        imageFromAlbumButton.setOnClickListener{
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            startActivityForResult(intent, REQUEST_IMAGE_PICKER)
-        }
-        decreaseThresholdButton.setOnClickListener {
-            segmentedImage.decreaseTheshold()
-            drawSubject()
-        }
-        increaseThresholdButton.setOnClickListener {
-            segmentedImage.increaseTheshold()
-            drawSubject()
-        }
-        prevButton.setOnClickListener{
-            segmentedImage.prevSubject()
-            drawSubject()
-        }
-        nextButton.setOnClickListener{
-            segmentedImage.nextSubject()
-            drawSubject()
-        }
-        imageFromAlbumButton.performClick()
+        imageFromCameraButton.setOnClickListener{ selectCameraImage() }
+        imageFromAlbumButton.setOnClickListener{ selectAlbumImage() }
+        decreaseThresholdButton.setOnClickListener { decreaseThreshold() }
+        increaseThresholdButton.setOnClickListener { increaseThreshold() }
+        prevButton.setOnClickListener{ prevSubject() }
+        nextButton.setOnClickListener{ nextSubject() }
     }
 
-    private fun drawSubject(){
-        timer.logElapsed("ML Kit Subject Segmentation Post-Processing")
-        preview.setImageBitmap(segmentedImage.subjectBitmap)
-    }
-
-    fun processImage(uri: Uri) {
-        try {
-            val inputImage = InputImage.fromFilePath(this, uri)
-            inputImage.byteBuffer
-            segmentedImage.process(inputImage) { success ->
-                if(success){ drawSubject() }
-                else{ toast("ML Kit failed to process image") }
-            }
-        } catch (e: IOException) {
-            toast("ML Kit failed to open image")
+    private fun drawSubject() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            preview.setImageBitmap(segmentedImage.subjectBitmap)
         }
     }
 
-    // TODO: It is recommended to use registerActivityForResult()
-    @Deprecated("We fucking did it boys")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if(resultCode == RESULT_OK) {
-            when(requestCode) {
-                REQUEST_IMAGE_CAPTURE -> resultImageUri?.let { uri ->
-                    timer.reset()
-                    // TODO: move to separate thread
-                    processImage(uri)
+    private fun processImage(uri: Uri) {
+        lifecycleScope.launch(Dispatchers.Default) {
+            try {
+                val inputImage = InputImage.fromFilePath(this@MainActivity, uri)
+                segmentedImage.process(inputImage) { success ->
+                    if (success) drawSubject()
+                    else Log.e("processImage()", "ML Kit failed to process image")
                 }
-
-                REQUEST_IMAGE_PICKER -> data?.data?.let { uri ->
-                    timer.reset()
-                    // TODO: move to separate thread
-                    processImage(uri)
-                }
-                else -> toast("Failed to get image from request.")
-            }
-        } else { toast("Image capture result not returned") }
+            } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
+        }
     }
-}
 
-fun createImageFileUri(context: Context): Uri? {
-    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-    val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-    return try {
-        val file = File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
-        FileProvider.getUriForFile(context, "com.inasweaterpoorlyknit.inknit.fileprovider", file)
-    } catch (ex: IOException) {
-        context.toast("Error creating file")
-        null
+    companion object {
+        private val REQUIRED_PERMISSIONS =
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
+                arrayOf(permission.CAMERA)
+            } else {
+                arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
+            }
     }
 }

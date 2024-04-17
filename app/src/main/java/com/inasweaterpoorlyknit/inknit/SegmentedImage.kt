@@ -78,12 +78,14 @@ class SegmentedImage {
     }
 
     fun decreaseTheshold() {
+        if(confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
         confidenceThreshold -= CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = max(MIN_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
     }
 
     fun increaseTheshold() {
+        if(confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
         confidenceThreshold += CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = min(MAX_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
@@ -91,6 +93,7 @@ class SegmentedImage {
 
     fun prevSubject() {
         val subjectCount = segmentationResult.subjects.size
+        if(subjectCount == 1) return
         subjectIndex = (subjectIndex - 1 + subjectCount) % subjectCount
         val subject = segmentationResult.subjects[subjectIndex]
         val subjectColorsSize = subject.width * subject.height
@@ -100,6 +103,7 @@ class SegmentedImage {
 
     fun nextSubject() {
         val subjectCount = segmentationResult.subjects.size
+        if(subjectCount == 1) return
         subjectIndex = (subjectIndex + 1) % subjectCount
         val subject = segmentationResult.subjects[subjectIndex]
         val subjectColorsSize = subject.width * subject.height
@@ -124,6 +128,7 @@ class SegmentedImage {
                 }
             }
         }
+
         // NOTE: this try/catch essentially used as an if/else.
         // Unfortunately, determining whether the new bitmap will fit is not simple or well-defined.
         try{
