@@ -28,9 +28,8 @@ class SegmentedImage {
         private const val MIN_CONFIDENCE_THRESHOLD = CONFIDENCE_THRESHOLD_INCREMENT
         private const val MAX_CONFIDENCE_THRESHOLD = 0.9f // NOTE: 1.0f threshold produces major artifact-ing
         private const val DEFAULT_CONFIDENCE_THRESHOLD = 0.5f
-        private const val ALPHA_MASK_OFF = 0x00ffffff
-        private const val ALPHA_MASK_ON = 0xff000000.toInt()
-        private val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        private const val TRANSPARENT_DEBUG_COLOR = 0x00fe00fe
+        private val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888, true)
         private val EMPTY_FLOAT_BUFFER = FloatBuffer.allocate(1)
         private val PLACEHOLDER_SUBJECT = Subject(EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP, 1, 1, 0, 0)
         private val PLACEHOLDER_RESULT = SubjectSegmentationResult(listOf(PLACEHOLDER_SUBJECT), EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP)
@@ -94,6 +93,7 @@ class SegmentedImage {
     fun prevSubject() {
         val subjectCount = segmentationResult.subjects.size
         if(subjectCount == 1) return
+        confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
         subjectIndex = (subjectIndex - 1 + subjectCount) % subjectCount
         val subject = segmentationResult.subjects[subjectIndex]
         val subjectColorsSize = subject.width * subject.height
@@ -104,6 +104,7 @@ class SegmentedImage {
     fun nextSubject() {
         val subjectCount = segmentationResult.subjects.size
         if(subjectCount == 1) return
+        confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
         subjectIndex = (subjectIndex + 1) % subjectCount
         val subject = segmentationResult.subjects[subjectIndex]
         val subjectColorsSize = subject.width * subject.height
@@ -112,6 +113,24 @@ class SegmentedImage {
     }
 
     private fun prepareSubjectBitmap() {
+        // Useful numbers taken from processing a raw camera image file from a Samsung Galaxy A23 5G
+        // confidence mask size ~= subject.confidenceMask.capacity * sizeof(Float)
+        //                      ~= 4,566,000 * 4 bytes = 18,264,000 bytes = 18.264 MB
+        // subject color size ~= subject.width * subject.height * sizeof(Int)
+        //                    ~= 2283 * 2000 * 4 bytes = 18,264,000 byte  = 18.264 MB
+        // raw image size ~= rawImageWidth * rawImageHeight * sizeof(Int)
+        //                ~= 3060 * 4080 * 4 bytes = 49,939,200 bytes = 49.939 MB
+        // It's good to note that the raw image is not being entirely cycled through. It is only being accessed
+        // where subject passes the transparency threshold. Which is less than the size of the subject bounding box.
+        // regardless a minimum of 36.5 MB is required and far exceeding any available cache on any modern system.
+        // I don't know the exact cache sizes but they are in the ballpark of 64KiB L1, 256KiB L2, and 2 MiB.
+        // If this function is called multiple times on the same raw image, confidence mask, or subject,
+        // the cache would not do us any favors unless the images were reduced 20 fold.
+        // That said...
+        // Since the fetching of memory in the inner loop is going to be our bottleneck, there are essentially
+        // free cycles in their for other things. Like post-processing type effects that does not itself access
+        // any large amounts of data.
+
         val subject = segmentationResult.subjects[subjectIndex]
         val subjectConfidenceMask = subject.confidenceMask!!
         subjectConfidenceMask.rewind()
@@ -119,13 +138,9 @@ class SegmentedImage {
             val rawRowOffset = ((y + subject.startY) * rawImageWidth) + subject.startX
             val subjectRowOffset = y * subject.width
             for(x in 0 ..< subject.width) {
-                subjectColors[subjectRowOffset + x] = if(subjectConfidenceMask.get() <= confidenceThreshold) {
-                    // fully transparency
-                    rawImageColors[rawRowOffset + x] and ALPHA_MASK_OFF
-                } else {
-                    // fully opaque
-                    rawImageColors[rawRowOffset + x] or ALPHA_MASK_ON
-                }
+                subjectColors[subjectRowOffset + x] =
+                    if(subjectConfidenceMask.get() < confidenceThreshold) TRANSPARENT_DEBUG_COLOR
+                    else rawImageColors[rawRowOffset + x]
             }
         }
 
