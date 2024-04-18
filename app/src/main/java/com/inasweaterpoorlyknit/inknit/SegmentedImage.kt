@@ -79,39 +79,39 @@ class SegmentedImage {
     }
 
     fun process(mlkitInputImage: InputImage, successCallback: (Boolean) -> Unit) {
-        mlkitInputImage.bitmapInternal?.also { bitmap ->
-            val bitmapSize = bitmap.width * bitmap.height
-            if(rawImageColors.size < bitmapSize){ rawImageColors = IntArray(bitmapSize) }
-            bitmap.getPixels(rawImageColors, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-            timer.logMilestone("SegmentedImage", "copy bitmap from input image")
-            rawImageWidth = bitmap.width
-            rawImageHeight = bitmap.height
-            subjectIndex = 0
-            confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
-            subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
-                segmentationResult = result
-                val subject = segmentationResult.subjects[subjectIndex]
-                val subjectColorsSize = subject.width * subject.height
-                if(subjectColors.size < subjectColorsSize){ subjectColors = IntArray(subjectColorsSize) }
-                timer.logMilestone("SegmentedImage", "image successfully processed")
-                prepareSubjectBitmap()
-                successCallback(true)
-            }.addOnFailureListener {
-                successCallback(false)
-            }
-        } ?: run {
+        if(mlkitInputImage.bitmapInternal == null) {
+            Log.e("SegmentedImage", "MLKit InputImage did not contain a bitmap")
+            successCallback(false)
+            return
+        }
+
+        val bitmap = mlkitInputImage.bitmapInternal!!
+        val bitmapSize = bitmap.width * bitmap.height
+        if(rawImageColors.size < bitmapSize){ rawImageColors = IntArray(bitmapSize) }
+        bitmap.getPixels(rawImageColors, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        timer.logMilestone("SegmentedImage", "copy bitmap from input image")
+        rawImageWidth = bitmap.width
+        rawImageHeight = bitmap.height
+        subjectIndex = 0
+        confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
+        subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
+            segmentationResult = result
+            timer.logMilestone("SegmentedImage", "image successfully processed")
+            prepareSubjectBitmap()
+            successCallback(true)
+        }.addOnFailureListener {
             successCallback(false)
         }
     }
 
-    fun decreaseTheshold() {
+    fun decreaseThreshold() {
         if(confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
         confidenceThreshold -= CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = max(MIN_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
     }
 
-    fun increaseTheshold() {
+    fun increaseThreshold() {
         if(confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
         confidenceThreshold += CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = min(MAX_CONFIDENCE_THRESHOLD, confidenceThreshold)
@@ -160,6 +160,8 @@ class SegmentedImage {
         // any large amounts of data. On the Samsung Galaxy A23 5G for the tested image above, it took ~32ms.
 
         val subject = segmentationResult.subjects[subjectIndex]
+        val subjectColorsSize = subject.width * subject.height
+        if(subjectColors.size < subjectColorsSize){ subjectColors = IntArray(subjectColorsSize) }
         val subjectConfidenceMask = subject.confidenceMask!!
         subjectConfidenceMask.rewind()
         for(y in 0 ..< subject.height) {

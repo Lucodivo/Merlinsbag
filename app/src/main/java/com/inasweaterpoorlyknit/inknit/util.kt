@@ -6,6 +6,7 @@ import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -55,7 +56,8 @@ class Timer {
 }
 
 // Context extensions
-fun Context.toast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+fun Context.toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+fun Fragment.toast(msg: String) = requireContext().toast(msg)
 fun Context.createImageFileUri(): Uri? {
     val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
