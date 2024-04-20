@@ -52,14 +52,20 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
     implementation(libs.play.services.mlkit.subject.segmentation)
+
+    // Compose
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.animation) // Animations
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // Integration with ViewModel
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
@@ -68,9 +74,6 @@ dependencies {
     implementation(libs.androidx.camera.mlkit.vision)
     implementation(libs.androidx.camera.extensions)
     implementation(libs.guava.android)
-
-    // TODO: Remove Glide?
-    implementation(libs.glide)
 
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
@@ -81,9 +84,17 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Proto DataStore
+//    implementation("libs.androidx.datastore")
+//    implementation("androidx.datastore:datastore-rxjava2:1.0.0")
+//    implementation("androidx.datastore:datastore-rxjava3:1.0.0")
+// Starting from Protobuf 3.8.0, use the lite runtime library
+//    implementation("libs.protobuf.kotlin.lite")
+
+    // Room Database
 }

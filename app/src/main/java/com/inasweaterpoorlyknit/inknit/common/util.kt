@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit
+package com.inasweaterpoorlyknit.inknit.common
 
 import android.content.Context
 import android.net.Uri

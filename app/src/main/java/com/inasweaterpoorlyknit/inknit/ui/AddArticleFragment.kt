@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit
+package com.inasweaterpoorlyknit.inknit.ui
 
 import android.Manifest.permission
 import android.content.Intent
@@ -7,9 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
@@ -19,6 +17,10 @@ import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.common.createImageFileUri
+import com.inasweaterpoorlyknit.inknit.common.toast
+import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException

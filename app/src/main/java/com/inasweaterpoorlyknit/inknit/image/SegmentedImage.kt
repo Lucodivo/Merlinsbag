@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit
+package com.inasweaterpoorlyknit.inknit.image
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,6 +9,7 @@ import com.google.mlkit.vision.segmentation.subject.Subject
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
+import com.inasweaterpoorlyknit.inknit.common.Timer
 import java.nio.FloatBuffer
 import kotlin.math.max
 import kotlin.math.min

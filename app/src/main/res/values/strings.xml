@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">inknit</string>
+    <string name="camera">Camera</string>
+    <string name="cowboy_hat">cowboy hat</string>
+    <string name="shirt">shirt</string>
+    <string name="sweater">sweater</string>
+    <string name="necklace">necklace</string>
+    <string name="shoe">shoe</string>
+    <string name="skirt">skirt</string>
+    <string name="hanger">hanger</string>
+    <string name="stars">stars</string>
+    <string name="mirror">mirror</string>
+    <string name="earrings">earrings</string>
+    <string name="glasses">glasses</string>
+    <string name="crown">crown</string>
+    <string name="swimsuit">swimsuit</string>
+    <string name="heart_necklace">heart necklace</string>
+    <string name="eyewear">eyewear</string>
+    <string name="accessories">accessories</string>
+    <string name="hats">hats</string>
+    <string name="shoes">shoes</string>
+    <string name="one_pieces">one-pieces</string>
+    <string name="bottom">bottom</string>
+    <string name="top">top</string>
+    <string name="outerwear">outerwear</string>
+    <string name="outfits">outfits</string>
+    <string name="wardrobe">wardrobe</string>
+    <string name="digitize">digitize</string>
 </resources>

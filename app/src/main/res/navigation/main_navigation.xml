@@ -2,10 +2,24 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_navigation"
-    app:startDestination="@id/cameraButtonFragment">
-
+    app:startDestination="@id/mainMenuFragment">
     <fragment
-        android:id="@+id/cameraButtonFragment"
-        android:name="com.inasweaterpoorlyknit.inknit.CameraButtonFragment"
-        android:label="CameraButtonFragment" />
+        android:id="@+id/addArticleFragment"
+        android:name="com.inasweaterpoorlyknit.inknit.ui.AddArticleFragment"
+        android:label="AddArticleFragment" />
+    <fragment
+        android:id="@+id/mainMenuFragment"
+        android:name="com.inasweaterpoorlyknit.inknit.ui.MainMenuFragment"
+        android:label="MainMenuFragment" >
+        <action
+            android:id="@+id/action_mainMenuFragment_to_addArticleFragment"
+            app:destination="@id/addArticleFragment" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_wardrobeFragment"
+            app:destination="@id/wardrobeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/wardrobeFragment"
+        android:name="com.inasweaterpoorlyknit.inknit.ui.WardrobeFragment"
+        android:label="WardrobeFragment" />
 </navigation>
