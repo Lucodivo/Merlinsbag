@@ -19,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.inasweaterpoorlyknit.inknit.ui.theme.Shapes
 
 data class ImageWithTextData(
@@ -33,8 +35,12 @@ data class ImageWithTextData(
 fun ImageWithText(
   menuItemData: ImageWithTextData,
   modifier: Modifier = Modifier,
+  fontSize: TextUnit,
 ) {
-  Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = Shapes.large, onClick = menuItemData.onClick, modifier = modifier.fillMaxSize().padding(10.dp)){
+  Surface(color = MaterialTheme.colorScheme.primaryContainer,
+    shape = Shapes.large,
+    onClick = menuItemData.onClick,
+    modifier = modifier.fillMaxSize().padding(10.dp)){
     Box(
       contentAlignment = Alignment.Center,
       modifier = Modifier.padding(10.dp).fillMaxSize()
@@ -44,25 +50,26 @@ fun ImageWithText(
           contentDescription = stringResource(menuItemData.drawableDescriptionId),
           colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onPrimaryContainer),
           modifier = Modifier.weight(1f)
+            .padding(10.dp)
         )
-        Text(text = stringResource(id = menuItemData.text))
+        Text(text = stringResource(id = menuItemData.text), fontSize = fontSize)
       }
     }
   }
 }
 
 @Composable
-fun ImageWithTextRow(buttonsLeftToRight: List<ImageWithTextData>, modifier: Modifier = Modifier) {
+fun ImageWithTextRow(buttonsLeftToRight: List<ImageWithTextData>, modifier: Modifier = Modifier, fontSize: TextUnit) {
   Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = modifier.fillMaxWidth().padding(0.dp)) {
     buttonsLeftToRight.forEach {
-      ImageWithText(it, modifier = Modifier.weight(1.0f))
+      ImageWithText(it, modifier = Modifier.weight(1.0f), fontSize)
     }
   }
 }
 
 @Composable
-fun ImageWithTextGrid(buttonsTopToBottom: List<List<ImageWithTextData>>, modifier: Modifier = Modifier){
-  Column(verticalArrangement = Arrangement.SpaceEvenly, modifier = modifier.fillMaxWidth().padding(0.dp)) {
-    buttonsTopToBottom.forEach { ImageWithTextRow(it, modifier = modifier.weight(1.0f)) }
+fun ImageWithTextGrid(buttonsTopToBottom: List<List<ImageWithTextData>>, modifier: Modifier = Modifier, fontSize: TextUnit = 20.sp){
+  Column(verticalArrangement = Arrangement.SpaceEvenly, modifier = modifier.fillMaxWidth()) {
+    buttonsTopToBottom.forEach { ImageWithTextRow(it, modifier = modifier.weight(1.0f), fontSize) }
   }
 }
