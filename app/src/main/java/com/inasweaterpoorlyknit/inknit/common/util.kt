@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.common
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
@@ -33,6 +34,8 @@ fun nanosecondsToString(nanoseconds: Long): String  {
         }
     }
 }
+
+val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888, true)
 
 class Timer {
     var startNs = System.nanoTime()

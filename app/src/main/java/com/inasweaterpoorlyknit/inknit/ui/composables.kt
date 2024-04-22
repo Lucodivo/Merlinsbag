@@ -27,9 +27,13 @@ import com.inasweaterpoorlyknit.inknit.ui.theme.Shapes
 data class ImageWithTextData(
   @DrawableRes val drawableId: Int,
   @StringRes val drawableDescriptionId: Int,
-  @StringRes val text: Int,
+  @StringRes val textId: Int = NO_TEXT,
   val onClick: () -> Unit = {},
-)
+) {
+  companion object{
+    val NO_TEXT: Int = -1
+  }
+}
 
 @Composable
 fun ImageWithText(
@@ -43,7 +47,7 @@ fun ImageWithText(
     modifier = modifier.fillMaxSize().padding(10.dp)){
     Box(
       contentAlignment = Alignment.Center,
-      modifier = Modifier.padding(10.dp).fillMaxSize()
+      modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp).fillMaxSize()
     ){
       Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Image(painter = painterResource(id = menuItemData.drawableId),
@@ -52,7 +56,9 @@ fun ImageWithText(
           modifier = Modifier.weight(1f)
             .padding(10.dp)
         )
-        Text(text = stringResource(id = menuItemData.text), fontSize = fontSize)
+        if(menuItemData.textId != ImageWithTextData.NO_TEXT){
+          Text(text = stringResource(id = menuItemData.textId), fontSize = fontSize)
+        }
       }
     }
   }
@@ -68,8 +74,9 @@ fun ImageWithTextRow(buttonsLeftToRight: List<ImageWithTextData>, modifier: Modi
 }
 
 @Composable
-fun ImageWithTextGrid(buttonsTopToBottom: List<List<ImageWithTextData>>, modifier: Modifier = Modifier, fontSize: TextUnit = 20.sp){
-  Column(verticalArrangement = Arrangement.SpaceEvenly, modifier = modifier.fillMaxWidth()) {
+fun ImageWithTextColumnsOfRows(buttonsTopToBottom: List<List<ImageWithTextData>>, modifier: Modifier = Modifier, fontSize: TextUnit = 20.sp){
+  Column(verticalArrangement = Arrangement.SpaceEvenly, modifier = modifier) {
     buttonsTopToBottom.forEach { ImageWithTextRow(it, modifier = modifier.weight(1.0f), fontSize) }
   }
 }
+

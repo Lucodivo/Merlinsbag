@@ -26,4 +26,17 @@
     <string name="outfits">outfits</string>
     <string name="wardrobe">wardrobe</string>
     <string name="digitize">digitize</string>
+    <string name="picture_frame">picture frame</string>
+    <string name="album">album</string>
+    <string name="left_arrow">left arrow</string>
+    <string name="previous">previous</string>
+    <string name="right_arrow">right arrow</string>
+    <string name="next">next</string>
+    <string name="archery_target">archery target</string>
+    <string name="focus">focus</string>
+    <string name="expand">expand</string>
+    <string name="outward_pointing_arrows">outward pointing arrows</string>
+    <string name="relax">relax</string>
+    <string name="processed_image">processed image</string>
+    <string name="four_x_four_panel">4 by 4 panel</string>
 </resources>

@@ -43,14 +43,14 @@ fun MainMenuScreen(
   InknitTheme {
     listOf(
       listOf(
-        ImageWithTextData(R.drawable.jewlery_reyda_donmez, R.string.earrings, R.string.outfits, onClickOutfits),
+        ImageWithTextData(R.drawable.jewlery_reyda_donmez, R.string.earrings, onClick = onClickOutfits),
       ),
       listOf(
-        ImageWithTextData(R.drawable.shirt_reyda_donmez, R.string.shirt, R.string.wardrobe, onClickWardrobe),
+        ImageWithTextData(R.drawable.shirt_reyda_donmez, R.string.shirt, onClick = onClickWardrobe),
       ),
       listOf(
-        ImageWithTextData(R.drawable.camera_reyda_donmez, R.string.camera, R.string.digitize, onClickAddArticles),
+        ImageWithTextData(R.drawable.camera_reyda_donmez, R.string.camera, onClick =  onClickAddArticles),
       ),
-    ).also { ImageWithTextGrid(buttonsTopToBottom = it) }
+    ).also { ImageWithTextColumnsOfRows(buttonsTopToBottom = it) }
   }
 }

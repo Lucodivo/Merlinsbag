@@ -61,6 +61,6 @@ fun WardrobeScreen(
         ImageWithTextData(R.drawable.skirt_reyda_donmez, R.string.skirt, R.string.bottoms, onClickBottoms),
         ImageWithTextData(R.drawable.shirt_reyda_donmez, R.string.shirt, R.string.tops, onClickTops),
       ),
-    ).also { ImageWithTextGrid(buttonsTopToBottom = it) }
+    ).also { ImageWithTextColumnsOfRows(buttonsTopToBottom = it) }
   }
 }

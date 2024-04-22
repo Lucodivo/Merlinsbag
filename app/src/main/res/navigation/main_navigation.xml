@@ -2,10 +2,10 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_navigation"
-    app:startDestination="@id/mainMenuFragment">
+    app:startDestination="@id/addArticleFragment">
     <fragment
         android:id="@+id/addArticleFragment"
-        android:name="com.inasweaterpoorlyknit.inknit.ui.AddArticleFragment"
+        android:name="com.inasweaterpoorlyknit.inknit.ui.AddArticleFragment2"
         android:label="AddArticleFragment" />
     <fragment
         android:id="@+id/mainMenuFragment"
