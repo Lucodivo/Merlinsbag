@@ -2,149 +2,61 @@ package com.inasweaterpoorlyknit.inknit.ui
 
 import android.Manifest.permission
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.createImageFileUri
 import com.inasweaterpoorlyknit.inknit.common.toast
-import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.IOException
+import com.inasweaterpoorlyknit.inknit.ui.theme.InknitTheme
 
-// TODO: remove requireContext/Activity?
-class AddArticleFragment: Fragment(R.layout.fragment_add_article) {
-  lateinit var preview: ImageView
-  lateinit var imageFromCameraButton: Button
-  lateinit var imageFromAlbumButton: Button
-  lateinit var decreaseThresholdButton: Button
-  lateinit var increaseThresholdButton: Button
-  lateinit var prevButton: Button
-  lateinit var nextButton: Button
-  val segmentedImage = SegmentedImage()
+class AddArticleFragment: Fragment() {
+  val viewModel: AddArticleViewModel by viewModels()
 
-  val externalStoragePermissionRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
-
-  val _appSettingsLauncher = registerForActivityResult(StartActivityForResult()){}
-  fun openAppSettings() = _appSettingsLauncher.launch(
-    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-      data = Uri.fromParts("package", requireActivity().packageName, null)
-    }
-  )
-
-  fun handleActivityResult(uri: Uri) = processImage(uri)
-
-  val _cameraLauncher = registerForActivityResult(RequestMultiplePermissions()){ permissions ->
-    var permissionsGranted = true
-    var userCheckedNeverAskAgain = false
-    permissions.entries.forEach { entry ->
-      if(!entry.value) {
-        userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(entry.key)
-        permissionsGranted = false
-      }
-    }
-    if(permissionsGranted) {
-      pendingCameraImageUri = requireContext().createImageFileUri()
-      pendingCameraImageUri?.let{ _getCameraImageLauncher.launch(pendingCameraImageUri) }
-    } else {
-      if(userCheckedNeverAskAgain) {
-        val alertMessage = if(externalStoragePermissionRequired) {
-          "Camera and storage permission required to use camera in app. " +
-              "Enable camera permission in settings to use camera feature."
-        } else {
-          "Camera permission required to use camera in app. " +
-              "Enable camera permission in settings to use camera feature."
-        }
-        AlertDialog.Builder(requireContext())
-          .setTitle("Permissions Required")
-          .setMessage(alertMessage)
-          .setNegativeButton("No Thanks"){ _, _ -> }
-          .setPositiveButton("App Permissions"){ _, _ -> openAppSettings() }
-          .show()
-      } else {
-        toast("Camera permissions required")
-      }
-    }
-  }
   var pendingCameraImageUri: Uri? = null
-  val _getCameraImageLauncher = registerForActivityResult(TakePicture()){ pictureTaken ->
-    if(pictureTaken) handleActivityResult(pendingCameraImageUri!!)
-    else Log.i("TakePicture ActivityResultContract", "Picture not returned from camera")
-  }
-  fun selectCameraImage() = _cameraLauncher.launch(REQUIRED_PERMISSIONS)
 
-  val _getContentLauncher = registerForActivityResult(GetContent()){ uri ->
-    if(uri != null) handleActivityResult(uri)
-    else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
-  }
-  fun selectAlbumImage() = _getContentLauncher.launch("image/*")
+  fun selectCameraImage() = _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS)
+  fun selectAlbumImage() = _photoAlbumLauncher.launch("image/*")
+  fun handleImageUriResult(uri: Uri) = viewModel.processImage(uri)
 
-
-  fun decreaseThreshold() = lifecycleScope.launch(Dispatchers.Default) {
-    segmentedImage.decreaseThreshold()
-    drawSubject()
-  }
-
-  fun increaseThreshold() = lifecycleScope.launch(Dispatchers.Default) {
-    segmentedImage.increaseThreshold()
-    drawSubject()
-  }
-
-  fun prevSubject() = lifecycleScope.launch(Dispatchers.Default) {
-    segmentedImage.prevSubject()
-    drawSubject()
-  }
-
-  fun nextSubject() = lifecycleScope.launch(Dispatchers.Default) {
-    segmentedImage.nextSubject()
-    drawSubject()
-  }
-
-  private fun drawSubject() {
-    lifecycleScope.launch(Dispatchers.Main) {
-      preview.setImageBitmap(segmentedImage.subjectBitmap)
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    return ComposeView(requireContext()).apply {
+      setContent {
+        AddArticleScreen(
+          processedImage = viewModel.processedBitmap.value,
+          onAlbumClick = ::selectAlbumImage,
+          onCameraClick = ::selectCameraImage,
+          onFocusClick = { viewModel.onFocusClicked() },
+          onWidenClick = { viewModel.onWidenClicked() },
+          onPrevClick = { viewModel.onPrevClicked() },
+          onNextClick = { viewModel.onNextClicked() }
+        )
+      }
     }
-  }
-
-  private fun processImage(uri: Uri) {
-    lifecycleScope.launch(Dispatchers.Default) {
-      try {
-        segmentedImage.process(requireContext(), uri) { success ->
-          if (success) drawSubject()
-          else Log.e("processImage()", "ML Kit failed to process image")
-        }
-      } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
-    }
-  }
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    preview = view.findViewById(R.id.preview)
-    imageFromCameraButton = view.findViewById(R.id.image_from_camera)
-    imageFromAlbumButton = view.findViewById(R.id.image_from_album)
-    decreaseThresholdButton = view.findViewById(R.id.decrease_threshold)
-    increaseThresholdButton = view.findViewById(R.id.increase_threshold)
-    prevButton = view.findViewById(R.id.prev)
-    nextButton = view.findViewById(R.id.next)
-    imageFromCameraButton.setOnClickListener{ selectCameraImage() }
-    imageFromAlbumButton.setOnClickListener{ selectAlbumImage() }
-    decreaseThresholdButton.setOnClickListener { decreaseThreshold() }
-    increaseThresholdButton.setOnClickListener { increaseThreshold() }
-    prevButton.setOnClickListener{ prevSubject() }
-    nextButton.setOnClickListener{ nextSubject() }
   }
 
   companion object {
@@ -154,5 +66,92 @@ class AddArticleFragment: Fragment(R.layout.fragment_add_article) {
       } else {
         arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
       }
+  }
+
+  //region REGISTER FOR ACTIVITY RESULTS
+  // Go to settings
+  val _appSettingsLauncher = registerForActivityResult(StartActivityForResult()){}
+
+  // Get new camera photo from user and check necessary permissions
+  val _cameraLauncher = registerForActivityResult(TakePicture()){ pictureTaken ->
+    if(pictureTaken) handleImageUriResult(pendingCameraImageUri!!)
+    else Log.i("TakePicture ActivityResultContract", "Picture not returned from camera")
+  }
+  val _cameraWithPermissionsCheckLauncher = registerForActivityResult(RequestMultiplePermissions()){ permissions ->
+    fun openAppSettings() = _appSettingsLauncher.launch(
+      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", requireActivity().packageName, null)
+      }
+    )
+
+    val context = requireContext()
+    var permissionsGranted = true
+    var userCheckedNeverAskAgain = false
+    permissions.entries.forEach { entry ->
+      if(!entry.value) {
+        userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(entry.key)
+        permissionsGranted = false
+      }
+    }
+    if(permissionsGranted) {
+      pendingCameraImageUri = context.createImageFileUri()
+      pendingCameraImageUri?.let{ _cameraLauncher.launch(pendingCameraImageUri) }
+    } else {
+      if(userCheckedNeverAskAgain) {
+        AlertDialog.Builder(context)
+          .setTitle(context.getString(R.string.permission_alert_title))
+          .setMessage(context.getString(R.string.permission_alert_justification))
+          .setNegativeButton(context.getString(R.string.permission_alert_negative)){ _, _ -> }
+          .setPositiveButton(context.getString(R.string.permission_alert_positive)){ _, _ -> openAppSettings() }
+          .show()
+      } else {
+        toast("Camera permissions required")
+      }
+    }
+  }
+
+  // Get image already saved on phone
+  val _photoAlbumLauncher = registerForActivityResult(GetContent()){ uri ->
+    if(uri != null) handleImageUriResult(uri)
+    else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+  }
+  //endregion REGISTER FOR ACTIVITY RESULTS
+}
+
+@Preview
+@Composable
+fun AddArticleScreen(
+  onAlbumClick: () -> Unit = {},
+  onCameraClick: () -> Unit = {},
+  onPrevClick: () -> Unit = {},
+  onNextClick: () -> Unit = {},
+  onFocusClick: () -> Unit = {},
+  onWidenClick: () -> Unit = {},
+  processedImage: Bitmap? = null
+) {
+  InknitTheme {
+    Column {
+      Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(10f).fillMaxSize()){
+        processedImage?.let {
+          Image(bitmap = it.asImageBitmap(),
+                contentDescription = stringResource(id = R.string.processed_image))
+        }
+      }
+      listOf(
+        listOf(
+          ImageWithTextData(R.drawable.prev_reyda_donmez, R.string.left_arrow, onClick =  onPrevClick),
+          ImageWithTextData(R.drawable.panel_reyda_donmez, R.string.four_x_four_panel, onClick =  onAlbumClick),
+          ImageWithTextData(R.drawable.next_reyda_donmez, R.string.right_arrow, onClick =  onNextClick),
+        ),
+        listOf(
+          ImageWithTextData(R.drawable.target_3_reyda_donmez, R.string.target, onClick =  onFocusClick),
+          ImageWithTextData(R.drawable.camera_reyda_donmez, R.string.camera, onClick = onCameraClick),
+          ImageWithTextData(R.drawable.expand_reyda_donmez, R.string.outward_pointing_arrows, onClick =  onWidenClick),
+        ),
+      ).also { ImageWithTextColumnsOfRows(
+        buttonsTopToBottom = it,
+        modifier = Modifier.weight(2.0f)
+      )}
+    }
   }
 }

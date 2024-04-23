@@ -35,8 +35,6 @@ fun nanosecondsToString(nanoseconds: Long): String  {
     }
 }
 
-val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888, true)
-
 class Timer {
     var startNs = System.nanoTime()
     var milestoneStartNs = startNs

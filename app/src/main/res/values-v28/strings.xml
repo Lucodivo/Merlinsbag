@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permission_alert_justification">Camera permission required to use camera in app. Enable camera permission in settings to use camera feature.</string>
+</resources>

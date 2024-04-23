@@ -5,7 +5,7 @@
     app:startDestination="@id/addArticleFragment">
     <fragment
         android:id="@+id/addArticleFragment"
-        android:name="com.inasweaterpoorlyknit.inknit.ui.AddArticleFragment2"
+        android:name="com.inasweaterpoorlyknit.inknit.ui.AddArticleFragment"
         android:label="AddArticleFragment" />
     <fragment
         android:id="@+id/mainMenuFragment"

@@ -9,7 +9,6 @@ import com.google.mlkit.vision.segmentation.subject.Subject
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
-import com.inasweaterpoorlyknit.inknit.common.PLACEHOLDER_BITMAP
 import com.inasweaterpoorlyknit.inknit.common.Timer
 import java.nio.FloatBuffer
 import kotlin.math.max
@@ -49,6 +48,7 @@ class SegmentedImage {
         private const val MAX_CONFIDENCE_THRESHOLD = 0.9f // NOTE: 1.0f threshold produces major artifact-ing
         private const val DEFAULT_CONFIDENCE_THRESHOLD = 0.5f
         private const val TRANSPARENT_DEBUG_COLOR = 0x00fe00fe
+        private val PLACEHOLDER_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888, true)
         private val EMPTY_FLOAT_BUFFER = FloatBuffer.allocate(1)
         private val PLACEHOLDER_SUBJECT = Subject(EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP, 1, 1, 0, 0)
         private val PLACEHOLDER_RESULT = SubjectSegmentationResult(listOf(PLACEHOLDER_SUBJECT), EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP)
