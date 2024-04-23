@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id(libs.plugins.navigationSafeArgs.get().pluginId)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -66,6 +67,17 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.animation) // Animations
     implementation(libs.androidx.lifecycle.viewmodel.compose) // Integration with ViewModel
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
+    implementation(libs.androidx.room.rxjava2) // RxJava2 support for Room
+    implementation(libs.androidx.room.rxjava3) // RxJava3 support for Room
+    implementation(libs.androidx.room.guava) // Guava support for Room, including Optional and ListenableFuture
+    testImplementation(libs.androidx.room.testing) // Test helpers
+    implementation(libs.androidx.room.paging) // Paging 3 Integration
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

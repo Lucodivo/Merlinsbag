@@ -19,11 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-// TODO
-//task clean(type: Delete) {
-//    delete rootProject.buildDir
-//}
-
 rootProject.name = "inknit"
 include(":app")
  
