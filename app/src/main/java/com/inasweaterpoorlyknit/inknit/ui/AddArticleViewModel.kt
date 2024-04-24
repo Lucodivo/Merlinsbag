@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.inknit.InKnitApplication
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,6 +18,8 @@ class AddArticleViewModel(application: Application) : AndroidViewModel(applicati
   val processedBitmap = mutableStateOf<Bitmap?>(null)
 
   val segmentedImage = SegmentedImage()
+  val inknitApplication: InKnitApplication
+    get() = getApplication() as InKnitApplication
 
   fun processImage(uri: Uri){
     viewModelScope.launch(Dispatchers.Default) {
