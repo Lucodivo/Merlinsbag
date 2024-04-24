@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id(libs.plugins.navigationSafeArgs.get().pluginId)
+    alias(libs.plugins.navigationSafeArgs)
     alias(libs.plugins.ksp)
 }
 

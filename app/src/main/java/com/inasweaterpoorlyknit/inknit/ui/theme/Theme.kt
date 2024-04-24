@@ -31,7 +31,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun InknitTheme(
+fun InKnitTheme(
         darkTheme: Boolean = isSystemInDarkTheme(),
         // Dynamic color is available on Android 12+
         dynamicColor: Boolean = true,

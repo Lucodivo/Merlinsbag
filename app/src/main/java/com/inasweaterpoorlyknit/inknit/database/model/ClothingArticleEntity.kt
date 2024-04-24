@@ -35,6 +35,7 @@ data class ClothingArticleImageEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @ColumnInfo(name = "clothing_article_id") val clothingArticleId: String,
     @ColumnInfo(name = "image_uri") val uri: Uri?,
+    @ColumnInfo(name = "thumbnail_uri") val thumbnailUri: Uri?,
 )
 
 data class ClothingArticleWithImagesEntity(

@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.inasweaterpoorlyknit.inknit.ui.theme.InknitTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 
 class CameraFragment: Fragment() {
 
@@ -33,48 +33,8 @@ class CameraFragment: Fragment() {
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
     return ComposeView(requireContext()).apply {
       setContent {
-        InknitTheme {
+        InKnitTheme {
           CameraPreview()
-/*
-          val previewView = PreviewView(context).apply {
-            setBackgroundColor(0xFF0000FF.toInt())
-            layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-            scaleType = PreviewView.ScaleType.FILL_START
-            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-          }
-          cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder()
-              .build()
-              .also {
-                it.setSurfaceProvider(previewView.surfaceProvider)
-              }
-
-            val imageCaptureBuilder = ImageCapture.Builder()
-
-            val imageCapture = imageCaptureBuilder
-              .setResolutionSelector(
-                ResolutionSelector.Builder()
-                  .setResolutionStrategy(
-                    ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY
-                  ).build()
-              )
-              .build()
-
-            // Select back camera as a default
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            try {
-              // Must unbind the use-cases before rebinding them
-              cameraProvider.unbindAll()
-
-              // Bind use cases to camera
-              cameraProvider.bindToLifecycle(viewLifecycleOwner, cameraSelector, preview, imageCapture)
-            } catch(exc: Exception) {
-              Log.e("InKnit", "Camera UseCase binding failed", exc)
-            }
-          }, ContextCompat.getMainExecutor(context))
-*/
         }
       }
     }

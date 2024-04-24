@@ -16,7 +16,8 @@ fun createClothingArticleEntity(count: Int) = Array(count){ createClothingArticl
 
 fun createClothingArticleImageEntity(clothingArticleId: String = randUUIDString()) = ClothingArticleImageEntity(
     clothingArticleId = clothingArticleId,
-    uri = Uri.parse("content://com.inasweaterpoorlyknit.inknit/fakepath${Counter.next()}"),
+    uri = Uri.parse("content://com.inasweaterpoorlyknit.inknit/fakeimage${Counter.next()}"),
+    thumbnailUri = Uri.parse("content://com.inasweaterpoorlyknit.inknit/fakethumbnail${Counter.next()}"),
 )
 fun createClothingArticleImageEntity(count: Int, clothingArticleId: String = randUUIDString()) = Array(count){
     createClothingArticleImageEntity(clothingArticleId = clothingArticleId)

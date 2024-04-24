@@ -10,7 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.Fragment
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.toast
-import com.inasweaterpoorlyknit.inknit.ui.theme.InknitTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 
 class WardrobeFragment : Fragment() {
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -43,7 +43,7 @@ fun WardrobeScreen(
   onClickBottoms: () -> Unit = {},
   onClickTops: () -> Unit = {},
 ) {
-  InknitTheme {
+  InKnitTheme {
     listOf(
       listOf(
         ImageWithTextData(R.drawable.glasses_2_reyda_donmez, R.string.glasses, R.string.eyewear, onClickEyewear),
