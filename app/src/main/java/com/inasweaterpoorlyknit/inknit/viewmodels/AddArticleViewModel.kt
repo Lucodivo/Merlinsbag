@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit.ui
+package com.inasweaterpoorlyknit.inknit.viewmodels
 
 import android.app.Application
 import android.graphics.Bitmap

@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit.ui
+package com.inasweaterpoorlyknit.inknit.viewmodels
 
 import android.app.Application
 import android.net.Uri
@@ -20,6 +20,6 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
   val imageUris: LiveData<List<Uri>>
     get() = inknitApplication.database.clothingArticleWithImagesDao()
       .getAllClothingArticlesWithImagesLive().map {  clothingArticlesWithImages ->
-        clothingArticlesWithImages.map { it.images[0].uri!! }
+        clothingArticlesWithImages.map { it.images[0].thumbnailUri!! }
       }
 }

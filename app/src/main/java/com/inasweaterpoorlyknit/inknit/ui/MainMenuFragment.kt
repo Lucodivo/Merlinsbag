@@ -15,11 +15,14 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestMultiple
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
@@ -37,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +51,7 @@ import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.toast
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import com.inasweaterpoorlyknit.inknit.viewmodels.MainMenuViewModel
 
 class MainMenuFragment : Fragment() {
     val viewModel: MainMenuViewModel by viewModels()
@@ -140,44 +145,58 @@ fun MainMenuScreen(
     onClickAddPhotoCamera: () -> Unit = {},
 ) {
     InKnitTheme {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(thumbnailUris.size) { index ->
-                val testWebP = "https://www.gstatic.com/webp/gallery/1.webp"
-                val thumbnailUri = thumbnailUris[index]
-                val thumbnailUriAsString = thumbnailUri.toString()
-//                AsyncImage(model = testWebP, contentDescription = "test")
-                AsyncImage(model = thumbnailUri, contentDescription = "test")
-            }
-        }
-        Box(
-            contentAlignment = Alignment.BottomEnd, modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp)
-        ) {
-            var addButtonActive by remember { mutableStateOf(false) }
-            Column(horizontalAlignment = Alignment.End) {
-                if (addButtonActive) {
-                    Column(horizontalAlignment = Alignment.End, modifier = Modifier.animateContentSize()) {
-                        ExtendedFloatingActionButton(
-                            text = { Text("album") },
-                            icon = { Icon(Icons.Filled.PhotoAlbum, "add a photo from album") },
-                            onClick = onClickAddPhotoAlbum
-                        )
-                        ExtendedFloatingActionButton(
-                            text = { Text("camera") },
-                            icon = { Icon(Icons.Filled.AddAPhoto, "add a photo from camera") },
-                            onClick = onClickAddPhotoCamera,
-                            modifier = Modifier.padding(vertical = 4.dp)
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyVerticalStaggeredGrid(
+                // typical dp width of a smart phone is 320dp-480dp
+                columns = StaggeredGridCells.Adaptive(minSize = 100.dp),
+                contentPadding = PaddingValues(16.dp),
+                verticalItemSpacing = 16.dp,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                content = {
+                    items(count = thumbnailUris.size) { index ->
+                        val thumbnailUri = thumbnailUris[index]
+                        AsyncImage(
+                            model = thumbnailUri,
+                            contentScale = ContentScale.Fit,
+                            contentDescription = null, // TODO: Thumbnail description
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
-                }
-                FloatingActionButton(
-                    onClick = { addButtonActive = !addButtonActive },
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // add article floating buttons
+            Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxSize()) {
+                // TODO: Revert to false on release, but useful to start as true for testing
+                var addButtonActive by remember { mutableStateOf(true) }
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.padding(20.dp)
                 ) {
                     if (addButtonActive) {
-                        Icon(Icons.Filled.Remove, "addition icon")
-                    } else {
-                        Icon(Icons.Filled.Add, "addition icon")
+                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.animateContentSize()) {
+                            ExtendedFloatingActionButton(
+                                text = { Text("album") },
+                                icon = { Icon(Icons.Filled.PhotoAlbum, "add a photo from album") },
+                                onClick = onClickAddPhotoAlbum
+                            )
+                            ExtendedFloatingActionButton(
+                                text = { Text("camera") },
+                                icon = { Icon(Icons.Filled.AddAPhoto, "add a photo from camera") },
+                                onClick = onClickAddPhotoCamera,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                    FloatingActionButton(
+                        onClick = { addButtonActive = !addButtonActive },
+                    ) {
+                        if (addButtonActive) {
+                            Icon(Icons.Filled.Remove, "addition icon")
+                        } else {
+                            Icon(Icons.Filled.Add, "addition icon")
+                        }
                     }
                 }
             }

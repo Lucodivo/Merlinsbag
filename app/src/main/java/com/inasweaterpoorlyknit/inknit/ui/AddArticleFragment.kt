@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
@@ -43,6 +42,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 
 class AddArticleFragment: Fragment() {
   val viewModel: AddArticleViewModel by viewModels()
@@ -55,7 +55,7 @@ class AddArticleFragment: Fragment() {
     }
     viewModel.shouldClose.observe(viewLifecycleOwner){ event ->
       event.getContentIfNotHandled()?.let { shouldClose ->
-        if(shouldClose) findNavController().popBackStack()
+        if(shouldClose) findNavController().popBackStack(R.id.mainMenuFragment, true)
       }
     }
     return ComposeView(requireContext()).apply {
@@ -133,21 +133,6 @@ fun AddArticleScreen(
           Button(onClick = onRotateCW, modifier = buttonModifier){ Icon(Icons.Outlined.Rotate90DegreesCw, "Rotate counter-clockwise") }
         }
       }
-/*
-      listOf(
-        listOf(
-          ImageWithTextData(R.drawable.prev_reyda_donmez, R.string.left_arrow, onClick =  onPrevClick),
-          ImageWithTextData(R.drawable.next_reyda_donmez, R.string.right_arrow, onClick =  onNextClick),
-        ),
-        listOf(
-          ImageWithTextData(R.drawable.expand_reyda_donmez, R.string.outward_pointing_arrows, onClick =  onWidenClick),
-          ImageWithTextData(R.drawable.target_3_reyda_donmez, R.string.target, onClick =  onFocusClick),
-        ),
-      ).also { ImageWithTextColumnsOfRows(
-        buttonsTopToBottom = it,
-        modifier = Modifier.weight(2.0f)
-      )}
-*/
     }
   }
 }

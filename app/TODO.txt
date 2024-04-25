@@ -1,6 +1,6 @@
 // TODO
 Quick:
-    - Upgrade gragle plugin to match KSP
+    - Upgrade gradle plugin to match KSP
 Database work:
     - Full text search
         - Room database @Fts3/@Fts4
@@ -9,15 +9,20 @@ Database work:
         - https://developer.android.com/training/data-storage/room/defining-data#column-indexing
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
-    - Hilt to inject Room into ViewModels ??
-Camera
+    - Hilt to inject Room into ViewModels
+Camera:
     - Flash
     - Setting to allow user to use preferred camera app
+Add Article:
+    - Loading icon
+    - Image labelling
+    - Primary / Secondary color classifications?
+Outfits:
+    - add items to a list
+    - display lists
+Main Menu:
+    - click item to enter detail view
 Features:
 - Export data
 - Outfits
-- Image labelling ?
-- Primary / Secondary color classifications?
-- Displaying segmented subjects as wardrobe
-- Modify AddArticleFragment to use CameraX and separate photo mode from editing to new Fragment
-- Proper landscape support
+- Proper landscape support for all screens
