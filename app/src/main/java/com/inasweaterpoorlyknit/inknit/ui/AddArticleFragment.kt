@@ -29,7 +29,6 @@ import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 class AddArticleFragment: Fragment() {
   val viewModel: AddArticleViewModel by viewModels()
 
-
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     arguments?.let {
       val safeArgs = AddArticleFragmentArgs.fromBundle(it)

@@ -4,10 +4,6 @@
     android:id="@+id/main_navigation"
     app:startDestination="@id/mainMenuFragment">
     <fragment
-        android:id="@+id/cameraFragment"
-        android:name="com.inasweaterpoorlyknit.inknit.ui.CameraFragment"
-        android:label="CameraFragment" />
-    <fragment
         android:id="@+id/addArticleFragment"
         android:name="com.inasweaterpoorlyknit.inknit.ui.AddArticleFragment"
         android:label="AddArticleFragment">
@@ -40,4 +36,17 @@
         android:id="@+id/wardrobeFragment"
         android:name="com.inasweaterpoorlyknit.inknit.ui.WardrobeFragment"
         android:label="WardrobeFragment" />
+    <fragment
+        android:id="@+id/cameraFragment"
+        android:name="com.inasweaterpoorlyknit.inknit.ui.CameraFragment"
+        android:label="CameraFragment" >
+        <action
+            android:id="@+id/action_cameraFragment_to_addArticleFragment"
+            app:destination="@id/addArticleFragment">
+            <argument
+                android:name="uri"
+                app:argType="string"
+                app:nullable="true" />
+        </action>
+    </fragment>
 </navigation>
