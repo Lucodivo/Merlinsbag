@@ -55,7 +55,7 @@ class AddArticleFragment: Fragment() {
     }
     viewModel.shouldClose.observe(viewLifecycleOwner){ event ->
       event.getContentIfNotHandled()?.let { shouldClose ->
-        if(shouldClose) findNavController().popBackStack(R.id.mainMenuFragment, true)
+        if(shouldClose) findNavController().popBackStack(R.id.mainMenuFragment, false)
       }
     }
     return ComposeView(requireContext()).apply {

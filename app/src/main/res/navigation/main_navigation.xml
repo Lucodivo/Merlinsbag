@@ -26,16 +26,9 @@
                 app:nullable="true" />
         </action>
         <action
-            android:id="@+id/action_mainMenuFragment_to_wardrobeFragment"
-            app:destination="@id/wardrobeFragment" />
-        <action
             android:id="@+id/action_mainMenuFragment_to_cameraFragment"
             app:destination="@id/cameraFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/wardrobeFragment"
-        android:name="com.inasweaterpoorlyknit.inknit.ui.WardrobeFragment"
-        android:label="WardrobeFragment" />
     <fragment
         android:id="@+id/cameraFragment"
         android:name="com.inasweaterpoorlyknit.inknit.ui.CameraFragment"

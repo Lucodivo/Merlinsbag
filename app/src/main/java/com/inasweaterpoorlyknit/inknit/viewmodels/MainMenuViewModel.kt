@@ -13,13 +13,13 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
 
   val thumbnailUris: LiveData<List<Uri>>
     get() = inknitApplication.database.clothingArticleWithImagesDao()
-              .getAllClothingArticlesWithImagesLive().map {  clothingArticlesWithImages ->
+              .getAllClothingArticlesWithImages().map { clothingArticlesWithImages ->
                 clothingArticlesWithImages.map { it.images[0].thumbnailUri!! }
               }
 
   val imageUris: LiveData<List<Uri>>
     get() = inknitApplication.database.clothingArticleWithImagesDao()
-      .getAllClothingArticlesWithImagesLive().map {  clothingArticlesWithImages ->
+      .getAllClothingArticlesWithImages().map { clothingArticlesWithImages ->
         clothingArticlesWithImages.map { it.images[0].thumbnailUri!! }
       }
 }

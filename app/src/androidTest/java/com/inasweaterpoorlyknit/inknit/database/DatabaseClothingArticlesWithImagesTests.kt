@@ -1,17 +1,40 @@
 package com.inasweaterpoorlyknit.inknit.database
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.inknit.database.model.AppDatabase
 import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesEntity
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+
+class LiveDataTestUtil<T> {
+    fun getValue(liveData: LiveData<T>): T {
+        var data: T? = null
+        val latch = CountDownLatch(1)
+        val observer = Observer<T> { t ->
+            data = t
+            latch.countDown()
+        }
+        liveData.observeForever(observer)
+        latch.await(2, TimeUnit.SECONDS)
+        liveData.removeObserver(observer)
+        return data ?: throw NullPointerException("LiveData value was null")
+    }
+}
+
 
 // These tests are for baseline sanity of the database.
 // If these aren't passing, something must be  wrong with the database as a whole.
@@ -20,11 +43,16 @@ class DatabaseClothingArticlesWithImagesTests {
     private lateinit var clothingArticleWithImagesDao: ClothingArticleWithImagesDao
     private lateinit var db: AppDatabase
 
+    // NOTE: Used to observeForever on the main thread
+    @get:Rule
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
+
     @Before
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(
-            context, AppDatabase::class.java).build()
+        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+            .allowMainThreadQueries()
+            .build()
         clothingArticleWithImagesDao = db.clothingArticleWithImagesDao()
     }
 
@@ -32,7 +60,6 @@ class DatabaseClothingArticlesWithImagesTests {
     @Throws(IOException::class)
     fun closeDb() { db.close() }
 
-    // TODO test LiveData version instead
     @Test
     @Throws(Exception::class)
     fun insertClothingArticle() {
@@ -43,7 +70,8 @@ class DatabaseClothingArticlesWithImagesTests {
         // act
         clothingArticleWithImagesDao.insertClothingArticle(fullImageUris[0], thumbnailUriImageUris[0])
         clothingArticleWithImagesDao.insertClothingArticle(fullImageUris[1], thumbnailUriImageUris[1])
-        val clothingArticlesWithImages = clothingArticleWithImagesDao.getAllClothingArticlesWithImages()
+        val clothingArticlesWithImages = LiveDataTestUtil<List<ClothingArticleWithImagesEntity>>()
+            .getValue(clothingArticleWithImagesDao.getAllClothingArticlesWithImages())
 
         // assert
         assertEquals("clothing articles not properly inserted and retreived", fullImageUris.size, clothingArticlesWithImages.size)
@@ -53,7 +81,7 @@ class DatabaseClothingArticlesWithImagesTests {
     @Throws(Exception::class)
     fun clothingInsertArticleWithImages() {
         // arrange
-        val clothingArticlesToInsert = createClothingArticleEntity(3)
+        val clothingArticlesToInsert = createClothingArticleEntity(  3)
         val clothingArticleImagesToInsert1 = createClothingArticleImageEntity(clothingArticleId = clothingArticlesToInsert[0].id)
         val clothingArticleImagesToInsert2 = createClothingArticleImageEntity(2, clothingArticleId = clothingArticlesToInsert[1].id)
         val clothingArticleImagesToInsert3 = createClothingArticleImageEntity(3, clothingArticleId = clothingArticlesToInsert[2].id)

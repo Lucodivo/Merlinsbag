@@ -50,13 +50,6 @@ data class ClothingArticleWithImagesEntity(
     val images: List<ClothingArticleImageEntity>
 )
 
-class UriConverter {
-    @TypeConverter
-    fun fromString(value: String?): Uri? = value?.let{ Uri.parse(value) }
-    @TypeConverter
-    fun toString(uri: Uri?): String? = uri?.toString()
-}
-
 @Dao
 interface ClothingArticleWithImagesDao {
     @Query("SELECT * FROM clothing_articles")
@@ -80,14 +73,9 @@ interface ClothingArticleWithImagesDao {
               WHERE clothing_articles.id = :clothingArticleId """)
     fun getClothingArticleWithImages(clothingArticleId: String): ClothingArticleWithImagesEntity
 
-    // TODO: Remove
     @Transaction
     @Query("""SELECT * FROM clothing_articles""")
-    fun getAllClothingArticlesWithImages(): List<ClothingArticleWithImagesEntity>
-
-    @Transaction
-    @Query("""SELECT * FROM clothing_articles""")
-    fun getAllClothingArticlesWithImagesLive(): LiveData<List<ClothingArticleWithImagesEntity>>
+    fun getAllClothingArticlesWithImages(): LiveData<List<ClothingArticleWithImagesEntity>>
 
     @Transaction
     fun insertClothingArticle(imageUri: Uri, thumbnailUri: Uri) {
@@ -96,6 +84,13 @@ interface ClothingArticleWithImagesDao {
         insertClothingArticles(clothingArticle)
         insertClothingArticleImages(clothingArticleImage)
     }
+}
+
+class UriConverter {
+    @TypeConverter
+    fun fromString(value: String?): Uri? = value?.let{ Uri.parse(value) }
+    @TypeConverter
+    fun toString(uri: Uri?): String? = uri?.toString()
 }
 
 @Database(entities = [ClothingArticleEntity::class, ClothingArticleImageEntity::class], version = 1)

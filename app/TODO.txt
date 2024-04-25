@@ -15,8 +15,10 @@ Camera:
     - Setting to allow user to use preferred camera app
 Add Article:
     - Loading icon
+    - User can't save until loaded
     - Image labelling
     - Primary / Secondary color classifications?
+    - Save using rotation
 Outfits:
     - add items to a list
     - display lists
