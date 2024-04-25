@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.database.model
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
@@ -25,6 +26,7 @@ import java.util.UUID
 )
 data class ClothingArticleEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    // TODO: Categories
 )
 
 @Entity(
@@ -34,8 +36,9 @@ data class ClothingArticleEntity(
 data class ClothingArticleImageEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @ColumnInfo(name = "clothing_article_id") val clothingArticleId: String,
-    @ColumnInfo(name = "image_uri") val uri: Uri?,
+    @ColumnInfo(name = "uri") val uri: Uri?,
     @ColumnInfo(name = "thumbnail_uri") val thumbnailUri: Uri?,
+    // TODO: image rank
 )
 
 data class ClothingArticleWithImagesEntity(
@@ -55,38 +58,48 @@ class UriConverter {
 }
 
 @Dao
-interface ClothingArticleDao {
+interface ClothingArticleWithImagesDao {
     @Query("SELECT * FROM clothing_articles")
-    fun getAll(): List<ClothingArticleEntity>
+    fun getAllClothingArticles(): List<ClothingArticleEntity>
     @Insert
-    fun insert(vararg clothingArticleEntity: ClothingArticleEntity)
+    fun insertClothingArticles(vararg clothingArticleEntity: ClothingArticleEntity)
     @Delete
-    fun delete(clothingArticleEntity: ClothingArticleEntity)
+    fun deleteClothingArticle(clothingArticleEntity: ClothingArticleEntity)
     @Update
-    fun update(clothingArticleEntity: ClothingArticleEntity)
-}
+    fun updateClothingArticle(clothingArticleEntity: ClothingArticleEntity)
 
-@Dao
-interface ClothingArticleImageDao {
     @Query("""SELECT * FROM clothing_article_images
               WHERE clothing_article_images.clothing_article_id = :clothingArticleId""")
-    fun getImages(clothingArticleId: String): ClothingArticleImageEntity
+    fun getClothingArticleImages(clothingArticleId: String): ClothingArticleImageEntity
     @Insert
-    fun insert(vararg clothingArticleImageEntity: ClothingArticleImageEntity)
-}
+    fun insertClothingArticleImages(vararg clothingArticleImageEntity: ClothingArticleImageEntity)
 
-@Dao
-interface ClothingArticleWithImagesDao {
+    // NOTE: @Transaction are necessary when using @Relation entities with the @Relation annotation
     @Transaction
     @Query("""SELECT * FROM clothing_articles
               WHERE clothing_articles.id = :clothingArticleId """)
-    fun get(clothingArticleId: String): ClothingArticleWithImagesEntity
+    fun getClothingArticleWithImages(clothingArticleId: String): ClothingArticleWithImagesEntity
+
+    // TODO: Remove
+    @Transaction
+    @Query("""SELECT * FROM clothing_articles""")
+    fun getAllClothingArticlesWithImages(): List<ClothingArticleWithImagesEntity>
+
+    @Transaction
+    @Query("""SELECT * FROM clothing_articles""")
+    fun getAllClothingArticlesWithImagesLive(): LiveData<List<ClothingArticleWithImagesEntity>>
+
+    @Transaction
+    fun insertClothingArticle(imageUri: Uri, thumbnailUri: Uri) {
+        val clothingArticle = ClothingArticleEntity()
+        val clothingArticleImage = ClothingArticleImageEntity(clothingArticleId = clothingArticle.id, uri = imageUri, thumbnailUri = thumbnailUri)
+        insertClothingArticles(clothingArticle)
+        insertClothingArticleImages(clothingArticleImage)
+    }
 }
 
 @Database(entities = [ClothingArticleEntity::class, ClothingArticleImageEntity::class], version = 1)
 @TypeConverters(UriConverter::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun clothingArticleDao(): ClothingArticleDao
-    abstract fun clothingArticleImageDao(): ClothingArticleImageDao
     abstract fun clothingArticleWithImagesDao(): ClothingArticleWithImagesDao
 }

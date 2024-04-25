@@ -5,8 +5,6 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.inknit.database.model.AppDatabase
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleDao
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleImageDao
 import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -19,8 +17,6 @@ import java.io.IOException
 // If these aren't passing, something must be  wrong with the database as a whole.
 @RunWith(AndroidJUnit4::class)
 class DatabaseClothingArticlesWithImagesTests {
-    private lateinit var clothingArticleDao: ClothingArticleDao
-    private lateinit var clothingArticleImageDao: ClothingArticleImageDao
     private lateinit var clothingArticleWithImagesDao: ClothingArticleWithImagesDao
     private lateinit var db: AppDatabase
 
@@ -29,8 +25,6 @@ class DatabaseClothingArticlesWithImagesTests {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
             context, AppDatabase::class.java).build()
-        clothingArticleDao = db.clothingArticleDao()
-        clothingArticleImageDao = db.clothingArticleImageDao()
         clothingArticleWithImagesDao = db.clothingArticleWithImagesDao()
     }
 
@@ -38,9 +32,26 @@ class DatabaseClothingArticlesWithImagesTests {
     @Throws(IOException::class)
     fun closeDb() { db.close() }
 
+    // TODO test LiveData version instead
     @Test
     @Throws(Exception::class)
-    fun clothingArticleWithImages() {
+    fun insertClothingArticle() {
+        // arrange
+        val fullImageUris = createFakeUris(2)
+        val thumbnailUriImageUris = createFakeUris(2)
+
+        // act
+        clothingArticleWithImagesDao.insertClothingArticle(fullImageUris[0], thumbnailUriImageUris[0])
+        clothingArticleWithImagesDao.insertClothingArticle(fullImageUris[1], thumbnailUriImageUris[1])
+        val clothingArticlesWithImages = clothingArticleWithImagesDao.getAllClothingArticlesWithImages()
+
+        // assert
+        assertEquals("clothing articles not properly inserted and retreived", fullImageUris.size, clothingArticlesWithImages.size)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun clothingInsertArticleWithImages() {
         // arrange
         val clothingArticlesToInsert = createClothingArticleEntity(3)
         val clothingArticleImagesToInsert1 = createClothingArticleImageEntity(clothingArticleId = clothingArticlesToInsert[0].id)
@@ -48,13 +59,13 @@ class DatabaseClothingArticlesWithImagesTests {
         val clothingArticleImagesToInsert3 = createClothingArticleImageEntity(3, clothingArticleId = clothingArticlesToInsert[2].id)
 
         // act
-        clothingArticleDao.insert(*clothingArticlesToInsert)
-        clothingArticleImageDao.insert(clothingArticleImagesToInsert1)
-        clothingArticleImageDao.insert(*clothingArticleImagesToInsert2)
-        clothingArticleImageDao.insert(*clothingArticleImagesToInsert3)
-        val clothingArticlesWithImages1 = clothingArticleWithImagesDao.get(clothingArticlesToInsert[0].id)
-        val clothingArticlesWithImages2 = clothingArticleWithImagesDao.get(clothingArticlesToInsert[1].id)
-        val clothingArticlesWithImages3 = clothingArticleWithImagesDao.get(clothingArticlesToInsert[2].id)
+        clothingArticleWithImagesDao.insertClothingArticles(*clothingArticlesToInsert)
+        clothingArticleWithImagesDao.insertClothingArticleImages(clothingArticleImagesToInsert1)
+        clothingArticleWithImagesDao.insertClothingArticleImages(*clothingArticleImagesToInsert2)
+        clothingArticleWithImagesDao.insertClothingArticleImages(*clothingArticleImagesToInsert3)
+        val clothingArticlesWithImages1 = clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[0].id)
+        val clothingArticlesWithImages2 = clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[1].id)
+        val clothingArticlesWithImages3 = clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[2].id)
 
         // assert
         assertEquals("Could not acquire clothing article with images", 1, clothingArticlesWithImages1.images.size)

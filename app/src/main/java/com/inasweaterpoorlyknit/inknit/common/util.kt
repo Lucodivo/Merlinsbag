@@ -56,6 +56,8 @@ class Timer {
     }
 }
 
+fun timestampAsString(): String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+
 // Context extensions
 fun Context.toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 fun Fragment.toast(msg: String) = requireContext().toast(msg)

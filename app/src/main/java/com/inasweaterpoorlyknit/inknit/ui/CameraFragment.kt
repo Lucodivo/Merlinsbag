@@ -20,16 +20,30 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.PhotoAlbum
+import androidx.compose.material.icons.outlined.Camera
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.inasweaterpoorlyknit.inknit.common.toast
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.Shapes
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.compose.ui.tooling.preview.Preview as ComposePreview
@@ -156,13 +170,22 @@ fun CameraPreview(
     })
 }
 
-@ComposePreview
 @Composable
 fun CameraScreen(
   imageCapture: ImageCapture? = null,
   onClick: () -> Unit = {}
 ) {
-  Box(Modifier.clickable { onClick() }) {
-    CameraPreview(imageCapture = imageCapture)
+  CameraPreview(imageCapture = imageCapture)
+  FloatingButton(onClick = onClick)
+}
+
+@ComposePreview
+@Composable
+fun FloatingButton(
+  onClick: () -> Unit = {},
+){
+  Box(contentAlignment = Alignment.BottomCenter,
+    modifier = Modifier.fillMaxSize().padding(bottom = 20.dp)){
+    FloatingActionButton(containerColor = Color.White, shape = CircleShape, onClick = onClick){}
   }
 }

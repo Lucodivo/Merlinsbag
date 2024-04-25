@@ -31,15 +31,23 @@ import kotlin.math.min
 //          Subject alpha masked to IntArray: 27ms
 //          Subject alpha masked IntArray to bitmap: 4ms
 class SegmentedImage {
+    data class BoundingBox(var minX: Int, var minY: Int, var maxX: Int, var maxY: Int){
+        val width: Int
+            get() = maxX - minX
+        val height: Int
+            get() = maxY - minY
+    }
+
     private var rawImageColors = PLACEHOLDER_INT_ARRAY
     private var rawImageWidth = 1
     private var rawImageHeight = 1
-    var subjectColors = PLACEHOLDER_INT_ARRAY
-    var subjectBitmap: Bitmap = PLACEHOLDER_BITMAP
+    private var subjectColors = PLACEHOLDER_INT_ARRAY
+    var subjectBitmap = PLACEHOLDER_BITMAP
         private set
-    var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
+    var subjectBoundingBox = PLACEHOLDER_BOUNDING_BOX
+    private var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
     var subjectIndex: Int = 0
-    var segmentationResult= PLACEHOLDER_RESULT
+    private var segmentationResult= PLACEHOLDER_RESULT
 
     companion object {
         private val PLACEHOLDER_INT_ARRAY = IntArray(1)
@@ -52,6 +60,7 @@ class SegmentedImage {
         private val EMPTY_FLOAT_BUFFER = FloatBuffer.allocate(1)
         private val PLACEHOLDER_SUBJECT = Subject(EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP, 1, 1, 0, 0)
         private val PLACEHOLDER_RESULT = SubjectSegmentationResult(listOf(PLACEHOLDER_SUBJECT), EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP)
+        private val PLACEHOLDER_BOUNDING_BOX = BoundingBox(0, 0, 1, 1)
 
         private val subjectSegmenter = SubjectSegmentation.getClient(
             SubjectSegmenterOptions.Builder()
@@ -164,16 +173,24 @@ class SegmentedImage {
         val subjectColorsSize = subject.width * subject.height
         if(subjectColors.size < subjectColorsSize){ subjectColors = IntArray(subjectColorsSize) }
         val subjectConfidenceMask = subject.confidenceMask!!
+        val subjectBoundingBox = BoundingBox(Int.MAX_VALUE, Int.MAX_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
         subjectConfidenceMask.rewind()
         for(y in 0 ..< subject.height) {
             val rawRowOffset = ((y + subject.startY) * rawImageWidth) + subject.startX
             val subjectRowOffset = y * subject.width
             for(x in 0 ..< subject.width) {
-                subjectColors[subjectRowOffset + x] =
-                    if(subjectConfidenceMask.get() < confidenceThreshold) TRANSPARENT_DEBUG_COLOR
-                    else rawImageColors[rawRowOffset + x]
+                if(subjectConfidenceMask.get() < confidenceThreshold){
+                    subjectColors[subjectRowOffset + x] = TRANSPARENT_DEBUG_COLOR
+                } else {
+                    if(x < subjectBoundingBox.minX){ subjectBoundingBox.minX = x }
+                    else if(x > subjectBoundingBox.maxX){ subjectBoundingBox.maxX = x }
+                    if(y < subjectBoundingBox.minY){ subjectBoundingBox.minY = y }
+                    else if(y > subjectBoundingBox.maxY){ subjectBoundingBox.maxY = y }
+                    subjectColors[subjectRowOffset + x] = rawImageColors[rawRowOffset + x]
+                }
             }
         }
+        this.subjectBoundingBox = subjectBoundingBox
         timer.logMilestone("SubjectImage", "alpha mask applied to subject int array")
 
         // NOTE: this try/catch essentially used as an if/else.

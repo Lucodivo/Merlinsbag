@@ -10,11 +10,14 @@ Database work:
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
     - Hilt to inject Room into ViewModels ??
+Camera
+    - Flash
+    - Setting to allow user to use preferred camera app
 Features:
 - Export data
 - Outfits
 - Image labelling ?
 - Primary / Secondary color classifications?
-- Saving segmented subject to device
 - Displaying segmented subjects as wardrobe
 - Modify AddArticleFragment to use CameraX and separate photo mode from editing to new Fragment
+- Proper landscape support

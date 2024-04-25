@@ -67,6 +67,12 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.animation) // Animations
     implementation(libs.androidx.lifecycle.viewmodel.compose) // Integration with ViewModel
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.compose.runtime.livedata)
+
+    // Coil
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
 
     // Room
     implementation(libs.androidx.room.runtime)

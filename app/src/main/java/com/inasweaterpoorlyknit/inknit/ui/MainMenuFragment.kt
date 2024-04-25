@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
@@ -30,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,12 +41,16 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.toast
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 
 class MainMenuFragment : Fragment() {
+    val viewModel: MainMenuViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -53,7 +59,9 @@ class MainMenuFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 InKnitTheme {
+                    val thumbnailUris = viewModel.imageUris.observeAsState()
                     MainMenuScreen(
+                        thumbnailUris = thumbnailUris.value ?: emptyList(),
                         onClickAddPhotoAlbum = { selectAlbumImage() },
                         onClickAddPhotoCamera = { selectCameraImage() },
                     )
@@ -127,10 +135,20 @@ class MainMenuFragment : Fragment() {
 @Preview
 @Composable
 fun MainMenuScreen(
+    thumbnailUris: List<Uri> = emptyList(),
     onClickAddPhotoAlbum: () -> Unit = {},
     onClickAddPhotoCamera: () -> Unit = {},
 ) {
     InKnitTheme {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(thumbnailUris.size) { index ->
+                val testWebP = "https://www.gstatic.com/webp/gallery/1.webp"
+                val thumbnailUri = thumbnailUris[index]
+                val thumbnailUriAsString = thumbnailUri.toString()
+//                AsyncImage(model = testWebP, contentDescription = "test")
+                AsyncImage(model = thumbnailUri, contentDescription = "test")
+            }
+        }
         Box(
             contentAlignment = Alignment.BottomEnd, modifier = Modifier
                 .fillMaxSize()
