@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.inknit.database.model
 
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao
@@ -15,12 +14,9 @@ import androidx.room.Query
 import androidx.room.Relation
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
-import androidx.room.TypeConverter
-import androidx.room.TypeConverters
 import androidx.room.Update
 import java.util.UUID
 
-// TODO: Just use URI instead of String
 @Entity(
     tableName = "clothing_articles",
 )
@@ -36,8 +32,8 @@ data class ClothingArticleEntity(
 data class ClothingArticleImageEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @ColumnInfo(name = "clothing_article_id") val clothingArticleId: String,
-    @ColumnInfo(name = "uri") val uri: Uri?,
-    @ColumnInfo(name = "thumbnail_uri") val thumbnailUri: Uri?,
+    @ColumnInfo(name = "uri") val uri: String,
+    @ColumnInfo(name = "thumbnail_uri") val thumbnailUri: String,
     // TODO: image rank
 )
 
@@ -83,7 +79,7 @@ interface ClothingArticleWithImagesDao {
     fun getAllClothingArticlesWithImages(): LiveData<List<ClothingArticleWithImagesEntity>>
 
     @Transaction
-    fun insertClothingArticle(imageUri: Uri, thumbnailUri: Uri) {
+    fun insertClothingArticle(imageUri: String, thumbnailUri: String) {
         val clothingArticle = ClothingArticleEntity()
         val clothingArticleImage = ClothingArticleImageEntity(clothingArticleId = clothingArticle.id, uri = imageUri, thumbnailUri = thumbnailUri)
         insertClothingArticles(clothingArticle)
@@ -91,15 +87,7 @@ interface ClothingArticleWithImagesDao {
     }
 }
 
-class UriConverter {
-    @TypeConverter
-    fun fromString(value: String?): Uri? = value?.let{ Uri.parse(value) }
-    @TypeConverter
-    fun toString(uri: Uri?): String? = uri?.toString()
-}
-
 @Database(entities = [ClothingArticleEntity::class, ClothingArticleImageEntity::class], version = 1)
-@TypeConverters(UriConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun clothingArticleWithImagesDao(): ClothingArticleWithImagesDao
 }

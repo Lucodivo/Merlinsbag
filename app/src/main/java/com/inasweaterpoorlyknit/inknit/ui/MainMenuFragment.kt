@@ -65,7 +65,7 @@ class MainMenuFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 InKnitTheme {
-                    val thumbnailDetails = viewModel.imageUris.observeAsState()
+                    val thumbnailDetails = viewModel.thumbnailDetails.observeAsState()
                     MainMenuScreen(
                         thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
                         onClickArticle = { index ->
@@ -147,7 +147,7 @@ class MainMenuFragment : Fragment() {
 @Preview
 @Composable
 fun MainMenuScreen(
-    thumbnailUris: List<Uri> = emptyList(),
+    thumbnailUris: List<String> = emptyList(),
     onClickArticle: (index: Int) -> Unit = {},
     onClickAddPhotoAlbum: () -> Unit = {},
     onClickAddPhotoCamera: () -> Unit = {},

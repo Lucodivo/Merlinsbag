@@ -14,13 +14,15 @@ object Counter{
 fun createClothingArticleEntity(id: String = Counter.next().toString()) = ClothingArticleEntity(id = id)
 fun createClothingArticleEntity(count: Int) = Array(count){ createClothingArticleEntity() }
 
-fun createUri() = Uri.parse("content://com.inasweaterpoorlyknit.inknit/fakeimage${Counter.next()}")
-fun createFakeUris(count: Int) = Array(count){ createUri() }
+fun createFakeUriString() = "content://com.inasweaterpoorlyknit.inknit/fakeimage${Counter.next()}"
+fun createFakeUriStrings(count: Int) = Array(count){ createFakeUriString() }
+fun createFakeUri(): Uri = Uri.parse(createFakeUriString())
+fun createFakeUris(count: Int) = Array(count){ createFakeUri() }
 
 fun createClothingArticleImageEntity(clothingArticleId: String = randUUIDString()) = ClothingArticleImageEntity(
     clothingArticleId = clothingArticleId,
-    uri = createUri(),
-    thumbnailUri = createUri(),
+    uri = createFakeUriString(),
+    thumbnailUri = createFakeUriString(),
 )
 fun createClothingArticleImageEntity(count: Int, clothingArticleId: String = randUUIDString()) = Array(count){
     createClothingArticleImageEntity(clothingArticleId = clothingArticleId)

@@ -24,7 +24,7 @@ class ArticleDetailFragment: Fragment() {
       setContent {
         val clothingDetail = viewModel.getArticleDetails().observeAsState(initial = null)
         InKnitTheme {
-          AsyncImage(model = clothingDetail.value?.imageUri, contentDescription = "TODO: image description")
+          AsyncImage(model = clothingDetail.value?.imageUriString, contentDescription = "TODO: image description")
         }
       }
     }

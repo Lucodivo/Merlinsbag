@@ -64,8 +64,8 @@ class DatabaseClothingArticlesWithImagesTests {
     @Throws(Exception::class)
     fun insertClothingArticle() {
         // arrange
-        val fullImageUris = createFakeUris(2)
-        val thumbnailUriImageUris = createFakeUris(2)
+        val fullImageUris = createFakeUriStrings(2)
+        val thumbnailUriImageUris = createFakeUriStrings(2)
 
         // act
         clothingArticleWithImagesDao.insertClothingArticle(fullImageUris[0], thumbnailUriImageUris[0])

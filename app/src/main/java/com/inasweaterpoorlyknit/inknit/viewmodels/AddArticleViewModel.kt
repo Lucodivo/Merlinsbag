@@ -164,9 +164,9 @@ class AddArticleViewModel(private val inknitApplication: InKnitApplication, priv
         outStream.flush()
       }
 
-      inknitApplication.database.clothingArticleWithImagesDao().insertClothingArticle(imageUri = imageFile.toUri(), thumbnailUri = thumbnailFile.toUri())
+      // TODO: Is there a better way to get a URI string?
+      inknitApplication.database.clothingArticleWithImagesDao().insertClothingArticle(imageUri = imageFile.toUri().toString(), thumbnailUri = thumbnailFile.toUri().toString())
     }
-    // TODO: Test that closing the fragment does not interfere with the work above
     viewModelScope.launch(Dispatchers.Main){
       _shouldClose.value = Event(true)
     }
