@@ -1,28 +1,23 @@
 package com.inasweaterpoorlyknit.inknit.viewmodels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
-import com.inasweaterpoorlyknit.inknit.InKnitApplication
+import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class MainMenuViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class MainMenuViewModel @Inject constructor(
+  private val clothingArticleWithImagesDao: ClothingArticleWithImagesDao,
+) : ViewModel() {
   data class ThumbnailDetails(
     val articleId: String,
     val thumbnailUri: String
   )
 
-  private val inknitApplication: InKnitApplication
-    get() = getApplication()
-
-  val thumbnailUris: LiveData<List<String>>
-    get() = inknitApplication.database.clothingArticleWithImagesDao()
-              .getAllClothingArticlesWithImages().map { clothingArticlesWithImages ->
-                clothingArticlesWithImages.map { it.images[0].thumbnailUri!! }
-              }
-
   val thumbnailDetails: LiveData<List<ThumbnailDetails>>
-    get() = inknitApplication.database.clothingArticleWithImagesDao()
+    get() = clothingArticleWithImagesDao
       .getAllClothingArticlesWithImages().map { clothingArticlesWithImages ->
         clothingArticlesWithImages.map {
           ThumbnailDetails(

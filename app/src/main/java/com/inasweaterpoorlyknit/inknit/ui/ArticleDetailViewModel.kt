@@ -1,35 +1,21 @@
 package com.inasweaterpoorlyknit.inknit.ui
 
-import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.map
-import com.inasweaterpoorlyknit.inknit.InKnitApplication
+import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ArticleDetailViewModel(private val inknitApplication: InKnitApplication, private val clothingArticleId: String): AndroidViewModel(inknitApplication) {
+@HiltViewModel
+class ArticleDetailViewModel @Inject constructor(
+  private val clothingArticleWithImagesDao: ClothingArticleWithImagesDao,
+): ViewModel() {
   data class ArticleDetails(val imageUriString: String)
-
-  fun getArticleDetails(): LiveData<ArticleDetails?> {
-    return inknitApplication.database.clothingArticleWithImagesDao()
+  fun getArticleDetails(clothingArticleId: String): LiveData<ArticleDetails?> {
+    return clothingArticleWithImagesDao
       .getClothingArticleWithImagesLive(clothingArticleId).map {
-        ArticleDetails(
-          imageUriString = it.images[0].uri
-        )
+        ArticleDetails(imageUriString = it.images[0].uri)
     }
-  }
-}
-
-class ArticleDetailViewModelFactory(
-  private val application: InKnitApplication,
-  private val userId: String
-) : ViewModelProvider.Factory {
-  override fun <T : ViewModel> create(modelClass: Class<T>): T {
-    if (modelClass.isAssignableFrom(ArticleDetailViewModel::class.java)) {
-      @Suppress("UNCHECKED_CAST")
-      return ArticleDetailViewModel(application, userId) as T
-    }
-    throw IllegalArgumentException("Unknown ViewModel class")
   }
 }

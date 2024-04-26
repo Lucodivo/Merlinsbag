@@ -3,11 +3,9 @@ package com.inasweaterpoorlyknit.inknit.ui
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,16 +43,16 @@ import com.inasweaterpoorlyknit.inknit.InKnitApplication
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
-import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
 // TODO: This screen does not work in landscape AT ALL
+@AndroidEntryPoint
 class AddArticleFragment: Fragment() {
   private val args: AddArticleFragmentArgs by navArgs()
-  private lateinit var viewModel: AddArticleViewModel
+  private val viewModel: AddArticleViewModel by viewModels()
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    val viewModelFactory = AddArticleViewModelFactory(requireActivity().application as InKnitApplication, Uri.parse(args.uriString))
-    viewModel = ViewModelProvider(this, viewModelFactory).get(AddArticleViewModel::class.java)
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    viewModel.setImage(args.uriString)
 
     viewModel.shouldClose.observe(viewLifecycleOwner){ event ->
       event.getContentIfNotHandled()?.let { shouldClose ->

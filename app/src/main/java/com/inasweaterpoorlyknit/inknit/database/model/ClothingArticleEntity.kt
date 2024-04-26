@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
-import androidx.room.Delete
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
@@ -18,9 +17,7 @@ import androidx.room.Update
 import java.util.Date
 import java.util.UUID
 
-@Entity(
-    tableName = "clothing_articles",
-)
+@Entity(tableName = "clothing_articles")
 data class ClothingArticleEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @ColumnInfo(name = "created") val createdEpoch: Long = Date().time,
@@ -33,10 +30,8 @@ data class ClothingArticleEntity(
         get() = Date(modifiedEpoch)
 }
 
-@Entity(
-    tableName = "clothing_article_images",
-    indices = [Index(value = ["clothing_article_id"])]
-)
+@Entity(tableName = "clothing_article_images",
+        indices = [Index(value = ["clothing_article_id"])])
 data class ClothingArticleImageEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @ColumnInfo(name = "clothing_article_id") val clothingArticleId: String,

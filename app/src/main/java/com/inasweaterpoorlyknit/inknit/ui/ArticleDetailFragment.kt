@@ -7,22 +7,21 @@ import android.view.ViewGroup
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import coil.compose.AsyncImage
-import com.inasweaterpoorlyknit.inknit.InKnitApplication
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ArticleDetailFragment: Fragment() {
   private val args: ArticleDetailFragmentArgs by navArgs()
-  private lateinit var viewModel: ArticleDetailViewModel
+  private val viewModel: ArticleDetailViewModel by viewModels()
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    val viewModelFactory = ArticleDetailViewModelFactory(requireActivity().application as InKnitApplication, args.clothingArticleId)
-    viewModel = ViewModelProvider(this, viewModelFactory).get(ArticleDetailViewModel::class.java)
     return ComposeView(requireContext()).apply {
       setContent {
-        val clothingDetail = viewModel.getArticleDetails().observeAsState(initial = null)
+        val clothingDetail = viewModel.getArticleDetails(args.clothingArticleId).observeAsState(initial = null)
         InKnitTheme {
           AsyncImage(model = clothingDetail.value?.imageUriString, contentDescription = "TODO: image description")
         }

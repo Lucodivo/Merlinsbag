@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.inknit.viewmodels
 
+import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.net.Uri
@@ -9,21 +10,21 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.inknit.InKnitApplication
 import com.inasweaterpoorlyknit.inknit.common.timestampAsString
+import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
-import com.inasweaterpoorlyknit.inknit.ui.ArticleDetailViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import javax.inject.Inject
 
 // Helps avoid events from being handled multiple times after reconfiguration
 open class Event<out T>(private val content: T) {
@@ -38,20 +39,11 @@ open class Event<out T>(private val content: T) {
   }
 }
 
-class AddArticleViewModelFactory(
-  private val application: InKnitApplication,
-  private val imageUri: Uri
-) : ViewModelProvider.Factory {
-  override fun <T : ViewModel> create(modelClass: Class<T>): T {
-    if (modelClass.isAssignableFrom(AddArticleViewModel::class.java)) {
-      @Suppress("UNCHECKED_CAST")
-      return AddArticleViewModel(application, imageUri) as T
-    }
-    throw IllegalArgumentException("Unknown ViewModel class")
-  }
-}
-
-class AddArticleViewModel(private val inknitApplication: InKnitApplication, private val imageUri: Uri) : AndroidViewModel(inknitApplication) {
+@HiltViewModel
+class AddArticleViewModel @Inject constructor(
+  private val application: Application,
+  private val clothingArticleWithImagesDao: ClothingArticleWithImagesDao
+) : ViewModel() {
 
   private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
   private var rotationIndex = 0
@@ -63,17 +55,18 @@ class AddArticleViewModel(private val inknitApplication: InKnitApplication, priv
   val shouldClose: LiveData<Event<Boolean>>
     get() = _shouldClose
 
-
   private val segmentedImage = SegmentedImage()
 
-  init {
+  fun setImage(imageUriString: String) {
     viewModelScope.launch(Dispatchers.Default) {
-      try {
-        segmentedImage.process(inknitApplication, imageUri) { success ->
-          if(success){ refreshProcessedBitmap() }
-          else{ Log.e("processImage()", "ML Kit failed to process image") }
-        }
-      } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
+      Uri.parse(imageUriString)?.let { imageUri ->
+        try {
+          segmentedImage.process(application, imageUri) { success ->
+            if(success){ refreshProcessedBitmap() }
+            else{ Log.e("processImage()", "ML Kit failed to process image") }
+          }
+        } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
+      }
     }
   }
 
@@ -144,8 +137,8 @@ class AddArticleViewModel(private val inknitApplication: InKnitApplication, priv
       val filenameBase = timestampAsString()
       val imageFilename = filenameBase + "_full.webp"
       val thumbnailFilename = filenameBase + "_thumb.webp"
-      val imageFile = File(inknitApplication.filesDir, imageFilename)
-      val thumbnailFile = File(inknitApplication.filesDir, thumbnailFilename)
+      val imageFile = File(application.filesDir, imageFilename)
+      val thumbnailFile = File(application.filesDir, thumbnailFilename)
       val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
 
       // save article full bitmap
@@ -163,9 +156,7 @@ class AddArticleViewModel(private val inknitApplication: InKnitApplication, priv
         // Flush and close the output stream
         outStream.flush()
       }
-
-      // TODO: Is there a better way to get a URI string?
-      inknitApplication.database.clothingArticleWithImagesDao().insertClothingArticle(imageUri = imageFile.toUri().toString(), thumbnailUri = thumbnailFile.toUri().toString())
+      clothingArticleWithImagesDao.insertClothingArticle(imageUri = imageFile.toUri().toString(), thumbnailUri = thumbnailFile.toUri().toString())
     }
     viewModelScope.launch(Dispatchers.Main){
       _shouldClose.value = Event(true)
