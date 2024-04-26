@@ -8,6 +8,12 @@ import androidx.lifecycle.map
 import com.inasweaterpoorlyknit.inknit.InKnitApplication
 
 class MainMenuViewModel(application: Application) : AndroidViewModel(application) {
+  data class ThumbnailDetails(
+    val articleId: String,
+    val thumbnailUri: Uri
+  )
+
+
   private val inknitApplication: InKnitApplication
     get() = getApplication()
 
@@ -17,9 +23,14 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
                 clothingArticlesWithImages.map { it.images[0].thumbnailUri!! }
               }
 
-  val imageUris: LiveData<List<Uri>>
+  val imageUris: LiveData<List<ThumbnailDetails>>
     get() = inknitApplication.database.clothingArticleWithImagesDao()
       .getAllClothingArticlesWithImages().map { clothingArticlesWithImages ->
-        clothingArticlesWithImages.map { it.images[0].thumbnailUri!! }
+        clothingArticlesWithImages.map {
+          ThumbnailDetails(
+            articleId = it.clothingArticleEntity.id,
+            thumbnailUri = it.images[0].thumbnailUri!!
+          )
+        }
       }
 }

@@ -74,6 +74,11 @@ interface ClothingArticleWithImagesDao {
     fun getClothingArticleWithImages(clothingArticleId: String): ClothingArticleWithImagesEntity
 
     @Transaction
+    @Query("""SELECT * FROM clothing_articles
+              WHERE clothing_articles.id = :clothingArticleId """)
+    fun getClothingArticleWithImagesLive(clothingArticleId: String): LiveData<ClothingArticleWithImagesEntity>
+
+    @Transaction
     @Query("""SELECT * FROM clothing_articles""")
     fun getAllClothingArticlesWithImages(): LiveData<List<ClothingArticleWithImagesEntity>>
 

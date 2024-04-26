@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestMultiple
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,9 +65,15 @@ class MainMenuFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 InKnitTheme {
-                    val thumbnailUris = viewModel.imageUris.observeAsState()
+                    val thumbnailDetails = viewModel.imageUris.observeAsState()
                     MainMenuScreen(
-                        thumbnailUris = thumbnailUris.value ?: emptyList(),
+                        thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
+                        onClickArticle = { index ->
+                            thumbnailDetails.value?.let { details ->
+                                val action = MainMenuFragmentDirections.actionMainMenuFragmentToArticleDetailFragment(details[index].articleId)
+                                findNavController().navigate(action)
+                            }
+                        },
                         onClickAddPhotoAlbum = { selectAlbumImage() },
                         onClickAddPhotoCamera = { selectCameraImage() },
                     )
@@ -141,6 +148,7 @@ class MainMenuFragment : Fragment() {
 @Composable
 fun MainMenuScreen(
     thumbnailUris: List<Uri> = emptyList(),
+    onClickArticle: (index: Int) -> Unit = {},
     onClickAddPhotoAlbum: () -> Unit = {},
     onClickAddPhotoCamera: () -> Unit = {},
 ) {
@@ -153,17 +161,21 @@ fun MainMenuScreen(
                 verticalItemSpacing = 16.dp,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 content = {
-                    items(count = thumbnailUris.size) { index ->
-                        val thumbnailUri = thumbnailUris[index]
+                    items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
+                        val thumbnailUri = thumbnailUris[thumbnailGridItemIndex]
                         AsyncImage(
                             model = thumbnailUri,
                             contentScale = ContentScale.Fit,
                             contentDescription = null, // TODO: Thumbnail description
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize().clickable {
+                                onClickArticle(thumbnailGridItemIndex)
+                            }
                         )
                     }
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize().clickable {
+
+                }
             )
 
             // add article floating buttons

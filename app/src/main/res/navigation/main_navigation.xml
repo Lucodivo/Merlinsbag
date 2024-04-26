@@ -14,6 +14,14 @@
             app:nullable="true" />
     </fragment>
     <fragment
+        android:id="@+id/articleDetailFragment"
+        android:name="com.inasweaterpoorlyknit.inknit.ui.ArticleDetailFragment"
+        android:label="ArticleDetailFragment">
+        <argument
+            android:name="clothingArticleId"
+            app:argType="string"/>
+    </fragment>
+    <fragment
         android:id="@+id/mainMenuFragment"
         android:name="com.inasweaterpoorlyknit.inknit.ui.MainMenuFragment"
         android:label="MainMenuFragment">
@@ -28,6 +36,12 @@
         <action
             android:id="@+id/action_mainMenuFragment_to_cameraFragment"
             app:destination="@id/cameraFragment" />
+        <action
+            android:id="@+id/action_mainMenuFragment_to_articleDetailFragment"
+            app:destination="@id/articleDetailFragment" />
+            <argument
+                android:name="clothingArticleId"
+                app:argType="string"/>
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"
