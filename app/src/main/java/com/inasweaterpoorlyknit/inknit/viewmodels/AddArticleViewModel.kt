@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.viewmodels
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -119,7 +120,8 @@ class AddArticleViewModel(private val inknitApplication: InKnitApplication, priv
 
   fun onSave(){
     viewModelScope.launch(Dispatchers.IO) {
-      // TODO: Properly adjust for rotation specification
+      val rotationMatrix = Matrix()
+      rotationMatrix.postRotate(rotation.floatValue)
 
       val fullBitmapToSave = Bitmap.createBitmap(
         segmentedImage.subjectBitmap,
@@ -127,6 +129,8 @@ class AddArticleViewModel(private val inknitApplication: InKnitApplication, priv
         segmentedImage.subjectBoundingBox.minY,
         segmentedImage.subjectBoundingBox.width,
         segmentedImage.subjectBoundingBox.height,
+        rotationMatrix,
+        false // e.g. bilinear filtering of source
       )
 
       var bitmapWidth = fullBitmapToSave.width
