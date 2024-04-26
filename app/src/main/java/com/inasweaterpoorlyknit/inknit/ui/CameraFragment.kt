@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -172,7 +173,9 @@ fun FloatingButton(
   onClick: () -> Unit = {},
 ){
   Box(contentAlignment = Alignment.BottomCenter,
-    modifier = Modifier.fillMaxSize().padding(bottom = 20.dp)){
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(bottom = 20.dp)){
     FloatingActionButton(containerColor = Color.White, shape = CircleShape, onClick = onClick){}
   }
 }

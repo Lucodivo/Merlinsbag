@@ -1,9 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.ui
 
-import android.Manifest.permission
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,6 +25,7 @@ import androidx.compose.material.icons.outlined.SwitchRight
 import androidx.compose.material.icons.outlined.ZoomInMap
 import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,28 +38,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.inasweaterpoorlyknit.inknit.InKnitApplication
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
+import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModelFactory
 
+// TODO: This screen does not work in landscape AT ALL
 class AddArticleFragment: Fragment() {
-  val viewModel: AddArticleViewModel by viewModels()
+  private val args: AddArticleFragmentArgs by navArgs()
+  private lateinit var viewModel: AddArticleViewModel
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    arguments?.let {
-      val safeArgs = AddArticleFragmentArgs.fromBundle(it)
-      val uri = Uri.parse(safeArgs.uri)
-      viewModel.processImage(uri)
-    }
+    val viewModelFactory = AddArticleViewModelFactory(requireActivity().application as InKnitApplication, Uri.parse(args.uriString))
+    viewModel = ViewModelProvider(this, viewModelFactory).get(AddArticleViewModel::class.java)
+
     viewModel.shouldClose.observe(viewLifecycleOwner){ event ->
       event.getContentIfNotHandled()?.let { shouldClose ->
         if(shouldClose) findNavController().popBackStack(R.id.mainMenuFragment, false)
       }
     }
+
     return ComposeView(requireContext()).apply {
       setContent {
         AddArticleScreen(
+          processing = viewModel.processing.value,
           processedImage = viewModel.processedBitmap.value,
           imageRotation = viewModel.rotation.floatValue,
           onNarrowFocusClick = { viewModel.onFocusClicked() },
@@ -74,31 +79,12 @@ class AddArticleFragment: Fragment() {
       }
     }
   }
-
-  companion object {
-    private val REQUIRED_PERMISSIONS =
-      if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
-        arrayOf(permission.CAMERA)
-      } else {
-        arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
-      }
-  }
-
-  //region REGISTER FOR ACTIVITY RESULTS
-  // TODO: Remove when determined to be of no use
-  // Get new camera photo from user and check necessary permissions
-  var pendingCameraImageUri: Uri? = null
-  fun handleImageUriResult(uri: Uri) = viewModel.processImage(uri)
-  val _cameraLauncher = registerForActivityResult(TakePicture()){ pictureTaken ->
-    if(pictureTaken) handleImageUriResult(pendingCameraImageUri!!)
-    else Log.i("TakePicture ActivityResultContract", "Picture not returned from camera")
-  }
-  //endregion REGISTER FOR ACTIVITY RESULTS
 }
 
 @Preview
 @Composable
 fun AddArticleScreen(
+  processing: Boolean = true,
   processedImage: Bitmap? = null,
   imageRotation: Float = 0.0f,
   onPrevClick: () -> Unit = {},
@@ -111,26 +97,34 @@ fun AddArticleScreen(
 ) {
   InKnitTheme {
     Column {
-      Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(10f).fillMaxSize()){
-        processedImage?.let {
-          Image(bitmap = it.asImageBitmap(),
-                contentDescription = stringResource(id = R.string.processed_image),
-                modifier = Modifier.rotate(imageRotation)
+      Box(contentAlignment = Alignment.Center, modifier = Modifier
+        .weight(10f)
+        .fillMaxSize()){
+        if(processedImage != null){
+          Image(bitmap = processedImage.asImageBitmap(),
+            contentDescription = stringResource(id = R.string.processed_image),
+            modifier = Modifier.rotate(imageRotation)
           )
+        } else {
+          CircularProgressIndicator()
         }
       }
-      Column(modifier = Modifier.weight(2.0f).fillMaxWidth()) {
-        val buttonModifier = Modifier.weight(1f).padding(3.dp)
+      Column(modifier = Modifier
+        .weight(2.0f)
+        .fillMaxWidth()) {
+        val buttonModifier = Modifier
+          .weight(1f)
+          .padding(3.dp)
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()){
-          Button(onClick = onPrevClick, modifier = buttonModifier){ Icon(Icons.Outlined.SwitchLeft, "Switch left") }
-          Button(onClick = onWidenFocusClick, modifier = buttonModifier){ Icon(Icons.Outlined.ZoomOutMap, "Narrow focus") }
-          Button(onClick = onNarrowFocusClick, modifier = buttonModifier){ Icon(Icons.Outlined.ZoomInMap, "Broaden focus") }
-          Button(onClick = onNextClick, modifier = buttonModifier) { Icon(Icons.Outlined.SwitchRight, "Switch right") }
+          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.SwitchLeft, "Switch left") }
+          Button(onClick = onWidenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.ZoomOutMap, "Narrow focus") }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.ZoomInMap, "Broaden focus") }
+          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(Icons.Outlined.SwitchRight, "Switch right") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()){
-          Button(onClick = onRotateCCW, modifier = buttonModifier) { Icon(Icons.Outlined.Rotate90DegreesCcw, "Rotate counter-clockwise") }
-          Button(onClick = onSave, modifier = buttonModifier) { Icon(Icons.Outlined.Save, "Save") }
-          Button(onClick = onRotateCW, modifier = buttonModifier){ Icon(Icons.Outlined.Rotate90DegreesCw, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(Icons.Outlined.Rotate90DegreesCcw, "Rotate counter-clockwise") }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier) { Icon(Icons.Outlined.Save, "Save") }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.Rotate90DegreesCw, "Rotate counter-clockwise") }
         }
       }
     }

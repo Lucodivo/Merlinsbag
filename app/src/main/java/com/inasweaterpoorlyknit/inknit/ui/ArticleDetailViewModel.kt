@@ -8,11 +8,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.map
 import com.inasweaterpoorlyknit.inknit.InKnitApplication
 
-class ArticleDetailViewModel(val application: InKnitApplication, val clothingArticleId: String): AndroidViewModel(application) {
+class ArticleDetailViewModel(private val inknitApplication: InKnitApplication, private val clothingArticleId: String): AndroidViewModel(inknitApplication) {
   data class ArticleDetails(val imageUri: Uri)
 
   fun getArticleDetails(): LiveData<ArticleDetails?> {
-    return application.database.clothingArticleWithImagesDao()
+    return inknitApplication.database.clothingArticleWithImagesDao()
       .getClothingArticleWithImagesLive(clothingArticleId).map {
         ArticleDetails(
           imageUri = it.images[0].uri!!

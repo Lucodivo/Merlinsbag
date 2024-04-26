@@ -8,10 +8,8 @@
         android:name="com.inasweaterpoorlyknit.inknit.ui.AddArticleFragment"
         android:label="AddArticleFragment">
         <argument
-            android:name="uri"
-            app:argType="string"
-            android:defaultValue="@null"
-            app:nullable="true" />
+            android:name="uriString"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/articleDetailFragment"
@@ -29,9 +27,8 @@
             android:id="@+id/action_mainMenuFragment_to_addArticleFragment"
             app:destination="@id/addArticleFragment">
             <argument
-                android:name="uri"
-                app:argType="string"
-                app:nullable="true" />
+                android:name="uriString"
+                app:argType="string" />
         </action>
         <action
             android:id="@+id/action_mainMenuFragment_to_cameraFragment"
@@ -51,9 +48,8 @@
             android:id="@+id/action_cameraFragment_to_addArticleFragment"
             app:destination="@id/addArticleFragment">
             <argument
-                android:name="uri"
-                app:argType="string"
-                app:nullable="true" />
+                android:name="uriString"
+                app:argType="string" />
         </action>
     </fragment>
 </navigation>

@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.inknit.viewmodels
 
-import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -12,10 +11,13 @@ import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.inknit.InKnitApplication
 import com.inasweaterpoorlyknit.inknit.common.timestampAsString
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
+import com.inasweaterpoorlyknit.inknit.ui.ArticleDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -35,11 +37,25 @@ open class Event<out T>(private val content: T) {
   }
 }
 
-class AddArticleViewModel(application: Application) : AndroidViewModel(application) {
+class AddArticleViewModelFactory(
+  private val application: InKnitApplication,
+  private val imageUri: Uri
+) : ViewModelProvider.Factory {
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    if (modelClass.isAssignableFrom(AddArticleViewModel::class.java)) {
+      @Suppress("UNCHECKED_CAST")
+      return AddArticleViewModel(application, imageUri) as T
+    }
+    throw IllegalArgumentException("Unknown ViewModel class")
+  }
+}
+
+class AddArticleViewModel(private val inknitApplication: InKnitApplication, private val imageUri: Uri) : AndroidViewModel(inknitApplication) {
 
   private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
   private var rotationIndex = 0
 
+  val processing = mutableStateOf(true)
   val processedBitmap = mutableStateOf<Bitmap?>(null)
   val rotation = mutableFloatStateOf(rotations[rotationIndex])
   private val _shouldClose = MutableLiveData<Event<Boolean>>()
@@ -48,15 +64,13 @@ class AddArticleViewModel(application: Application) : AndroidViewModel(applicati
 
 
   private val segmentedImage = SegmentedImage()
-  private val inknitApplication: InKnitApplication
-    get() = getApplication()
 
-  fun processImage(uri: Uri){
+  init {
     viewModelScope.launch(Dispatchers.Default) {
       try {
-        segmentedImage.process(getApplication(), uri) { success ->
-          if (success) refreshProcessedBitmap()
-          else Log.e("processImage()", "ML Kit failed to process image")
+        segmentedImage.process(inknitApplication, imageUri) { success ->
+          if(success){ refreshProcessedBitmap() }
+          else{ Log.e("processImage()", "ML Kit failed to process image") }
         }
       } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
     }
@@ -70,12 +84,30 @@ class AddArticleViewModel(application: Application) : AndroidViewModel(applicati
     // our desired value forces it to actually emit our desired value in all circumstances.
     processedBitmap.value = null
     processedBitmap.value = segmentedImage.subjectBitmap
+    processing.value = false
   }
 
-  fun onWidenClicked() = segmentedImage.decreaseThreshold().also { refreshProcessedBitmap() }
-  fun onFocusClicked() = segmentedImage.increaseThreshold().also { refreshProcessedBitmap() }
-  fun onPrevClicked() = segmentedImage.prevSubject().also { refreshProcessedBitmap() }
-  fun onNextClicked() = segmentedImage.nextSubject().also { refreshProcessedBitmap() }
+  fun onWidenClicked(){
+    processing.value = true
+    segmentedImage.decreaseThreshold()
+    refreshProcessedBitmap()
+  }
+  fun onFocusClicked() {
+    processing.value = true
+    segmentedImage.increaseThreshold()
+    refreshProcessedBitmap()
+  }
+  fun onPrevClicked(){
+    processing.value = true
+    segmentedImage.prevSubject()
+    refreshProcessedBitmap()
+  }
+  fun onNextClicked(){
+    processing.value = true
+    segmentedImage.nextSubject()
+    refreshProcessedBitmap()
+  }
+
   fun onRotateCW(){
     rotationIndex = if(rotationIndex == rotations.lastIndex) 0 else rotationIndex + 1
     rotation.floatValue = rotations[rotationIndex]
@@ -129,9 +161,10 @@ class AddArticleViewModel(application: Application) : AndroidViewModel(applicati
       }
 
       inknitApplication.database.clothingArticleWithImagesDao().insertClothingArticle(imageUri = imageFile.toUri(), thumbnailUri = thumbnailFile.toUri())
-      viewModelScope.launch(Dispatchers.Main) {
-        _shouldClose.value = Event(true)
-      }
+    }
+    // TODO: Test that closing the fragment does not interfere with the work above
+    viewModelScope.launch(Dispatchers.Main){
+      _shouldClose.value = Event(true)
     }
   }
 }

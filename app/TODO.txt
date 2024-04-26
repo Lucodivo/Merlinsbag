@@ -13,6 +13,7 @@ Database work:
 Camera:
     - Flash
     - Setting to allow user to use preferred camera app
+    - Selfie camera
 Add Article:
     - Loading icon
     - User can't save until loaded
