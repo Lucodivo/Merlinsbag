@@ -91,9 +91,12 @@ class DatabaseClothingArticlesWithImagesTests {
         clothingArticleWithImagesDao.insertClothingArticleImages(clothingArticleImagesToInsert1)
         clothingArticleWithImagesDao.insertClothingArticleImages(*clothingArticleImagesToInsert2)
         clothingArticleWithImagesDao.insertClothingArticleImages(*clothingArticleImagesToInsert3)
-        val clothingArticlesWithImages1 = clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[0].id)
-        val clothingArticlesWithImages2 = clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[1].id)
-        val clothingArticlesWithImages3 = clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[2].id)
+        val clothingArticlesWithImages1 = LiveDataTestUtil<ClothingArticleWithImagesEntity>()
+            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImagesLive(clothingArticlesToInsert[0].id))
+        val clothingArticlesWithImages2 = LiveDataTestUtil<ClothingArticleWithImagesEntity>()
+            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImagesLive(clothingArticlesToInsert[1].id))
+        val clothingArticlesWithImages3 = LiveDataTestUtil<ClothingArticleWithImagesEntity>()
+            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImagesLive(clothingArticlesToInsert[2].id))
 
         // assert
         assertEquals("Could not acquire clothing article with images", 1, clothingArticlesWithImages1.images.size)

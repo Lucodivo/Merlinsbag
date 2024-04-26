@@ -15,6 +15,7 @@ import androidx.room.Relation
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Update
+import java.util.Date
 import java.util.UUID
 
 @Entity(
@@ -22,8 +23,15 @@ import java.util.UUID
 )
 data class ClothingArticleEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "created") val createdEpoch: Long = Date().time,
+    @ColumnInfo(name = "modified") val modifiedEpoch: Long = createdEpoch,
     // TODO: Categories
-)
+){
+    val createdDate: Date
+        get() = Date(createdEpoch)
+    val modifiedDate: Date
+        get() = Date(modifiedEpoch)
+}
 
 @Entity(
     tableName = "clothing_article_images",
@@ -39,27 +47,17 @@ data class ClothingArticleImageEntity(
 
 data class ClothingArticleWithImagesEntity(
     @Embedded val clothingArticleEntity: ClothingArticleEntity,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "clothing_article_id"
-    )
+    @Relation(parentColumn = "id", entityColumn = "clothing_article_id")
     val images: List<ClothingArticleImageEntity>
 )
 
 @Dao
 interface ClothingArticleWithImagesDao {
-    @Query("SELECT * FROM clothing_articles")
-    fun getAllClothingArticles(): List<ClothingArticleEntity>
     @Insert
     fun insertClothingArticles(vararg clothingArticleEntity: ClothingArticleEntity)
-    @Delete
-    fun deleteClothingArticle(clothingArticleEntity: ClothingArticleEntity)
     @Update
     fun updateClothingArticle(clothingArticleEntity: ClothingArticleEntity)
 
-    @Query("""SELECT * FROM clothing_article_images
-              WHERE clothing_article_images.clothing_article_id = :clothingArticleId""")
-    fun getClothingArticleImages(clothingArticleId: String): ClothingArticleImageEntity
     @Insert
     fun insertClothingArticleImages(vararg clothingArticleImageEntity: ClothingArticleImageEntity)
 
@@ -67,15 +65,11 @@ interface ClothingArticleWithImagesDao {
     @Transaction
     @Query("""SELECT * FROM clothing_articles
               WHERE clothing_articles.id = :clothingArticleId """)
-    fun getClothingArticleWithImages(clothingArticleId: String): ClothingArticleWithImagesEntity
-
-    @Transaction
-    @Query("""SELECT * FROM clothing_articles
-              WHERE clothing_articles.id = :clothingArticleId """)
     fun getClothingArticleWithImagesLive(clothingArticleId: String): LiveData<ClothingArticleWithImagesEntity>
 
     @Transaction
-    @Query("""SELECT * FROM clothing_articles""")
+    @Query("""SELECT * FROM clothing_articles 
+                ORDER BY clothing_articles.modified DESC""")
     fun getAllClothingArticlesWithImages(): LiveData<List<ClothingArticleWithImagesEntity>>
 
     @Transaction

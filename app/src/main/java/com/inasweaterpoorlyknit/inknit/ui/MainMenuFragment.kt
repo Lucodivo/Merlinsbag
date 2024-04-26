@@ -15,12 +15,15 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestMultiple
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -32,6 +35,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
@@ -152,30 +157,30 @@ fun MainMenuScreen(
     onClickAddPhotoAlbum: () -> Unit = {},
     onClickAddPhotoCamera: () -> Unit = {},
 ) {
+    val gridMinWidth = 100.dp
+    val gridItemPadding = 16.dp
     InKnitTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyVerticalStaggeredGrid(
                 // typical dp width of a smart phone is 320dp-480dp
-                columns = StaggeredGridCells.Adaptive(minSize = 100.dp),
-                contentPadding = PaddingValues(16.dp),
-                verticalItemSpacing = 16.dp,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
                 content = {
                     items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
                         val thumbnailUri = thumbnailUris[thumbnailGridItemIndex]
-                        AsyncImage(
-                            model = thumbnailUri,
-                            contentScale = ContentScale.Fit,
-                            contentDescription = null, // TODO: Thumbnail description
-                            modifier = Modifier.fillMaxSize().clickable {
+                        Box(contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize().clickable{
                                 onClickArticle(thumbnailGridItemIndex)
-                            }
-                        )
+                        }){
+                            AsyncImage(
+                                model = thumbnailUri,
+                                contentScale = ContentScale.Fit,
+                                contentDescription = null, // TODO: Thumbnail description
+                                modifier = Modifier.padding(gridItemPadding)
+                            )
+                        }
                     }
                 },
-                modifier = Modifier.fillMaxSize().clickable {
-
-                }
+                modifier = Modifier.fillMaxSize()
             )
 
             // add article floating buttons
