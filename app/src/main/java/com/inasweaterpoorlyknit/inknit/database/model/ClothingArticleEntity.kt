@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.inknit.database.model
 
+import androidx.camera.core.processing.SurfaceProcessorNode.Out
 import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao
@@ -30,6 +31,21 @@ data class ClothingArticleEntity(
         get() = Date(modifiedEpoch)
 }
 
+@Entity(tableName = "outfits")
+data class OutfitEntity(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "created") val createdEpoch: Long = Date().time,
+    @ColumnInfo(name = "modified") val modifiedEpoch: Long = createdEpoch,
+)
+
+// Outfits & Clothing Articles join table
+@Entity(tableName = "outfit_articles",
+        primaryKeys = ["clothing_article_id", "outfit_id"])
+data class OutfitArticlesEntity(
+    @ColumnInfo(name = "clothing_article_id") val clothingArticleId: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "outfit_id") val outfitId: String = UUID.randomUUID().toString(),
+)
+
 @Entity(tableName = "clothing_article_images",
         indices = [Index(value = ["clothing_article_id"])])
 data class ClothingArticleImageEntity(
@@ -45,6 +61,23 @@ data class ClothingArticleWithImagesEntity(
     @Relation(parentColumn = "id", entityColumn = "clothing_article_id")
     val images: List<ClothingArticleImageEntity>
 )
+
+@Dao
+interface OutfitArticlesDao {
+    @Insert
+    fun insertOutfit(vararg outfitEntity: OutfitEntity)
+    @Update
+    fun updateOutfit(outfitEntity: OutfitEntity)
+
+    @Insert
+    fun insertOutfitArticle(vararg outfitArticlesEntity: OutfitArticlesEntity)
+
+    @Query(""" SELECT clothing_articles.*
+                FROM clothing_articles
+                JOIN outfit_articles ON clothing_articles.id = outfit_articles.clothing_article_id
+                WHERE outfit_articles.outfit_id = :outfitId """)
+    fun getAllOutfitArticles(outfitId: String): LiveData<List<ClothingArticleEntity>>
+}
 
 @Dao
 interface ClothingArticleWithImagesDao {
@@ -76,7 +109,12 @@ interface ClothingArticleWithImagesDao {
     }
 }
 
-@Database(entities = [ClothingArticleEntity::class, ClothingArticleImageEntity::class], version = 1)
+@Database(entities = [ClothingArticleEntity::class,
+                        ClothingArticleImageEntity::class,
+                        OutfitEntity::class,
+                        OutfitArticlesEntity::class,],
+                    version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun clothingArticleWithImagesDao(): ClothingArticleWithImagesDao
+    abstract fun outfitArticlesDao(): OutfitArticlesDao
 }

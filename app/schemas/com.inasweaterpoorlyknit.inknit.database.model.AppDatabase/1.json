@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "475b89e4c19d5615bff9bb78490d8f07",
+    "identityHash": "a73fe0fe36f9e415e6e2e9df1318595c",
     "entities": [
       {
         "tableName": "clothing_articles",
@@ -83,12 +83,71 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "outfits",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `created` INTEGER NOT NULL, `modified` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdEpoch",
+            "columnName": "created",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedEpoch",
+            "columnName": "modified",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "outfit_articles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clothing_article_id` TEXT NOT NULL, `outfit_id` TEXT NOT NULL, PRIMARY KEY(`clothing_article_id`, `outfit_id`))",
+        "fields": [
+          {
+            "fieldPath": "clothingArticleId",
+            "columnName": "clothing_article_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "outfitId",
+            "columnName": "outfit_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "clothing_article_id",
+            "outfit_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '475b89e4c19d5615bff9bb78490d8f07')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a73fe0fe36f9e415e6e2e9df1318595c')"
     ]
   }
 }

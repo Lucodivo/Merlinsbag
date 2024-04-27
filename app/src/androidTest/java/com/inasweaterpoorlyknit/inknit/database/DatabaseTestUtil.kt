@@ -1,9 +1,13 @@
 package com.inasweaterpoorlyknit.inknit.database
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleEntity
 import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleImageEntity
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 fun randUUIDString() = UUID.randomUUID().toString()
 object Counter{
@@ -26,4 +30,19 @@ fun createClothingArticleImageEntity(clothingArticleId: String = randUUIDString(
 )
 fun createClothingArticleImageEntity(count: Int, clothingArticleId: String = randUUIDString()) = Array(count){
     createClothingArticleImageEntity(clothingArticleId = clothingArticleId)
+}
+
+class LiveDataTestUtil<T> {
+    fun getValue(liveData: LiveData<T>): T {
+        var data: T? = null
+        val latch = CountDownLatch(1)
+        val observer = Observer<T> { t ->
+            data = t
+            latch.countDown()
+        }
+        liveData.observeForever(observer)
+        latch.await(2, TimeUnit.SECONDS)
+        liveData.removeObserver(observer)
+        return data ?: throw NullPointerException("LiveData value was null")
+    }
 }

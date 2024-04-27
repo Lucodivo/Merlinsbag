@@ -20,22 +20,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 
-class LiveDataTestUtil<T> {
-    fun getValue(liveData: LiveData<T>): T {
-        var data: T? = null
-        val latch = CountDownLatch(1)
-        val observer = Observer<T> { t ->
-            data = t
-            latch.countDown()
-        }
-        liveData.observeForever(observer)
-        latch.await(2, TimeUnit.SECONDS)
-        liveData.removeObserver(observer)
-        return data ?: throw NullPointerException("LiveData value was null")
-    }
-}
-
-
 // These tests are for baseline sanity of the database.
 // If these aren't passing, something must be  wrong with the database as a whole.
 @RunWith(AndroidJUnit4::class)
