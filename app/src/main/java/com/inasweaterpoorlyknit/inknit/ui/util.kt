@@ -23,6 +23,7 @@ fun Activity.showSystemUI() {
       controller.show(WindowInsetsCompat.Type.navigationBars())
     }
   } else { // TODO: Test if this even works
+    @Suppress("DEPRECATION")
     window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
   }
 }
@@ -41,6 +42,7 @@ fun Activity.hideSystemUI() {
       controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
   } else { // TODO: System visibility is deprecated, remove when minSDK is 30+
+    @Suppress("DEPRECATION")
     window.decorView.systemUiVisibility = (
         View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or // hide the navigation
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or // lay out view as if the navigation will be hidden

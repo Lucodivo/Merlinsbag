@@ -139,6 +139,7 @@ class AddArticleViewModel @Inject constructor(
       val thumbnailFilename = filenameBase + "_thumb.webp"
       val imageFile = File(application.filesDir, imageFilename)
       val thumbnailFile = File(application.filesDir, thumbnailFilename)
+      @Suppress("DEPRECATION")
       val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
 
       // save article full bitmap

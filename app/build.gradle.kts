@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.navigationSafeArgs)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -20,6 +20,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        ksp {
+            arg("room.schemaLocation","$projectDir/schemas")
         }
     }
 
@@ -42,7 +46,7 @@ android {
         viewBinding = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.7"
     }
     packaging {
         resources {
@@ -120,7 +124,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     kspTest(libs.hilt.compiler)
     kspAndroidTest(libs.hilt.compiler)
-
 
     // Proto DataStore
 //    implementation("libs.androidx.datastore")
