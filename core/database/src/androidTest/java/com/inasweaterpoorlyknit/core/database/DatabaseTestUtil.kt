@@ -1,10 +1,10 @@
-package com.inasweaterpoorlyknit.inknit.database
+package com.inasweaterpoorlyknit.core.database
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleEntity
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleEntity
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleImageEntity
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

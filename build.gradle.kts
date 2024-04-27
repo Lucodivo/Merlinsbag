@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.navigationSafeArgs) apply false
     alias(libs.plugins.hiltAndroid) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.androidLibrary) apply false
 }
 
 buildscript {

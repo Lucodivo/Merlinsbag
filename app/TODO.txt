@@ -14,6 +14,7 @@ Camera:
     - Flash
     - Setting to allow user to use preferred camera app
     - Selfie camera
+    - Camera "feels" slow between clicking the "take picture" button to the AddArticleFragment
 Add Article:
     - Loading icon
     - User can't save until loaded

@@ -1,10 +1,9 @@
-package com.inasweaterpoorlyknit.inknit.di
+package com.inasweaterpoorlyknit.core.database.di
 
-import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import com.inasweaterpoorlyknit.inknit.database.model.AppDatabase
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.model.AppDatabase
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,7 +20,7 @@ object AppModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "inknit-db"
+            "inknit-database"
         ).build()
     }
 

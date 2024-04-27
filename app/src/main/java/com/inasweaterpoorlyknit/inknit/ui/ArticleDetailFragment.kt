@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

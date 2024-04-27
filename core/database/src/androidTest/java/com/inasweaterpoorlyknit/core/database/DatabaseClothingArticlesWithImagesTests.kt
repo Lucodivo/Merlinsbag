@@ -1,14 +1,12 @@
-package com.inasweaterpoorlyknit.inknit.database
+package com.inasweaterpoorlyknit.core.database
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.inasweaterpoorlyknit.inknit.database.model.AppDatabase
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesEntity
+import com.inasweaterpoorlyknit.core.database.model.AppDatabase
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesEntity
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -16,8 +14,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 
 // These tests are for baseline sanity of the database.

@@ -1,11 +1,11 @@
-package com.inasweaterpoorlyknit.inknit.database
+package com.inasweaterpoorlyknit.core.database
 
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.inasweaterpoorlyknit.inknit.database.model.AppDatabase
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.model.AppDatabase
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -13,11 +13,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleEntity
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesEntity
-import com.inasweaterpoorlyknit.inknit.database.model.OutfitArticlesDao
-import com.inasweaterpoorlyknit.inknit.database.model.OutfitArticlesEntity
-import com.inasweaterpoorlyknit.inknit.database.model.OutfitEntity
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleEntity
+import com.inasweaterpoorlyknit.core.database.model.OutfitArticlesDao
+import com.inasweaterpoorlyknit.core.database.model.OutfitArticlesEntity
+import com.inasweaterpoorlyknit.core.database.model.OutfitEntity
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 

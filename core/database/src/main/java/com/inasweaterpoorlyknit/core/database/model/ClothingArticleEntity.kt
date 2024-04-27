@@ -1,6 +1,5 @@
-package com.inasweaterpoorlyknit.inknit.database.model
+package com.inasweaterpoorlyknit.core.database.model
 
-import androidx.camera.core.processing.SurfaceProcessorNode.Out
 import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao

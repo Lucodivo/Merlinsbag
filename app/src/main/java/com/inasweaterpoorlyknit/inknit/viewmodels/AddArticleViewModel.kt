@@ -15,7 +15,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.inknit.common.timestampAsString
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel

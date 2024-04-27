@@ -3,7 +3,7 @@ package com.inasweaterpoorlyknit.inknit.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
-import com.inasweaterpoorlyknit.inknit.database.model.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

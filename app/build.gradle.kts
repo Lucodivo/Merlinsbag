@@ -21,10 +21,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        ksp {
-            arg("room.schemaLocation","$projectDir/schemas")
-        }
     }
 
     buildTypes {
@@ -56,6 +52,8 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.database)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.ui)
@@ -81,15 +79,9 @@ dependencies {
 
     // Room
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
     annotationProcessor(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
-    implementation(libs.androidx.room.rxjava2) // RxJava2 support for Room
-    implementation(libs.androidx.room.rxjava3) // RxJava3 support for Room
-    implementation(libs.androidx.room.guava) // Guava support for Room, including Optional and ListenableFuture
-    testImplementation(libs.androidx.room.testing) // Test helpers
-    implementation(libs.androidx.room.paging) // Paging 3 Integration
-
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
@@ -116,7 +108,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Hilt (Dependency Injection)
+    // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.fragment)
     testImplementation(libs.hilt.android.testing)
