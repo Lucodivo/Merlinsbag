@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.inasweaterpoorlyknit.core.database.model.AppDatabase
-import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -13,12 +11,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.inasweaterpoorlyknit.core.database.dao.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.dao.OutfitArticlesDao
 import com.inasweaterpoorlyknit.core.database.model.ClothingArticleEntity
-import com.inasweaterpoorlyknit.core.database.model.OutfitArticlesDao
 import com.inasweaterpoorlyknit.core.database.model.OutfitArticlesEntity
 import com.inasweaterpoorlyknit.core.database.model.OutfitEntity
 import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
 
 // These tests are for baseline sanity of the database.
 // If these aren't passing, something must be  wrong with the database as a whole.
@@ -26,7 +24,7 @@ import org.junit.Assert.assertEquals
 class DatabaseOutfitArticlesTests {
   private lateinit var outfitArticlesDao: OutfitArticlesDao
   private lateinit var clothingArticleWithImagesDao: ClothingArticleWithImagesDao
-  private lateinit var db: AppDatabase
+  private lateinit var db: InKnitDatabase
 
   // NOTE: Used to observeForever on the main thread
   @get:Rule
@@ -35,7 +33,7 @@ class DatabaseOutfitArticlesTests {
   @Before
   fun createDb() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+    db = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
       .allowMainThreadQueries()
       .build()
     outfitArticlesDao = db.outfitArticlesDao()

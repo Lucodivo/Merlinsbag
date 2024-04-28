@@ -14,10 +14,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.database.dao.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.repository.ClothingArticleRepository
 import com.inasweaterpoorlyknit.inknit.common.timestampAsString
-import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
-import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,7 +42,7 @@ open class Event<out T>(private val content: T) {
 @HiltViewModel
 class AddArticleViewModel @Inject constructor(
   private val application: Application,
-  private val clothingArticleWithImagesDao: ClothingArticleWithImagesDao
+  private val clothingArticleRepository: ClothingArticleRepository,
 ) : ViewModel() {
 
   private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
@@ -157,7 +157,10 @@ class AddArticleViewModel @Inject constructor(
         // Flush and close the output stream
         outStream.flush()
       }
-      clothingArticleWithImagesDao.insertClothingArticle(imageUri = imageFile.toUri().toString(), thumbnailUri = thumbnailFile.toUri().toString())
+      clothingArticleRepository.insertClothingArticle(
+        imageUri = imageFile.toUri().toString(),
+        thumbnailUri = thumbnailFile.toUri().toString()
+      )
     }
     viewModelScope.launch(Dispatchers.Main){
       _shouldClose.value = Event(true)

@@ -4,9 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.inasweaterpoorlyknit.core.database.model.AppDatabase
-import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesDao
-import com.inasweaterpoorlyknit.core.database.model.ClothingArticleWithImagesEntity
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -15,13 +12,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.inasweaterpoorlyknit.core.database.dao.ClothingArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.dao.ClothingArticleWithImagesEntity
+import com.inasweaterpoorlyknit.core.database.repository.ClothingArticleRepository
 
 // These tests are for baseline sanity of the database.
 // If these aren't passing, something must be  wrong with the database as a whole.
 @RunWith(AndroidJUnit4::class)
 class DatabaseClothingArticlesWithImagesTests {
+    // TODO: Remove DAO, test through repository only
     private lateinit var clothingArticleWithImagesDao: ClothingArticleWithImagesDao
-    private lateinit var db: AppDatabase
+    private lateinit var clothingArticleRepository: ClothingArticleRepository
+    private lateinit var database: InKnitDatabase
 
     // NOTE: Used to observeForever on the main thread
     @get:Rule
@@ -30,15 +32,18 @@ class DatabaseClothingArticlesWithImagesTests {
     @Before
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+        database = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        clothingArticleWithImagesDao = db.clothingArticleWithImagesDao()
+        clothingArticleWithImagesDao = database.clothingArticleWithImagesDao()
+        clothingArticleRepository = ClothingArticleRepository(
+            clothingArticleWithImagesDao = clothingArticleWithImagesDao
+        )
     }
 
     @After
     @Throws(IOException::class)
-    fun closeDb() { db.close() }
+    fun closeDb() { database.close() }
 
     @Test
     @Throws(Exception::class)
@@ -48,15 +53,16 @@ class DatabaseClothingArticlesWithImagesTests {
         val thumbnailUriImageUris = createFakeUriStrings(2)
 
         // act
-        clothingArticleWithImagesDao.insertClothingArticle(fullImageUris[0], thumbnailUriImageUris[0])
-        clothingArticleWithImagesDao.insertClothingArticle(fullImageUris[1], thumbnailUriImageUris[1])
+        clothingArticleRepository.insertClothingArticle(fullImageUris[0], thumbnailUriImageUris[0])
+        clothingArticleRepository.insertClothingArticle(fullImageUris[1], thumbnailUriImageUris[1])
         val clothingArticlesWithImages = LiveDataTestUtil<List<ClothingArticleWithImagesEntity>>()
-            .getValue(clothingArticleWithImagesDao.getAllClothingArticlesWithImages())
+            .getValue(clothingArticleRepository.getAllClothingArticlesWithImages())
 
         // assert
         assertEquals("clothing articles not properly inserted and retreived", fullImageUris.size, clothingArticlesWithImages.size)
     }
 
+    // TODO: Adapt this test for usage of Repository only
     @Test
     @Throws(Exception::class)
     fun clothingInsertArticleWithImages() {
@@ -72,11 +78,11 @@ class DatabaseClothingArticlesWithImagesTests {
         clothingArticleWithImagesDao.insertClothingArticleImages(*clothingArticleImagesToInsert2)
         clothingArticleWithImagesDao.insertClothingArticleImages(*clothingArticleImagesToInsert3)
         val clothingArticlesWithImages1 = LiveDataTestUtil<ClothingArticleWithImagesEntity>()
-            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImagesLive(clothingArticlesToInsert[0].id))
+            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[0].id))
         val clothingArticlesWithImages2 = LiveDataTestUtil<ClothingArticleWithImagesEntity>()
-            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImagesLive(clothingArticlesToInsert[1].id))
+            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[1].id))
         val clothingArticlesWithImages3 = LiveDataTestUtil<ClothingArticleWithImagesEntity>()
-            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImagesLive(clothingArticlesToInsert[2].id))
+            .getValue(clothingArticleWithImagesDao.getClothingArticleWithImages(clothingArticlesToInsert[2].id))
 
         // assert
         assertEquals("Could not acquire clothing article with images", 1, clothingArticlesWithImages1.images.size)

@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // TODO: Move ML Kit code to their own module?
     implementation(libs.play.services.mlkit.subject.segmentation)
 
     // Compose
@@ -76,12 +77,6 @@ dependencies {
     // Coil
     implementation(libs.coil)
     implementation(libs.coil.compose)
-
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
-    annotationProcessor(libs.androidx.room.compiler)
-    ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
@@ -123,6 +118,4 @@ dependencies {
 //    implementation("androidx.datastore:datastore-rxjava3:1.0.0")
 // Starting from Protobuf 3.8.0, use the lite runtime library
 //    implementation("libs.protobuf.kotlin.lite")
-
-    // Room Database
 }
