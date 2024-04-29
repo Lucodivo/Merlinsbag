@@ -1,6 +1,4 @@
 // TODO
-Quick:
-    - Upgrade gradle plugin to match KSP
 Database work:
     - Full text search
         - Room database @Fts3/@Fts4
@@ -28,5 +26,4 @@ Main Menu:
     - click item to enter detail view
 Features:
 - Export data
-- Outfits
 - Proper landscape support for all screens

@@ -47,7 +47,7 @@ class SegmentedImage {
     var subjectBoundingBox = PLACEHOLDER_BOUNDING_BOX
     private var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
     var subjectIndex: Int = 0
-    private var segmentationResult= PLACEHOLDER_RESULT
+    private var segmentationResult = PLACEHOLDER_RESULT
 
     companion object {
         private val PLACEHOLDER_INT_ARRAY = IntArray(1)
@@ -102,27 +102,32 @@ class SegmentedImage {
         timer.logMilestone("SegmentedImage", "copy bitmap from input image")
         rawImageWidth = bitmap.width
         rawImageHeight = bitmap.height
-        subjectIndex = 0
+        subjectIndex = -1
         confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
         subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
             segmentationResult = result
             timer.logMilestone("SegmentedImage", "image successfully processed")
-            prepareSubjectBitmap()
+            if(subjectsFound()){
+                subjectIndex = 0
+                prepareSubjectBitmap()
+            }
             successCallback(true)
         }.addOnFailureListener {
             successCallback(false)
         }
     }
 
+    fun subjectsFound() = segmentationResult.subjects.size >= 1
+
     fun decreaseThreshold() {
-        if(confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
+        if(subjectsFound() || confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
         confidenceThreshold -= CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = max(MIN_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
     }
 
     fun increaseThreshold() {
-        if(confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
+        if(subjectsFound() || confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
         confidenceThreshold += CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = min(MAX_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
@@ -130,7 +135,7 @@ class SegmentedImage {
 
     fun prevSubject() {
         val subjectCount = segmentationResult.subjects.size
-        if(subjectCount == 1) return
+        if(subjectCount <= 1) return
         confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
         subjectIndex = (subjectIndex - 1 + subjectCount) % subjectCount
         val subject = segmentationResult.subjects[subjectIndex]
@@ -141,7 +146,7 @@ class SegmentedImage {
 
     fun nextSubject() {
         val subjectCount = segmentationResult.subjects.size
-        if(subjectCount == 1) return
+        if(subjectCount <= 1) return
         confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
         subjectIndex = (subjectIndex + 1) % subjectCount
         val subject = segmentationResult.subjects[subjectIndex]

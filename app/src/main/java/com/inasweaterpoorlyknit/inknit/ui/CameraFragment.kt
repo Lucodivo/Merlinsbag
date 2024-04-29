@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.ui
 
 import android.content.ContentValues
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -14,16 +15,24 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -46,7 +55,8 @@ class CameraFragment: Fragment() {
   var imageCapture: ImageCapture? = ImageCapture
     .Builder()
     .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-  .setJpegQuality(100)
+    .setFlashMode(ImageCapture.FLASH_MODE_AUTO)
+    .setJpegQuality(100)
     .build()
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -89,15 +99,16 @@ class CameraFragment: Fragment() {
     // Set up image capture listener, which is triggered after photo has
     // been taken
     imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageSavedCallback {
-        override fun onError(exc: ImageCaptureException){ Log.e(TAG, "Photo capture failed: ${exc.message}", exc) }
-        override fun onImageSaved(output: ImageCapture.OutputFileResults){
-          Log.d(TAG, "Photo capture succeeded: ${output.savedUri}")
-          val uriString = output.savedUri.toString()
-          val action = CameraFragmentDirections.actionCameraFragmentToAddArticleFragment(uriString)
-          findNavController().navigate(action)
-        }
+      override fun onError(exc: ImageCaptureException) {
+        Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
       }
-    )
+      override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+        Log.d(TAG, "Photo capture succeeded: ${output.savedUri}")
+        val uriString = output.savedUri.toString()
+        val action = CameraFragmentDirections.actionCameraFragmentToAddArticleFragment(uriString)
+        findNavController().navigate(action)
+      }
+    })
   }
 
   // onResume / onPause are used to expand the activity's vertical range and set the status bar transparent
@@ -117,7 +128,7 @@ fun CameraPreview(
   modifier: Modifier = Modifier,
   cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
   scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_CENTER,
-  imageCapture: ImageCapture? = null
+  imageCapture: ImageCapture? = null,
 ) {
   val lifecycleOwner = LocalLifecycleOwner.current
   AndroidView(
@@ -172,10 +183,18 @@ fun CameraScreen(
 fun FloatingButton(
   onClick: () -> Unit = {},
 ){
+  var captureActivated by remember{ mutableStateOf(false) }
   Box(contentAlignment = Alignment.BottomCenter,
-    modifier = Modifier
-      .fillMaxSize()
-      .padding(bottom = 20.dp)){
-    FloatingActionButton(containerColor = Color.White, shape = CircleShape, onClick = onClick){}
+    modifier = Modifier.fillMaxSize()){
+    Button(
+      colors = ButtonColors(containerColor = Color.White, contentColor = Color.White, disabledContainerColor = Color.Gray, disabledContentColor = Color.Gray),
+      shape = CircleShape,
+      enabled = !captureActivated,
+      onClick = {
+        captureActivated = true
+        onClick()
+      },
+      modifier = Modifier.padding(20.dp)
+    ){}
   }
 }
