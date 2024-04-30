@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_search"
+        android:title="@string/outfits"
+        android:icon="@drawable/ic_search" />
+    <item android:id="@+id/action_settings"
+        android:title="@string/add"
+        android:icon="@drawable/ic_add" />
+    <item android:id="@+id/action_navigation"
+        android:title="@string/wardrobe"
+        android:icon="@drawable/ic_wardrobe" />
+</menu>
