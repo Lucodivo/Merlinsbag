@@ -14,8 +14,6 @@ Camera:
     - Selfie camera
     - Camera "feels" slow between clicking the "take picture" button to the AddArticleFragment
 Add Article:
-    - Loading icon
-    - User can't save until loaded
     - Image labelling
     - Primary / Secondary color classifications?
     - Save using rotation
@@ -25,5 +23,21 @@ Outfits:
 Main Menu:
     - click item to enter detail view
 Features:
-- Export data
-- Proper landscape support for all screens
+    - Export data
+        - Individual items
+        - All items
+    - Proper landscape support for all screens
+Architecture:
+    - Switch to navigation compose
+App-wide UI:
+    - EdgeToEdge
+Quick:
+    - Splash screen
+        - androidx.core:core-splashscreen
+            installSplashScreen()
+            splashScreen.setKeepOnScreenCondition {
+                when (uiState) {
+                    Loading -> true
+                    is Success -> false
+                }
+            }

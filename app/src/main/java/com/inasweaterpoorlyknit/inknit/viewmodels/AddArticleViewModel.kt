@@ -14,7 +14,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.database.dao.ClothingArticleWithImagesDao
 import com.inasweaterpoorlyknit.core.database.repository.ClothingArticleRepository
 import com.inasweaterpoorlyknit.inknit.common.timestampAsString
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage

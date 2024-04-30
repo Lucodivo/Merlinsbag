@@ -13,14 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
-import androidx.compose.material.icons.outlined.Rotate90DegreesCw
-import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material.icons.outlined.SwitchLeft
-import androidx.compose.material.icons.outlined.SwitchRight
-import androidx.compose.material.icons.outlined.ZoomInMap
-import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -38,6 +30,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.icons.InKnitIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -64,7 +57,7 @@ class AddArticleFragment: Fragment() {
           processedImage = viewModel.processedBitmap.value,
           imageRotation = viewModel.rotation.floatValue,
           onNarrowFocusClick = { viewModel.onFocusClicked() },
-          onWidenFocusClick = { viewModel.onWidenClicked() },
+          onBroadenFocusClick = { viewModel.onWidenClicked() },
           onPrevClick = { viewModel.onPrevClicked() },
           onNextClick = { viewModel.onNextClicked() },
           onRotateCW = { viewModel.onRotateCW() },
@@ -85,7 +78,7 @@ fun AddArticleScreen(
   onPrevClick: () -> Unit = {},
   onNextClick: () -> Unit = {},
   onNarrowFocusClick: () -> Unit = {},
-  onWidenFocusClick: () -> Unit = {},
+  onBroadenFocusClick: () -> Unit = {},
   onRotateCW: () -> Unit = {},
   onRotateCCW: () -> Unit = {},
   onSave: () -> Unit = {},
@@ -111,15 +104,15 @@ fun AddArticleScreen(
           .weight(1f)
           .padding(3.dp)
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()){
-          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.SwitchLeft, "Switch left") }
-          Button(onClick = onWidenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.ZoomOutMap, "Narrow focus") }
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.ZoomInMap, "Broaden focus") }
-          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(Icons.Outlined.SwitchRight, "Switch right") }
+          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, "Narrow focus") }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, "Broaden focus") }
+          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()){
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(Icons.Outlined.Rotate90DegreesCcw, "Rotate counter-clockwise") }
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier) { Icon(Icons.Outlined.Save, "Save") }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(Icons.Outlined.Rotate90DegreesCw, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.RotateCCW, "Rotate counter-clockwise") }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.Save, "Save") }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.RotateCW, "Rotate counter-clockwise") }
         }
       }
     }

@@ -44,4 +44,10 @@
     <string name="permission_alert_justification">Camera and storage permission required to use camera in app. Enable camera permission in settings to use camera feature.</string>
     <string name="permission_alert_negative">No Thanks</string>
     <string name="permission_alert_positive">App Permissions</string>
+    <string name="search">search</string>
+    <string name="settings">settings</string>
+    <string name="articles">articles</string>
+    <string name="add">add</string>
+    <string name="collections">collections</string>
+    <string name="add_article">add article</string>
 </resources>

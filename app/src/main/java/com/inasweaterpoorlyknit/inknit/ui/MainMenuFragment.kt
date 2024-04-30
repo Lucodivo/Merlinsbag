@@ -22,11 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.PhotoAlbum
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -49,13 +45,14 @@ import androidx.navigation.fragment.findNavController
 import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.toast
+import com.inasweaterpoorlyknit.inknit.ui.icons.InKnitIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
-import com.inasweaterpoorlyknit.inknit.viewmodels.MainMenuViewModel
+import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainMenuFragment : Fragment() {
-    private val viewModel: MainMenuViewModel by viewModels()
+    private val viewModel: ArticlesViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,7 +63,7 @@ class MainMenuFragment : Fragment() {
             setContent {
                 InKnitTheme {
                     val thumbnailDetails = viewModel.thumbnailDetails.observeAsState()
-                    MainMenuScreen(
+                    ArticlesScreen(
                         thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
                         onClickArticle = { index ->
                             thumbnailDetails.value?.let { details ->
@@ -146,7 +143,7 @@ class MainMenuFragment : Fragment() {
 
 @Preview
 @Composable
-fun MainMenuScreen(
+fun ArticlesScreen(
     thumbnailUris: List<String> = emptyList(),
     onClickArticle: (index: Int) -> Unit = {},
     onClickAddPhotoAlbum: () -> Unit = {},
@@ -154,6 +151,7 @@ fun MainMenuScreen(
 ) {
     val gridMinWidth = 100.dp
     val gridItemPadding = 16.dp
+    val articlesGridState = rememberLazyStaggeredGridState()
     InKnitTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyVerticalStaggeredGrid(
@@ -175,7 +173,8 @@ fun MainMenuScreen(
                         }
                     }
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                state = articlesGridState,
             )
 
             // add article floating buttons
@@ -190,12 +189,12 @@ fun MainMenuScreen(
                         Column(horizontalAlignment = Alignment.End, modifier = Modifier.animateContentSize()) {
                             ExtendedFloatingActionButton(
                                 text = { Text("album") },
-                                icon = { Icon(Icons.Filled.PhotoAlbum, "add a photo from album") },
+                                icon = { Icon(InKnitIcons.PhotoAlbum, "add a photo from album") },
                                 onClick = onClickAddPhotoAlbum
                             )
                             ExtendedFloatingActionButton(
                                 text = { Text("camera") },
-                                icon = { Icon(Icons.Filled.AddAPhoto, "add a photo from camera") },
+                                icon = { Icon(InKnitIcons.AddPhoto, "add a photo from camera") },
                                 onClick = onClickAddPhotoCamera,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
@@ -205,9 +204,9 @@ fun MainMenuScreen(
                         onClick = { addButtonActive = !addButtonActive },
                     ) {
                         if (addButtonActive) {
-                            Icon(Icons.Filled.Remove, "addition icon")
+                            Icon(InKnitIcons.Add, "addition icon")
                         } else {
-                            Icon(Icons.Filled.Add, "addition icon")
+                            Icon(InKnitIcons.Remove, "addition icon")
                         }
                     }
                 }

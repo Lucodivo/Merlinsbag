@@ -12,11 +12,13 @@ ksp = "1.9.21-1.0.15"
 coreKtx = "1.13.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
+androidxHiltNavigationCompose = "1.2.0"
 espressoCore = "3.5.1"
 lifecycle = "2.7.0"
 navigationFragmentKtx = "2.7.7"
 playServicesMlkitSubjectSegmentation = "16.0.0-beta1"
 guava-android = "29.0-android"
+androidxComposeRuntimeTracing = "1.0.0-beta01"
 protobufKotlinLite = "3.24.4"
 composeActivity = "1.9.0"
 composeMaterial3 = "1.2.1"
@@ -25,6 +27,8 @@ room = "2.6.1"
 test = "1.5.0"
 appcompat = "1.6.1"
 material = "1.11.0"
+androidxComposeMaterial3Adaptive = "1.0.0-alpha11"
+androidxTracing = "1.3.0-alpha02"
 
 [libraries]
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
@@ -38,8 +42,14 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-fragment", version.ref = "hiltNavigationFragment" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
+androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "androidxComposeMaterial3Adaptive" }
+androidx-compose-material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "androidxComposeMaterial3Adaptive" }
+androidx-compose-material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "androidxComposeMaterial3Adaptive" }
+androidx-compose-material3-windowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+androidx-compose-runtime-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeRuntimeTracing" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationFragmentKtx" }
 androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navigationFragmentKtx" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
@@ -82,6 +92,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-tracing-ktx = { group = "androidx.tracing", name = "tracing-ktx", version.ref = "androidxTracing" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

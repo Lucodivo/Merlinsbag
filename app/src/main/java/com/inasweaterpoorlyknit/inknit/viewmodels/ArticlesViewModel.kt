@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class MainMenuViewModel @Inject constructor(
+class ArticlesViewModel @Inject constructor(
   private val clothingArticleRepository: ClothingArticleRepository,
 ) : ViewModel() {
   data class ClothingThumbnails(
