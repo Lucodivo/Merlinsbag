@@ -1,6 +1,22 @@
 package com.inasweaterpoorlyknit.inknit.navigation
 
+import android.Manifest.permission
+import android.content.ContentValues
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.provider.Settings
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.GetContent
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.appcompat.app.AlertDialog
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.layout.RowScope
+import com.inasweaterpoorlyknit.inknit.common.toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,11 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -32,26 +48,50 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navOptions
 import androidx.tracing.trace
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.AddArticleScreen
 import com.inasweaterpoorlyknit.inknit.ui.ArticleDetailScreen
 import com.inasweaterpoorlyknit.inknit.ui.ArticlesScreen
+import com.inasweaterpoorlyknit.inknit.ui.CameraFragment
+import com.inasweaterpoorlyknit.inknit.ui.CameraScreen
+import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.icons.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
 import kotlinx.coroutines.CoroutineScope
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+private val REQUIRED_PERMISSIONS =
+  if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
+    arrayOf(permission.CAMERA)
+  } else {
+    arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
+  }
+
+//region REGISTER FOR ACTIVITY RESULTS
+
+// Get image already saved on phone
+//endregion REGISTER FOR ACTIVITY RESULTS
 
 object ROUTES {
   const val ARTICLES = "articles_route"
   const val CAMERA = "camera_route"
-  const val ADD_ARTICLES = "add_articles_route"
+
+  const val IMAGE_URI_STRING_ARG = "imageUriString"
+  const val ADD_ARTICLES_BASE = "add_articles_route"
+  const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_ARG={$IMAGE_URI_STRING_ARG}"
 
   const val ARTICLE_ID_ARG = "articleId"
   const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
@@ -60,9 +100,14 @@ object ROUTES {
   const val OUTFITS = "outfits_route"
 }
 
-fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ROUTES.ARTICLES, navOptions)
+fun NavController.navigateToArticles(){
+  navigate(ROUTES.ARTICLES) { launchSingleTop = true }
+}
 fun NavController.navigateToCamera(navOptions: NavOptions? = null) = navigate(ROUTES.CAMERA, navOptions)
-fun NavController.navigateToAddArticle(navOptions: NavOptions? = null) = navigate(ROUTES.ADD_ARTICLES, navOptions)
+fun NavController.navigateToAddArticle(uriString: String, navOptions: NavOptions? = null){
+  val route = "${ROUTES.ADD_ARTICLES_BASE}?${ROUTES.IMAGE_URI_STRING_ARG}=$uriString"
+  navigate(route, navOptions)
+}
 fun NavController.navigateToArticleDetail(clothingArticleId: String, navOptions: NavOptions? = null){
   val route = "${ROUTES.ARTICLE_DETAIL_ROUTE_BASE}?${ROUTES.ARTICLE_ID_ARG}=$clothingArticleId"
   navigate(route, navOptions)
@@ -76,10 +121,53 @@ fun ArticlesRoute(
   articlesViewModel: ArticlesViewModel = hiltViewModel(), // MainMenuViewModel
 ){
   val thumbnailDetails = articlesViewModel.thumbnailDetails.observeAsState()
+  val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()){}
+  val _photoAlbumLauncher = rememberLauncherForActivityResult(GetContent()){ uri ->
+    if(uri != null) {
+      navController.navigateToAddArticle(uri.toString())
+    } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+  }
+  val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(RequestMultiplePermissions()){ permissions ->
+    fun openAppSettings() = _appSettingsLauncher.launch(
+      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", navController.context.packageName, null)
+      }
+    )
+
+    val context = navController.context
+    var permissionsGranted = true
+    var userCheckedNeverAskAgain = false
+    permissions.entries.forEach { entry ->
+      if(!entry.value) {
+        userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(navController.context.getActivity()!!, entry.key)
+        permissionsGranted = false
+      }
+    }
+    if(permissionsGranted) {
+      navController.navigateToCamera()
+    } else {
+      if(userCheckedNeverAskAgain) {
+        AlertDialog.Builder(context)
+          .setTitle(context.getString(R.string.permission_alert_title))
+          .setMessage(context.getString(R.string.permission_alert_justification))
+          .setNegativeButton(context.getString(R.string.permission_alert_negative)){ _, _ -> }
+          .setPositiveButton(context.getString(R.string.permission_alert_positive)){ _, _ -> openAppSettings() }
+          .show()
+      } else {
+        navController.context.toast("Camera permissions required")
+      }
+    }
+  }
   ArticlesScreen(
     thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
     onClickArticle = { thumbnailIndex ->
       navController.navigateToArticleDetail(thumbnailDetails.value!![thumbnailIndex].articleId)
+    },
+    onClickAddPhotoAlbum = {
+      _photoAlbumLauncher.launch("image/*")
+    },
+    onClickAddPhotoCamera = {
+      _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS)
     }
   )
 }
@@ -94,6 +182,90 @@ fun ArticleDetailRoute(
   val clothingDetail = articleDetailViewModel.getArticleDetails(clothingArticleId).observeAsState(initial = null)
   ArticleDetailScreen(
     imageUriString = clothingDetail.value?.imageUriString,
+  )
+}
+
+@Composable
+fun CameraRoute(
+  navController: NavController,
+  modifier: Modifier = Modifier,
+  articleDetailViewModel: ArticleDetailViewModel = hiltViewModel(), // MainMenuViewModel
+){
+  val TAG = CameraFragment::class.simpleName
+  val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+  val imageCapture = remember {
+    ImageCapture.Builder()
+      .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+      .setFlashMode(ImageCapture.FLASH_MODE_AUTO)
+      .setJpegQuality(100)
+      .build()
+  }
+  fun takePhoto() {
+    // Get a stable reference of the modifiable image capture use case
+    val context = navController.context
+
+    // Create time stamped name and MediaStore entry.
+    val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+      .format(System.currentTimeMillis())
+    val contentValues = ContentValues().apply {
+      put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+      put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+      if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/InKnit")
+      }
+    }
+
+    // Create output options object which contains file + metadata
+    val outputOptions = ImageCapture.OutputFileOptions
+      .Builder(context.contentResolver,
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        contentValues)
+      .build()
+
+    // Set up image capture listener, which is triggered after photo has
+    // been taken
+    imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageSavedCallback {
+      override fun onError(exc: ImageCaptureException) {
+        Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
+      }
+      override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+        Log.d(TAG, "Photo capture succeeded: ${output.savedUri}")
+        val uriString = output.savedUri.toString()
+        navController.navigateToAddArticle(uriString)
+      }
+    })
+  }
+  CameraScreen(
+    imageCapture = imageCapture,
+    onClick = ::takePhoto,
+  )
+}
+
+@Composable
+fun AddArticleRoute(
+  navController: NavController,
+  imageUriString: String,
+){
+  val addArticleViewModel = hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory>{ factory ->
+    factory.create(imageUriString)
+  }
+
+  val shouldCloseEvent = addArticleViewModel.shouldClose.observeAsState()
+  shouldCloseEvent.value?.getContentIfNotHandled()?.let { shouldClose ->
+    if(shouldClose) navController.popBackStack()
+  }
+
+  AddArticleScreen(
+    processing = addArticleViewModel.processing.value,
+    processedImage = addArticleViewModel.processedBitmap.value,
+    imageRotation = addArticleViewModel.rotation.floatValue,
+    onNarrowFocusClick = { addArticleViewModel.onFocusClicked() },
+    onBroadenFocusClick = { addArticleViewModel.onWidenClicked() },
+    onPrevClick = { addArticleViewModel.onPrevClicked() },
+    onNextClick = { addArticleViewModel.onNextClicked() },
+    onRotateCW = { addArticleViewModel.onRotateCW() },
+    onRotateCCW = { addArticleViewModel.onRotateCCW() },
+    onSave = { addArticleViewModel.onSave() },
   )
 }
 
@@ -168,7 +340,7 @@ class InKnitAppState(
 
       when (topLevelDestination) {
         TopLevelDestination.COLLECTIONS -> navController.navigateToOutfits(topLevelNavOptions)
-        TopLevelDestination.ARTICLES -> navController.navigateToArticles(topLevelNavOptions)
+        TopLevelDestination.ARTICLES -> navController.navigateToArticles()
       }
     }
   }
@@ -199,6 +371,18 @@ fun InKnitNavHost(
     ) { navBackStackEntry ->
       val articleIdArg = navBackStackEntry.arguments!!.getString(ROUTES.ARTICLE_ID_ARG)!!
       ArticleDetailRoute(navController = navController, clothingArticleId = articleIdArg)
+    }
+    composable(route = ROUTES.CAMERA){
+      CameraRoute(navController = navController)
+    }
+    composable(
+      route = ROUTES.ADD_ARTICLES_ROUTE,
+      arguments = listOf(
+        navArgument(ROUTES.IMAGE_URI_STRING_ARG) { nullable = false; type = NavType.StringType },
+      ),
+    ) { navBackStackEntry ->
+      val imageUriStringArg = navBackStackEntry.arguments!!.getString(ROUTES.IMAGE_URI_STRING_ARG)!!
+      AddArticleRoute(navController = navController, imageUriString = imageUriStringArg)
     }
   }
 }
@@ -244,7 +428,7 @@ private fun NavDestination?.isTopLevelDestinationInHierarchy(destination: TopLev
   } ?: false
 
 @Composable
-private fun NiaBottomBar(
+private fun InKnitBottomBar(
   destinations: List<TopLevelDestination>,
   onNavigateToDestination: (TopLevelDestination) -> Unit,
   currentDestination: NavDestination?,
@@ -273,11 +457,7 @@ fun InKnitApp(
   appState: InKnitAppState,
   modifier: Modifier = Modifier,
 ) {
-  val color = Color.Unspecified
-  val tonalElevation = Dp.Unspecified
   Surface(
-    color = if (color == Color.Unspecified) Color.Transparent else color,
-    tonalElevation = if (tonalElevation == Dp.Unspecified) 0.dp else tonalElevation,
     modifier = modifier.fillMaxSize(),
   ) {
     CompositionLocalProvider(LocalAbsoluteTonalElevation provides 0.dp) {

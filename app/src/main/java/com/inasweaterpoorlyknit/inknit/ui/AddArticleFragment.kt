@@ -42,7 +42,6 @@ class AddArticleFragment: Fragment() {
   private val viewModel: AddArticleViewModel by viewModels()
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-    viewModel.setImage(args.uriString)
 
     viewModel.shouldClose.observe(viewLifecycleOwner){ event ->
       event.getContentIfNotHandled()?.let { shouldClose ->

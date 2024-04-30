@@ -1,9 +1,12 @@
 package com.inasweaterpoorlyknit.inknit.ui
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Color
 import android.os.Build
 import android.view.View
+import androidx.activity.ComponentActivity
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
@@ -51,4 +54,10 @@ fun Activity.hideSystemUI() {
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or // lay out view as if fullscreen
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE) // stable view of content (layout view size doesn't change)
   }
+}
+
+fun Context.getActivity(): ComponentActivity? = when (this) {
+  is ComponentActivity -> this
+  is ContextWrapper -> baseContext.getActivity()
+  else -> null
 }

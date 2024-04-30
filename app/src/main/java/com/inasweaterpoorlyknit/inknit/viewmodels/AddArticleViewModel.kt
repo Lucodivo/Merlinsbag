@@ -17,6 +17,9 @@ import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.repository.ClothingArticleRepository
 import com.inasweaterpoorlyknit.inknit.common.timestampAsString
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,11 +41,17 @@ open class Event<out T>(private val content: T) {
   }
 }
 
-@HiltViewModel
-class AddArticleViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = AddArticleViewModel.AddArticleViewModelFactory::class)
+class AddArticleViewModel @AssistedInject constructor(
+  @Assisted private val imageUriString: String,
   private val application: Application,
   private val clothingArticleRepository: ClothingArticleRepository,
 ) : ViewModel() {
+
+  @AssistedFactory
+  interface AddArticleViewModelFactory {
+    fun create(uriImageString: String): AddArticleViewModel
+  }
 
   private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
   private var rotationIndex = 0
@@ -56,7 +65,7 @@ class AddArticleViewModel @Inject constructor(
 
   private val segmentedImage = SegmentedImage()
 
-  fun setImage(imageUriString: String) {
+  init {
     viewModelScope.launch(Dispatchers.Default) {
       Uri.parse(imageUriString)?.let { imageUri ->
         try {

@@ -117,17 +117,17 @@ class SegmentedImage {
         }
     }
 
-    fun subjectsFound() = segmentationResult.subjects.size >= 1
+    private fun subjectsFound() = segmentationResult.subjects.size >= 1
 
     fun decreaseThreshold() {
-        if(subjectsFound() || confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
+        if(!subjectsFound() || confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
         confidenceThreshold -= CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = max(MIN_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
     }
 
     fun increaseThreshold() {
-        if(subjectsFound() || confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
+        if(!subjectsFound() || confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
         confidenceThreshold += CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = min(MAX_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
