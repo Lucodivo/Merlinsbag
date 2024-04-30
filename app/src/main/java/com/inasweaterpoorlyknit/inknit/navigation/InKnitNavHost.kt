@@ -32,48 +32,69 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.navOptions
 import androidx.tracing.trace
 import com.inasweaterpoorlyknit.inknit.R
-import com.inasweaterpoorlyknit.inknit.ui.CameraScreen
+import com.inasweaterpoorlyknit.inknit.ui.ArticleDetailScreen
 import com.inasweaterpoorlyknit.inknit.ui.ArticlesScreen
 import com.inasweaterpoorlyknit.inknit.ui.icons.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
 import kotlinx.coroutines.CoroutineScope
 
-const val ARTICLES_ROUTE = "articles_route"
-const val CAMERA_ROUTE = "camera_route"
-const val ADD_ARTICLES_ROUTE = "add_articles_route"
-const val ARTICLE_DETAIL_ROUTE = "article_detail_route"
-const val OUTFITS_ROUTE = "outfits_route"
+object ROUTES {
+  const val ARTICLES = "articles_route"
+  const val CAMERA = "camera_route"
+  const val ADD_ARTICLES = "add_articles_route"
 
-fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ARTICLES_ROUTE, navOptions)
-fun NavController.navigateToCamera(navOptions: NavOptions? = null) = navigate(CAMERA_ROUTE, navOptions)
-fun NavController.navigateToAddArticle(navOptions: NavOptions? = null) = navigate(ADD_ARTICLES_ROUTE, navOptions)
-fun NavController.navigateToArticleDetail(navOptions: NavOptions? = null) = navigate(ARTICLE_DETAIL_ROUTE, navOptions)
-fun NavController.navigateToOutfits(navOptions: NavOptions? = null) = navigate(OUTFITS_ROUTE, navOptions)
+  const val ARTICLE_ID_ARG = "articleId"
+  const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
+  const val ARTICLE_DETAIL_ROUTE = "$ARTICLE_DETAIL_ROUTE_BASE?$ARTICLE_ID_ARG={$ARTICLE_ID_ARG}"
+
+  const val OUTFITS = "outfits_route"
+}
+
+fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ROUTES.ARTICLES, navOptions)
+fun NavController.navigateToCamera(navOptions: NavOptions? = null) = navigate(ROUTES.CAMERA, navOptions)
+fun NavController.navigateToAddArticle(navOptions: NavOptions? = null) = navigate(ROUTES.ADD_ARTICLES, navOptions)
+fun NavController.navigateToArticleDetail(clothingArticleId: String, navOptions: NavOptions? = null){
+  val route = "${ROUTES.ARTICLE_DETAIL_ROUTE_BASE}?${ROUTES.ARTICLE_ID_ARG}=$clothingArticleId"
+  navigate(route, navOptions)
+}
+fun NavController.navigateToOutfits(navOptions: NavOptions? = null) = navigate(ROUTES.OUTFITS, navOptions)
 
 @Composable
 fun ArticlesRoute(
+  navController: NavController,
   modifier: Modifier = Modifier,
   articlesViewModel: ArticlesViewModel = hiltViewModel(), // MainMenuViewModel
 ){
   val thumbnailDetails = articlesViewModel.thumbnailDetails.observeAsState()
   ArticlesScreen(
     thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
+    onClickArticle = { thumbnailIndex ->
+      navController.navigateToArticleDetail(thumbnailDetails.value!![thumbnailIndex].articleId)
+    }
   )
 }
 
 @Composable
-fun CameraRoute(
+fun ArticleDetailRoute(
+  navController: NavController,
+  clothingArticleId: String,
   modifier: Modifier = Modifier,
-  articlesViewModel: ArticlesViewModel = hiltViewModel(), // MainMenuViewModel
+  articleDetailViewModel: ArticleDetailViewModel = hiltViewModel(), // MainMenuViewModel
 ){
-  CameraScreen() // MainMenuScreen
+  val clothingDetail = articleDetailViewModel.getArticleDetails(clothingArticleId).observeAsState(initial = null)
+  ArticleDetailScreen(
+    imageUriString = clothingDetail.value?.imageUriString,
+  )
 }
 
 enum class TopLevelDestination(
@@ -157,7 +178,7 @@ class InKnitAppState(
 fun InKnitNavHost(
   appState: InKnitAppState,
   modifier: Modifier = Modifier,
-  startDestination: String = ARTICLES_ROUTE,
+  startDestination: String = ROUTES.ARTICLES,
 ) {
   val navController = appState.navController
   NavHost(
@@ -165,7 +186,20 @@ fun InKnitNavHost(
     startDestination = startDestination,
     modifier = modifier,
   ){
-    composable(route = ARTICLES_ROUTE) { ArticlesRoute() }
+    composable(
+      route = ROUTES.ARTICLES
+    ) {
+      ArticlesRoute(navController = navController)
+    }
+    composable(
+      route = ROUTES.ARTICLE_DETAIL_ROUTE,
+      arguments = listOf(
+        navArgument(ROUTES.ARTICLE_ID_ARG) { nullable = false; type = NavType.StringType },
+      ),
+    ) { navBackStackEntry ->
+      val articleIdArg = navBackStackEntry.arguments!!.getString(ROUTES.ARTICLE_ID_ARG)!!
+      ArticleDetailRoute(navController = navController, clothingArticleId = articleIdArg)
+    }
   }
 }
 

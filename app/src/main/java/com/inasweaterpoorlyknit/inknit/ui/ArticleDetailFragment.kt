@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -29,4 +31,11 @@ class ArticleDetailFragment: Fragment() {
       }
     }
   }
+}
+
+@Composable
+fun ArticleDetailScreen(
+  modifier: Modifier = Modifier,
+  imageUriString: String?) {
+  AsyncImage(model = imageUriString, contentDescription = "TODO: image description")
 }
