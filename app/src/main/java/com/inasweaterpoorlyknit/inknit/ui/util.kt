@@ -4,12 +4,22 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.core.content.FileProvider
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 fun Fragment.showSystemUI() = requireActivity().showSystemUI()
 fun Fragment.hideSystemUI() = requireActivity().hideSystemUI()
@@ -60,4 +70,19 @@ fun Context.getActivity(): ComponentActivity? = when (this) {
   is ComponentActivity -> this
   is ContextWrapper -> baseContext.getActivity()
   else -> null
+}
+
+// Context extensions
+fun Context.toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+fun Fragment.toast(msg: String) = requireContext().toast(msg)
+fun Context.createImageFileUri(): Uri? {
+    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    return try {
+        val file = File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+      FileProvider.getUriForFile(this, "com.inasweaterpoorlyknit.inknit.fileprovider", file)
+    } catch (ex: IOException) {
+      Log.e("createImageFileUri", "Failed to create file - ${ex.message}")
+        null
+    }
 }

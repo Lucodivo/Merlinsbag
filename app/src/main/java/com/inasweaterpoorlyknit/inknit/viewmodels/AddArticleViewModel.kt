@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import javax.inject.Inject
 
 // Helps avoid events from being handled multiple times after reconfiguration
 open class Event<out T>(private val content: T) {

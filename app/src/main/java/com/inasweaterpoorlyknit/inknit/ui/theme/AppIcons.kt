@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit.ui.icons
+package com.inasweaterpoorlyknit.inknit.ui.theme
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -19,7 +19,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Collections
 import androidx.compose.material.icons.rounded.DryCleaning
 
-object InKnitIcons {
+object AppIcons {
   val PhotoAlbum = Icons.Filled.PhotoAlbum
   val AddPhoto = Icons.Filled.AddAPhoto
   val Remove = Icons.Filled.Remove

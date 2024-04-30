@@ -17,6 +17,7 @@ Add Article:
     - Image labelling
     - Primary / Secondary color classifications?
     - Save using rotation
+    - on no subject detected, pop back stack
 Outfits:
     - add items to a list
     - display lists

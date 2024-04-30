@@ -1,15 +1,12 @@
-package com.inasweaterpoorlyknit.inknit.ui
+package com.inasweaterpoorlyknit.inknit.ui.screen
 
 import android.Manifest.permission
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -36,89 +33,61 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
-import com.inasweaterpoorlyknit.inknit.common.toast
-import com.inasweaterpoorlyknit.inknit.ui.icons.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.ui.getActivity
+import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
-class MainMenuFragment : Fragment() {
-    private val viewModel: ArticlesViewModel by viewModels()
+const val ARTICLES_ROUTE = "articles_route"
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setContent {
-                InKnitTheme {
-                    val thumbnailDetails = viewModel.thumbnailDetails.observeAsState()
-                    ArticlesScreen(
-                        thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
-                        onClickArticle = { index ->
-                            thumbnailDetails.value?.let { details ->
-                                val action = MainMenuFragmentDirections.actionMainMenuFragmentToArticleDetailFragment(details[index].articleId)
-                                findNavController().navigate(action)
-                            }
-                        },
-                        onClickAddPhotoAlbum = { selectAlbumImage() },
-                        onClickAddPhotoCamera = { selectCameraImage() },
-                    )
-                }
-            }
-        }
+private val REQUIRED_PERMISSIONS =
+    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
+        arrayOf(permission.CAMERA)
+    } else {
+        arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
     }
 
-    fun handleAlbumImageUriResult(uri: Uri){
-        val uriString = uri.toString()
-        val action = MainMenuFragmentDirections.actionMainMenuFragmentToAddArticleFragment(uriString)
-        findNavController().navigate(action)
+@Composable
+fun ArticlesRoute(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    articlesViewModel: ArticlesViewModel = hiltViewModel(), // MainMenuViewModel
+){
+    val thumbnailDetails = articlesViewModel.thumbnailDetails.observeAsState()
+    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()){}
+    val _photoAlbumLauncher = rememberLauncherForActivityResult(GetContent()){ uri ->
+        if(uri != null) {
+            navController.navigateToAddArticle(uri.toString())
+        } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
     }
-
-    fun selectCameraImage() = _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS)
-    fun selectAlbumImage() = _photoAlbumLauncher.launch("image/*")
-
-    companion object {
-        private val REQUIRED_PERMISSIONS =
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
-                arrayOf(permission.CAMERA)
-            } else {
-                arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
-            }
-    }
-
-    //region REGISTER FOR ACTIVITY RESULTS
-    // Go to settings
-    val _appSettingsLauncher = registerForActivityResult(StartActivityForResult()){}
-    val _cameraWithPermissionsCheckLauncher = registerForActivityResult(RequestMultiplePermissions()){ permissions ->
+    val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
+        RequestMultiplePermissions()
+    ){ permissions ->
         fun openAppSettings() = _appSettingsLauncher.launch(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", requireActivity().packageName, null)
+                data = Uri.fromParts("package", navController.context.packageName, null)
             }
         )
 
-        val context = requireContext()
+        val context = navController.context
         var permissionsGranted = true
         var userCheckedNeverAskAgain = false
         permissions.entries.forEach { entry ->
             if(!entry.value) {
-                userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(entry.key)
+                userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(navController.context.getActivity()!!, entry.key)
                 permissionsGranted = false
             }
         }
         if(permissionsGranted) {
-            val directions = MainMenuFragmentDirections.actionMainMenuFragmentToCameraFragment()
-            findNavController().navigate(directions)
+            navController.navigateToCamera()
         } else {
             if(userCheckedNeverAskAgain) {
                 AlertDialog.Builder(context)
@@ -128,17 +97,22 @@ class MainMenuFragment : Fragment() {
                     .setPositiveButton(context.getString(R.string.permission_alert_positive)){ _, _ -> openAppSettings() }
                     .show()
             } else {
-                toast("Camera permissions required")
+                navController.context.toast("Camera permissions required")
             }
         }
     }
-
-    // Get image already saved on phone
-    val _photoAlbumLauncher = registerForActivityResult(GetContent()){ uri ->
-        if(uri != null) handleAlbumImageUriResult(uri)
-        else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
-    }
-    //endregion REGISTER FOR ACTIVITY RESULTS
+    ArticlesScreen(
+        thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
+        onClickArticle = { thumbnailIndex ->
+            navController.navigateToArticleDetail(thumbnailDetails.value!![thumbnailIndex].articleId)
+        },
+        onClickAddPhotoAlbum = {
+            _photoAlbumLauncher.launch("image/*")
+        },
+        onClickAddPhotoCamera = {
+            _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS)
+        }
+    )
 }
 
 @Preview
@@ -189,12 +163,12 @@ fun ArticlesScreen(
                         Column(horizontalAlignment = Alignment.End, modifier = Modifier.animateContentSize()) {
                             ExtendedFloatingActionButton(
                                 text = { Text("album") },
-                                icon = { Icon(InKnitIcons.PhotoAlbum, "add a photo from album") },
+                                icon = { Icon(AppIcons.PhotoAlbum, "add a photo from album") },
                                 onClick = onClickAddPhotoAlbum
                             )
                             ExtendedFloatingActionButton(
                                 text = { Text("camera") },
-                                icon = { Icon(InKnitIcons.AddPhoto, "add a photo from camera") },
+                                icon = { Icon(AppIcons.AddPhoto, "add a photo from camera") },
                                 onClick = onClickAddPhotoCamera,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
@@ -204,13 +178,17 @@ fun ArticlesScreen(
                         onClick = { addButtonActive = !addButtonActive },
                     ) {
                         if (addButtonActive) {
-                            Icon(InKnitIcons.Add, "addition icon")
+                            Icon(AppIcons.Add, "addition icon")
                         } else {
-                            Icon(InKnitIcons.Remove, "addition icon")
+                            Icon(AppIcons.Remove, "addition icon")
                         }
                     }
                 }
             }
         }
     }
+}
+
+fun NavController.navigateToArticles(){
+  navigate(ARTICLES_ROUTE) { launchSingleTop = true }
 }
