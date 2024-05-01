@@ -29,7 +29,16 @@ import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 
-@Preview
+
+const val IMAGE_URI_STRING_ARG = "imageUriString"
+const val ADD_ARTICLES_BASE = "add_articles_route"
+const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_ARG={$IMAGE_URI_STRING_ARG}"
+
+fun NavController.navigateToAddArticle(uriString: String, navOptions: NavOptions? = null){
+  val route = "${ADD_ARTICLES_BASE}?${IMAGE_URI_STRING_ARG}=$uriString"
+  navigate(route, navOptions)
+}
+
 @Composable
 fun AddArticleScreen(
   processing: Boolean = true,
@@ -86,6 +95,7 @@ fun AddArticleScreen(
   }
 }
 
+
 @Composable
 fun AddArticleRoute(
   navController: NavController,
@@ -115,11 +125,12 @@ fun AddArticleRoute(
   )
 }
 
-fun NavController.navigateToAddArticle(uriString: String, navOptions: NavOptions? = null){
-  val route = "${ADD_ARTICLES_BASE}?${IMAGE_URI_STRING_ARG}=$uriString"
-  navigate(route, navOptions)
+@Preview
+@Composable
+fun PreviewAddArticleScreen(){
+  AddArticleScreen(
+    processing = false,
+    processedImage = previewAssetBitmap(filename = "add_article_compose_preview.webp"),
+    imageRotation = 270.0f,
+  )
 }
-
-const val IMAGE_URI_STRING_ARG = "imageUriString"
-const val ADD_ARTICLES_BASE = "add_articles_route"
-const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_ARG={$IMAGE_URI_STRING_ARG}"

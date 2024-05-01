@@ -46,5 +46,3 @@ class Timer {
         milestoneStartNs = startNs
     }
 }
-
-fun timestampAsString(): String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())

@@ -15,8 +15,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.repository.ClothingArticleRepository
-import com.inasweaterpoorlyknit.inknit.common.timestampAsString
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
+import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -141,11 +141,12 @@ class AddArticleViewModel @AssistedInject constructor(
       }
       val thumbnailBitmapToSave = fullBitmapToSave.scale(bitmapWidth, bitmapHeight)
 
-      val filenameBase = timestampAsString()
-      val imageFilename = filenameBase + "_full.webp"
-      val thumbnailFilename = filenameBase + "_thumb.webp"
-      val imageFile = File(application.filesDir, imageFilename)
-      val thumbnailFile = File(application.filesDir, thumbnailFilename)
+      val directory = File(application.filesDir, "articles").apply{ mkdirs() }
+      val filenameBase = timestampFileName()
+      val imageFilename = "${filenameBase}_full.webp"
+      val thumbnailFilename = "${filenameBase}_thumb.webp"
+      val imageFile = File(directory, imageFilename)
+      val thumbnailFile = File(directory, thumbnailFilename)
       @Suppress("DEPRECATION")
       val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
 

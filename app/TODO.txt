@@ -13,6 +13,7 @@ Camera:
     - Setting to allow user to use preferred camera app
     - Selfie camera
     - Camera "feels" slow between clicking the "take picture" button to the AddArticleFragment
+    - Delete unused external storage photos? Change to internal storage directory that gets cleared?
 Add Article:
     - Image labelling
     - Primary / Secondary color classifications?
@@ -28,17 +29,9 @@ Features:
         - Individual items
         - All items
     - Proper landscape support for all screens
-Architecture:
-    - Switch to navigation compose
 App-wide UI:
     - EdgeToEdge
-Quick:
-    - Splash screen
-        - androidx.core:core-splashscreen
-            installSplashScreen()
-            splashScreen.setKeepOnScreenCondition {
-                when (uiState) {
-                    Loading -> true
-                    is Success -> false
-                }
-            }
+Splash screen
+    - androidx.core:core-splashscreen
+        installSplashScreen()
+        splashScreen.setKeepOnScreenCondition { when (uiState) { Loading -> true is Success -> false } }

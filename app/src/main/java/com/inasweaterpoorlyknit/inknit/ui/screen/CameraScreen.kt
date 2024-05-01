@@ -5,18 +5,21 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,18 +27,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
+import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.compose.ui.tooling.preview.Preview as ComposePreview
+
+const val TAG = "CameraScreen"
+const val EXTERNAL_STORAGE_CAMERA_PIC_DIR = "Pictures/InKnit"
 
 @Composable
 fun CameraPreview(
@@ -44,16 +54,26 @@ fun CameraPreview(
   scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_CENTER,
   imageCapture: ImageCapture? = null,
 ) {
+  val androidViewLayoutParams = ViewGroup.LayoutParams(
+      ViewGroup.LayoutParams.MATCH_PARENT,
+      ViewGroup.LayoutParams.MATCH_PARENT,
+  )
+  if(LocalInspectionMode.current) { // !! Compose Preview only code !!
+    val previewCameraBitmap = previewAssetBitmap("camera_compose_preview.webp")
+    AndroidView(modifier = modifier, factory = { context ->
+        ImageView(context).apply {
+          setImageBitmap(previewCameraBitmap)
+          layoutParams = androidViewLayoutParams
+    }})
+    return
+  }
   val lifecycleOwner = LocalLifecycleOwner.current
   AndroidView(
     modifier = modifier,
     factory = { context ->
       val previewView = PreviewView(context).apply {
         this.scaleType = scaleType
-        layoutParams = ViewGroup.LayoutParams(
-          ViewGroup.LayoutParams.MATCH_PARENT,
-          ViewGroup.LayoutParams.MATCH_PARENT
-        )
+        layoutParams = androidViewLayoutParams
         // Preview is incorrectly scaled in Compose on some devices without this
         implementationMode = PreviewView.ImplementationMode.COMPATIBLE
       }
@@ -83,6 +103,7 @@ fun CameraPreview(
     })
 }
 
+@ComposePreview
 @Composable
 fun CameraScreen(
   imageCapture: ImageCapture? = null,
@@ -92,7 +113,6 @@ fun CameraScreen(
   FloatingButton(onClick = onClick)
 }
 
-@ComposePreview
 @Composable
 fun FloatingButton(
   onClick: () -> Unit = {},
@@ -119,10 +139,7 @@ fun NavController.navigateToCamera(navOptions: NavOptions? = null) = navigate(CA
 fun CameraRoute(
   navController: NavController,
   modifier: Modifier = Modifier,
-  articleDetailViewModel: ArticleDetailViewModel = hiltViewModel(), // MainMenuViewModel
 ){
-  val TAG = "CameraScreen"
-  val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
   val imageCapture = remember {
     ImageCapture.Builder()
       .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
@@ -135,13 +152,11 @@ fun CameraRoute(
     val context = navController.context
 
     // Create time stamped name and MediaStore entry.
-    val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
-      .format(System.currentTimeMillis())
     val contentValues = ContentValues().apply {
-      put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+      put(MediaStore.MediaColumns.DISPLAY_NAME, timestampFileName())
       put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
       if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/InKnit")
+        put(MediaStore.Images.Media.RELATIVE_PATH, EXTERNAL_STORAGE_CAMERA_PIC_DIR)
       }
     }
 

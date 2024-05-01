@@ -55,6 +55,10 @@ private val REQUIRED_PERMISSIONS =
         arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
     }
 
+fun NavController.navigateToArticles(){
+    navigate(ARTICLES_ROUTE) { launchSingleTop = true }
+}
+
 @Composable
 fun ArticlesRoute(
     navController: NavController,
@@ -115,7 +119,6 @@ fun ArticlesRoute(
     )
 }
 
-@Preview
 @Composable
 fun ArticlesScreen(
     thumbnailUris: List<String> = emptyList(),
@@ -178,9 +181,9 @@ fun ArticlesScreen(
                         onClick = { addButtonActive = !addButtonActive },
                     ) {
                         if (addButtonActive) {
-                            Icon(AppIcons.Add, "addition icon")
+                            Icon(AppIcons.Remove, "remove icon")
                         } else {
-                            Icon(AppIcons.Remove, "addition icon")
+                            Icon(AppIcons.Add, "add icon")
                         }
                     }
                 }
@@ -189,6 +192,8 @@ fun ArticlesScreen(
     }
 }
 
-fun NavController.navigateToArticles(){
-  navigate(ARTICLES_ROUTE) { launchSingleTop = true }
+@Preview
+@Composable
+fun PreviewArticlesScreen() {
+    ArticlesScreen()
 }
