@@ -11,7 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -162,21 +164,32 @@ fun ArticlesScreen(
                     horizontalAlignment = Alignment.End,
                     modifier = Modifier.padding(20.dp)
                 ) {
-                    if (addButtonActive) {
-                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.animateContentSize()) {
-                            ExtendedFloatingActionButton(
-                                text = { Text("album") },
-                                icon = { Icon(AppIcons.PhotoAlbum, "add a photo from album") },
-                                onClick = onClickAddPhotoAlbum
-                            )
-                            ExtendedFloatingActionButton(
-                                text = { Text("camera") },
-                                icon = { Icon(AppIcons.AddPhoto, "add a photo from camera") },
-                                onClick = onClickAddPhotoCamera,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
+                    val openAnimateFloat by animateFloatAsState(
+                        targetValue = if(addButtonActive) 1.0f else 0.0f,
+                        label = "floating action button size"
+                    )
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.graphicsLayer {
+                            scaleY = openAnimateFloat
+                            scaleX = openAnimateFloat
+                            // https://www.desmos.com/calculator/6ru1kya9ar
+                            alpha = (-(openAnimateFloat - 1.0f)*(openAnimateFloat - 1.0f)) + 1.0f
+                            transformOrigin = TransformOrigin(0.9f, 1.0f)
+                        }) {
+                        ExtendedFloatingActionButton(
+                            text = { Text("album") },
+                            icon = { Icon(AppIcons.PhotoAlbum, "add a photo from album") },
+                            onClick = onClickAddPhotoAlbum
+                        )
+                        ExtendedFloatingActionButton(
+                            text = { Text("camera") },
+                            icon = { Icon(AppIcons.AddPhoto, "add a photo from camera") },
+                            onClick = onClickAddPhotoCamera,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
                     }
+
                     FloatingActionButton(
                         onClick = { addButtonActive = !addButtonActive },
                     ) {

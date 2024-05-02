@@ -29,6 +29,7 @@ Features:
         - Individual items
         - All items
     - Proper landscape support for all screens
+        - AddArticlesScreen [COMPLETED]
 App-wide UI:
     - EdgeToEdge
 Splash screen

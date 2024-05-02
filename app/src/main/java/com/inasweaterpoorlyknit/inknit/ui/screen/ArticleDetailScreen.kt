@@ -1,8 +1,10 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -13,7 +15,11 @@ import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 fun ArticleDetailScreen(
   modifier: Modifier = Modifier,
   imageUriString: String?) {
-  AsyncImage(model = imageUriString, contentDescription = "TODO: image description")
+  AsyncImage(
+    model = imageUriString,
+    contentDescription = "TODO: image description",
+    modifier = modifier.padding(16.dp)
+  )
 }
 
 fun NavController.navigateToArticleDetail(clothingArticleId: String, navOptions: NavOptions? = null){
@@ -30,6 +36,7 @@ fun ArticleDetailRoute(
 ){
   val clothingDetail = articleDetailViewModel.getArticleDetails(clothingArticleId).observeAsState(initial = null)
   ArticleDetailScreen(
+    modifier = modifier,
     imageUriString = clothingDetail.value?.imageUriString,
   )
 }
