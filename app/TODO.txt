@@ -19,6 +19,8 @@ Add Article:
     - Primary / Secondary color classifications?
     - Save using rotation
     - on no subject detected, pop back stack
+    - Animated rotate
+        - requires not copying bitmap
 Outfits:
     - add items to a list
     - display lists

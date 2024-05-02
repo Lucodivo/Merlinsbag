@@ -3,12 +3,15 @@ package com.inasweaterpoorlyknit.inknit.ui.screen
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
@@ -16,6 +19,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -31,6 +38,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -38,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
@@ -68,6 +77,8 @@ fun ArticleImage(
     modifier = modifier.fillMaxSize()
   ){
     if(processedImage != null){
+      // TODO: If I avoid copying this rotated Bitmap and simply can rotate the Compose Image
+      //  I could not only avoid an unnecessary copy but also create very cheap rotation animations.
       val rotatedBitmap = Bitmap.createBitmap(
         processedImage,
         0, 0, processedImage.width, processedImage.height,
@@ -84,6 +95,7 @@ fun ArticleImage(
 
 @Composable
 fun AddArticleControls(
+  windowSizeClass: WindowSizeClass,
   landscape: Boolean = true,
   processing: Boolean = true,
   onPrevClick: () -> Unit = {},
@@ -94,18 +106,19 @@ fun AddArticleControls(
   onRotateCCW: () -> Unit = {},
   onSave: () -> Unit = {},
 ){
+  val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
   Box(
     contentAlignment = Alignment.BottomEnd,
     modifier = Modifier.fillMaxSize()){
     var columnSize by remember { mutableStateOf(DpSize(0.dp, 0.dp)) }
     Column(
       horizontalAlignment = Alignment.End,
-      verticalArrangement = Arrangement.Bottom,
+      verticalArrangement = if(landscape) Arrangement.Center else Arrangement.Bottom,
       modifier = Modifier
-        .wrapContentSize()
+        .fillMaxHeight()
         .onSizeChanged { columnSize = DpSize(pixelsToDp(it.width), pixelsToDp(it.height)) },
       ){
-      val buttonModifier = Modifier.padding(3.dp)
+      var buttonModifier = Modifier.padding(3.dp)
       if(landscape){
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
@@ -132,9 +145,9 @@ fun AddArticleControls(
         }
       } else { // portrait
         Row(horizontalArrangement = Arrangement.SpaceBetween,
-          modifier = Modifier
-            .wrapContentSize()
+          modifier = if(compactWidth){ Modifier.fillMaxWidth() } else { Modifier.wrapContentSize() }
         ){
+          if(compactWidth) { buttonModifier = buttonModifier.weight(1f) }
           Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.Previous, "Switch left") }
           Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusNarrow, "Narrow focus") }
           Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusBroaden, "Broaden focus") }
@@ -152,6 +165,7 @@ fun AddArticleControls(
 
 @Composable
 fun AddArticleScreen(
+  windowSizeClass: WindowSizeClass,
   processing: Boolean = true,
   processedImage: Bitmap? = null,
   imageRotation: Float = 0.0f,
@@ -164,41 +178,40 @@ fun AddArticleScreen(
   onSave: () -> Unit = {},
 ) {
   val landscape: Boolean = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-  InKnitTheme {
-    Box(
-      contentAlignment = Alignment.BottomCenter,
-      modifier = Modifier.fillMaxSize()
-    ) {
-      ArticleImage(
-        modifier = Modifier
-          .padding(
-            top = 16.dp,
-            bottom = if(landscape) 16.dp else 80.dp,
-            start = 16.dp,
-            end = if(landscape) 150.dp else 16.dp),
-        processedImage = processedImage,
-        imageRotation = imageRotation,
-      )
-      AddArticleControls(
-        landscape = landscape,
-        processing = processing,
-        onPrevClick = onPrevClick,
-        onNextClick = onNextClick,
-        onNarrowFocusClick = onNarrowFocusClick,
-        onBroadenFocusClick = onBroadenFocusClick,
-        onRotateCW = onRotateCW,
-        onRotateCCW = onRotateCCW,
-        onSave = onSave,
-      )
-    }
+  Box(
+    contentAlignment = Alignment.BottomCenter,
+    modifier = Modifier.fillMaxSize()
+  ) {
+    ArticleImage(
+      modifier = Modifier
+        .padding(
+          top = 16.dp,
+          bottom = if(landscape) 16.dp else 80.dp,
+          start = 16.dp,
+          end = if(landscape) 150.dp else 16.dp),
+      processedImage = processedImage,
+      imageRotation = imageRotation,
+    )
+    AddArticleControls(
+      windowSizeClass = windowSizeClass,
+      landscape = landscape,
+      processing = processing,
+      onPrevClick = onPrevClick,
+      onNextClick = onNextClick,
+      onNarrowFocusClick = onNarrowFocusClick,
+      onBroadenFocusClick = onBroadenFocusClick,
+      onRotateCW = onRotateCW,
+      onRotateCCW = onRotateCCW,
+      onSave = onSave,
+    )
   }
 }
-
 
 @Composable
 fun AddArticleRoute(
   navController: NavController,
   imageUriString: String,
+  windowSizeClass: WindowSizeClass,
 ){
   val addArticleViewModel =
     hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
@@ -211,6 +224,7 @@ fun AddArticleRoute(
   }
 
   AddArticleScreen(
+    windowSizeClass = windowSizeClass,
     processing = addArticleViewModel.processing.value,
     processedImage = addArticleViewModel.processedBitmap.value,
     imageRotation = addArticleViewModel.rotation.floatValue,
@@ -224,10 +238,12 @@ fun AddArticleRoute(
   )
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @DevicePreviews
 @Composable
 fun PreviewAddArticleScreen(){
   AddArticleScreen(
+    windowSizeClass = currentWindowAdaptiveInfo(),
     processing = false,
     processedImage = previewAssetBitmap(filename = "add_article_compose_preview.webp"),
     imageRotation = 270.0f,

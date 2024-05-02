@@ -54,7 +54,11 @@ fun InKnitNavHost(
       ),
     ) { navBackStackEntry ->
       val imageUriStringArg = navBackStackEntry.arguments!!.getString(IMAGE_URI_STRING_ARG)!!
-      AddArticleRoute(navController = navController, imageUriString = imageUriStringArg)
+      AddArticleRoute(
+        navController = navController,
+        imageUriString = imageUriStringArg,
+        windowSizeClass = appState.windowSizeClass,
+      )
     }
   }
 }

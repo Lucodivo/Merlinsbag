@@ -131,73 +131,71 @@ fun ArticlesScreen(
     val gridMinWidth = 100.dp
     val gridItemPadding = 16.dp
     val articlesGridState = rememberLazyStaggeredGridState()
-    InKnitTheme {
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyVerticalStaggeredGrid(
-                // typical dp width of a smart phone is 320dp-480dp
-                columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
-                content = {
-                    items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
-                        val thumbnailUri = thumbnailUris[thumbnailGridItemIndex]
-                        Box(contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize().clickable{
-                                onClickArticle(thumbnailGridItemIndex)
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalStaggeredGrid(
+            // typical dp width of a smart phone is 320dp-480dp
+            columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
+            content = {
+                items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
+                    val thumbnailUri = thumbnailUris[thumbnailGridItemIndex]
+                    Box(contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize().clickable{
+                            onClickArticle(thumbnailGridItemIndex)
                         }){
-                            AsyncImage(
-                                model = thumbnailUri,
-                                contentScale = ContentScale.Fit,
-                                contentDescription = null, // TODO: Thumbnail description
-                                modifier = Modifier.padding(gridItemPadding)
-                            )
-                        }
+                        AsyncImage(
+                            model = thumbnailUri,
+                            contentScale = ContentScale.Fit,
+                            contentDescription = null, // TODO: Thumbnail description
+                            modifier = Modifier.padding(gridItemPadding)
+                        )
                     }
-                },
-                modifier = Modifier.fillMaxSize(),
-                state = articlesGridState,
-            )
+                }
+            },
+            modifier = Modifier.fillMaxSize(),
+            state = articlesGridState,
+        )
 
-            // add article floating buttons
-            Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxSize()) {
-                // TODO: Revert to false on release, but useful to start as true for testing
-                var addButtonActive by remember { mutableStateOf(true) }
+        // add article floating buttons
+        Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxSize()) {
+            // TODO: Revert to false on release, but useful to start as true for testing
+            var addButtonActive by remember { mutableStateOf(true) }
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.padding(20.dp)
+            ) {
+                val openAnimateFloat by animateFloatAsState(
+                    targetValue = if(addButtonActive) 1.0f else 0.0f,
+                    label = "floating action button size"
+                )
                 Column(
                     horizontalAlignment = Alignment.End,
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    val openAnimateFloat by animateFloatAsState(
-                        targetValue = if(addButtonActive) 1.0f else 0.0f,
-                        label = "floating action button size"
+                    modifier = Modifier.graphicsLayer {
+                        scaleY = openAnimateFloat
+                        scaleX = openAnimateFloat
+                        // https://www.desmos.com/calculator/6ru1kya9ar
+                        alpha = (-(openAnimateFloat - 1.0f)*(openAnimateFloat - 1.0f)) + 1.0f
+                        transformOrigin = TransformOrigin(0.9f, 1.0f)
+                    }) {
+                    ExtendedFloatingActionButton(
+                        text = { Text("album") },
+                        icon = { Icon(AppIcons.PhotoAlbum, "add a photo from album") },
+                        onClick = onClickAddPhotoAlbum
                     )
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        modifier = Modifier.graphicsLayer {
-                            scaleY = openAnimateFloat
-                            scaleX = openAnimateFloat
-                            // https://www.desmos.com/calculator/6ru1kya9ar
-                            alpha = (-(openAnimateFloat - 1.0f)*(openAnimateFloat - 1.0f)) + 1.0f
-                            transformOrigin = TransformOrigin(0.9f, 1.0f)
-                        }) {
-                        ExtendedFloatingActionButton(
-                            text = { Text("album") },
-                            icon = { Icon(AppIcons.PhotoAlbum, "add a photo from album") },
-                            onClick = onClickAddPhotoAlbum
-                        )
-                        ExtendedFloatingActionButton(
-                            text = { Text("camera") },
-                            icon = { Icon(AppIcons.AddPhoto, "add a photo from camera") },
-                            onClick = onClickAddPhotoCamera,
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
-                    }
+                    ExtendedFloatingActionButton(
+                        text = { Text("camera") },
+                        icon = { Icon(AppIcons.AddPhoto, "add a photo from camera") },
+                        onClick = onClickAddPhotoCamera,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
 
-                    FloatingActionButton(
-                        onClick = { addButtonActive = !addButtonActive },
-                    ) {
-                        if (addButtonActive) {
-                            Icon(AppIcons.Remove, "remove icon")
-                        } else {
-                            Icon(AppIcons.Add, "add icon")
-                        }
+                FloatingActionButton(
+                    onClick = { addButtonActive = !addButtonActive },
+                ) {
+                    if (addButtonActive) {
+                        Icon(AppIcons.Remove, "remove icon")
+                    } else {
+                        Icon(AppIcons.Add, "add icon")
                     }
                 }
             }

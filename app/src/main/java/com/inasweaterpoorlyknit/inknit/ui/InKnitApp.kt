@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.inasweaterpoorlyknit.inknit.navigation.InKnitNavHost
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -24,14 +25,16 @@ fun InKnitApp(
     appState: InKnitAppState,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-    ) {
-        CompositionLocalProvider(LocalAbsoluteTonalElevation provides 0.dp) {
-            InKnitNavHost(
-                appState = appState,
-                modifier = modifier,
-            )
+    InKnitTheme {
+        Surface(
+            modifier = modifier.fillMaxSize(),
+        ) {
+            CompositionLocalProvider(LocalAbsoluteTonalElevation provides 0.dp) {
+                InKnitNavHost(
+                    appState = appState,
+                    modifier = modifier,
+                )
+            }
         }
     }
 }
@@ -39,20 +42,17 @@ fun InKnitApp(
 @Stable
 class InKnitAppState(
     val navController: NavHostController,
-    coroutineScope: CoroutineScope,
     val windowSizeClass: WindowSizeClass,
 )
 
 @Composable
 fun rememberInKnitAppState(
     windowSizeClass: WindowSizeClass,
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
     navController: NavHostController = rememberNavController(),
 ): InKnitAppState {
-  return remember(navController, coroutineScope, windowSizeClass) {
+  return remember(navController, windowSizeClass) {
       InKnitAppState(
           navController = navController,
-          coroutineScope = coroutineScope,
           windowSizeClass = windowSizeClass,
       )
   }
