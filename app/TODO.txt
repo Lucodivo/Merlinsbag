@@ -35,3 +35,6 @@ Splash screen
     - androidx.core:core-splashscreen
         installSplashScreen()
         splashScreen.setKeepOnScreenCondition { when (uiState) { Loading -> true is Success -> false } }
+App Colors
+    - Dynamic colors
+    - At least not white background...

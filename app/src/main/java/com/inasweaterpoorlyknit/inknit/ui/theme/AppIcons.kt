@@ -6,6 +6,8 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Checkroom
 import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.DryCleaning
 import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
@@ -37,4 +39,7 @@ object AppIcons {
   val ArticlesBorder = Icons.Outlined.DryCleaning
   val AddArticle = Icons.Rounded.Add
   val AddArticleBorder = Icons.Outlined.Add
+  val HangUp = Icons.Outlined.Checkroom
+  val HangUp2 = Icons.Outlined.DryCleaning
+  val Check = Icons.Outlined.Check
 }

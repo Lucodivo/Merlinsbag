@@ -16,6 +16,7 @@ androidxHiltNavigationCompose = "1.2.0"
 espressoCore = "3.5.1"
 lifecycle = "2.7.0"
 navigationFragmentKtx = "2.7.7"
+noopmathkt = "v0.2.4-alpha"
 playServicesMlkitSubjectSegmentation = "16.0.0-beta1"
 guava-android = "29.0-android"
 androidxComposeRuntimeTracing = "1.0.0-beta01"
@@ -85,6 +86,7 @@ androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name =
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "composeMaterial3" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+noopmathkt = { module = "com.github.lucodivo:NoopMathKt", version.ref = "noopmathkt" }
 play-services-mlkit-subject-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "playServicesMlkitSubjectSegmentation" }
 guava-android = {module = "com.google.guava:guava", version.ref = "guava-android"}
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobufKotlinLite" }

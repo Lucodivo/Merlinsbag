@@ -54,6 +54,8 @@ android {
 dependencies {
     implementation(projects.core.database)
 
+    implementation(libs.noopmathkt)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.ui)
