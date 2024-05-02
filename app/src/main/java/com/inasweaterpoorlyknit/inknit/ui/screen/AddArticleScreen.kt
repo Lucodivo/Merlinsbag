@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -69,12 +70,8 @@ fun ArticleImage(
     if(processedImage != null){
       val rotatedBitmap = Bitmap.createBitmap(
         processedImage,
-        0,
-        0,
-        processedImage.width,
-        processedImage.height,
-        Matrix().apply { postRotate(imageRotation) },
-        true)
+        0, 0, processedImage.width, processedImage.height,
+        Matrix().apply { postRotate(imageRotation) }, true)
       Image(
         bitmap = rotatedBitmap.asImageBitmap(),
         contentDescription = stringResource(id = R.string.processed_image),
@@ -87,6 +84,7 @@ fun ArticleImage(
 
 @Composable
 fun AddArticleControls(
+  landscape: Boolean = true,
   processing: Boolean = true,
   onPrevClick: () -> Unit = {},
   onNextClick: () -> Unit = {},
@@ -108,19 +106,45 @@ fun AddArticleControls(
         .onSizeChanged { columnSize = DpSize(pixelsToDp(it.width), pixelsToDp(it.height)) },
       ){
       val buttonModifier = Modifier.padding(3.dp)
-      Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-          .wrapContentSize()
+      if(landscape){
+        Row(horizontalArrangement = Arrangement.SpaceBetween,
+          modifier = Modifier.wrapContentSize()
         ){
-        Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.Previous, "Switch left") }
-        Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusNarrow, "Narrow focus") }
-        Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusBroaden, "Broaden focus") }
-        Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(AppIcons.Next, "Switch right") }
-      }
-      Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
-        Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(AppIcons.RotateCCW, "Rotate counter-clockwise") }
-        Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(AppIcons.Check, "Check") }
-        Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(AppIcons.RotateCW, "Rotate counter-clockwise") }
+          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.Previous, "Switch left") }
+          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(AppIcons.Next, "Switch right") }
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween,
+          modifier = Modifier.wrapContentSize()
+        ){
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusNarrow, "Narrow focus") }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusBroaden, "Broaden focus") }
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween,
+          modifier = Modifier.wrapContentSize()
+        ){
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(AppIcons.RotateCCW, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.RotateCW, "Rotate counter-clockwise") }
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween,
+          modifier = Modifier.width(columnSize.width),
+        ){
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(AppIcons.Check, "Check") }
+        }
+      } else { // portrait
+        Row(horizontalArrangement = Arrangement.SpaceBetween,
+          modifier = Modifier
+            .wrapContentSize()
+        ){
+          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.Previous, "Switch left") }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusNarrow, "Narrow focus") }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusBroaden, "Broaden focus") }
+          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(AppIcons.Next, "Switch right") }
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(AppIcons.RotateCCW, "Rotate counter-clockwise") }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(AppIcons.Check, "Check") }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(AppIcons.RotateCW, "Rotate counter-clockwise") }
+        }
       }
     }
   }
@@ -139,6 +163,7 @@ fun AddArticleScreen(
   onRotateCCW: () -> Unit = {},
   onSave: () -> Unit = {},
 ) {
+  val landscape: Boolean = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
   InKnitTheme {
     Box(
       contentAlignment = Alignment.BottomCenter,
@@ -146,11 +171,16 @@ fun AddArticleScreen(
     ) {
       ArticleImage(
         modifier = Modifier
-          .padding(bottom = 80.dp, start = 16.dp, end = 16.dp),
+          .padding(
+            top = 16.dp,
+            bottom = if(landscape) 16.dp else 80.dp,
+            start = 16.dp,
+            end = if(landscape) 150.dp else 16.dp),
         processedImage = processedImage,
         imageRotation = imageRotation,
       )
       AddArticleControls(
+        landscape = landscape,
         processing = processing,
         onPrevClick = onPrevClick,
         onNextClick = onNextClick,
