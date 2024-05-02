@@ -50,4 +50,5 @@
     <string name="add">add</string>
     <string name="collections">collections</string>
     <string name="add_article">add article</string>
+    <string name="no_subject_found">Try again. No subject found.</string>
 </resources>

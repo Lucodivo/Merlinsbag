@@ -117,7 +117,7 @@ class SegmentedImage {
         }
     }
 
-    private fun subjectsFound() = segmentationResult.subjects.size >= 1
+    fun subjectsFound() = segmentationResult.subjects.size >= 1
 
     fun decreaseThreshold() {
         if(!subjectsFound() || confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return

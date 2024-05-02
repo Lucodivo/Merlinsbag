@@ -58,9 +58,14 @@ class AddArticleViewModel @AssistedInject constructor(
   val processing = mutableStateOf(true)
   val processedBitmap = mutableStateOf<Bitmap?>(null)
   val rotation = mutableFloatStateOf(rotations[rotationIndex])
-  private val _shouldClose = MutableLiveData<Event<Boolean>>()
-  val shouldClose: LiveData<Event<Boolean>>
-    get() = _shouldClose
+
+  private val _finished = MutableLiveData<Event<Boolean>>()
+  val finished: LiveData<Event<Boolean>>
+    get() = _finished
+
+  private val _noSubjectFound = MutableLiveData<Event<Boolean>>()
+  val noSubjectFound: LiveData<Event<Boolean>>
+    get() = _noSubjectFound
 
   private val segmentedImage = SegmentedImage()
 
@@ -69,8 +74,15 @@ class AddArticleViewModel @AssistedInject constructor(
       Uri.parse(imageUriString)?.let { imageUri ->
         try {
           segmentedImage.process(application, imageUri) { success ->
-            if(success){ refreshProcessedBitmap() }
-            else{ Log.e("processImage()", "ML Kit failed to process image") }
+            if(success){
+              if(segmentedImage.subjectsFound()) {
+                refreshProcessedBitmap()
+              } else {
+                _noSubjectFound.value = Event(true)
+              }
+            } else{
+              Log.e("processImage()", "ML Kit failed to process image")
+            }
           }
         } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
       }
@@ -171,7 +183,7 @@ class AddArticleViewModel @AssistedInject constructor(
       )
     }
     viewModelScope.launch(Dispatchers.Main){
-      _shouldClose.value = Event(true)
+      _finished.value = Event(true)
     }
   }
 }

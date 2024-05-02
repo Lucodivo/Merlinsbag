@@ -3,7 +3,6 @@ package com.inasweaterpoorlyknit.inknit.ui.screen
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
@@ -22,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -31,14 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -46,14 +38,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
-import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.min
-import kotlin.math.sin
 
 const val IMAGE_URI_STRING_ARG = "imageUriString"
 const val ADD_ARTICLES_BASE = "add_articles_route"
@@ -218,9 +204,17 @@ fun AddArticleRoute(
       factory.create(imageUriString)
     }
 
-  val shouldCloseEvent = addArticleViewModel.shouldClose.observeAsState()
-  shouldCloseEvent.value?.getContentIfNotHandled()?.let { shouldClose ->
-    if(shouldClose) navController.navigateToArticles()
+  val finished = addArticleViewModel.finished.observeAsState()
+  finished.value?.getContentIfNotHandled()?.let { finished ->
+    if(finished) navController.navigateToArticles()
+  }
+
+  val noSubjectFound = addArticleViewModel.noSubjectFound.observeAsState()
+  noSubjectFound.value?.getContentIfNotHandled()?.let { noSubjectFound ->
+    if(noSubjectFound) {
+      navController.popBackStack()
+      Toast(msg = R.string.no_subject_found)
+    }
   }
 
   AddArticleScreen(
