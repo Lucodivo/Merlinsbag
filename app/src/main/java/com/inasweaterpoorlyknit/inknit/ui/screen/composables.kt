@@ -8,13 +8,14 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import com.inasweaterpoorlyknit.inknit.ui.hideSystemUI
 import com.inasweaterpoorlyknit.inknit.ui.showSystemUI
 import com.inasweaterpoorlyknit.inknit.ui.toast
+import com.inasweaterpoorlyknit.mod
+import kotlin.math.abs
 
 @Composable
 @NonRestartableComposable
@@ -40,29 +41,21 @@ fun animateRotationAsState(
   targetValue: Float,
   label: String = "RotationAnimation",
 ): State<Float> {
-  val (lastRotation, setLastRotation) = remember { mutableFloatStateOf(0.0f) } // this keeps last rotation
-  var newRotation = lastRotation // newRotation will be updated in proper way
-  val modLast = if (lastRotation > 0) lastRotation % 360.0f else 360.0f - (-lastRotation % 360.0f) // last rotation converted to range [-359; 359]
+  val (lastRotation, setLastRotation) = remember { mutableFloatStateOf(0.0f) }
 
-  if (modLast != targetValue) // if modLast isn't equal rotation retrieved as function argument it means that newRotation has to be updated
-  {
-    val backward = if (targetValue > modLast) modLast + 360.0f - targetValue else modLast - targetValue // distance in degrees between modLast and targetValue going backward
-    val forward = if (targetValue > modLast) targetValue - modLast else 360.0f - modLast + targetValue // distance in degrees between modLast and targetValue going forward
-
-    // update newRotation so it will change rotation in the shortest way
-    newRotation = if (backward < forward) {
-      // backward rotation is shorter
-      lastRotation - backward
-    } else {
-      // forward rotation is shorter (or they are equal)
-      lastRotation + forward
-    }
-
-    setLastRotation(newRotation)
+  val modLast = lastRotation % 360.0f
+  val deltaRotation = targetValue - modLast
+  val (degreeDeltaCW, degreeDeltaCCW) = if(targetValue > modLast){
+    Pair(deltaRotation - 360.0f, deltaRotation)
+  } else {
+    Pair(deltaRotation, deltaRotation + 360.0f)
   }
 
+  val newRotation = lastRotation + if(abs(degreeDeltaCW) < degreeDeltaCCW) degreeDeltaCW else degreeDeltaCCW
+  setLastRotation(newRotation)
+
   return animateFloatAsState(
-    targetValue = -newRotation,
+    targetValue = newRotation,
     label = label,
   )
 }
