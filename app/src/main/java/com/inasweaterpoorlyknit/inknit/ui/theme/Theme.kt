@@ -17,34 +17,24 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.internal.managers.FragmentComponentManager
 
-private val LightColorScheme = lightColorScheme(
-  primary = Blue100,
-  onPrimary = Color.Black,
-  background = Grayscale4,
-  surface = Grayscale5,
-)
+private val LightColorScheme = lightColorScheme()
 
-private val DarkColorScheme = darkColorScheme(
-  primary = Blue100_dark,
-  onPrimary = Color.Black,
-  background = RosyBrown4,
-  surface = RosyBrown3
-)
+private val DarkColorScheme = darkColorScheme()
 
 @Composable
 fun InKnitTheme(
         darkTheme: Boolean = isSystemInDarkTheme(),
-        // Dynamic color is available on Android 12+
         dynamicColor: Boolean = true,
         content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) dynamicDarkColorScheme(LocalContext.current) else dynamicLightColorScheme(LocalContext.current)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme ->
+          DarkColorScheme
+        else ->
+          LightColorScheme
     }
     val view = LocalView.current
     if (!view.isInEditMode) {

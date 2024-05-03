@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.inknit.ui
 
-import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Resources
@@ -17,21 +16,22 @@ import androidx.core.view.WindowInsetsControllerCompat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+// TODO: Properly bring back the system UI (color, etc)
 fun Window.showSystemUI() {
   if(Build.VERSION.SDK_INT >= 30) {
     setDecorFitsSystemWindows(true)
-    // TODO: What is the status bar color used for the app?
     statusBarColor = Color.BLACK
     WindowInsetsControllerCompat(this, decorView).let { controller ->
       controller.show(WindowInsetsCompat.Type.systemBars())
       controller.show(WindowInsetsCompat.Type.navigationBars())
     }
-  } else { // TODO: Test if this even works
+  } else {
     @Suppress("DEPRECATION")
     decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
   }
 }
 
+// TODO: Convert to composable
 fun Window.hideSystemUI() {
   if(Build.VERSION.SDK_INT >= 30) {
     setDecorFitsSystemWindows(false) // fill window
@@ -43,7 +43,7 @@ fun Window.hideSystemUI() {
       // allow navbar to show up after swipe
       controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
-  } else { // TODO: System visibility is deprecated, remove when minSDK is 30+
+  } else {
     @Suppress("DEPRECATION")
     decorView.systemUiVisibility = (
         View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or // hide the navigation

@@ -9,7 +9,6 @@ Database work:
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
     - Hilt to inject Room into ViewModels
 Camera:
-    - Flash
     - Setting to allow user to use preferred camera app
     - Selfie camera
     - Camera "feels" slow between clicking the "take picture" button to the AddArticleFragment
@@ -17,9 +16,6 @@ Camera:
 Add Article:
     - Image labelling
     - Primary / Secondary color classifications?
-    - Save using rotation
-    - Animated rotate
-        - requires not copying bitmap
 Outfits:
     - add items to a list
     - display lists

@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalView
 import com.inasweaterpoorlyknit.inknit.ui.hideSystemUI
 import com.inasweaterpoorlyknit.inknit.ui.showSystemUI
 import com.inasweaterpoorlyknit.inknit.ui.toast
-import com.inasweaterpoorlyknit.mod
 import kotlin.math.abs
 
 @Composable
@@ -33,10 +32,7 @@ fun HideSystemUIDisposableEffect() {
 fun Toast(@StringRes msg: Int) = LocalContext.current.toast(msg)
 
 @Composable
-/*
-  target value between [0, 360)
-  output in degrees of shortest path
- */
+/* target value between [0, 360) */
 fun animateRotationAsState(
   targetValue: Float,
   label: String = "RotationAnimation",

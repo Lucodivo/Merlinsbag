@@ -10,7 +10,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,10 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.AlertDialog as AlertDialogCompose
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -35,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
@@ -44,17 +47,17 @@ import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
 
 const val ARTICLES_ROUTE = "articles_route"
 
+val additionalPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_PERMISSIONS =
-    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
-        arrayOf(permission.CAMERA)
-    } else {
+   if(additionalPermissionsRequired){
         arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
+    } else {
+        arrayOf(permission.CAMERA)
     }
 
 fun NavController.navigateToArticles(){
@@ -67,8 +70,6 @@ fun ArticlesRoute(
     modifier: Modifier = Modifier,
     articlesViewModel: ArticlesViewModel = hiltViewModel(), // MainMenuViewModel
 ){
-    val thumbnailDetails = articlesViewModel.thumbnailDetails.observeAsState()
-    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()){}
     val _photoAlbumLauncher = rememberLauncherForActivityResult(GetContent()){ uri ->
         if(uri != null) {
             navController.navigateToAddArticle(uri.toString())
@@ -77,11 +78,6 @@ fun ArticlesRoute(
     val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
         RequestMultiplePermissions()
     ){ permissions ->
-        fun openAppSettings() = _appSettingsLauncher.launch(
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", navController.context.packageName, null)
-            }
-        )
 
         val context = navController.context
         var permissionsGranted = true
@@ -96,41 +92,76 @@ fun ArticlesRoute(
             navController.navigateToCamera()
         } else {
             if(userCheckedNeverAskAgain) {
-                AlertDialog.Builder(context)
-                    .setTitle(context.getString(R.string.permission_alert_title))
-                    .setMessage(context.getString(R.string.permission_alert_justification))
-                    .setNegativeButton(context.getString(R.string.permission_alert_negative)){ _, _ -> }
-                    .setPositiveButton(context.getString(R.string.permission_alert_positive)){ _, _ -> openAppSettings() }
-                    .show()
+                articlesViewModel.userCheckedNeverAskAgain()
             } else {
                 navController.context.toast("Camera permissions required")
             }
         }
     }
+
+    val packageName = LocalContext.current.packageName
+    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()){}
+    fun openAppSettings() = _appSettingsLauncher.launch(
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+        }
+    )
+
+    val thumbnailDetails = articlesViewModel.thumbnailDetails.observeAsState()
+    val showPermissionsAlert = articlesViewModel.showPermissionsAlert.observeAsState(false)
+    articlesViewModel.openSettings.observeAsState().value?.getContentIfNotHandled()?.let { openAppSettings() }
     ArticlesScreen(
         thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
-        onClickArticle = { thumbnailIndex ->
-            navController.navigateToArticleDetail(thumbnailDetails.value!![thumbnailIndex].articleId)
-        },
-        onClickAddPhotoAlbum = {
-            _photoAlbumLauncher.launch("image/*")
-        },
-        onClickAddPhotoCamera = {
-            _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS)
-        }
+        showPermissionsAlert = showPermissionsAlert.value,
+        onClickArticle = { i -> navController.navigateToArticleDetail(thumbnailDetails.value!![i].articleId) },
+        onClickAddPhotoAlbum = { _photoAlbumLauncher.launch("image/*") },
+        onClickAddPhotoCamera = { _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS) },
+        onPermissionsAlertPositive = { articlesViewModel.onPermissionsAlertPositive() },
+        onPermissionsAlertNegative = { articlesViewModel.onPermissionsAlertNegative() },
+        onPermissionsAlertOutside = { articlesViewModel.onPermissionsAlertOutside() },
     )
 }
 
 @Composable
 fun ArticlesScreen(
     thumbnailUris: List<String> = emptyList(),
+    showPermissionsAlert: Boolean = false,
     onClickArticle: (index: Int) -> Unit = {},
     onClickAddPhotoAlbum: () -> Unit = {},
     onClickAddPhotoCamera: () -> Unit = {},
+    onPermissionsAlertPositive: () -> Unit = {},
+    onPermissionsAlertNegative: () -> Unit = {},
+    onPermissionsAlertOutside: () -> Unit = {},
 ) {
     val gridMinWidth = 100.dp
     val gridItemPadding = 16.dp
     val articlesGridState = rememberLazyStaggeredGridState()
+
+    if(showPermissionsAlert) {
+        AlertDialogCompose(
+            title = {
+                Text(text = stringResource(id = R.string.permission_alert_title))
+            },
+            text = {
+                Text(text = stringResource(id =
+                if(additionalPermissionsRequired) R.string.permission_alert_justification_additional
+                else R.string.permission_alert_justification)
+                )
+            },
+            onDismissRequest = onPermissionsAlertOutside,
+            confirmButton = {
+                TextButton(onClick = onPermissionsAlertPositive) {
+                    Text(stringResource(id = R.string.permission_alert_positive))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onPermissionsAlertNegative){
+                    Text(stringResource(id = R.string.permission_alert_negative))
+                }
+            }
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalStaggeredGrid(
             // typical dp width of a smart phone is 320dp-480dp
@@ -207,4 +238,10 @@ fun ArticlesScreen(
 @Composable
 fun PreviewArticlesScreen() {
     ArticlesScreen()
+}
+
+@Preview
+@Composable
+fun PreviewArticlesScreenWithAlert() {
+    ArticlesScreen(showPermissionsAlert = true)
 }
