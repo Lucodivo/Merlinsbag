@@ -12,3 +12,7 @@
   - /sdcard/
     - /sdcard/Android/data/{app name}
     - /sdcard/pictures/{app name}
+
+## IDE Errors
+#### Error running 'Android Java Debugger (pid: 28478, debug port: 53060)' Unable to open debugger port (localhost:53060): java.net.SocketException "Connection reset"
+- Restart Android Studio (killing adb server did not work)

@@ -1,8 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
-import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.Matrix
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
@@ -21,6 +21,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -28,18 +29,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.degToRad
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sin
 
 const val IMAGE_URI_STRING_ARG = "imageUriString"
 const val ADD_ARTICLES_BASE = "add_articles_route"
@@ -50,28 +60,32 @@ fun NavController.navigateToAddArticle(uriString: String, navOptions: NavOptions
   navigate(route, navOptions)
 }
 
-fun pixelsToDp(pixels: Int) = (pixels / Resources.getSystem().displayMetrics.density).dp
-
 
 @Composable
 fun ArticleImage(
   modifier: Modifier = Modifier,
   processedImage: Bitmap? = null,
-  imageRotation: Float = 0.0f,
+  angle: Float = 0.0f,
 ){
+  var maxBoxSize by remember { mutableStateOf(IntSize(0, 0)) }
+  val rotateAnimateFloat by animateRotationAsState(targetValue = angle)
   Box(contentAlignment = Alignment.Center,
-    modifier = modifier.fillMaxSize()
-  ){
+    modifier = modifier.fillMaxSize().onSizeChanged { boxSize ->
+      if(boxSize.width != maxBoxSize.width || boxSize.height != maxBoxSize.height) {
+        maxBoxSize = boxSize
+      }
+    }){
     if(processedImage != null){
-      // TODO: If I avoid copying this rotated Bitmap and simply can rotate the Compose Image
-      //  I could not only avoid an unnecessary copy but also create very cheap rotation animations.
-      val rotatedBitmap = Bitmap.createBitmap(
-        processedImage,
-        0, 0, processedImage.width, processedImage.height,
-        Matrix().apply { postRotate(imageRotation) }, true)
+      val absSin = abs(sin(rotateAnimateFloat.degToRad()))
+      val absCos = abs(cos(rotateAnimateFloat.degToRad()))
+      val maxImageSize = DpSize(
+        pixelsToDp(((maxBoxSize.width * absCos) + (maxBoxSize.height * absSin)).toInt()),
+        pixelsToDp(((maxBoxSize.height * absCos) + (maxBoxSize.width * absSin)).toInt()),
+      )
       Image(
-        bitmap = rotatedBitmap.asImageBitmap(),
+        bitmap = processedImage.asImageBitmap(),
         contentDescription = stringResource(id = R.string.processed_image),
+        modifier = Modifier.rotate(rotateAnimateFloat).sizeIn(maxWidth = maxImageSize.width, maxHeight = maxImageSize.height)
       )
     } else {
       CircularProgressIndicator()
@@ -176,7 +190,7 @@ fun AddArticleScreen(
           start = 16.dp,
           end = if(landscape) 150.dp else 16.dp),
       processedImage = processedImage,
-      imageRotation = imageRotation,
+      angle = imageRotation,
     )
     AddArticleControls(
       windowSizeClass = windowSizeClass,
@@ -204,13 +218,11 @@ fun AddArticleRoute(
       factory.create(imageUriString)
     }
 
-  val finished = addArticleViewModel.finished.observeAsState()
-  finished.value?.getContentIfNotHandled()?.let { finished ->
+  addArticleViewModel.finished.observeAsState().value?.getContentIfNotHandled()?.let { finished ->
     if(finished) navController.navigateToArticles()
   }
 
-  val noSubjectFound = addArticleViewModel.noSubjectFound.observeAsState()
-  noSubjectFound.value?.getContentIfNotHandled()?.let { noSubjectFound ->
+  addArticleViewModel.noSubjectFound.observeAsState().value?.getContentIfNotHandled()?.let { noSubjectFound ->
     if(noSubjectFound) {
       navController.popBackStack()
       Toast(msg = R.string.no_subject_found)
@@ -232,14 +244,17 @@ fun AddArticleRoute(
   )
 }
 
+@Suppress("UNUSED_VARIABLE")
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @DevicePreviews
 @Composable
 fun PreviewAddArticleScreen(){
+  val longArticle = "long_compose_preview.webp"
+  val squareishComposable = "add_article_compose_preview.webp"
   AddArticleScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
     processing = false,
-    processedImage = previewAssetBitmap(filename = "add_article_compose_preview.webp"),
-    imageRotation = 270.0f,
+    processedImage = previewAssetBitmap(filename = longArticle),
+    imageRotation = 0.0f,
   )
 }
