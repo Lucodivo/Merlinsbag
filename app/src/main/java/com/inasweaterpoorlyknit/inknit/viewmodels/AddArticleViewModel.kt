@@ -184,8 +184,6 @@ class AddArticleViewModel @AssistedInject constructor(
         thumbnailUri = thumbnailFile.toUri().toString()
       )
     }
-    viewModelScope.launch(Dispatchers.Main){
-      _finished.value = Event(Unit)
-    }
+    _finished.value = Event(Unit)
   }
 }

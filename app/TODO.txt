@@ -17,7 +17,6 @@ Camera:
 Add Article:
     - Image labelling
     - Primary / Secondary color classifications?
-    - Remove lag when saving. Should be none.
 Outfits:
     - add items to a list
     - display lists
