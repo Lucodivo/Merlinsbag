@@ -68,6 +68,7 @@ fun AddArticleControls(
   windowSizeClass: WindowSizeClass,
   landscape: Boolean = true,
   processing: Boolean = true,
+  multipleSubjects: Boolean = false,
   onPrevClick: () -> Unit = {},
   onNextClick: () -> Unit = {},
   onNarrowFocusClick: () -> Unit = {},
@@ -93,8 +94,8 @@ fun AddArticleControls(
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
-          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
+          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
+          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
@@ -118,10 +119,10 @@ fun AddArticleControls(
           modifier = if(compactWidth){ Modifier.fillMaxWidth() } else { Modifier.wrapContentSize() }
         ){
           if(compactWidth) { buttonModifier = buttonModifier.weight(1f) }
-          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
+          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
           Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, "Narrow focus") }
           Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, "Broaden focus") }
-          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
+          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
           Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.RotateCCW, "Rotate counter-clockwise") }
@@ -137,6 +138,7 @@ fun AddArticleControls(
 fun AddArticleScreen(
   windowSizeClass: WindowSizeClass,
   processing: Boolean = true,
+  multipleSubjects: Boolean = false,
   processedImage: Bitmap? = null,
   imageRotation: Float = 0.0f,
   onPrevClick: () -> Unit = {},
@@ -166,6 +168,7 @@ fun AddArticleScreen(
       windowSizeClass = windowSizeClass,
       landscape = landscape,
       processing = processing,
+      multipleSubjects = multipleSubjects,
       onPrevClick = onPrevClick,
       onNextClick = onNextClick,
       onNarrowFocusClick = onNarrowFocusClick,
@@ -189,12 +192,12 @@ fun AddArticleRoute(
       factory.create(imageUriString)
     }
 
-  addArticleViewModel.finished.observeAsState().value?.getContentIfNotHandled()?.let {
+  addArticleViewModel.finished.value.getContentIfNotHandled()?.let {
       onSuccess(ScreenSuccess(imageUriString, true))
       navController.popBackStack()
   }
 
-  addArticleViewModel.noSubjectFound.observeAsState().value?.getContentIfNotHandled()?.let {
+  addArticleViewModel.noSubjectFound.value.getContentIfNotHandled()?.let {
     onSuccess(ScreenSuccess(imageUriString, false))
     navController.popBackStack()
     Toast(msg = R.string.no_subject_found)
@@ -203,6 +206,7 @@ fun AddArticleRoute(
   AddArticleScreen(
     windowSizeClass = windowSizeClass,
     processing = addArticleViewModel.processing.value,
+    multipleSubjects = addArticleViewModel.multipleSubjects.value,
     processedImage = addArticleViewModel.processedBitmap.value,
     imageRotation = addArticleViewModel.rotation.floatValue,
     onNarrowFocusClick = { addArticleViewModel.onFocusClicked() },

@@ -107,7 +107,7 @@ class SegmentedImage {
         subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
             segmentationResult = result
             timer.logMilestone("SegmentedImage", "image successfully processed")
-            if(subjectsFound()){
+            if(subjectCount > 0){
                 subjectIndex = 0
                 prepareSubjectBitmap()
             }
@@ -117,17 +117,20 @@ class SegmentedImage {
         }
     }
 
-    fun subjectsFound() = segmentationResult.subjects.size >= 1
+    val subjectCount
+        get() = segmentationResult.subjects.size
+    val subjectsFound
+        get() = subjectCount > 0
 
     fun decreaseThreshold() {
-        if(!subjectsFound() || confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
+        if(!subjectsFound || confidenceThreshold == MIN_CONFIDENCE_THRESHOLD) return
         confidenceThreshold -= CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = max(MIN_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()
     }
 
     fun increaseThreshold() {
-        if(!subjectsFound() || confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
+        if(!subjectsFound || confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
         confidenceThreshold += CONFIDENCE_THRESHOLD_INCREMENT
         confidenceThreshold = min(MAX_CONFIDENCE_THRESHOLD, confidenceThreshold)
         prepareSubjectBitmap()

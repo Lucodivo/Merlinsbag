@@ -26,6 +26,8 @@ Features:
         - All items
     - Proper landscape support for all screens
         - AddArticlesScreen [COMPLETED]
+Architecture:
+    - UIState structs from viewmodel to Screens
 App-wide UI:
     - EdgeToEdge
 Splash screen
