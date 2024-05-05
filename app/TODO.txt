@@ -3,11 +3,12 @@ Database work:
     - Full text search
         - Room database @Fts3/@Fts4
             - https://developer.android.com/training/data-storage/room/defining-data#fts
+            - Potentially create separate tables specifically for text search, as demonstrated here:
+                https://github.com/android/nowinandroid/tree/afad1b9ac7e3d5efc798e786bd6548229a55735c/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/model
     - Indices for commonly queried fields
         - https://developer.android.com/training/data-storage/room/defining-data#column-indexing
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
-    - Hilt to inject Room into ViewModels
 Camera:
     - Setting to allow user to use preferred camera app
     - Selfie camera
@@ -16,11 +17,10 @@ Camera:
 Add Article:
     - Image labelling
     - Primary / Secondary color classifications?
+    - Remove lag when saving. Should be none.
 Outfits:
     - add items to a list
     - display lists
-Main Menu:
-    - click item to enter detail view
 Features:
     - Export data
         - Individual items
@@ -36,3 +36,7 @@ Splash screen
 App Colors
     - Dynamic colors
     - At least not white background...
+Build time:
+    - Look into removing AsyncImage since
+Tooling:
+    - UI Catalog

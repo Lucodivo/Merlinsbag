@@ -1,8 +1,6 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
 import android.graphics.Bitmap
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,17 +9,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -29,37 +24,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.degToRad
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
-import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
 
 const val IMAGE_URI_STRING_ARG = "imageUriString"
 const val ADD_ARTICLES_BASE = "add_articles_route"
 const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_ARG={$IMAGE_URI_STRING_ARG}"
 
-fun NavController.navigateToAddArticle(uriString: String, navOptions: NavOptions? = null){
+fun NavController.navigateToAddArticle(
+  uriString: String,
+  navOptions: NavOptions? = null
+){
   val route = "${ADD_ARTICLES_BASE}?${IMAGE_URI_STRING_ARG}=$uriString"
   navigate(route, navOptions)
 }
-
 
 @Composable
 fun ArticleImage(
@@ -67,30 +55,12 @@ fun ArticleImage(
   processedImage: Bitmap? = null,
   angle: Float = 0.0f,
 ){
-  var maxBoxSize by remember { mutableStateOf(IntSize(0, 0)) }
   val rotateAnimateFloat by animateRotationAsState(targetValue = angle)
-  Box(contentAlignment = Alignment.Center,
-    modifier = modifier.fillMaxSize().onSizeChanged { boxSize ->
-      if(boxSize.width != maxBoxSize.width || boxSize.height != maxBoxSize.height) {
-        maxBoxSize = boxSize
-      }
-    }){
-    if(processedImage != null){
-      val absSin = abs(sin(rotateAnimateFloat.degToRad()))
-      val absCos = abs(cos(rotateAnimateFloat.degToRad()))
-      val maxImageSize = DpSize(
-        pixelsToDp(((maxBoxSize.width * absCos) + (maxBoxSize.height * absSin)).toInt()),
-        pixelsToDp(((maxBoxSize.height * absCos) + (maxBoxSize.width * absSin)).toInt()),
-      )
-      Image(
-        bitmap = processedImage.asImageBitmap(),
-        contentDescription = stringResource(id = R.string.processed_image),
-        modifier = Modifier.rotate(rotateAnimateFloat).sizeIn(maxWidth = maxImageSize.width, maxHeight = maxImageSize.height)
-      )
-    } else {
-      CircularProgressIndicator()
-    }
-  }
+  rotatableImage(
+    modifier = modifier,
+    bitmap = processedImage,
+    ccwRotaitonAngle = rotateAnimateFloat,
+  )
 }
 
 @Composable
@@ -123,40 +93,40 @@ fun AddArticleControls(
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.Previous, "Switch left") }
-          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(AppIcons.Next, "Switch right") }
+          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
+          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusNarrow, "Narrow focus") }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusBroaden, "Broaden focus") }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, "Narrow focus") }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, "Broaden focus") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(AppIcons.RotateCCW, "Rotate counter-clockwise") }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.RotateCW, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.RotateCCW, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.RotateCW, "Rotate counter-clockwise") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.width(columnSize.width),
         ){
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(AppIcons.Check, "Check") }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.Check, "Check") }
         }
       } else { // portrait
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = if(compactWidth){ Modifier.fillMaxWidth() } else { Modifier.wrapContentSize() }
         ){
           if(compactWidth) { buttonModifier = buttonModifier.weight(1f) }
-          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.Previous, "Switch left") }
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusNarrow, "Narrow focus") }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(AppIcons.FocusBroaden, "Broaden focus") }
-          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(AppIcons.Next, "Switch right") }
+          Button(onClick = onPrevClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, "Narrow focus") }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, "Broaden focus") }
+          Button(onClick = onNextClick, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(AppIcons.RotateCCW, "Rotate counter-clockwise") }
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(AppIcons.Check, "Check") }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(AppIcons.RotateCW, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.RotateCCW, "Rotate counter-clockwise") }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(InKnitIcons.Check, "Check") }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(InKnitIcons.RotateCW, "Rotate counter-clockwise") }
         }
       }
     }
@@ -212,21 +182,22 @@ fun AddArticleRoute(
   navController: NavController,
   imageUriString: String,
   windowSizeClass: WindowSizeClass,
+  onSuccess: (ScreenSuccess) -> Unit = {}, // Only called if user sucessfully added an article
 ){
   val addArticleViewModel =
     hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
       factory.create(imageUriString)
     }
 
-  addArticleViewModel.finished.observeAsState().value?.getContentIfNotHandled()?.let { finished ->
-    if(finished) navController.navigateToArticles()
+  addArticleViewModel.finished.observeAsState().value?.getContentIfNotHandled()?.let {
+      onSuccess(ScreenSuccess(imageUriString, true))
+      navController.popBackStack()
   }
 
-  addArticleViewModel.noSubjectFound.observeAsState().value?.getContentIfNotHandled()?.let { noSubjectFound ->
-    if(noSubjectFound) {
-      navController.popBackStack()
-      Toast(msg = R.string.no_subject_found)
-    }
+  addArticleViewModel.noSubjectFound.observeAsState().value?.getContentIfNotHandled()?.let {
+    onSuccess(ScreenSuccess(imageUriString, false))
+    navController.popBackStack()
+    Toast(msg = R.string.no_subject_found)
   }
 
   AddArticleScreen(
@@ -249,8 +220,6 @@ fun AddArticleRoute(
 @DevicePreviews
 @Composable
 fun PreviewAddArticleScreen(){
-  val longArticle = "long_compose_preview.webp"
-  val squareishComposable = "add_article_compose_preview.webp"
   AddArticleScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
     processing = false,

@@ -2,22 +2,17 @@ package com.inasweaterpoorlyknit.inknit.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 private val lightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
 private val darkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
 
 @AndroidEntryPoint
-class NavigationActivity : ComponentActivity(){
+class MainActivity : ComponentActivity(){
   @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -44,7 +39,9 @@ class NavigationActivity : ComponentActivity(){
       val appState = rememberInKnitAppState(
         windowSizeClass = calculateWindowSizeClass(this)
       )
-      InKnitApp(appState = appState)
+      InKnitTheme {
+        InKnitApp(appState = appState)
+      }
     }
   }
 }

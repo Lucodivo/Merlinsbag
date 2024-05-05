@@ -1,7 +1,10 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
+import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.annotation.RawRes
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -11,8 +14,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 
+
+val longArticle = "long_compose_preview.webp"
+val squareishComposable = "add_article_compose_preview.webp"
+
 @Composable
 fun previewAssetBitmap(filename: String): Bitmap = BitmapFactory.decodeStream(LocalContext.current.assets.open(filename))
+
+@Composable
+fun resourceAsUriString(@RawRes resId: Int): String {
+  val resources = LocalContext.current.resources
+  return Uri.parse(
+    ContentResolver.SCHEME_ANDROID_RESOURCE +
+        "://" + resources.getResourcePackageName(resId)
+        + '/' + resources.getResourceTypeName(resId)
+        + '/' + resources.getResourceEntryName(resId)
+  ).toString()
+}
 
 @Preview(name = "phone", device = "spec:shape=Normal,width=360,height=640,unit=dp,dpi=480")
 @Preview(name = "landscape", device = "spec:shape=Normal,width=640,height=360,unit=dp,dpi=480")

@@ -1,6 +1,10 @@
 package com.inasweaterpoorlyknit.inknit.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,6 +21,12 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.ArticlesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CameraRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_ARG
+import com.inasweaterpoorlyknit.inknit.viewmodels.Event
+
+data class ScreenSuccess(
+  val id: String,
+  val success: Boolean,
+)
 
 @Composable
 fun InKnitNavHost(
@@ -25,32 +35,41 @@ fun InKnitNavHost(
   startDestination: String = ARTICLES_ROUTE,
 ) {
   val navController = appState.navController
+  val (screenSuccess, setScreenSuccess) = remember { mutableStateOf(Event<ScreenSuccess>(null)) }
+
   NavHost(
     navController = navController,
     startDestination = startDestination,
     modifier = modifier,
   ){
-    composable(
-      route = ARTICLES_ROUTE
-    ) {
+    composable(route = ARTICLES_ROUTE) {
       ArticlesRoute(navController = navController)
     }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(
-        navArgument(ARTICLE_ID_ARG) { nullable = false; type = NavType.StringType },
+        navArgument(ARTICLE_ID_ARG) {
+          nullable = false;
+          type = NavType.StringType
+        },
       ),
     ) { navBackStackEntry ->
       val articleIdArg = navBackStackEntry.arguments!!.getString(ARTICLE_ID_ARG)!!
       ArticleDetailRoute(navController = navController, clothingArticleId = articleIdArg)
     }
     composable(route = CAMERA_ROUTE){
-      CameraRoute(navController = navController)
+      CameraRoute(
+        navController = navController,
+        imageSuccessfullyUsed = screenSuccess.getContentIfNotHandled(),
+      )
     }
     composable(
       route = ADD_ARTICLES_ROUTE,
       arguments = listOf(
-        navArgument(IMAGE_URI_STRING_ARG) { nullable = false; type = NavType.StringType },
+        navArgument(IMAGE_URI_STRING_ARG) {
+          nullable = false;
+          type = NavType.StringType
+        },
       ),
     ) { navBackStackEntry ->
       val imageUriStringArg = navBackStackEntry.arguments!!.getString(IMAGE_URI_STRING_ARG)!!
@@ -58,6 +77,7 @@ fun InKnitNavHost(
         navController = navController,
         imageUriString = imageUriStringArg,
         windowSizeClass = appState.windowSizeClass,
+        onSuccess = { success -> setScreenSuccess(Event(success)) }
       )
     }
   }

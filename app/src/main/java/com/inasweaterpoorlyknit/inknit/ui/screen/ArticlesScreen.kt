@@ -43,10 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
-import com.inasweaterpoorlyknit.inknit.ui.theme.AppIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
 
@@ -60,9 +61,7 @@ private val REQUIRED_PERMISSIONS =
         arrayOf(permission.CAMERA)
     }
 
-fun NavController.navigateToArticles(){
-    navigate(ARTICLES_ROUTE) { launchSingleTop = true }
-}
+fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ARTICLES_ROUTE, navOptions)
 
 @Composable
 fun ArticlesRoute(
@@ -209,12 +208,12 @@ fun ArticlesScreen(
                     }) {
                     ExtendedFloatingActionButton(
                         text = { Text("album") },
-                        icon = { Icon(AppIcons.PhotoAlbum, "add a photo from album") },
+                        icon = { Icon(InKnitIcons.PhotoAlbum, "add a photo from album") },
                         onClick = onClickAddPhotoAlbum
                     )
                     ExtendedFloatingActionButton(
                         text = { Text("camera") },
-                        icon = { Icon(AppIcons.AddPhoto, "add a photo from camera") },
+                        icon = { Icon(InKnitIcons.AddPhoto, "add a photo from camera") },
                         onClick = onClickAddPhotoCamera,
                         modifier = Modifier.padding(vertical = 4.dp)
                     )
@@ -224,9 +223,9 @@ fun ArticlesScreen(
                     onClick = { addButtonActive = !addButtonActive },
                 ) {
                     if (addButtonActive) {
-                        Icon(AppIcons.Remove, "remove icon")
+                        Icon(InKnitIcons.Remove, "remove icon")
                     } else {
-                        Icon(AppIcons.Add, "add icon")
+                        Icon(InKnitIcons.Add, "add icon")
                     }
                 }
             }

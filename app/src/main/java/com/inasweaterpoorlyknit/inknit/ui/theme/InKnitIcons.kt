@@ -3,13 +3,16 @@ package com.inasweaterpoorlyknit.inknit.ui.theme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Checkroom
 import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.DryCleaning
+import androidx.compose.material.icons.outlined.FolderSpecial
 import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
 import androidx.compose.material.icons.outlined.Rotate90DegreesCw
 import androidx.compose.material.icons.outlined.Save
@@ -21,7 +24,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Collections
 import androidx.compose.material.icons.rounded.DryCleaning
 
-object AppIcons {
+object InKnitIcons {
   val PhotoAlbum = Icons.Filled.PhotoAlbum
   val AddPhoto = Icons.Filled.AddAPhoto
   val Remove = Icons.Filled.Remove
@@ -33,13 +36,11 @@ object AppIcons {
   val RotateCCW = Icons.Outlined.Rotate90DegreesCcw
   val Save = Icons.Outlined.Save
   val RotateCW = Icons.Outlined.Rotate90DegreesCw
-  val Collections = Icons.Rounded.Collections
-  val CollectionsBorder = Icons.Outlined.Collections
-  val Articles = Icons.Rounded.DryCleaning
-  val ArticlesBorder = Icons.Outlined.DryCleaning
-  val AddArticle = Icons.Rounded.Add
-  val AddArticleBorder = Icons.Outlined.Add
   val HangUp = Icons.Outlined.Checkroom
   val HangUp2 = Icons.Outlined.DryCleaning
   val Check = Icons.Outlined.Check
+  val Items = Icons.Outlined.Category
+  val ItemsSelected = Icons.Filled.Category
+  val Collections = Icons.Outlined.FolderSpecial
+  val CollectionsSelected = Icons.Outlined.FolderSpecial
 }

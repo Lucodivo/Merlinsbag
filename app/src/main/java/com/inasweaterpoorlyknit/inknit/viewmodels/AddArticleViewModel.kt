@@ -28,7 +28,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 // Helps avoid events from being handled multiple times after reconfiguration
-open class Event<out T>(private val content: T) {
+open class Event<out T>(private val content: T?) {
   var hasBeenHandled = false
     private set
 
@@ -59,12 +59,14 @@ class AddArticleViewModel @AssistedInject constructor(
   val processedBitmap = mutableStateOf<Bitmap?>(null)
   val rotation = mutableFloatStateOf(rotations[rotationIndex])
 
-  private val _finished = MutableLiveData<Event<Boolean>>()
-  val finished: LiveData<Event<Boolean>>
+  // TODO: convert to MutableState
+  private val _finished = MutableLiveData<Event<Unit>>()
+  val finished: LiveData<Event<Unit>>
     get() = _finished
 
-  private val _noSubjectFound = MutableLiveData<Event<Boolean>>()
-  val noSubjectFound: LiveData<Event<Boolean>>
+  // TODO: convert to MutableState
+  private val _noSubjectFound = MutableLiveData<Event<Unit>>()
+  val noSubjectFound: LiveData<Event<Unit>>
     get() = _noSubjectFound
 
   private val segmentedImage = SegmentedImage()
@@ -78,7 +80,7 @@ class AddArticleViewModel @AssistedInject constructor(
               if(segmentedImage.subjectsFound()) {
                 refreshProcessedBitmap()
               } else {
-                _noSubjectFound.value = Event(true)
+                _noSubjectFound.value = Event(Unit)
               }
             } else{
               Log.e("processImage()", "ML Kit failed to process image")
@@ -183,7 +185,7 @@ class AddArticleViewModel @AssistedInject constructor(
       )
     }
     viewModelScope.launch(Dispatchers.Main){
-      _finished.value = Event(true)
+      _finished.value = Event(Unit)
     }
   }
 }

@@ -52,4 +52,6 @@
     <string name="collections">collections</string>
     <string name="add_article">add article</string>
     <string name="no_subject_found">Try again. No subject found.</string>
+    <string name="assorted_blocks">assorted blocks</string>
+    <string name="folder_with_star">folder with star</string>
 </resources>

@@ -30,10 +30,13 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
+import com.inasweaterpoorlyknit.inknit.viewmodels.CameraViewModel
 import androidx.compose.ui.tooling.preview.Preview as ComposePreview
 
 const val TAG = "CameraScreen"
@@ -101,13 +104,12 @@ fun CameraScreen(
   imageCapture: ImageCapture? = null,
   onClick: () -> Unit = {}
 ) {
-  HideSystemUIDisposableEffect()
   CameraPreview(imageCapture = imageCapture)
-  FloatingButton(onClick = onClick)
+  TakePictureButton(onClick = onClick)
 }
 
 @Composable
-fun FloatingButton(
+fun TakePictureButton(
   onClick: () -> Unit = {},
 ){
   var captureActivated by remember{ mutableStateOf(false) }
@@ -132,7 +134,28 @@ fun NavController.navigateToCamera(navOptions: NavOptions? = null) = navigate(CA
 fun CameraRoute(
   navController: NavController,
   modifier: Modifier = Modifier,
+  imageSuccessfullyUsed: ScreenSuccess? = null,
+  cameraViewModel: CameraViewModel = hiltViewModel(),
 ){
+  // TODO: This should not be that hard
+  //   Pain points were that recomposition was happening multiple times
+  //   causing the backstack to be popped multiple times
+  //   while also maintaining a desire to not draw anything on subsequent recompositions
+  //   especially in terms of hiding system UI
+  var finished by remember { mutableStateOf(false) }
+  if(cameraViewModel.checkImageUsedSuccessfully(imageSuccessfullyUsed)){
+    finished = true
+    navController.popBackStack()
+  }
+  if (finished){ return }
+
+  cameraViewModel.addArticle.value.getContentIfNotHandled()?.let { uriString ->
+    ShowSystemUI()
+    navController.navigateToAddArticle(uriString)
+  }
+
+  HideSystemUI()
+
   val imageCapture = remember {
     ImageCapture.Builder()
       .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
@@ -158,8 +181,7 @@ fun CameraRoute(
       context.contentResolver,
       MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
       contentValues
-    )
-      .build()
+    ).build()
 
     // Set up image capture listener, which is triggered after photo has
     // been taken
@@ -171,7 +193,7 @@ fun CameraRoute(
       override fun onImageSaved(output: ImageCapture.OutputFileResults) {
         Log.d(TAG, "Photo capture succeeded: ${output.savedUri}")
         val uriString = output.savedUri.toString()
-        navController.navigateToAddArticle(uriString)
+        cameraViewModel.newImageUri(uriString)
       }
     })
   }
