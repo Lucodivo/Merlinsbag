@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
@@ -98,11 +99,10 @@ fun rotatableImage(
   }
 }
 
-@Composable
-fun ShowSystemUI() {
-  val activity = LocalView.current.context as Activity
-  with(activity.window){
-    if(Build.VERSION.SDK_INT >= 30) {
+fun Context.showSystemUI() {
+  val activity = this as Activity
+  with(activity.window) {
+    if (Build.VERSION.SDK_INT >= 30) {
       setDecorFitsSystemWindows(true)
       statusBarColor = Color.BLACK
       WindowInsetsControllerCompat(this, decorView).let { controller ->
@@ -116,24 +116,23 @@ fun ShowSystemUI() {
   }
 }
 
-@Composable
-fun HideSystemUI() {
-  val activity = LocalView.current.context as Activity
+fun Context.hideSystemUI(){
+  val activity = this as Activity
   with(activity.window) {
-    if (Build.VERSION.SDK_INT >= 30) {
+    if (android.os.Build.VERSION.SDK_INT >= 30) {
       setDecorFitsSystemWindows(false) // fill window
-      statusBarColor = Color.TRANSPARENT // set
+      statusBarColor = android.graphics.Color.TRANSPARENT // set
 
       WindowInsetsControllerCompat(this, decorView).let { controller ->
         // hide navigation buttons
-        controller.hide(WindowInsetsCompat.Type.systemBars())
+        controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
         // allow navbar to show up after swipe
-        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
       }
     } else {
       @Suppress("DEPRECATION")
       decorView.systemUiVisibility = (
-          View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or // hide the navigation
+              View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or // hide the navigation
               View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or // lay out view as if the navigation will be hidden
               View.SYSTEM_UI_FLAG_IMMERSIVE or // used with HIDE_NAVIGATION to remain interactive when hiding navigation
               View.SYSTEM_UI_FLAG_FULLSCREEN or // fullscreen

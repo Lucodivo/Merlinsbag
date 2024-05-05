@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Add
@@ -42,5 +43,5 @@ object InKnitIcons {
   val Items = Icons.Outlined.Category
   val ItemsSelected = Icons.Filled.Category
   val Collections = Icons.Outlined.FolderSpecial
-  val CollectionsSelected = Icons.Outlined.FolderSpecial
+  val CollectionsSelected = Icons.Filled.FolderSpecial
 }

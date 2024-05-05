@@ -19,7 +19,9 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.AddArticleRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticlesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
+import com.inasweaterpoorlyknit.inknit.ui.screen.COLLECTIONS_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CameraRoute
+import com.inasweaterpoorlyknit.inknit.ui.screen.CollectionsRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_ARG
 import com.inasweaterpoorlyknit.inknit.viewmodels.Event
 
@@ -28,11 +30,13 @@ data class ScreenSuccess(
   val success: Boolean,
 )
 
+const val APP_START_DESTINATION = ARTICLES_ROUTE
+
 @Composable
 fun InKnitNavHost(
   appState: InKnitAppState,
   modifier: Modifier = Modifier,
-  startDestination: String = ARTICLES_ROUTE,
+  startDestination: String = APP_START_DESTINATION,
 ) {
   val navController = appState.navController
   val (screenSuccess, setScreenSuccess) = remember { mutableStateOf(Event<ScreenSuccess>(null)) }
@@ -44,6 +48,9 @@ fun InKnitNavHost(
   ){
     composable(route = ARTICLES_ROUTE) {
       ArticlesRoute(navController = navController)
+    }
+    composable(route = COLLECTIONS_ROUTE) {
+      CollectionsRoute(navController = navController)
     }
     composable(
       route = ARTICLE_DETAIL_ROUTE,

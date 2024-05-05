@@ -77,8 +77,6 @@ fun ArticlesRoute(
     val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
         RequestMultiplePermissions()
     ){ permissions ->
-
-        val context = navController.context
         var permissionsGranted = true
         var userCheckedNeverAskAgain = false
         permissions.entries.forEach { entry ->
