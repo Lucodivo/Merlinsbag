@@ -1,30 +1,32 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
-import android.net.Uri
-import android.provider.MediaStore
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import java.util.ArrayList
+import kotlin.math.max
+import kotlin.math.min
 
 // TODO: Collections Screen
 
@@ -42,36 +44,62 @@ fun CollectionsRoute(
     CollectionsScreen(state.value.collections)
 }
 
-@Composable
-fun CollectionRow(collection: Collection){
-    val contentResolver = LocalContext.current.contentResolver
 
-    Row(
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)
-    ) {
-        Card(modifier = Modifier.fillMaxWidth()){
+@Composable
+fun CollectionRow(
+    collection: Collection,
+    modifier: Modifier = Modifier,
+){
+    val padding = 10.dp
+    Card(
+        modifier = modifier
+    ){
+        OverlappingCollectionLayout(
+            modifier = Modifier
+                .padding(horizontal = padding),
+            overlapPercentage = 0.6f,
+        ) {
             for (thumbnailUriString in collection.thumbnailUriStrings) {
-                val uri = Uri.parse(thumbnailUriString)
-                // TODO: Image
+                ArticleThumbnailImage(
+                    uriString = thumbnailUriString,
+                    modifier = Modifier
+                        .size(70.dp)
+                        .padding(top = padding)
+                )
             }
-            Text(collection.name)
+        }
+        Row {
+            Text(
+                text = collection.name,
+                modifier = Modifier.padding(padding)
+            )
         }
     }
 }
 
 @Composable
 fun CollectionsScreen(collections: List<Collection>){
+    val sidePadding = 10.dp
+    val collectionsSpacing = 5.dp
     Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(horizontal = 10.dp),
+            contentPadding = PaddingValues(horizontal = sidePadding),
             modifier = Modifier.fillMaxWidth()
         ) {
             items(collections.size){ index ->
-                CollectionRow(collections[index])
+                val topPadding = if(index == 0) collectionsSpacing * 2 else collectionsSpacing
+                val bottomPadding = if(index == collections.lastIndex) collectionsSpacing * 2 else collectionsSpacing
+                CollectionRow(
+                    collection = collections[index],
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = topPadding,
+                            bottom = bottomPadding,
+                        )
+                )
             }
         }
     }
@@ -84,55 +112,62 @@ fun CollectionsScreenPreview(){
         Collection(
             name = "Collection 1",
             thumbnailUriStrings = listOf(
-                resourceAsUriString(resId = R.raw.test_thumb_1),
-                resourceAsUriString(resId = R.raw.test_thumb_2),
-                resourceAsUriString(resId = R.raw.test_thumb_3),
-                resourceAsUriString(resId = R.raw.test_thumb_4),
-                resourceAsUriString(resId = R.raw.test_thumb_5),
+                R.raw.test_thumb_1.toString(),
+                R.raw.test_thumb_2.toString(),
+                R.raw.test_thumb_3.toString(),
+                R.raw.test_thumb_4.toString(),
+                R.raw.test_thumb_5.toString(),
             )
         ),
         Collection(
             name = "Collection 2",
             thumbnailUriStrings = listOf(
-                resourceAsUriString(resId = R.raw.test_thumb_2),
-                resourceAsUriString(resId = R.raw.test_thumb_4),
-                resourceAsUriString(resId = R.raw.test_thumb_5),
-                resourceAsUriString(resId = R.raw.test_thumb_6),
+                R.raw.test_thumb_2.toString(),
+                R.raw.test_thumb_4.toString(),
+                R.raw.test_thumb_5.toString(),
+                R.raw.test_thumb_6.toString(),
             )
         ),
         Collection(
             name = "Collection 3",
             thumbnailUriStrings = listOf(
-                resourceAsUriString(resId = R.raw.test_thumb_3),
-                resourceAsUriString(resId = R.raw.test_thumb_4),
-                resourceAsUriString(resId = R.raw.test_thumb_5),
+                R.raw.test_thumb_3.toString(),
+                R.raw.test_thumb_4.toString(),
+                R.raw.test_thumb_5.toString(),
             )
         ),
         Collection(
             name = "Collection 4",
             thumbnailUriStrings = listOf(
-                resourceAsUriString(resId = R.raw.test_thumb_4),
-                resourceAsUriString(resId = R.raw.test_thumb_8),
+                R.raw.test_thumb_4.toString(),
+                R.raw.test_thumb_8.toString(),
             )
         ),
         Collection(
             name = "Collection 5",
             thumbnailUriStrings = listOf(
-                resourceAsUriString(resId = R.raw.test_thumb_9),
+                R.raw.test_thumb_9.toString(),
             )
         ),
         Collection(
             name = "Collection 6",
             thumbnailUriStrings = listOf(
-                resourceAsUriString(resId = R.raw.test_thumb_9),
-                resourceAsUriString(resId = R.raw.test_thumb_8),
-                resourceAsUriString(resId = R.raw.test_thumb_7),
-                resourceAsUriString(resId = R.raw.test_thumb_6),
-                resourceAsUriString(resId = R.raw.test_thumb_5),
-                resourceAsUriString(resId = R.raw.test_thumb_4),
-                resourceAsUriString(resId = R.raw.test_thumb_3),
-                resourceAsUriString(resId = R.raw.test_thumb_2),
-                resourceAsUriString(resId = R.raw.test_thumb_1),
+                R.raw.test_thumb_9.toString(),
+                R.raw.test_thumb_8.toString(),
+                R.raw.test_thumb_7.toString(),
+                R.raw.test_thumb_7.toString(),
+                R.raw.test_thumb_6.toString(),
+                R.raw.test_thumb_5.toString(),
+                R.raw.test_thumb_4.toString(),
+                R.raw.test_thumb_3.toString(),
+                R.raw.test_thumb_2.toString(),
+                R.raw.test_thumb_1.toString(),
+                R.raw.test_thumb_6.toString(),
+                R.raw.test_thumb_5.toString(),
+                R.raw.test_thumb_4.toString(),
+                R.raw.test_thumb_3.toString(),
+                R.raw.test_thumb_2.toString(),
+                R.raw.test_thumb_1.toString(),
             )
         ),
     )

@@ -240,36 +240,6 @@ fun ArticlesScreen(
     }
 }
 
-@Composable
-fun ArticleThumbnailImage(
-    uriString: String,
-    modifier: Modifier = Modifier,
-){
-    val composePreview = LocalInspectionMode.current
-    var isLoading by remember { mutableStateOf(true) }
-    Box(contentAlignment = Alignment.Center,
-        modifier = modifier
-    ){
-        if(isLoading && !composePreview){
-            CircularProgressIndicator()
-        }
-        if(!composePreview){
-            AsyncImage(
-                model = uriString,
-                contentDescription = "thumbnail desc",
-                onState = { state ->
-                    isLoading = state is Loading
-                },
-            )
-        } else {
-            Image(
-                painter = painterResource(id = uriString.toInt()),
-                contentDescription = "preview thumbnail",
-            )
-        }
-    }
-}
-
 val allThumbnailUris = listOf(
     R.raw.test_thumb_1.toString(), R.raw.test_thumb_2.toString(), R.raw.test_thumb_3.toString(),
     R.raw.test_thumb_4.toString(), R.raw.test_thumb_5.toString(), R.raw.test_thumb_6.toString(),
