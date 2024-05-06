@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.guava.android)
 
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.compose.material)
     androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.androidx.navigation.compose)
 

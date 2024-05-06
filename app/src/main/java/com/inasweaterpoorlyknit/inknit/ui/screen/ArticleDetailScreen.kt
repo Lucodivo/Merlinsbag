@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
@@ -9,6 +10,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
 import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
@@ -27,11 +30,11 @@ fun ArticleDetailScreen(
   imageUriString: String?,
   modifier: Modifier = Modifier
 ) {
-  AsyncImage(
-    model = imageUriString,
-    contentDescription = "TODO: image description",
-    modifier = modifier.padding(16.dp),
-  )
+    AsyncImage(
+      model = imageUriString,
+      contentDescription = "TODO: image description",
+      modifier = modifier.padding(16.dp),
+    )
 }
 
 @Composable
@@ -42,12 +45,10 @@ fun ArticleDetailRoute(
   articleDetailViewModel: ArticleDetailViewModel = hiltViewModel(), // MainMenuViewModel
 ){
   val clothingDetail = articleDetailViewModel.getArticleDetails(clothingArticleId).observeAsState(initial = null)
-//  Box(modifier = modifier.fillMaxSize()) {
-    ArticleDetailScreen(
-      imageUriString = clothingDetail.value?.imageUriString,
-      modifier = modifier,
-    )
-//  }
+  ArticleDetailScreen(
+    imageUriString = clothingDetail.value?.imageUriString,
+    modifier = modifier,
+  )
 }
 
 @Preview

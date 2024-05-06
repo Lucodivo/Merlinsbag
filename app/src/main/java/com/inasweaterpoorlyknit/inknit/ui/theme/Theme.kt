@@ -18,7 +18,6 @@ import androidx.core.view.WindowCompat
 import dagger.hilt.android.internal.managers.FragmentComponentManager
 
 private val LightColorScheme = lightColorScheme()
-
 private val DarkColorScheme = darkColorScheme()
 
 @Composable
@@ -27,25 +26,16 @@ fun InKnitTheme(
         dynamicColor: Boolean = true,
         content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            if (darkTheme) dynamicDarkColorScheme(LocalContext.current) else dynamicLightColorScheme(LocalContext.current)
-        }
-        darkTheme ->
-          DarkColorScheme
-        else ->
-          LightColorScheme
-    }
-/*
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (FragmentComponentManager.findActivity(view.context) as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
-        }
-    }
-*/
+  val colorScheme = when {
+      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+          if (darkTheme) dynamicDarkColorScheme(LocalContext.current)
+          else dynamicLightColorScheme(LocalContext.current)
+      }
+      darkTheme ->
+        DarkColorScheme
+      else ->
+        LightColorScheme
+  }
 
   MaterialTheme(
     colorScheme = colorScheme,

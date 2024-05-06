@@ -20,6 +20,11 @@ Add Article:
 Outfits:
     - add items to a list
     - display lists
+Article Detail:
+    - Swipe between items in current scope
+        - HorizontalPager?
+        - Transfer current list context from one screen into ArticleDetailViewmodel
+            - Context being essentially filters of any kind, most notably tags/collections/outfits
 Features:
     - Export data
         - Individual items
@@ -41,20 +46,3 @@ Build time:
     - Look into removing AsyncImage since
 Tooling:
     - UI Catalog
-
-vvvvv SCRATCH vvvvv
-
-MULTIPLE NAV HOSTS??
-InterestsListDetailScreen.kt
-
-Been working on my own project and using this repo as a compose navigation learning tool. I believe the following lines are not valid. I've found that the `NavDestination.hierarchy` does not always contain a node with the top level destination route.
-
-https://github.com/android/nowinandroid/blob/afad1b9ac7e3d5efc798e786bd6548229a55735c/app/src/main/kotlin/com/google/samples/apps/nowinandroid/ui/NiaApp.kt#L320-L323
-
-Where the `NavDestination` is sources from here:
-
-https://github.com/android/nowinandroid/blob/afad1b9ac7e3d5efc798e786bd6548229a55735c/app/src/main/kotlin/com/google/samples/apps/nowinandroid/ui/NiaAppState.kt#L94-L96
-
-I've actually never seen any destination hierarchy have more than two `NavDestination`'s ever. Not while debugging my own project or NowInAndroid
-
-https://github.com/android/nowinandroid/blob/afad1b9ac7e3d5efc798e786bd6548229a55735c/app/src/main/kotlin/com/google/samples/apps/nowinandroid/navigation/NiaNavHost.kt#L38-L63

@@ -4,6 +4,7 @@ import android.Manifest.permission
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Debug
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,14 +12,18 @@ import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import coil.compose.AsyncImagePainter.State.Error
+import coil.compose.AsyncImagePainter.State.Loading
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog as AlertDialogCompose
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -37,6 +42,8 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,9 +52,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
 
@@ -106,13 +117,16 @@ fun ArticlesRoute(
 
     val thumbnailDetails = articlesViewModel.thumbnailDetails.observeAsState()
     val showPermissionsAlert = articlesViewModel.showPermissionsAlert.observeAsState(false)
+    var addButtonActive by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
     articlesViewModel.openSettings.observeAsState().value?.getContentIfNotHandled()?.let { openAppSettings() }
     ArticlesScreen(
         thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
+        addButtonActive = addButtonActive,
         showPermissionsAlert = showPermissionsAlert.value,
         onClickArticle = { i -> navController.navigateToArticleDetail(thumbnailDetails.value!![i].articleId) },
         onClickAddPhotoAlbum = { _photoAlbumLauncher.launch("image/*") },
         onClickAddPhotoCamera = { _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS) },
+        onClickAddButton = { addButtonActive = !addButtonActive },
         onPermissionsAlertPositive = { articlesViewModel.onPermissionsAlertPositive() },
         onPermissionsAlertNegative = { articlesViewModel.onPermissionsAlertNegative() },
         onPermissionsAlertOutside = { articlesViewModel.onPermissionsAlertOutside() },
@@ -122,10 +136,12 @@ fun ArticlesRoute(
 @Composable
 fun ArticlesScreen(
     thumbnailUris: List<String> = emptyList(),
+    addButtonActive: Boolean = false,
     showPermissionsAlert: Boolean = false,
     onClickArticle: (index: Int) -> Unit = {},
     onClickAddPhotoAlbum: () -> Unit = {},
     onClickAddPhotoCamera: () -> Unit = {},
+    onClickAddButton: () -> Unit = {},
     onPermissionsAlertPositive: () -> Unit = {},
     onPermissionsAlertNegative: () -> Unit = {},
     onPermissionsAlertOutside: () -> Unit = {},
@@ -165,18 +181,13 @@ fun ArticlesScreen(
             columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
             content = {
                 items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
-                    val thumbnailUri = thumbnailUris[thumbnailGridItemIndex]
-                    Box(contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize().clickable{
-                            onClickArticle(thumbnailGridItemIndex)
-                        }){
-                        AsyncImage(
-                            model = thumbnailUri,
-                            contentScale = ContentScale.Fit,
-                            contentDescription = null, // TODO: Thumbnail description
-                            modifier = Modifier.padding(gridItemPadding)
-                        )
-                    }
+                    ArticleThumbnailImage(
+                        uriString = thumbnailUris[thumbnailGridItemIndex],
+                        modifier = Modifier
+                            .padding(gridItemPadding)
+                            .clickable { onClickArticle(thumbnailGridItemIndex) }
+                            .fillMaxSize(),
+                    )
                 }
             },
             modifier = Modifier.fillMaxSize(),
@@ -185,8 +196,6 @@ fun ArticlesScreen(
 
         // add article floating buttons
         Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxSize()) {
-            // TODO: Revert to false on release, but useful to start as true for testing
-            var addButtonActive by remember { mutableStateOf(true) }
             Column(
                 horizontalAlignment = Alignment.End,
                 modifier = Modifier.padding(20.dp)
@@ -218,7 +227,7 @@ fun ArticlesScreen(
                 }
 
                 FloatingActionButton(
-                    onClick = { addButtonActive = !addButtonActive },
+                    onClick = { onClickAddButton() },
                 ) {
                     if (addButtonActive) {
                         Icon(InKnitIcons.Remove, "remove icon")
@@ -231,14 +240,64 @@ fun ArticlesScreen(
     }
 }
 
+@Composable
+fun ArticleThumbnailImage(
+    uriString: String,
+    modifier: Modifier = Modifier,
+){
+    val composePreview = LocalInspectionMode.current
+    var isLoading by remember { mutableStateOf(true) }
+    Box(contentAlignment = Alignment.Center,
+        modifier = modifier
+    ){
+        if(isLoading && !composePreview){
+            CircularProgressIndicator()
+        }
+        if(!composePreview){
+            AsyncImage(
+                model = uriString,
+                contentDescription = "thumbnail desc",
+                onState = { state ->
+                    isLoading = state is Loading
+                },
+            )
+        } else {
+            Image(
+                painter = painterResource(id = uriString.toInt()),
+                contentDescription = "preview thumbnail",
+            )
+        }
+    }
+}
+
+val allThumbnailUris = listOf(
+    R.raw.test_thumb_1.toString(), R.raw.test_thumb_2.toString(), R.raw.test_thumb_3.toString(),
+    R.raw.test_thumb_4.toString(), R.raw.test_thumb_5.toString(), R.raw.test_thumb_6.toString(),
+    R.raw.test_thumb_7.toString(), R.raw.test_thumb_8.toString(), R.raw.test_thumb_9.toString(),
+)
+val testList = mutableListOf<String>().apply {
+    repeat(3){ addAll(allThumbnailUris) }
+}
+
 @Preview
 @Composable
 fun PreviewArticlesScreen() {
-    ArticlesScreen()
+    InKnitTheme {
+        ArticlesScreen(
+            thumbnailUris = testList,
+            addButtonActive = true,
+        )
+    }
 }
 
 @Preview
 @Composable
 fun PreviewArticlesScreenWithAlert() {
-    ArticlesScreen(showPermissionsAlert = true)
+    InKnitTheme {
+        ArticlesScreen(
+            thumbnailUris = testList,
+            showPermissionsAlert = true,
+            addButtonActive = true,
+        )
+    }
 }

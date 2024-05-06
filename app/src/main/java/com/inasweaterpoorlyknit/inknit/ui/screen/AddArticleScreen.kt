@@ -30,11 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 
 const val IMAGE_URI_STRING_ARG = "imageUriString"
@@ -224,10 +224,13 @@ fun AddArticleRoute(
 @DevicePreviews
 @Composable
 fun PreviewAddArticleScreen(){
-  AddArticleScreen(
-    windowSizeClass = currentWindowAdaptiveInfo(),
-    processing = false,
-    processedImage = previewAssetBitmap(filename = longArticle),
-    imageRotation = 0.0f,
-  )
+  InKnitTheme(){
+    AddArticleScreen(
+      windowSizeClass = currentWindowAdaptiveInfo(),
+      processing = false,
+      multipleSubjects = true,
+      processedImage = previewAssetBitmap(filename = squareishComposable),
+      imageRotation = 270.0f,
+    )
+  }
 }

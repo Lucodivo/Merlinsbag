@@ -41,10 +41,8 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.ADD_ARTICLES_BASE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.COLLECTIONS_ROUTE
-import com.inasweaterpoorlyknit.inknit.ui.screen.hideSystemUI
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToCollections
-import com.inasweaterpoorlyknit.inknit.ui.screen.showSystemUI
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
 
 object InKnitNavigationDefaults {
