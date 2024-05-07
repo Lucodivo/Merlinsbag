@@ -12,10 +12,10 @@ Database work:
 Camera:
     - Setting to allow user to use preferred camera app
     - Selfie camera
-    - Camera "feels" slow between clicking the "take picture" button to the AddArticleFragment
+    - Camera "feels" slow between clicking the "take picture" button to the AddArticleScreen
     - Delete unused external storage photos? Change to internal storage directory that gets cleared?
 Add Article:
-    - Image labelling
+    - ML Kit: Image labelling
     - Primary / Secondary color classifications?
 Outfits:
     - add items to a list
@@ -29,21 +29,21 @@ Features:
     - Export data
         - Individual items
         - All items
-    - Proper landscape support for all screens
+    - Proper multiple form factor support for all screens
         - AddArticlesScreen [COMPLETED]
+Articles:
+    - thumbnails with random "shimmer"/"rotation"
 Architecture:
     - Consolidate mutable states into UIStates, mostly in viewmodels and listened to in Screens
 App-wide UI:
     - EdgeToEdge
+    - Explicit to Screen animations
 Splash screen
     - androidx.core:core-splashscreen
         installSplashScreen()
         splashScreen.setKeepOnScreenCondition { when (uiState) { Loading -> true is Success -> false } }
-App Colors
-    - Dynamic colors
-    - At least not white background...
 Build time:
-    - Look into removing AsyncImage since
+    - Look into removing AsyncImage since images are local
 Tooling:
     - UI Catalog
 Performance:

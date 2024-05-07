@@ -32,6 +32,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
+import com.inasweaterpoorlyknit.inknit.ui.component.RotatableImage
+import com.inasweaterpoorlyknit.inknit.ui.component.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
@@ -55,8 +57,8 @@ fun ArticleImage(
   processedImage: Bitmap? = null,
   angle: Float = 0.0f,
 ){
-  val rotateAnimateFloat by animateRotationAsState(targetValue = angle)
-  rotatableImage(
+  val rotateAnimateFloat by animateClosestRotationAsState(targetDegrees = angle)
+  RotatableImage(
     modifier = modifier,
     bitmap = processedImage,
     ccwRotaitonAngle = rotateAnimateFloat,

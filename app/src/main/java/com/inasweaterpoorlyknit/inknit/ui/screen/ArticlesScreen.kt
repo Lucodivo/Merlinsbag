@@ -44,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons

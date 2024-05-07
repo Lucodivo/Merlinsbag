@@ -17,6 +17,12 @@ import java.util.Locale
 
 fun pixelsToDp(pixels: Int) = (pixels / Resources.getSystem().displayMetrics.density).dp
 
+const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+fun timestampFileName(): String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
+
+fun Float.degToRad() = this * Math.PI / 180.0
+fun Float.radToDeg() = this * 180.0 / Math.PI
+
 fun Context.getActivity(): ComponentActivity? = when (this) {
   is ComponentActivity -> this
   is ContextWrapper -> baseContext.getActivity()
@@ -25,11 +31,6 @@ fun Context.getActivity(): ComponentActivity? = when (this) {
 fun Context.toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 fun Context.toast(@StringRes msg: Int) = Toast.makeText(this, resources.getString(msg), Toast.LENGTH_SHORT).show()
 
-const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-fun timestampFileName(): String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
-
-fun Float.degToRad() = this * Math.PI / 180.0
-fun Float.radToDeg() = this * 180.0 / Math.PI
 fun Context.showSystemUI() {
   val window = (this as Activity).window
   if (Build.VERSION.SDK_INT >= 30) {

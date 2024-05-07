@@ -6,10 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +20,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
+import com.inasweaterpoorlyknit.inknit.ui.component.HorizontalOverlappingCollectionLayout
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 
 // TODO: Collections Screen
@@ -46,19 +47,20 @@ fun CollectionRow(
     modifier: Modifier = Modifier,
 ){
     val padding = 10.dp
+    val maxThumbnailSize = 70.dp
     Card(
         modifier = modifier
     ){
-        OverlappingCollectionLayout(
+        HorizontalOverlappingCollectionLayout(
             modifier = Modifier
                 .padding(horizontal = padding),
-            overlapPercentage = 0.6f,
+            overlapPercentage = 0.5f,
         ) {
             for (thumbnailUriString in collection.thumbnailUriStrings) {
                 ArticleThumbnailImage(
                     uriString = thumbnailUriString,
                     modifier = Modifier
-                        .size(70.dp)
+                        .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
                         .padding(top = padding)
                 )
             }

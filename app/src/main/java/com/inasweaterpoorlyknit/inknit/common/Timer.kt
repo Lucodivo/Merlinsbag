@@ -1,9 +1,6 @@
 package com.inasweaterpoorlyknit.inknit.common
 
 import android.util.Log
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 const val NANOSECONDS_PER_MICROSECOND = 1_000
 const val NANOSECONDS_PER_MILLISECOND = 1_000_000
