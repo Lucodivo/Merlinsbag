@@ -4,7 +4,6 @@ import android.Manifest.permission
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Debug
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -12,19 +11,15 @@ import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import coil.compose.AsyncImagePainter.State.Error
-import coil.compose.AsyncImagePainter.State.Loading
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.AlertDialog as AlertDialogCompose
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,10 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,16 +43,13 @@ import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
+import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
+import androidx.compose.material3.AlertDialog as AlertDialogCompose
 
 const val ARTICLES_ROUTE = "articles_route"
 
@@ -202,6 +191,7 @@ fun ArticlesScreen(
             ) {
                 val openAnimateFloat by animateFloatAsState(
                     targetValue = if(addButtonActive) 1.0f else 0.0f,
+                    animationSpec = tween(),
                     label = "floating action button size"
                 )
                 Column(
@@ -214,12 +204,12 @@ fun ArticlesScreen(
                         transformOrigin = TransformOrigin(0.9f, 1.0f)
                     }) {
                     ExtendedFloatingActionButton(
-                        text = { Text("album") },
+                        text = { Text(stringResource(id = R.string.Album)) },
                         icon = { Icon(InKnitIcons.PhotoAlbum, "add a photo from album") },
                         onClick = onClickAddPhotoAlbum
                     )
                     ExtendedFloatingActionButton(
-                        text = { Text("camera") },
+                        text = { Text(stringResource(id = R.string.Camera)) },
                         icon = { Icon(InKnitIcons.AddPhoto, "add a photo from camera") },
                         onClick = onClickAddPhotoCamera,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -252,7 +242,7 @@ val testList = mutableListOf<String>().apply {
 @Preview
 @Composable
 fun PreviewArticlesScreen() {
-    InKnitTheme {
+    AppTheme {
         ArticlesScreen(
             thumbnailUris = testList,
             addButtonActive = true,
@@ -263,7 +253,7 @@ fun PreviewArticlesScreen() {
 @Preview
 @Composable
 fun PreviewArticlesScreenWithAlert() {
-    InKnitTheme {
+    AppTheme {
         ArticlesScreen(
             thumbnailUris = testList,
             showPermissionsAlert = true,

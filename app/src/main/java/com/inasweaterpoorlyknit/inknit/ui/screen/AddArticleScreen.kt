@@ -33,8 +33,8 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
+import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 
 const val IMAGE_URI_STRING_ARG = "imageUriString"
@@ -224,7 +224,7 @@ fun AddArticleRoute(
 @DevicePreviews
 @Composable
 fun PreviewAddArticleScreen(){
-  InKnitTheme(){
+  AppTheme(){
     AddArticleScreen(
       windowSizeClass = currentWindowAdaptiveInfo(),
       processing = false,

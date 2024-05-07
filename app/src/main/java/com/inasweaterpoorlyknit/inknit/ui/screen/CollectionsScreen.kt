@@ -9,24 +9,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
-import java.util.ArrayList
-import kotlin.math.max
-import kotlin.math.min
+import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 
 // TODO: Collections Screen
 
@@ -81,7 +76,9 @@ fun CollectionRow(
 fun CollectionsScreen(collections: List<Collection>){
     val sidePadding = 10.dp
     val collectionsSpacing = 5.dp
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+    ) {
         LazyColumn(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -172,7 +169,7 @@ fun CollectionsScreenPreview(){
         ),
     )
 
-    InKnitTheme{
+    AppTheme {
         CollectionsScreen(debugCollections)
     }
 }

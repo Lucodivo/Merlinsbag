@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">inknit</string>
-    <string name="camera">Camera</string>
+    <string name="Camera">Camera</string>
     <string name="cowboy_hat">cowboy hat</string>
     <string name="shirt">shirt</string>
     <string name="sweater">sweater</string>
@@ -27,7 +27,7 @@
     <string name="wardrobe">wardrobe</string>
     <string name="digitize">digitize</string>
     <string name="picture_frame">picture frame</string>
-    <string name="album">album</string>
+    <string name="Album">Album</string>
     <string name="left_arrow">left arrow</string>
     <string name="previous">previous</string>
     <string name="right_arrow">right arrow</string>
@@ -47,9 +47,9 @@
     <string name="permission_alert_positive">App Permissions</string>
     <string name="search">search</string>
     <string name="settings">settings</string>
-    <string name="articles">articles</string>
+    <string name="Articles">Articles</string>
     <string name="add">add</string>
-    <string name="collections">collections</string>
+    <string name="Collections">Collections</string>
     <string name="add_article">add article</string>
     <string name="no_subject_found">Try again. No subject found.</string>
     <string name="assorted_blocks">assorted blocks</string>

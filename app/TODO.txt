@@ -46,3 +46,8 @@ Build time:
     - Look into removing AsyncImage since
 Tooling:
     - UI Catalog
+Performance:
+    - Bottom bar navigation
+        - bug: transition to articles from bottom bar hiccups a little
+    - Logs report skipping frames:
+        - Startup in articles screen up to 120 frames total!

@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 private val lightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity(){
       val appState = rememberInKnitAppState(
         windowSizeClass = calculateWindowSizeClass(this)
       )
-      InKnitTheme {
+      AppTheme {
         InKnitApp(appState = appState)
       }
     }
