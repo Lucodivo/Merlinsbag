@@ -67,7 +67,7 @@ fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(
 fun ArticlesRoute(
     navController: NavController,
     modifier: Modifier = Modifier,
-    articlesViewModel: ArticlesViewModel = hiltViewModel(), // MainMenuViewModel
+    articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ){
     val _photoAlbumLauncher = rememberLauncherForActivityResult(GetContent()){ uri ->
         if(uri != null) {
@@ -108,6 +108,7 @@ fun ArticlesRoute(
     val showPermissionsAlert = articlesViewModel.showPermissionsAlert.observeAsState(false)
     var addButtonActive by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
     articlesViewModel.openSettings.observeAsState().value?.getContentIfNotHandled()?.let { openAppSettings() }
+
     ArticlesScreen(
         thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
         addButtonActive = addButtonActive,

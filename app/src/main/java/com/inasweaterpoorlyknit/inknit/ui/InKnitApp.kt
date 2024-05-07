@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -24,12 +25,14 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import com.inasweaterpoorlyknit.inknit.navigation.APP_START_DESTINATION
 import com.inasweaterpoorlyknit.inknit.navigation.InKnitNavHost
 import com.inasweaterpoorlyknit.inknit.navigation.TopLevelDestination
-import com.inasweaterpoorlyknit.inknit.navigation.navigateToTopLevelDestination
 import com.inasweaterpoorlyknit.inknit.ui.screen.ADD_ARTICLES_BASE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
+import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToArticles
+import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToCollections
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -37,6 +40,9 @@ fun InKnitApp(
     appState: InKnitAppState,
     modifier: Modifier = Modifier,
 ) {
+    val currentTopLevelDestination = remember { mutableIntStateOf(
+        TopLevelDestination.entries.indexOf(TopLevelDestination.routeToTopLevelDestination(APP_START_DESTINATION))
+    )}
     Scaffold(
         modifier = modifier.semantics {
             testTagsAsResourceId = true
@@ -47,9 +53,16 @@ fun InKnitApp(
         bottomBar = {
             if(appState.showBottomNavBar.value){
                 InKnitBottomNavBar(
-                    destinations = appState.topLevelDestinations,
-                    onNavigateToTopLevelDestination = { from, to -> appState.navController.navigateToTopLevelDestination(from, to) },
-                    startDestination = TopLevelDestination.routeToTopLevelDestination(APP_START_DESTINATION)!!,
+                    bottomNavBarDataItems = appState.topLevelDestinations,
+                    onClick = { selectedIndex ->
+                        val previousIndex = currentTopLevelDestination.intValue
+                        currentTopLevelDestination.intValue = selectedIndex
+                        appState.navController.navigateToTopLevelDestination(
+                            TopLevelDestination.entries[previousIndex],
+                            TopLevelDestination.entries[selectedIndex]
+                        )
+                    },
+                    selectedIndex = currentTopLevelDestination.intValue,
                     modifier = Modifier.testTag("InKnitBottomBar"),
                 )
             }
@@ -106,4 +119,20 @@ fun rememberInKnitAppState(
           windowSizeClass = windowSizeClass,
       )
   }
+}
+
+fun NavHostController.navigateToTopLevelDestination(from: TopLevelDestination, to: TopLevelDestination){
+    val topLevelNavOptions = navOptions {
+        popUpTo(route = TopLevelDestination.topLevelDestinationToRoute(from)){
+            inclusive = true
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+
+    when(to){
+        TopLevelDestination.ARTICLES -> navigateToArticles(topLevelNavOptions)
+        TopLevelDestination.COLLECTIONS -> navigateToCollections(topLevelNavOptions)
+    }
 }

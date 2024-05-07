@@ -6,10 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navOptions
 import com.inasweaterpoorlyknit.inknit.ui.InKnitAppState
 import com.inasweaterpoorlyknit.inknit.ui.screen.ADD_ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLES_ROUTE
@@ -23,6 +25,8 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.COLLECTIONS_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CameraRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.CollectionsRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_ARG
+import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToArticles
+import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToCollections
 import com.inasweaterpoorlyknit.inknit.viewmodels.Event
 
 data class ScreenSuccess(

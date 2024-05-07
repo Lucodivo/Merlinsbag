@@ -1,53 +1,54 @@
 package com.inasweaterpoorlyknit.inknit.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.inknit.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 
+open class BottomNavBarData(
+  val selectedIcon: ImageVector,
+  val unselectedIcon: ImageVector,
+  @StringRes val iconTextId: Int,
+)
+
 @Composable
 fun InKnitBottomNavBar(
-  destinations: List<TopLevelDestination>,
-  onNavigateToTopLevelDestination: (from: TopLevelDestination, to: TopLevelDestination) -> Unit,
-  startDestination: TopLevelDestination,
+  bottomNavBarDataItems: List<BottomNavBarData>,
+  onClick: (index: Int) -> Unit,
+  selectedIndex: Int,
   modifier: Modifier = Modifier,
 ){
-  val topLevelDestination = remember { mutableStateOf(startDestination) }
   InKnitNavBar(
     modifier = modifier
   ) {
-    destinations.forEach { destination ->
-      val selected = destination == topLevelDestination.value
+    bottomNavBarDataItems.forEachIndexed { index, item ->
       InKnitNavigationBarItem(
-        selected = selected,
-        onClick = {
-          val from = topLevelDestination.value
-          topLevelDestination.value = destination
-          onNavigateToTopLevelDestination(from, topLevelDestination.value)
-        },
+        selected = selectedIndex == index,
+        onClick = { onClick(index) },
         icon = {
           Icon(
-            imageVector = destination.unselectedIcon,
+            imageVector = item.unselectedIcon,
             contentDescription = null,
           )
         },
         selectedIcon = {
           Icon(
-            imageVector = destination.selectedIcon,
+            imageVector = item.selectedIcon,
             contentDescription = null,
           )
         },
-        label = { Text(stringResource(destination.iconTextId)) },
+        label = { Text(stringResource(item.iconTextId)) },
         modifier = Modifier,
       )
     }
@@ -93,9 +94,9 @@ private fun RowScope.InKnitNavigationBarItem(
 fun InKnitBottomNavBarPreviewLight(){
   AppTheme(darkTheme = false) {
     InKnitBottomNavBar(
-      destinations = TopLevelDestination.entries,
-      onNavigateToTopLevelDestination = {_, _ ->},
-      startDestination = TopLevelDestination.entries.first(),
+      bottomNavBarDataItems = TopLevelDestination.entries,
+      onClick = {_ ->},
+      selectedIndex = 0,
     )
   }
 }
@@ -105,9 +106,9 @@ fun InKnitBottomNavBarPreviewLight(){
 fun InKnitBottomNavBarPreviewDark(){
   AppTheme(darkTheme = true) {
     InKnitBottomNavBar(
-      destinations = TopLevelDestination.entries,
-      onNavigateToTopLevelDestination = {_, _ ->},
-      startDestination = TopLevelDestination.entries.last(),
+      bottomNavBarDataItems = TopLevelDestination.entries,
+      onClick = {_ ->},
+      selectedIndex = TopLevelDestination.entries.lastIndex,
     )
   }
 }
