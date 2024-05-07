@@ -1,6 +1,6 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
@@ -10,10 +10,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.wear.compose.material.rememberSwipeableState
-import androidx.wear.compose.material.swipeable
-import coil.compose.AsyncImage
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
+import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 
 const val ARTICLE_ID_ARG = "articleId"
@@ -30,10 +30,10 @@ fun ArticleDetailScreen(
   imageUriString: String?,
   modifier: Modifier = Modifier
 ) {
-    AsyncImage(
-      model = imageUriString,
-      contentDescription = "TODO: image description",
-      modifier = modifier.padding(16.dp),
+    ArticleThumbnailImage(
+      uriString = imageUriString,
+      contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+      modifier = modifier.fillMaxSize().padding(16.dp),
     )
 }
 
@@ -53,8 +53,10 @@ fun ArticleDetailRoute(
 
 @Preview
 @Composable
-fun ArticleDetailScreenPreview(){
-  ArticleDetailScreen(
-    imageUriString = resourceAsUriString(R.raw.add_article_compose_preview)
-  )
+fun PreviewArticleDetailScreen(){
+  AppTheme {
+    ArticleDetailScreen(
+      imageUriString = R.raw.test_full_1.toString()
+    )
+  }
 }

@@ -2,7 +2,6 @@ package com.inasweaterpoorlyknit.inknit.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,11 +19,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.inknit.ui.allTestThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
 import com.inasweaterpoorlyknit.inknit.ui.component.HorizontalOverlappingCollectionLayout
+import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
-
-// TODO: Collections Screen
 
 const val COLLECTIONS_ROUTE = "collections_route"
 
@@ -40,7 +40,6 @@ fun CollectionsRoute(
     CollectionsScreen(state.value.collections)
 }
 
-
 @Composable
 fun CollectionRow(
     collection: Collection,
@@ -48,29 +47,28 @@ fun CollectionRow(
 ){
     val padding = 10.dp
     val maxThumbnailSize = 70.dp
+    val overlapPercentage = 0.4f
     Card(
         modifier = modifier
     ){
         HorizontalOverlappingCollectionLayout(
-            modifier = Modifier
-                .padding(horizontal = padding),
-            overlapPercentage = 0.5f,
+            modifier = Modifier.padding(horizontal = padding),
+            overlapPercentage = overlapPercentage,
         ) {
             for (thumbnailUriString in collection.thumbnailUriStrings) {
                 ArticleThumbnailImage(
                     uriString = thumbnailUriString,
+                    contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
                     modifier = Modifier
                         .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
                         .padding(top = padding)
                 )
             }
         }
-        Row {
-            Text(
-                text = collection.name,
-                modifier = Modifier.padding(padding)
-            )
-        }
+        Text(
+            text = collection.name,
+            modifier = Modifier.padding(padding)
+        )
     }
 }
 
@@ -94,10 +92,7 @@ fun CollectionsScreen(collections: List<Collection>){
                     collection = collections[index],
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            top = topPadding,
-                            bottom = bottomPadding,
-                        )
+                        .padding(top = topPadding, bottom = bottomPadding)
                 )
             }
         }
@@ -106,72 +101,24 @@ fun CollectionsScreen(collections: List<Collection>){
 
 @Preview
 @Composable
-fun CollectionsScreenPreview(){
-    val debugCollections = listOf(
-        Collection(
-            name = "Collection 1",
-            thumbnailUriStrings = listOf(
-                R.raw.test_thumb_1.toString(),
-                R.raw.test_thumb_2.toString(),
-                R.raw.test_thumb_3.toString(),
-                R.raw.test_thumb_4.toString(),
-                R.raw.test_thumb_5.toString(),
-            )
-        ),
-        Collection(
-            name = "Collection 2",
-            thumbnailUriStrings = listOf(
-                R.raw.test_thumb_2.toString(),
-                R.raw.test_thumb_4.toString(),
-                R.raw.test_thumb_5.toString(),
-                R.raw.test_thumb_6.toString(),
-            )
-        ),
-        Collection(
-            name = "Collection 3",
-            thumbnailUriStrings = listOf(
-                R.raw.test_thumb_3.toString(),
-                R.raw.test_thumb_4.toString(),
-                R.raw.test_thumb_5.toString(),
-            )
-        ),
-        Collection(
-            name = "Collection 4",
-            thumbnailUriStrings = listOf(
-                R.raw.test_thumb_4.toString(),
-                R.raw.test_thumb_8.toString(),
-            )
-        ),
-        Collection(
-            name = "Collection 5",
-            thumbnailUriStrings = listOf(
-                R.raw.test_thumb_9.toString(),
-            )
-        ),
-        Collection(
-            name = "Collection 6",
-            thumbnailUriStrings = listOf(
-                R.raw.test_thumb_9.toString(),
-                R.raw.test_thumb_8.toString(),
-                R.raw.test_thumb_7.toString(),
-                R.raw.test_thumb_7.toString(),
-                R.raw.test_thumb_6.toString(),
-                R.raw.test_thumb_5.toString(),
-                R.raw.test_thumb_4.toString(),
-                R.raw.test_thumb_3.toString(),
-                R.raw.test_thumb_2.toString(),
-                R.raw.test_thumb_1.toString(),
-                R.raw.test_thumb_6.toString(),
-                R.raw.test_thumb_5.toString(),
-                R.raw.test_thumb_4.toString(),
-                R.raw.test_thumb_3.toString(),
-                R.raw.test_thumb_2.toString(),
-                R.raw.test_thumb_1.toString(),
-            )
-        ),
-    )
-
+fun PreviewCollectionsScreen(){
+    val thumbnails = repeatedThumbnailResourceIdsAsStrings
     AppTheme {
-        CollectionsScreen(debugCollections)
+        CollectionsScreen(collections = listOf(
+            Collection(name = "Collection 1",
+                thumbnailUriStrings = thumbnails.slice(0..5)),
+            Collection(name = "Collection 2",
+                thumbnailUriStrings = thumbnails.slice(1..7)),
+            Collection(name = "Collection 3",
+                thumbnailUriStrings = thumbnails.slice(3..5)),
+            Collection(name = "Collection 4",
+                thumbnailUriStrings = thumbnails.slice(4..4)),
+            Collection(name = "Collection 5",
+                thumbnailUriStrings = thumbnails.slice(5..11)),
+            Collection(name = "Collection 6",
+                thumbnailUriStrings = thumbnails.slice(6..16)),
+            Collection(name = "Collection 7",
+                thumbnailUriStrings = thumbnails.slice(7..11)),
+        ))
     }
 }

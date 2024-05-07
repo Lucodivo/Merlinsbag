@@ -31,10 +31,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
+import com.inasweaterpoorlyknit.inknit.ui.DevicePreviews
 import com.inasweaterpoorlyknit.inknit.ui.component.RotatableImage
 import com.inasweaterpoorlyknit.inknit.ui.component.animateClosestRotationAsState
+import com.inasweaterpoorlyknit.inknit.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
+import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
+import com.inasweaterpoorlyknit.inknit.ui.squareishComposable
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
@@ -65,6 +70,8 @@ fun ArticleImage(
   )
 }
 
+// TODO: User custom layout instead of onSizeChanged()
+//  Preventing multiple redraws and better compose previews
 @Composable
 fun AddArticleControls(
   windowSizeClass: WindowSizeClass,
@@ -96,40 +103,40 @@ fun AddArticleControls(
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
-          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
+          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, "Narrow focus") }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, "Broaden focus") }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.RotateCCW, "Rotate counter-clockwise") }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.RotateCW, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.width(columnSize.width),
         ){
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.Check, "Check") }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
         }
       } else { // portrait
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = if(compactWidth){ Modifier.fillMaxWidth() } else { Modifier.wrapContentSize() }
         ){
           if(compactWidth) { buttonModifier = buttonModifier.weight(1f) }
-          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, "Switch left") }
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, "Narrow focus") }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, "Broaden focus") }
-          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, "Switch right") }
+          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.RotateCCW, "Rotate counter-clockwise") }
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(InKnitIcons.Check, "Check") }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(InKnitIcons.RotateCW, "Rotate counter-clockwise") }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(InKnitIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(InKnitIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
         }
       }
     }

@@ -17,6 +17,11 @@ Camera:
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
+    - Thumbnail sizes could be better determined.
+        - In examples used in this project, the coat is a lot smaller than the jacket.
+            - Ideally, subjects with similar aspect ratios should have similar sizes
+        - Although... the articles currently fit well within a collection.
+    - Use custom layout for AddArticleControls
 Outfits:
     - add items to a list
     - display lists
@@ -33,6 +38,10 @@ Features:
         - AddArticlesScreen [COMPLETED]
 Articles:
     - thumbnails with random "shimmer"/"rotation"
+Accessibility:
+    - Icon content description
+        - Research what kind of descriptions are desired for accessibility services? Describe the form only or function as well?
+            - If form, app icons can be localized to a single file with content descriptions instead of writing descriptions per Icon usage
 Architecture:
     - Consolidate mutable states into UIStates, mostly in viewmodels and listened to in Screens
 App-wide UI:

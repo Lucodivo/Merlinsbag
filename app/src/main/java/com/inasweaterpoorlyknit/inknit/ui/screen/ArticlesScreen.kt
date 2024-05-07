@@ -10,19 +10,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,10 +25,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,8 +35,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
+import com.inasweaterpoorlyknit.inknit.ui.component.ExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.inknit.ui.component.IconData
+import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
+import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
 import com.inasweaterpoorlyknit.inknit.ui.toast
@@ -125,6 +122,36 @@ fun ArticlesRoute(
 }
 
 @Composable
+fun CameraPermissionsAlertDialog(
+    onClickOutside: () -> Unit = {},
+    onClickNegative: () -> Unit = {},
+    onClickPositive: () -> Unit = {},
+){
+    AlertDialogCompose(
+        title = {
+            Text(text = stringResource(id = R.string.permission_alert_title))
+        },
+        text = {
+            Text(text = stringResource(id =
+            if(additionalPermissionsRequired) R.string.permission_alert_justification_additional
+            else R.string.permission_alert_justification)
+            )
+        },
+        onDismissRequest = onClickOutside,
+        confirmButton = {
+            TextButton(onClick = onClickPositive) {
+                Text(stringResource(id = R.string.permission_alert_positive))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onClickNegative){
+                Text(stringResource(id = R.string.permission_alert_negative))
+            }
+        }
+    )
+}
+
+@Composable
 fun ArticlesScreen(
     thumbnailUris: List<String> = emptyList(),
     addButtonActive: Boolean = false,
@@ -142,27 +169,10 @@ fun ArticlesScreen(
     val articlesGridState = rememberLazyStaggeredGridState()
 
     if(showPermissionsAlert) {
-        AlertDialogCompose(
-            title = {
-                Text(text = stringResource(id = R.string.permission_alert_title))
-            },
-            text = {
-                Text(text = stringResource(id =
-                if(additionalPermissionsRequired) R.string.permission_alert_justification_additional
-                else R.string.permission_alert_justification)
-                )
-            },
-            onDismissRequest = onPermissionsAlertOutside,
-            confirmButton = {
-                TextButton(onClick = onPermissionsAlertPositive) {
-                    Text(stringResource(id = R.string.permission_alert_positive))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onPermissionsAlertNegative){
-                    Text(stringResource(id = R.string.permission_alert_negative))
-                }
-            }
+        CameraPermissionsAlertDialog(
+            onClickOutside = onPermissionsAlertOutside,
+            onClickNegative = onPermissionsAlertNegative,
+            onClickPositive = onPermissionsAlertPositive,
         )
     }
 
@@ -174,6 +184,7 @@ fun ArticlesScreen(
                 items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
                     ArticleThumbnailImage(
                         uriString = thumbnailUris[thumbnailGridItemIndex],
+                        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
                         modifier = Modifier
                             .padding(gridItemPadding)
                             .clickable { onClickArticle(thumbnailGridItemIndex) }
@@ -184,61 +195,29 @@ fun ArticlesScreen(
             modifier = Modifier.fillMaxSize(),
             state = articlesGridState,
         )
-
-        // add article floating buttons
-        Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxSize()) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(20.dp)
-            ) {
-                val openAnimateFloat by animateFloatAsState(
-                    targetValue = if(addButtonActive) 1.0f else 0.0f,
-                    animationSpec = tween(),
-                    label = "floating action button size"
-                )
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    modifier = Modifier.graphicsLayer {
-                        scaleY = openAnimateFloat
-                        scaleX = openAnimateFloat
-                        // https://www.desmos.com/calculator/6ru1kya9ar
-                        alpha = (-(openAnimateFloat - 1.0f)*(openAnimateFloat - 1.0f)) + 1.0f
-                        transformOrigin = TransformOrigin(0.9f, 1.0f)
-                    }) {
-                    ExtendedFloatingActionButton(
-                        text = { Text(stringResource(id = R.string.Album)) },
-                        icon = { Icon(InKnitIcons.PhotoAlbum, "add a photo from album") },
-                        onClick = onClickAddPhotoAlbum
-                    )
-                    ExtendedFloatingActionButton(
-                        text = { Text(stringResource(id = R.string.Camera)) },
-                        icon = { Icon(InKnitIcons.AddPhoto, "add a photo from camera") },
-                        onClick = onClickAddPhotoCamera,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                }
-
-                FloatingActionButton(
-                    onClick = { onClickAddButton() },
-                ) {
-                    if (addButtonActive) {
-                        Icon(InKnitIcons.Remove, "remove icon")
-                    } else {
-                        Icon(InKnitIcons.Add, "add icon")
-                    }
-                }
-            }
-        }
+        ExpandingFloatingActionButton(
+            expanded = addButtonActive,
+            expandedButtons = listOf(
+                TextIconButtonData(
+                    text = stringResource(id = R.string.Album),
+                    icon = IconData(
+                        icon = InKnitIcons.PhotoAlbum,
+                        contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+                    ),
+                    onClick = onClickAddPhotoAlbum
+                ),
+                TextIconButtonData(
+                    text = stringResource(id = R.string.Camera),
+                    icon = IconData(
+                        icon = InKnitIcons.AddPhoto,
+                        contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+                    ),
+                    onClick = onClickAddPhotoCamera
+                ),
+            ),
+            onClickExpandCollapse = onClickAddButton,
+        )
     }
-}
-
-val allThumbnailUris = listOf(
-    R.raw.test_thumb_1.toString(), R.raw.test_thumb_2.toString(), R.raw.test_thumb_3.toString(),
-    R.raw.test_thumb_4.toString(), R.raw.test_thumb_5.toString(), R.raw.test_thumb_6.toString(),
-    R.raw.test_thumb_7.toString(), R.raw.test_thumb_8.toString(), R.raw.test_thumb_9.toString(),
-)
-val testList = mutableListOf<String>().apply {
-    repeat(3){ addAll(allThumbnailUris) }
 }
 
 @Preview
@@ -246,7 +225,7 @@ val testList = mutableListOf<String>().apply {
 fun PreviewArticlesScreen() {
     AppTheme {
         ArticlesScreen(
-            thumbnailUris = testList,
+            thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             addButtonActive = true,
         )
     }
@@ -257,9 +236,17 @@ fun PreviewArticlesScreen() {
 fun PreviewArticlesScreenWithAlert() {
     AppTheme {
         ArticlesScreen(
-            thumbnailUris = testList,
+            thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             showPermissionsAlert = true,
-            addButtonActive = true,
+            addButtonActive = false,
         )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewCameraPermissionsAlert(){
+    AppTheme {
+        CameraPermissionsAlertDialog()
     }
 }

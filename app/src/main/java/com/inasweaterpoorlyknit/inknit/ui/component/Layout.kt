@@ -1,10 +1,12 @@
 package com.inasweaterpoorlyknit.inknit.ui.component
 
+import android.graphics.drawable.Icon
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
+import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
 import kotlin.math.max
 import kotlin.math.min
@@ -13,14 +15,14 @@ import kotlin.math.min
 fun HorizontalOverlappingCollectionLayout(
   modifier: Modifier = Modifier,
   overlapPercentage: Float = 0.5f,
-  overflowIcon: ImageVector = InKnitIcons.MoreHorizontal,
+  overflowIcon: IconData = IconData(icon = InKnitIcons.MoreHorizontal, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
   content: @Composable () -> Unit
 ) {
   Layout(
     modifier = modifier,
     content = {
       content()
-      Icon(overflowIcon, contentDescription = null)
+      Icon(overflowIcon.icon, contentDescription = overflowIcon.contentDescription)
     },
   ) { measurables, constraints ->
     val showingPercentage = 1.0f - overlapPercentage

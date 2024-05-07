@@ -4,14 +4,8 @@ import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,7 +13,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,19 +20,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
+import com.inasweaterpoorlyknit.inknit.ui.component.CameraPreview
 import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import com.inasweaterpoorlyknit.inknit.viewmodels.CameraViewModel
-import androidx.compose.ui.tooling.preview.Preview as ComposePreview
+import androidx.compose.ui.tooling.preview.Preview
 
 const val TAG = "CameraScreen"
 const val EXTERNAL_STORAGE_CAMERA_PIC_DIR = "Pictures/InKnit"
@@ -118,74 +108,18 @@ fun CameraRoute(
   )
 }
 
-@Composable
-fun CameraPreview(
-  modifier: Modifier = Modifier,
-  cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
-  scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_CENTER,
-  imageCapture: ImageCapture? = null,
-) {
-  val androidViewLayoutParams = ViewGroup.LayoutParams(
-      ViewGroup.LayoutParams.MATCH_PARENT,
-      ViewGroup.LayoutParams.MATCH_PARENT,
-  )
-  if(LocalInspectionMode.current) { // !! Compose Preview only code !!
-    val previewCameraBitmap = previewAssetBitmap("camera_compose_preview.webp")
-    AndroidView(modifier = modifier, factory = { context ->
-        ImageView(context).apply {
-          setImageBitmap(previewCameraBitmap)
-          layoutParams = androidViewLayoutParams
-    }})
-    return
-  }
-  val lifecycleOwner = LocalLifecycleOwner.current
-  AndroidView(
-    modifier = modifier,
-    factory = { context ->
-      val previewView = PreviewView(context).apply {
-        this.scaleType = scaleType
-        layoutParams = androidViewLayoutParams
-        // Preview is incorrectly scaled in Compose on some devices without this
-        implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-      }
-
-      val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-
-      cameraProviderFuture.addListener({
-        val cameraProvider = cameraProviderFuture.get()
-
-        // Preview
-        val preview = Preview.Builder()
-          .build()
-          .also {
-            it.setSurfaceProvider(previewView.surfaceProvider)
-          }
-
-        try {
-          // Must unbind the use-cases before rebinding them.
-          cameraProvider.unbindAll()
-          cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
-        } catch (exc: Exception) {
-          Log.e("InKnit", "Use case binding failed", exc)
-        }
-      }, ContextCompat.getMainExecutor(context))
-
-      previewView
-    })
-}
-
-@ComposePreview
+@Preview
 @Composable
 fun CameraScreen(
   imageCapture: ImageCapture? = null,
   onClick: () -> Unit = {}
 ) {
   CameraPreview(imageCapture = imageCapture)
-  TakePictureButton(onClick = onClick)
+  CameraControls(onClick = onClick)
 }
 
 @Composable
-fun TakePictureButton(
+fun CameraControls(
   onClick: () -> Unit = {},
 ){
   var captureActivated by remember{ mutableStateOf(false) }
