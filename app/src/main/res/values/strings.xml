@@ -54,4 +54,8 @@
     <string name="no_subject_found">Try again. No subject found.</string>
     <string name="assorted_blocks">assorted blocks</string>
     <string name="folder_with_star">folder with star</string>
+    <string name="Goth_2_Boss">Goth 2 Boss</string>
+    <string name="Collection_title">Collection title</string>
+    <string name="Add_article_collection">Add article collection</string>
+    <string name="Save">Save</string>
 </resources>

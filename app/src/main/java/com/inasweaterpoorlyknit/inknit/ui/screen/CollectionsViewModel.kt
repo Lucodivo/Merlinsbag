@@ -11,7 +11,7 @@ data class Collection(
 )
 data class CollectionsUiState(
   val collections: List<Collection>,
-  val showAddCollectionForm: Boolean,
+  val showAddCollectionDialog: Boolean,
 )
 
 @HiltViewModel
@@ -21,11 +21,24 @@ class CollectionsViewModel @Inject constructor(
   val state = mutableStateOf(
     CollectionsUiState(
       collections = emptyList(),
-      showAddCollectionForm = false,
+      showAddCollectionDialog = false,
     )
   )
 
-  fun addCollection(){
-
+  private fun closeDialog() {
+    state.value = state.value.copy(showAddCollectionDialog = false)
   }
+
+  fun onClickAddCollection() {
+    state.value = state.value.copy(showAddCollectionDialog = true)
+  }
+
+  fun onClickCloseAddCollectionDialog() = closeDialog()
+
+  fun onClickSaveAddCollectionDialog() {
+    // TODO
+    closeDialog()
+  }
+
+  fun onClickOutsideAddCollectionDialog() = closeDialog()
 }
