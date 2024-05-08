@@ -26,7 +26,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.component.HorizontalOverlappingCollectionLayout
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopAddCollectionDialog
@@ -49,10 +49,10 @@ fun CollectionsRoute(
     CollectionsScreen(
         collections = state.value.collections,
         showAddCollectionForm = state.value.showAddCollectionDialog,
-        onClickAddCollection = { viewModel.onClickAddCollection() },
-        onClickSaveCollection = { viewModel.onClickSaveAddCollectionDialog() },
-        onClickOutsideAddCollectionDialog = { viewModel.onClickOutsideAddCollectionDialog() },
-        onCloseAddCollectionDialog = { viewModel.onClickCloseAddCollectionDialog() },
+        onClickAddCollection = viewModel::onClickAddCollection,
+        onClickSaveCollection = viewModel::onClickSaveAddCollectionDialog,
+        onClickOutsideAddCollectionDialog = viewModel::onClickOutsideAddCollectionDialog,
+        onCloseAddCollectionDialog = viewModel::onClickCloseAddCollectionDialog ,
     )
 }
 
@@ -72,7 +72,7 @@ fun CollectionRow(
             overlapPercentage = overlapPercentage,
         ) {
             for (thumbnailUriString in collection.thumbnailUriStrings) {
-                ArticleThumbnailImage(
+                NoopImage(
                     uriString = thumbnailUriString,
                     contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
                     modifier = Modifier
@@ -92,10 +92,10 @@ fun CollectionRow(
 fun CollectionsScreen(
     collections: List<Collection>,
     showAddCollectionForm: Boolean,
-    onClickAddCollection: () -> Unit = {},
-    onClickSaveCollection: () -> Unit = {},
-    onClickOutsideAddCollectionDialog: () -> Unit = {},
-    onCloseAddCollectionDialog: () -> Unit = {},
+    onClickAddCollection: () -> Unit,
+    onClickSaveCollection: (SaveCollectionData) -> Unit,
+    onClickOutsideAddCollectionDialog: () -> Unit,
+    onCloseAddCollectionDialog: () -> Unit,
 ) {
     val sidePadding = 10.dp
     val collectionsSpacing = 5.dp
@@ -140,19 +140,33 @@ fun CollectionsScreen(
             ) {
                 NoopAddCollectionDialog(
                     onClose = onCloseAddCollectionDialog,
-                    onPositive = onClickSaveCollection,
+                    onPositive = { userInputData ->
+                        onClickSaveCollection(
+                            SaveCollectionData(
+                                title = userInputData.title,
+                            )
+                        )
+                    },
                 )
             }
         }
     }
 }
 
+//region COMPOSABLE PREVIEWS
+@Composable
+fun __PreviewUtilCollectionsScreen(
+    collections: List<Collection>,
+    showAddCollectionForm: Boolean,
+) = CollectionsScreen(collections = collections, showAddCollectionForm = showAddCollectionForm, onClickAddCollection = {},
+        onClickSaveCollection = {}, onClickOutsideAddCollectionDialog = {}, onCloseAddCollectionDialog = {})
+
 @Preview
 @Composable
 fun PreviewCollectionsScreen(){
     val thumbnails = repeatedThumbnailResourceIdsAsStrings
     NoopTheme {
-        CollectionsScreen(
+        __PreviewUtilCollectionsScreen(
             collections = listOf(
                 Collection(name = "Collection 1",
                     thumbnailUriStrings = thumbnails.slice(0..5)),
@@ -179,7 +193,7 @@ fun PreviewCollectionsScreen(){
 fun PreviewCollectionsScreenAddCollectionDialog(){
     val thumbnails = repeatedThumbnailResourceIdsAsStrings
     NoopTheme {
-        CollectionsScreen(
+        __PreviewUtilCollectionsScreen(
             collections = listOf(
                 Collection(name = "Collection 1",
                     thumbnailUriStrings = thumbnails.slice(0..5)),
@@ -196,7 +210,8 @@ fun PreviewCollectionsScreenAddCollectionDialog(){
                 Collection(name = "Collection 7",
                     thumbnailUriStrings = thumbnails.slice(7..11)),
             ),
-            showAddCollectionForm = true
+            showAddCollectionForm = true,
         )
     }
 }
+//endregion

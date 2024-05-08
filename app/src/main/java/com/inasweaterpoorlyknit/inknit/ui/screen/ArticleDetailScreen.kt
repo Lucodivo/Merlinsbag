@@ -12,7 +12,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 
@@ -30,7 +30,7 @@ fun ArticleDetailScreen(
   imageUriString: String?,
   modifier: Modifier = Modifier
 ) {
-    ArticleThumbnailImage(
+    NoopImage(
       uriString = imageUriString,
       contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
       modifier = modifier.fillMaxSize().padding(16.dp),

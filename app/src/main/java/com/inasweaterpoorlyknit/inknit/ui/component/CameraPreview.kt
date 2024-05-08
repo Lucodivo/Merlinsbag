@@ -19,10 +19,10 @@ import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
 
 @Composable
 fun CameraPreview(
+  imageCapture: ImageCapture,
   modifier: Modifier = Modifier,
   cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
   scaleType: PreviewView.ScaleType = PreviewView.ScaleType.FIT_CENTER,
-  imageCapture: ImageCapture? = null,
 ) {
   val androidViewLayoutParams = ViewGroup.LayoutParams(
     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -76,5 +76,6 @@ fun CameraPreview(
 @ComposePreview
 @Composable
 fun PreviewCameraPreview(){
-  CameraPreview()
+  val bogusPreviewImageCapture = ImageCapture.Builder().build()
+  CameraPreview(imageCapture = bogusPreviewImageCapture)
 }

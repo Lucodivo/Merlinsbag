@@ -38,7 +38,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
 import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
@@ -123,9 +123,9 @@ fun ArticlesRoute(
 
 @Composable
 fun CameraPermissionsAlertDialog(
-    onClickOutside: () -> Unit = {},
-    onClickNegative: () -> Unit = {},
-    onClickPositive: () -> Unit = {},
+    onClickOutside: () -> Unit,
+    onClickNegative: () -> Unit,
+    onClickPositive: () -> Unit,
 ){
     AlertDialog(
         title = {
@@ -153,16 +153,16 @@ fun CameraPermissionsAlertDialog(
 
 @Composable
 fun ArticlesScreen(
-    thumbnailUris: List<String> = emptyList(),
-    addButtonActive: Boolean = false,
-    showPermissionsAlert: Boolean = false,
-    onClickArticle: (index: Int) -> Unit = {},
-    onClickAddPhotoAlbum: () -> Unit = {},
-    onClickAddPhotoCamera: () -> Unit = {},
-    onClickAddButton: () -> Unit = {},
-    onPermissionsAlertPositive: () -> Unit = {},
-    onPermissionsAlertNegative: () -> Unit = {},
-    onPermissionsAlertOutside: () -> Unit = {},
+    thumbnailUris: List<String>,
+    addButtonActive: Boolean,
+    showPermissionsAlert: Boolean,
+    onClickArticle: (index: Int) -> Unit,
+    onClickAddPhotoAlbum: () -> Unit,
+    onClickAddPhotoCamera: () -> Unit,
+    onClickAddButton: () -> Unit,
+    onPermissionsAlertPositive: () -> Unit,
+    onPermissionsAlertNegative: () -> Unit,
+    onPermissionsAlertOutside: () -> Unit,
 ) {
     val gridMinWidth = 100.dp
     val gridItemPadding = 16.dp
@@ -182,7 +182,7 @@ fun ArticlesScreen(
             columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
             content = {
                 items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
-                    ArticleThumbnailImage(
+                    NoopImage(
                         uriString = thumbnailUris[thumbnailGridItemIndex],
                         contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
                         modifier = Modifier
@@ -220,13 +220,21 @@ fun ArticlesScreen(
     }
 }
 
+//region COMPOSABLE PREVIEWS
+@Composable
+fun __PreviewUtilArticleScreen(thumbnailUris: List<String>, addButtonActive: Boolean, showPermissionsAlert: Boolean) =
+    ArticlesScreen(thumbnailUris = thumbnailUris, addButtonActive = addButtonActive, showPermissionsAlert = showPermissionsAlert,
+        onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickAddButton = {},
+        onPermissionsAlertPositive = {}, onPermissionsAlertNegative = {}, onPermissionsAlertOutside = {},)
+
 @Preview
 @Composable
 fun PreviewArticlesScreen() {
     NoopTheme {
-        ArticlesScreen(
+        __PreviewUtilArticleScreen(
             thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             addButtonActive = true,
+            showPermissionsAlert = false,
         )
     }
 }
@@ -235,7 +243,7 @@ fun PreviewArticlesScreen() {
 @Composable
 fun PreviewArticlesScreenWithAlert() {
     NoopTheme {
-        ArticlesScreen(
+        __PreviewUtilArticleScreen(
             thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             showPermissionsAlert = true,
             addButtonActive = false,
@@ -247,6 +255,7 @@ fun PreviewArticlesScreenWithAlert() {
 @Composable
 fun PreviewCameraPermissionsAlert(){
     NoopTheme {
-        CameraPermissionsAlertDialog()
+        CameraPermissionsAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
     }
 }
+//endregion

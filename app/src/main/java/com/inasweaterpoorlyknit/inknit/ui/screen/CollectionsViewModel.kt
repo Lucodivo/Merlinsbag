@@ -13,6 +13,9 @@ data class CollectionsUiState(
   val collections: List<Collection>,
   val showAddCollectionDialog: Boolean,
 )
+data class SaveCollectionData(
+  val title: String,
+)
 
 @HiltViewModel
 class CollectionsViewModel @Inject constructor(
@@ -35,7 +38,7 @@ class CollectionsViewModel @Inject constructor(
 
   fun onClickCloseAddCollectionDialog() = closeDialog()
 
-  fun onClickSaveAddCollectionDialog() {
+  fun onClickSaveAddCollectionDialog(saveCollectionData: SaveCollectionData) {
     // TODO
     closeDialog()
   }

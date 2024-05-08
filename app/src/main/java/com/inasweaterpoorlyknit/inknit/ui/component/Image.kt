@@ -27,12 +27,15 @@ import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.degToRad
 import com.inasweaterpoorlyknit.inknit.ui.isComposePreview
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
+import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
+import com.inasweaterpoorlyknit.inknit.ui.squareishArticle
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun ArticleThumbnailImage(
+fun NoopImage(
   uriString: String?,
   contentDescription: String?,
   modifier: Modifier = Modifier,
@@ -63,11 +66,14 @@ fun ArticleThumbnailImage(
   }
 }
 
+// TODO: Implement using custom layouts instead of onSizeChanged()
+//   less redraw
+//   stable composable previews
 @Composable
-fun RotatableImage(
+fun NoopRotatableImage(
   bitmap: Bitmap?, // displays progress indicator if null
+  ccwRotaitonAngle: Float, // degrees
   modifier: Modifier = Modifier,
-  ccwRotaitonAngle: Float = 0.0f,
 ) {
   var maxBoxSize by remember { mutableStateOf(IntSize(0, 0)) }
   Box(contentAlignment = Alignment.Center,
@@ -97,5 +103,40 @@ fun RotatableImage(
 @Preview
 @Composable
 fun PreviewArticleThumbnailImage() {
-  ArticleThumbnailImage(uriString = R.raw.test_full_1.toString(), contentDescription = null)
+  NoopTheme {
+    NoopImage(uriString = R.raw.test_full_1.toString(), contentDescription = null)
+  }
+}
+
+@Preview
+@Composable
+fun PreviewRotateableImage180(){
+  NoopTheme{
+    NoopRotatableImage(
+      bitmap = previewAssetBitmap(filename = squareishArticle),
+      ccwRotaitonAngle = 180.0f
+    )
+  }
+}
+
+@Preview
+@Composable
+fun PreviewRotateableImage90(){
+  NoopTheme{
+    NoopRotatableImage(
+      bitmap = previewAssetBitmap(filename = squareishArticle),
+      ccwRotaitonAngle = 90.0f
+    )
+  }
+}
+
+@Preview
+@Composable
+fun PreviewRotateableImage45(){
+  NoopTheme{
+    NoopRotatableImage(
+      bitmap = previewAssetBitmap(filename = squareishArticle),
+      ccwRotaitonAngle = 45.0f
+    )
+  }
 }

@@ -29,6 +29,10 @@ import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.Shapes
 
+data class DialogUserData(
+  val title: String,
+)
+
 /*
   Heavily based off of the Material 3 specks for fullscreen dialog:
      https://m3.material.io/components/dialogs/specs
@@ -36,11 +40,12 @@ import com.inasweaterpoorlyknit.inknit.ui.theme.Shapes
 @Composable
 fun NoopAddCollectionDialog(
   modifier: Modifier = Modifier,
-  onPositive: () -> Unit = {},
-  onClose: () -> Unit = {},
+  onPositive: (DialogUserData) -> Unit,
+  onClose: () -> Unit,
 ) {
   val headerHeight = 56.dp
   val padding = 16.dp
+  val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
   Surface(
     modifier = Modifier
       .fillMaxWidth(),
@@ -83,11 +88,16 @@ fun NoopAddCollectionDialog(
           modifier = Modifier
             .height(headerHeight)
             .padding(padding)
-            .clickable{ onPositive() }
+            .clickable{
+              onPositive(
+                DialogUserData(
+                  title = userInputTitle
+                )
+              )
+            }
         )
       }
       Row{
-        val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
         OutlinedTextField(
           value = userInputTitle,
           placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
@@ -104,6 +114,6 @@ fun NoopAddCollectionDialog(
 @Composable
 fun PreviewNoopDialog() {
   NoopTheme {
-    NoopAddCollectionDialog()
+    NoopAddCollectionDialog(onPositive = {}, onClose = {})
   }
 }

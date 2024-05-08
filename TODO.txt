@@ -60,3 +60,14 @@ Performance:
         - bug: transition to articles from bottom bar hiccups a little
     - Logs report skipping frames:
         - Startup in articles screen up to 120 frames total!
+Best Practices:
+    - Many composables have onClick lambdas as function parameters. In this project, those parameters
+        have been assigned default values simply to make Composable @Preview easier. This feels like
+        testing affecting an implementation. For the most part, the exposed lambdas on custom Compose
+        components should always be supplied.
+        - Is this actually a problem?
+            - Probably, because compilation errors are invaluable when using an API wrong
+        - Solutions?
+            - Simply supply void lambdas every time in @Preview functions
+            - If there are lots of previews using the same function, simply create and re-use a function
+                that sets these defaults for us.

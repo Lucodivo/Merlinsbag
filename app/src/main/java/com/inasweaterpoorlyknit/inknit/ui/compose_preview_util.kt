@@ -11,19 +11,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.FolderSpecial
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.FolderSpecial
-import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
-import androidx.compose.material.icons.outlined.Rotate90DegreesCw
 import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material.icons.outlined.SwitchLeft
-import androidx.compose.material.icons.outlined.SwitchRight
-import androidx.compose.material.icons.outlined.ZoomInMap
-import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -37,7 +30,7 @@ import com.inasweaterpoorlyknit.inknit.R
 
 
 val longArticle = "long_compose_preview.webp"
-val squareishComposable = "add_article_compose_preview.webp"
+val squareishArticle = "add_article_compose_preview.webp"
 val COMPOSE_PREVIEW_CONTENT_DESCRIPTION = "compose preview content description"
 
 @Composable
@@ -72,6 +65,12 @@ fun currentWindowAdaptiveInfo(): WindowSizeClass {
 val isComposePreview
   @Composable get() = LocalInspectionMode.current
 
+val allTestFullResourceIdsAsStrings = arrayOf(
+  R.raw.test_full_1.toString(), R.raw.test_full_2.toString(), R.raw.test_full_3.toString(),
+  R.raw.test_full_4.toString(), R.raw.test_full_5.toString(), R.raw.test_full_6.toString(),
+  R.raw.test_full_7.toString(), R.raw.test_full_8.toString(), R.raw.test_full_9.toString(),
+)
+val repeatedFullResourceIdsAsStrings = arrayListOf(*allTestFullResourceIdsAsStrings, *allTestFullResourceIdsAsStrings, *allTestFullResourceIdsAsStrings)
 val allTestThumbnailResourceIdsAsStrings = arrayOf(
     R.raw.test_thumb_1.toString(), R.raw.test_thumb_2.toString(), R.raw.test_thumb_3.toString(),
     R.raw.test_thumb_4.toString(), R.raw.test_thumb_5.toString(), R.raw.test_thumb_6.toString(),

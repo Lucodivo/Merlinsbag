@@ -26,11 +26,11 @@ import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 
 @Composable
 private fun _NoopExpandingFloatingActionButton(
-  expanded: Boolean = false,
+  expanded: Boolean,
   collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
   expandedIcon: IconData = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-  onClickExpandCollapse: () -> Unit = {},
-  expandedButtons: List<TextIconButtonData> = emptyList(),
+  onClickExpandCollapse: () -> Unit,
+  expandedButtons: List<TextIconButtonData>,
 ) {
   val columnPadding = 20.dp
   val expandedButtonPadding = 4.dp
@@ -69,11 +69,11 @@ private fun _NoopExpandingFloatingActionButton(
 
 @Composable
 fun NoopExpandingFloatingActionButton(
-  expanded: Boolean = false,
+  expanded: Boolean,
   collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
   expandedIcon: IconData = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-  onClickExpandCollapse: () -> Unit = {},
-  expandedButtons: List<TextIconButtonData> = emptyList()
+  onClickExpandCollapse: () -> Unit,
+  expandedButtons: List<TextIconButtonData>,
 ) {
   Box(
     contentAlignment = Alignment.BottomEnd,
@@ -92,7 +92,7 @@ fun NoopExpandingFloatingActionButton(
 @Composable
 private fun _NoopFloatingActionButton(
   iconData: IconData,
-  onClick: () -> Unit = {},
+  onClick: () -> Unit,
 ) {
   FloatingActionButton(onClick = { onClick() }) {
     Icon(iconData.icon, iconData.contentDescription)
@@ -102,7 +102,7 @@ private fun _NoopFloatingActionButton(
 @Composable
 fun NoopFloatingActionButton(
   iconData: IconData,
-  onClick: () -> Unit = {},
+  onClick: () -> Unit,
 ) {
   val buttonPadding = 20.dp
   Box(
@@ -122,7 +122,10 @@ fun NoopFloatingActionButton(
 @Composable
 fun PreviewNoopFloatingActionButton_Alone(){
   NoopTheme {
-    _NoopFloatingActionButton(iconData = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION))
+    _NoopFloatingActionButton(
+      iconData = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
+      onClick = {}
+    )
   }
 }
 
@@ -137,7 +140,8 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded_Alone(){
       expandedButtons = listOf(
         TextIconButtonData("Album", IconData(NoopComposePreviewIcons.PhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
         TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddAPhoto, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
-      )
+      ),
+      onClickExpandCollapse = {}
     )
   }
 }
@@ -153,7 +157,8 @@ fun PreviewNoopExpandingFloatingActionButtonCollapsed_Alone(){
       expandedButtons = listOf(
         TextIconButtonData("Album", IconData(NoopComposePreviewIcons.PhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
         TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddAPhoto, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
-      )
+      ),
+      onClickExpandCollapse = {}
     )
   }
 }
@@ -169,7 +174,8 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded_Full(){
       expandedButtons = listOf(
         TextIconButtonData("Album", IconData(NoopComposePreviewIcons.PhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
         TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddAPhoto, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
-      )
+      ),
+      onClickExpandCollapse = {}
     )
   }
 }
@@ -178,6 +184,9 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded_Full(){
 @Composable
 fun PreviewNoopFloatingActionButton_Full(){
   NoopTheme {
-    NoopFloatingActionButton(iconData = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION))
+    NoopFloatingActionButton(
+      iconData = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
+      onClick = {}
+    )
   }
 }

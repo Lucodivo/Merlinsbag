@@ -30,6 +30,7 @@ import com.inasweaterpoorlyknit.inknit.ui.component.CameraPreview
 import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import com.inasweaterpoorlyknit.inknit.viewmodels.CameraViewModel
 import androidx.compose.ui.tooling.preview.Preview
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
 const val TAG = "CameraScreen"
 const val EXTERNAL_STORAGE_CAMERA_PIC_DIR = "Pictures/InKnit"
@@ -108,11 +109,10 @@ fun CameraRoute(
   )
 }
 
-@Preview
 @Composable
 fun CameraScreen(
-  imageCapture: ImageCapture? = null,
-  onClick: () -> Unit = {}
+  imageCapture: ImageCapture,
+  onClick: () -> Unit,
 ) {
   CameraPreview(imageCapture = imageCapture)
   CameraControls(onClick = onClick)
@@ -120,7 +120,7 @@ fun CameraScreen(
 
 @Composable
 fun CameraControls(
-  onClick: () -> Unit = {},
+  onClick: () -> Unit,
 ){
   var captureActivated by remember{ mutableStateOf(false) }
   Box(contentAlignment = Alignment.BottomCenter,
@@ -135,5 +135,16 @@ fun CameraControls(
       },
       modifier = Modifier.padding(20.dp)
     ){}
+  }
+}
+
+@Preview
+@Composable
+fun PreviewCameraScreen(){
+  val bogusPreviewImageCapture = ImageCapture.Builder().build()
+  NoopTheme {
+    CameraScreen(
+      imageCapture = bogusPreviewImageCapture,
+      onClick = {})
   }
 }

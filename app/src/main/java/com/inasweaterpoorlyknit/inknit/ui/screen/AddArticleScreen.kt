@@ -34,12 +34,12 @@ import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.DevicePreviews
-import com.inasweaterpoorlyknit.inknit.ui.component.RotatableImage
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopRotatableImage
 import com.inasweaterpoorlyknit.inknit.ui.component.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.inknit.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
-import com.inasweaterpoorlyknit.inknit.ui.squareishComposable
+import com.inasweaterpoorlyknit.inknit.ui.squareishArticle
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
@@ -63,7 +63,7 @@ fun ArticleImage(
   angle: Float = 0.0f,
 ){
   val rotateAnimateFloat by animateClosestRotationAsState(targetDegrees = angle)
-  RotatableImage(
+  NoopRotatableImage(
     modifier = modifier,
     bitmap = processedImage,
     ccwRotaitonAngle = rotateAnimateFloat,
@@ -78,13 +78,13 @@ fun AddArticleControls(
   landscape: Boolean = true,
   processing: Boolean = true,
   multipleSubjects: Boolean = false,
-  onPrevClick: () -> Unit = {},
-  onNextClick: () -> Unit = {},
-  onNarrowFocusClick: () -> Unit = {},
-  onBroadenFocusClick: () -> Unit = {},
-  onRotateCW: () -> Unit = {},
-  onRotateCCW: () -> Unit = {},
-  onSave: () -> Unit = {},
+  onPrevClick: () -> Unit,
+  onNextClick: () -> Unit,
+  onNarrowFocusClick: () -> Unit,
+  onBroadenFocusClick: () -> Unit,
+  onRotateCW: () -> Unit,
+  onRotateCCW: () -> Unit,
+  onSave: () -> Unit,
 ){
   val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
   Box(
@@ -150,13 +150,13 @@ fun AddArticleScreen(
   multipleSubjects: Boolean = false,
   processedImage: Bitmap? = null,
   imageRotation: Float = 0.0f,
-  onPrevClick: () -> Unit = {},
-  onNextClick: () -> Unit = {},
-  onNarrowFocusClick: () -> Unit = {},
-  onBroadenFocusClick: () -> Unit = {},
-  onRotateCW: () -> Unit = {},
-  onRotateCCW: () -> Unit = {},
-  onSave: () -> Unit = {},
+  onPrevClick: () -> Unit,
+  onNextClick: () -> Unit,
+  onNarrowFocusClick: () -> Unit,
+  onBroadenFocusClick: () -> Unit,
+  onRotateCW: () -> Unit,
+  onRotateCCW: () -> Unit,
+  onSave: () -> Unit,
 ) {
   val landscape: Boolean = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
   Box(
@@ -194,7 +194,7 @@ fun AddArticleRoute(
   navController: NavController,
   imageUriString: String,
   windowSizeClass: WindowSizeClass,
-  onSuccess: (ScreenSuccess) -> Unit = {}, // Only called if user sucessfully added an article
+  onSuccess: (ScreenSuccess) -> Unit, // Only called if user sucessfully added an article
 ){
   val addArticleViewModel =
     hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
@@ -233,13 +233,14 @@ fun AddArticleRoute(
 @DevicePreviews
 @Composable
 fun PreviewAddArticleScreen(){
-  NoopTheme(){
+  NoopTheme{
     AddArticleScreen(
       windowSizeClass = currentWindowAdaptiveInfo(),
       processing = false,
       multipleSubjects = true,
-      processedImage = previewAssetBitmap(filename = squareishComposable),
+      processedImage = previewAssetBitmap(filename = squareishArticle),
       imageRotation = 270.0f,
+      onNarrowFocusClick = {}, onBroadenFocusClick = {}, onPrevClick = {}, onNextClick = {}, onRotateCW = {}, onRotateCCW = {}, onSave = {},
     )
   }
 }
