@@ -29,7 +29,7 @@ style = FontStyle.Normal,
 
 val bodyFontFamily = FontFamily(
     Font(
-        googleFont = GoogleFont("Chakra Petch"),
+        googleFont = GoogleFont("Roboto"),
         fontProvider = provider,
         weight = FontWeight.W700,
         style = FontStyle.Normal,
@@ -38,7 +38,7 @@ val bodyFontFamily = FontFamily(
 
 val displayFontFamily = FontFamily(
     Font(
-        googleFont = GoogleFont("Rubik Bubbles"),
+        googleFont = GoogleFont("Roboto"),
         fontProvider = provider,
     )
 )

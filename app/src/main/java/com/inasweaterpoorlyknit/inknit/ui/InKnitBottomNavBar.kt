@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.navigation.TopLevelDestination
-import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
 open class BottomNavBarData(
   val selectedIcon: ImageVector,
@@ -93,7 +92,7 @@ private fun RowScope.InKnitNavigationBarItem(
 @Preview
 @Composable
 fun InKnitBottomNavBarPreviewLight(){
-  AppTheme(darkTheme = false) {
+  NoopTheme(darkTheme = false) {
     InKnitBottomNavBar(
       bottomNavBarDataItems = TopLevelDestination.entries,
       onClick = {_ ->},
@@ -105,7 +104,7 @@ fun InKnitBottomNavBarPreviewLight(){
 @Preview
 @Composable
 fun InKnitBottomNavBarPreviewDark(){
-  AppTheme(darkTheme = true) {
+  NoopTheme(darkTheme = true) {
     InKnitBottomNavBar(
       bottomNavBarDataItems = TopLevelDestination.entries,
       onClick = {_ ->},

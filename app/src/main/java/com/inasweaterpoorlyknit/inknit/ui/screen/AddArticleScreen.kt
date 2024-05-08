@@ -40,8 +40,8 @@ import com.inasweaterpoorlyknit.inknit.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
 import com.inasweaterpoorlyknit.inknit.ui.squareishComposable
-import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 
 const val IMAGE_URI_STRING_ARG = "imageUriString"
@@ -103,40 +103,40 @@ fun AddArticleControls(
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(NoopIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(NoopIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(InKnitIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.width(columnSize.width),
         ){
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
         }
       } else { // portrait
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = if(compactWidth){ Modifier.fillMaxWidth() } else { Modifier.wrapContentSize() }
         ){
           if(compactWidth) { buttonModifier = buttonModifier.weight(1f) }
-          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(InKnitIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(InKnitIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(InKnitIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(NoopIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(NoopIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(InKnitIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(InKnitIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(InKnitIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
         }
       }
     }
@@ -233,7 +233,7 @@ fun AddArticleRoute(
 @DevicePreviews
 @Composable
 fun PreviewAddArticleScreen(){
-  AppTheme(){
+  NoopTheme(){
     AddArticleScreen(
       windowSizeClass = currentWindowAdaptiveInfo(),
       processing = false,

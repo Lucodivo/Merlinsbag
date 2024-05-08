@@ -6,12 +6,12 @@ import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.BottomNavBarData
 import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.COLLECTIONS_ROUTE
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 
 sealed class TopLevelDestination(selectedIcon: ImageVector, unselectedIcon: ImageVector, @StringRes iconTextId: Int)
     : BottomNavBarData(selectedIcon = selectedIcon, unselectedIcon = unselectedIcon, iconTextId = iconTextId){
-    data object ARTICLES: TopLevelDestination(InKnitIcons.ItemsSelected, InKnitIcons.Items, R.string.Articles)
-    data object COLLECTIONS: TopLevelDestination(InKnitIcons.CollectionsSelected, InKnitIcons.Collections, R.string.Collections)
+    data object ARTICLES: TopLevelDestination(NoopIcons.ItemsSelected, NoopIcons.Items, R.string.Articles)
+    data object COLLECTIONS: TopLevelDestination(NoopIcons.CollectionsSelected, NoopIcons.Collections, R.string.Collections)
 
     companion object{
         val entries = listOf(ARTICLES, COLLECTIONS)

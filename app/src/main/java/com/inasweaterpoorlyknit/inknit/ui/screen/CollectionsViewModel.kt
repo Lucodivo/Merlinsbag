@@ -10,7 +10,8 @@ data class Collection(
   val thumbnailUriStrings: List<String> = emptyList()
 )
 data class CollectionsUiState(
-  val collections: List<Collection>
+  val collections: List<Collection>,
+  val showAddCollectionForm: Boolean,
 )
 
 @HiltViewModel
@@ -19,7 +20,12 @@ class CollectionsViewModel @Inject constructor(
 ): ViewModel(){
   val state = mutableStateOf(
     CollectionsUiState(
-      collections = emptyList()
+      collections = emptyList(),
+      showAddCollectionForm = false,
     )
   )
+
+  fun addCollection(){
+
+  }
 }

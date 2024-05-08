@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -38,16 +39,15 @@ import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
-import com.inasweaterpoorlyknit.inknit.ui.component.ExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
 import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
-import com.inasweaterpoorlyknit.inknit.ui.theme.InKnitIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
-import androidx.compose.material3.AlertDialog as AlertDialogCompose
 
 const val ARTICLES_ROUTE = "articles_route"
 
@@ -127,7 +127,7 @@ fun CameraPermissionsAlertDialog(
     onClickNegative: () -> Unit = {},
     onClickPositive: () -> Unit = {},
 ){
-    AlertDialogCompose(
+    AlertDialog(
         title = {
             Text(text = stringResource(id = R.string.permission_alert_title))
         },
@@ -195,13 +195,13 @@ fun ArticlesScreen(
             modifier = Modifier.fillMaxSize(),
             state = articlesGridState,
         )
-        ExpandingFloatingActionButton(
+        NoopExpandingFloatingActionButton(
             expanded = addButtonActive,
             expandedButtons = listOf(
                 TextIconButtonData(
                     text = stringResource(id = R.string.Album),
                     icon = IconData(
-                        icon = InKnitIcons.PhotoAlbum,
+                        icon = NoopIcons.PhotoAlbum,
                         contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                     ),
                     onClick = onClickAddPhotoAlbum
@@ -209,7 +209,7 @@ fun ArticlesScreen(
                 TextIconButtonData(
                     text = stringResource(id = R.string.Camera),
                     icon = IconData(
-                        icon = InKnitIcons.AddPhoto,
+                        icon = NoopIcons.AddPhoto,
                         contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                     ),
                     onClick = onClickAddPhotoCamera
@@ -223,7 +223,7 @@ fun ArticlesScreen(
 @Preview
 @Composable
 fun PreviewArticlesScreen() {
-    AppTheme {
+    NoopTheme {
         ArticlesScreen(
             thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             addButtonActive = true,
@@ -234,7 +234,7 @@ fun PreviewArticlesScreen() {
 @Preview
 @Composable
 fun PreviewArticlesScreenWithAlert() {
-    AppTheme {
+    NoopTheme {
         ArticlesScreen(
             thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             showPermissionsAlert = true,
@@ -246,7 +246,7 @@ fun PreviewArticlesScreenWithAlert() {
 @Preview
 @Composable
 fun PreviewCameraPermissionsAlert(){
-    AppTheme {
+    NoopTheme {
         CameraPermissionsAlertDialog()
     }
 }

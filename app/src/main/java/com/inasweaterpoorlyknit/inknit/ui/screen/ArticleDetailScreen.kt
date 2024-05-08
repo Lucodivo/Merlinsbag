@@ -13,7 +13,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
-import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 
 const val ARTICLE_ID_ARG = "articleId"
@@ -54,7 +54,7 @@ fun ArticleDetailRoute(
 @Preview
 @Composable
 fun PreviewArticleDetailScreen(){
-  AppTheme {
+  NoopTheme {
     ArticleDetailScreen(
       imageUriString = R.raw.test_full_1.toString()
     )

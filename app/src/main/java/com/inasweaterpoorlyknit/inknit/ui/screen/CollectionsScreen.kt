@@ -18,13 +18,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.ui.allTestThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailImage
 import com.inasweaterpoorlyknit.inknit.ui.component.HorizontalOverlappingCollectionLayout
+import com.inasweaterpoorlyknit.inknit.ui.component.IconData
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.inknit.ui.theme.AppTheme
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
 const val COLLECTIONS_ROUTE = "collections_route"
 
@@ -37,7 +39,13 @@ fun CollectionsRoute(
     viewModel: CollectionsViewModel = hiltViewModel()
 ){
     val state = viewModel.state
-    CollectionsScreen(state.value.collections)
+    CollectionsScreen(
+        collections = state.value.collections,
+        showAddCollectionForm = state.value.showAddCollectionForm,
+        onClickAddCollection = {
+            viewModel.addCollection()
+        }
+    )
 }
 
 @Composable
@@ -73,7 +81,11 @@ fun CollectionRow(
 }
 
 @Composable
-fun CollectionsScreen(collections: List<Collection>){
+fun CollectionsScreen(
+    collections: List<Collection>,
+    showAddCollectionForm: Boolean,
+    onClickAddCollection: () -> Unit = {},
+){
     val sidePadding = 10.dp
     val collectionsSpacing = 5.dp
     Surface(
@@ -96,6 +108,13 @@ fun CollectionsScreen(collections: List<Collection>){
                 )
             }
         }
+        NoopFloatingActionButton(
+            iconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
+            onClick = onClickAddCollection,
+        )
+        if (showAddCollectionForm) {
+
+        }
     }
 }
 
@@ -103,22 +122,25 @@ fun CollectionsScreen(collections: List<Collection>){
 @Composable
 fun PreviewCollectionsScreen(){
     val thumbnails = repeatedThumbnailResourceIdsAsStrings
-    AppTheme {
-        CollectionsScreen(collections = listOf(
-            Collection(name = "Collection 1",
-                thumbnailUriStrings = thumbnails.slice(0..5)),
-            Collection(name = "Collection 2",
-                thumbnailUriStrings = thumbnails.slice(1..7)),
-            Collection(name = "Collection 3",
-                thumbnailUriStrings = thumbnails.slice(3..5)),
-            Collection(name = "Collection 4",
-                thumbnailUriStrings = thumbnails.slice(4..4)),
-            Collection(name = "Collection 5",
-                thumbnailUriStrings = thumbnails.slice(5..11)),
-            Collection(name = "Collection 6",
-                thumbnailUriStrings = thumbnails.slice(6..16)),
-            Collection(name = "Collection 7",
-                thumbnailUriStrings = thumbnails.slice(7..11)),
-        ))
+    NoopTheme {
+        CollectionsScreen(
+            collections = listOf(
+                Collection(name = "Collection 1",
+                    thumbnailUriStrings = thumbnails.slice(0..5)),
+                Collection(name = "Collection 2",
+                    thumbnailUriStrings = thumbnails.slice(1..7)),
+                Collection(name = "Collection 3",
+                    thumbnailUriStrings = thumbnails.slice(3..5)),
+                Collection(name = "Collection 4",
+                    thumbnailUriStrings = thumbnails.slice(4..4)),
+                Collection(name = "Collection 5",
+                    thumbnailUriStrings = thumbnails.slice(5..11)),
+                Collection(name = "Collection 6",
+                    thumbnailUriStrings = thumbnails.slice(6..16)),
+                Collection(name = "Collection 7",
+                    thumbnailUriStrings = thumbnails.slice(7..11)),
+            ),
+            showAddCollectionForm = false
+        )
     }
 }

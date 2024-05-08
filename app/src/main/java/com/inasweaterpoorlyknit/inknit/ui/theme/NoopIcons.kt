@@ -21,7 +21,7 @@ import androidx.compose.material.icons.outlined.SwitchRight
 import androidx.compose.material.icons.outlined.ZoomInMap
 import androidx.compose.material.icons.outlined.ZoomOutMap
 
-object InKnitIcons {
+object NoopIcons {
   val PhotoAlbum = Icons.Filled.PhotoAlbum
   val AddPhoto = Icons.Filled.AddAPhoto
   val Remove = Icons.Filled.Remove
