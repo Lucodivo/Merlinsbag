@@ -20,8 +20,8 @@ const val ARTICLE_ID_ARG = "articleId"
 const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
 const val ARTICLE_DETAIL_ROUTE = "$ARTICLE_DETAIL_ROUTE_BASE?$ARTICLE_ID_ARG={$ARTICLE_ID_ARG}"
 
-fun NavController.navigateToArticleDetail(clothingArticleId: String, navOptions: NavOptions? = null){
-  val route = "${ARTICLE_DETAIL_ROUTE_BASE}?${ARTICLE_ID_ARG}=$clothingArticleId"
+fun NavController.navigateToArticleDetail(articleId: String, navOptions: NavOptions? = null){
+  val route = "${ARTICLE_DETAIL_ROUTE_BASE}?${ARTICLE_ID_ARG}=$articleId"
   navigate(route, navOptions)
 }
 
@@ -40,13 +40,13 @@ fun ArticleDetailScreen(
 @Composable
 fun ArticleDetailRoute(
   navController: NavController,
-  clothingArticleId: String,
+  articleId: String,
   modifier: Modifier = Modifier,
   articleDetailViewModel: ArticleDetailViewModel = hiltViewModel(), // MainMenuViewModel
 ){
-  val clothingDetail = articleDetailViewModel.getArticleDetails(clothingArticleId).observeAsState(initial = null)
+  val articleDetail = articleDetailViewModel.getArticleDetails(articleId).observeAsState(initial = null)
   ArticleDetailScreen(
-    imageUriString = clothingDetail.value?.imageUriString,
+    imageUriString = articleDetail.value?.imageUriString,
     modifier = modifier,
   )
 }

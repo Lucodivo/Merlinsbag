@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6ec18c833d17532e9f51f3d614b1659f",
+    "identityHash": "2b7020e81f66383a4a7a90d19ff471e1",
     "entities": [
       {
-        "tableName": "clothing_articles",
+        "tableName": "article",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `created` INTEGER NOT NULL, `modified` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
@@ -37,8 +37,8 @@
         "foreignKeys": []
       },
       {
-        "tableName": "clothing_article_images",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `clothing_article_id` TEXT NOT NULL, `uri` TEXT NOT NULL, `thumbnail_uri` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`clothing_article_id`) REFERENCES `clothing_articles`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED)",
+        "tableName": "article_image",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `article_id` TEXT NOT NULL, `uri` TEXT NOT NULL, `thumb_uri` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED)",
         "fields": [
           {
             "fieldPath": "id",
@@ -47,8 +47,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "clothingArticleId",
-            "columnName": "clothing_article_id",
+            "fieldPath": "articleId",
+            "columnName": "article_id",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -60,7 +60,7 @@
           },
           {
             "fieldPath": "thumbnailUri",
-            "columnName": "thumbnail_uri",
+            "columnName": "thumb_uri",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -73,22 +73,22 @@
         },
         "indices": [
           {
-            "name": "index_clothing_article_images_clothing_article_id",
+            "name": "index_article_image_article_id",
             "unique": false,
             "columnNames": [
-              "clothing_article_id"
+              "article_id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_clothing_article_images_clothing_article_id` ON `${TABLE_NAME}` (`clothing_article_id`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_article_image_article_id` ON `${TABLE_NAME}` (`article_id`)"
           }
         ],
         "foreignKeys": [
           {
-            "table": "clothing_articles",
+            "table": "article",
             "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
-              "clothing_article_id"
+              "article_id"
             ],
             "referencedColumns": [
               "id"
@@ -97,7 +97,7 @@
         ]
       },
       {
-        "tableName": "outfits",
+        "tableName": "ensemble",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `created` INTEGER NOT NULL, `modified` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
@@ -129,18 +129,18 @@
         "foreignKeys": []
       },
       {
-        "tableName": "outfit_articles",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clothing_article_id` TEXT NOT NULL, `outfit_id` TEXT NOT NULL, PRIMARY KEY(`clothing_article_id`, `outfit_id`), FOREIGN KEY(`clothing_article_id`) REFERENCES `clothing_articles`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY(`outfit_id`) REFERENCES `outfits`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED)",
+        "tableName": "article_ensemble",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`article_id` TEXT NOT NULL, `ensemble_id` TEXT NOT NULL, PRIMARY KEY(`article_id`, `ensemble_id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY(`ensemble_id`) REFERENCES `ensemble`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED)",
         "fields": [
           {
-            "fieldPath": "clothingArticleId",
-            "columnName": "clothing_article_id",
+            "fieldPath": "articleId",
+            "columnName": "article_id",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "outfitId",
-            "columnName": "outfit_id",
+            "fieldPath": "ensembleId",
+            "columnName": "ensemble_id",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -148,29 +148,29 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "clothing_article_id",
-            "outfit_id"
+            "article_id",
+            "ensemble_id"
           ]
         },
         "indices": [],
         "foreignKeys": [
           {
-            "table": "clothing_articles",
+            "table": "article",
             "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
-              "clothing_article_id"
+              "article_id"
             ],
             "referencedColumns": [
               "id"
             ]
           },
           {
-            "table": "outfits",
+            "table": "ensemble",
             "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
-              "outfit_id"
+              "ensemble_id"
             ],
             "referencedColumns": [
               "id"
@@ -182,7 +182,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ec18c833d17532e9f51f3d614b1659f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b7020e81f66383a4a7a90d19ff471e1')"
     ]
   }
 }

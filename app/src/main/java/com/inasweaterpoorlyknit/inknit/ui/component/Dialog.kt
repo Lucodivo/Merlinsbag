@@ -38,7 +38,7 @@ data class DialogUserData(
      https://m3.material.io/components/dialogs/specs
  */
 @Composable
-fun NoopAddCollectionDialog(
+fun NoopAddEnsembleDialog(
   modifier: Modifier = Modifier,
   onPositive: (DialogUserData) -> Unit,
   onClose: () -> Unit,
@@ -75,7 +75,7 @@ fun NoopAddCollectionDialog(
               .clickable{ onClose() }
           )
           Text(
-            text = stringResource(id = R.string.Add_article_collection),
+            text = stringResource(id = R.string.Add_article_ensemble),
             color = MaterialTheme.colorScheme.onSurface,
             fontSize = MaterialTheme.typography.titleLarge.fontSize,
           )
@@ -102,7 +102,7 @@ fun NoopAddCollectionDialog(
           value = userInputTitle,
           placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
           onValueChange = { setUserInputTitle(it) },
-          label = { Text(text = stringResource(id = R.string.Collection_title)) },
+          label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
         )
       }
       Spacer(modifier = Modifier.height(padding))
@@ -114,6 +114,6 @@ fun NoopAddCollectionDialog(
 @Composable
 fun PreviewNoopDialog() {
   NoopTheme {
-    NoopAddCollectionDialog(onPositive = {}, onClose = {})
+    NoopAddEnsembleDialog(onPositive = {}, onClose = {})
   }
 }

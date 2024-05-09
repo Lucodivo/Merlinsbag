@@ -32,7 +32,7 @@ import com.inasweaterpoorlyknit.inknit.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.inknit.ui.screen.ADD_ARTICLES_BASE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToArticles
-import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToCollections
+import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToEnsembles
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -133,6 +133,6 @@ fun NavHostController.navigateToTopLevelDestination(from: TopLevelDestination, t
 
     when(to){
         TopLevelDestination.ARTICLES -> navigateToArticles(topLevelNavOptions)
-        TopLevelDestination.COLLECTIONS -> navigateToCollections(topLevelNavOptions)
+        TopLevelDestination.ENSEMBLES -> navigateToEnsembles(topLevelNavOptions)
     }
 }

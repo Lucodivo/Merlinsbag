@@ -10,11 +10,9 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.database.repository.ClothingArticleRepository
+import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
 import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import dagger.assisted.Assisted
@@ -44,7 +42,7 @@ open class Event<out T>(private val content: T?) {
 class AddArticleViewModel @AssistedInject constructor(
   @Assisted private val imageUriString: String,
   private val application: Application,
-  private val clothingArticleRepository: ClothingArticleRepository,
+  private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
   @AssistedFactory
@@ -173,7 +171,7 @@ class AddArticleViewModel @AssistedInject constructor(
         // Flush and close the output stream
         outStream.flush()
       }
-      clothingArticleRepository.insertClothingArticle(
+      articleRepository.insertArticle(
         imageUri = imageFile.toUri().toString(),
         thumbnailUri = thumbnailFile.toUri().toString()
       )

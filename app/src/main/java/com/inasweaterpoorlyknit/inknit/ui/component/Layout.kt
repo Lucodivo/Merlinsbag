@@ -1,10 +1,8 @@
 package com.inasweaterpoorlyknit.inknit.ui.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -13,17 +11,15 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.COMPOSE_PREVIEW_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.inknit.ui.screen.Collection
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-fun HorizontalOverlappingCollectionLayout(
+fun HorizontalOverlappingLayout(
   modifier: Modifier = Modifier,
   overlapPercentage: Float = 0.5f,
   overflowIcon: IconData = IconData(icon = NoopIcons.MoreHorizontal, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
@@ -72,12 +68,12 @@ fun HorizontalOverlappingCollectionLayout(
 //region COMPOSABLE PREVIEWS
 @Preview
 @Composable
-fun PreviewHorizontalOverlappingCollectionLayout() {
+fun PreviewHorizontalOverlappingLayout() {
   val thumbnailUriStrings = repeatedThumbnailResourceIdsAsStrings.slice(6..16)
   val padding = 10.dp
   NoopTheme{
     Surface {
-      HorizontalOverlappingCollectionLayout(
+      HorizontalOverlappingLayout(
         modifier = Modifier
           .fillMaxWidth()
           .padding(padding)
@@ -95,12 +91,12 @@ fun PreviewHorizontalOverlappingCollectionLayout() {
 
 @Preview
 @Composable
-fun PreviewHorizontalOverlappingCollectionLayoutOverflow() {
+fun PreviewHorizontalOverlappigLayoutOverflow() {
   val thumbnailUriStrings = repeatedThumbnailResourceIdsAsStrings.slice(5..11)
   val padding = 10.dp
   NoopTheme{
     Surface{
-      HorizontalOverlappingCollectionLayout(
+      HorizontalOverlappingLayout(
         modifier = Modifier
           .fillMaxWidth()
           .padding(padding)

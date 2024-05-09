@@ -41,6 +41,6 @@ object NoopIcons {
   val Check = Icons.Outlined.Check
   val Items = Icons.Outlined.Category
   val ItemsSelected = Icons.Filled.Category
-  val Collections = Icons.Outlined.FolderSpecial
-  val CollectionsSelected = Icons.Filled.FolderSpecial
+  val Ensembles = Icons.Outlined.FolderSpecial
+  val EnsemblesSelected = Icons.Filled.FolderSpecial
 }

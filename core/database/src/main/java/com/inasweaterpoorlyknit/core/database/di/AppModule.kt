@@ -3,9 +3,8 @@ package com.inasweaterpoorlyknit.core.database.di
 import android.content.Context
 import androidx.room.Room
 import com.inasweaterpoorlyknit.core.database.InKnitDatabase
-import com.inasweaterpoorlyknit.core.database.dao.ClothingArticleWithImagesDao
-import com.inasweaterpoorlyknit.core.database.model.ClothingArticleEntity
-import com.inasweaterpoorlyknit.core.database.repository.ClothingArticleRepository
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,11 +27,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesClothingArticleWithImagesDao(appDatabase: InKnitDatabase): ClothingArticleWithImagesDao = appDatabase.clothingArticleWithImagesDao()
+    fun providesArticleWithImagesDao(appDatabase: InKnitDatabase): ArticleWithImagesDao = appDatabase.ArticleWithImagesDao()
 
     @Provides
     @Singleton
-    fun providesClothingArticleRepository(clothingArticleWithImagesDao: ClothingArticleWithImagesDao): ClothingArticleRepository{
-        return ClothingArticleRepository(clothingArticleWithImagesDao)
+    fun providesArticleRepository(articleWithImagesDao: ArticleWithImagesDao): ArticleRepository{
+        return ArticleRepository(articleWithImagesDao)
     }
 }

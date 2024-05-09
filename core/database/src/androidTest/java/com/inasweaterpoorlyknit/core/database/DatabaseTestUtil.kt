@@ -3,8 +3,8 @@ package com.inasweaterpoorlyknit.core.database
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.inasweaterpoorlyknit.core.database.model.ClothingArticleEntity
-import com.inasweaterpoorlyknit.core.database.model.ClothingArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
+import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -15,21 +15,21 @@ object Counter{
     fun next(): Int = count++
 }
 
-fun createClothingArticleEntity(id: String = Counter.next().toString()) = ClothingArticleEntity(id = id)
-fun createClothingArticleEntity(count: Int) = Array(count){ createClothingArticleEntity() }
+fun createArticleEntity(id: String = Counter.next().toString()) = ArticleEntity(id = id)
+fun createArticleEntity(count: Int) = Array(count){ createArticleEntity() }
 
 fun createFakeUriString() = "content://com.inasweaterpoorlyknit.inknit/fakeimage${Counter.next()}"
 fun createFakeUriStrings(count: Int) = Array(count){ createFakeUriString() }
 fun createFakeUri(): Uri = Uri.parse(createFakeUriString())
 fun createFakeUris(count: Int) = Array(count){ createFakeUri() }
 
-fun createClothingArticleImageEntity(clothingArticleId: String = randUUIDString()) = ClothingArticleImageEntity(
-    clothingArticleId = clothingArticleId,
+fun createArticleImageEntity(ArticleId: String = randUUIDString()) = ArticleImageEntity(
+    articleId = ArticleId,
     uri = createFakeUriString(),
     thumbnailUri = createFakeUriString(),
 )
-fun createClothingArticleImageEntity(count: Int, clothingArticleId: String = randUUIDString()) = Array(count){
-    createClothingArticleImageEntity(clothingArticleId = clothingArticleId)
+fun createArticleImageEntity(count: Int, ArticleId: String = randUUIDString()) = Array(count){
+    createArticleImageEntity(ArticleId = ArticleId)
 }
 
 class LiveDataTestUtil<T> {

@@ -5,28 +5,28 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.ui.BottomNavBarData
 import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLES_ROUTE
-import com.inasweaterpoorlyknit.inknit.ui.screen.COLLECTIONS_ROUTE
+import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 
 sealed class TopLevelDestination(selectedIcon: ImageVector, unselectedIcon: ImageVector, @StringRes iconTextId: Int)
     : BottomNavBarData(selectedIcon = selectedIcon, unselectedIcon = unselectedIcon, iconTextId = iconTextId){
     data object ARTICLES: TopLevelDestination(NoopIcons.ItemsSelected, NoopIcons.Items, R.string.Articles)
-    data object COLLECTIONS: TopLevelDestination(NoopIcons.CollectionsSelected, NoopIcons.Collections, R.string.Collections)
+    data object ENSEMBLES: TopLevelDestination(NoopIcons.EnsemblesSelected, NoopIcons.Ensembles, R.string.Ensembles)
 
     companion object{
-        val entries = listOf(ARTICLES, COLLECTIONS)
+        val entries = listOf(ARTICLES, ENSEMBLES)
 
         fun routeToTopLevelDestination(route: String): TopLevelDestination? {
             return when(route){
                 ARTICLES_ROUTE -> ARTICLES
-                COLLECTIONS_ROUTE -> COLLECTIONS
+                ENSEMBLES_ROUTE -> ENSEMBLES
                 else -> null
             }
         }
         fun topLevelDestinationToRoute(dest: TopLevelDestination): String {
             return when(dest){
                 ARTICLES -> ARTICLES_ROUTE
-                COLLECTIONS -> COLLECTIONS_ROUTE
+                ENSEMBLES -> ENSEMBLES_ROUTE
             }
         }
     }

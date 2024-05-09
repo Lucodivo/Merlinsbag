@@ -7,20 +7,20 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
 
-@Entity(tableName = "clothing_article_images",
-  indices = [Index(value = ["clothing_article_id"])],
+@Entity(tableName = "article_image",
+  indices = [Index(value = ["article_id"])],
   foreignKeys = [
     ForeignKey(
-      entity = ClothingArticleEntity::class,
+      entity = ArticleEntity::class,
       parentColumns = arrayOf("id"),
-      childColumns = arrayOf("clothing_article_id"),
+      childColumns = arrayOf("article_id"),
       deferred = true
     )]
 )
-data class ClothingArticleImageEntity(
+data class ArticleImageEntity(
   @PrimaryKey val id: String = UUID.randomUUID().toString(),
-  @ColumnInfo(name = "clothing_article_id") val clothingArticleId: String,
+  @ColumnInfo(name = "article_id") val articleId: String,
   @ColumnInfo(name = "uri") val uri: String,
-  @ColumnInfo(name = "thumbnail_uri") val thumbnailUri: String,
+  @ColumnInfo(name = "thumb_uri") val thumbnailUri: String,
   // TODO: image rank
 )
