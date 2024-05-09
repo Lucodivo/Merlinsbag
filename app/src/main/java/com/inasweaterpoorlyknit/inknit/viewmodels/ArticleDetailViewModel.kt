@@ -7,15 +7,18 @@ import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-// TODO: ArticleDetailUiState
+data class ArticleDetailUiState(
+  val imageUriString: String
+)
+
 @HiltViewModel
 class ArticleDetailViewModel @Inject constructor(
   private val articleRepository: ArticleRepository,
 ): ViewModel() {
-  data class ArticleDetails(val imageUriString: String)
-  fun getArticleDetails(articleId: String): LiveData<ArticleDetails?> {
+  // TODO: Convert to flow state?
+  fun getArticleDetails(articleId: String): LiveData<ArticleDetailUiState?> {
     return articleRepository.getArticleWithImages(articleId).map {
-        ArticleDetails(imageUriString = it.images[0].uri)
+        ArticleDetailUiState(imageUriString = it.images[0].uri)
     }
   }
 }

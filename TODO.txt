@@ -34,8 +34,9 @@ Features:
     - Export data
         - Individual items
         - All items
-    - Proper multiple form factor support for all screens
-        - AddArticlesScreen [COMPLETED]
+Multiple Form Factor Support:
+    - AddArticlesScreen [COMPLETED]
+    - Navigation Drawer / Navigation Rail
 Articles:
     - thumbnails with random "shimmer"/"rotation"
 Accessibility:

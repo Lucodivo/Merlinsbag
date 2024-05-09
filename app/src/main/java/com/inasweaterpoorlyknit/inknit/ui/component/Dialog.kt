@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -89,7 +91,7 @@ fun NoopAddEnsembleDialog(
       Surface(
         modifier = modifier
           .fillMaxWidth(),
-        shape = Shapes.medium,
+        shape = MaterialTheme.shapes.large.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
       ) {
         Column(
           verticalArrangement = Arrangement.Top,
@@ -139,6 +141,7 @@ fun NoopAddEnsembleDialog(
   }
 }
 
+// TODO: Consider implementing as a Modal Bottom Sheet?
 @Preview
 @Composable
 fun PreviewNoopDialog() {

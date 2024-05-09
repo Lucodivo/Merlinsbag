@@ -8,5 +8,6 @@ class EnsembleRepository(
   private val ensembleDao: EnsembleDao
 ) {
   fun getAllEnsembles(): Flow<List<EnsembleEntity>> = ensembleDao.getAllEnsembles()
+  fun getEnsemble(ensembleId: String): Flow<EnsembleEntity> = ensembleDao.getEnsemble(ensembleId)
   fun insertEnsemble(title: String) = ensembleDao.insertEnsemble(EnsembleEntity(title = title))
 }

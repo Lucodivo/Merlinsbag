@@ -19,7 +19,10 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.ArticlesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CameraRoute
-import com.inasweaterpoorlyknit.inknit.ui.screen.EnsembleRoute
+import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_DETAIL_ROUTE
+import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_ID_ARG
+import com.inasweaterpoorlyknit.inknit.ui.screen.EnsembleDetailRoute
+import com.inasweaterpoorlyknit.inknit.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_ARG
 import com.inasweaterpoorlyknit.inknit.viewmodels.Event
 
@@ -48,7 +51,7 @@ fun InKnitNavHost(
       ArticlesRoute(navController = navController)
     }
     composable(route = ENSEMBLES_ROUTE) {
-      EnsembleRoute(navController = navController)
+      EnsemblesRoute(navController = navController)
     }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
@@ -61,6 +64,18 @@ fun InKnitNavHost(
     ) { navBackStackEntry ->
       val articleIdArg = navBackStackEntry.arguments!!.getString(ARTICLE_ID_ARG)!!
       ArticleDetailRoute(navController = navController, articleId = articleIdArg)
+    }
+    composable(
+      route = ENSEMBLE_DETAIL_ROUTE,
+      arguments = listOf(
+        navArgument(ENSEMBLE_ID_ARG) {
+          nullable = false;
+          type = NavType.StringType
+        },
+      ),
+    ) { navBackStackEntry ->
+      val ensembleIdArg = navBackStackEntry.arguments!!.getString(ENSEMBLE_ID_ARG)!!
+      EnsembleDetailRoute(navController = navController, ensembleId = ensembleIdArg)
     }
     composable(route = CAMERA_ROUTE){
       CameraRoute(

@@ -1,13 +1,7 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,14 +37,13 @@ import com.inasweaterpoorlyknit.inknit.ui.component.NoopFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
-import kotlin.math.max
 
 const val ENSEMBLES_ROUTE = "ensembles_route"
 
 fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate(ENSEMBLES_ROUTE, navOptions)
 
 @Composable
-fun EnsembleRoute(
+fun EnsemblesRoute(
     navController: NavController,
     modifier: Modifier = Modifier,
     ensemblesViewModel: EnsemblesViewModel = hiltViewModel()
@@ -62,6 +53,9 @@ fun EnsembleRoute(
     EnsemblesScreen(
         ensembles = ensemblesState,
         showAddEnsembleDialog = showAddEnsembleDialog,
+        onClickEnsemble = { id ->
+            navController.navigateToEnsembleDetail(ensembleId = id)
+        },
         onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
         onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
         onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog ,
@@ -69,7 +63,7 @@ fun EnsembleRoute(
 }
 
 @Composable
-fun EnsembleRow(
+fun EnsemblesRow(
     ensemble: Ensemble,
     modifier: Modifier = Modifier,
 ){
@@ -104,6 +98,7 @@ fun EnsembleRow(
 fun EnsemblesScreen(
     ensembles: List<Ensemble>,
     showAddEnsembleDialog: Boolean,
+    onClickEnsemble: (id: String) -> Unit,
     onClickAddEnsemble: () -> Unit,
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
@@ -122,11 +117,13 @@ fun EnsemblesScreen(
             items(ensembles.size) { index ->
                 val topPadding = if (index == 0) ensembleSpacing * 2 else ensembleSpacing
                 val bottomPadding = if (index == ensembles.lastIndex) ensembleSpacing * 2 else ensembleSpacing
-                EnsembleRow(
-                    ensemble = ensembles[index],
+                val ensemble = ensembles[index]
+                EnsemblesRow(
+                    ensemble = ensemble,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = topPadding, bottom = bottomPadding)
+                        .clickable { onClickEnsemble(ensemble.id) }
                 )
             }
         }
@@ -161,8 +158,27 @@ fun EnsemblesScreen(
 fun __PreviewUtilEnsembleScreen(
     ensembles: List<Ensemble>,
     showAddEnsembleForm: Boolean,
-) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleDialog = showAddEnsembleForm, onClickAddEnsemble = {},
-        onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {})
+) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleDialog = showAddEnsembleForm, onClickEnsemble = {},
+    onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {})
+
+val previewEnsembles: List<Ensemble> =
+    repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
+        listOf(
+            thumbnails.slice(0..5),
+            thumbnails.slice(1..7),
+            thumbnails.slice(3..5),
+            thumbnails.slice(4..4),
+            thumbnails.slice(5..11),
+            thumbnails.slice(6..16),
+            thumbnails.slice(7..11),
+        ).mapIndexed { index, thumbnailUriStrings ->
+            Ensemble(
+                id = index.toString(),
+                name = "Ensemble $index",
+                thumbnailUriStrings = thumbnailUriStrings,
+            )
+        }
+    }
 
 @Preview
 @Composable
@@ -170,22 +186,7 @@ fun PreviewEnsembleScreen(){
     val thumbnails = repeatedThumbnailResourceIdsAsStrings
     NoopTheme {
         __PreviewUtilEnsembleScreen(
-            ensembles = listOf(
-                Ensemble(name = "Ensemble 1",
-                    thumbnailUriStrings = thumbnails.slice(0..5)),
-                Ensemble(name = "Ensemble 2",
-                    thumbnailUriStrings = thumbnails.slice(1..7)),
-                Ensemble(name = "Ensemble 3",
-                    thumbnailUriStrings = thumbnails.slice(3..5)),
-                Ensemble(name = "Ensemble 4",
-                    thumbnailUriStrings = thumbnails.slice(4..4)),
-                Ensemble(name = "Ensemble 5",
-                    thumbnailUriStrings = thumbnails.slice(5..11)),
-                Ensemble(name = "Ensemble 6",
-                    thumbnailUriStrings = thumbnails.slice(6..16)),
-                Ensemble(name = "Ensemble 7",
-                    thumbnailUriStrings = thumbnails.slice(7..11)),
-            ),
+            ensembles = previewEnsembles,
             showAddEnsembleForm = false
         )
     }
@@ -197,22 +198,7 @@ fun PreviewEnsemblesScreenAddEnsembleDialog(){
     val thumbnails = repeatedThumbnailResourceIdsAsStrings
     NoopTheme {
         __PreviewUtilEnsembleScreen(
-            ensembles = listOf(
-                Ensemble(name = "Ensemble 1",
-                    thumbnailUriStrings = thumbnails.slice(0..5)),
-                Ensemble(name = "Ensemble 2",
-                    thumbnailUriStrings = thumbnails.slice(1..7)),
-                Ensemble(name = "Ensemble 3",
-                    thumbnailUriStrings = thumbnails.slice(3..5)),
-                Ensemble(name = "Ensemble 4",
-                    thumbnailUriStrings = thumbnails.slice(4..4)),
-                Ensemble(name = "Ensemble 5",
-                    thumbnailUriStrings = thumbnails.slice(5..11)),
-                Ensemble(name = "Ensemble 6",
-                    thumbnailUriStrings = thumbnails.slice(6..16)),
-                Ensemble(name = "Ensemble 7",
-                    thumbnailUriStrings = thumbnails.slice(7..11)),
-            ),
+            ensembles = previewEnsembles,
             showAddEnsembleForm = true,
         )
     }

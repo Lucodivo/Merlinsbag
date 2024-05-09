@@ -21,13 +21,18 @@ interface EnsembleDao {
   fun insertArticleEnsemble(vararg articleEnsembleEntity: ArticleEnsembleEntity)
 
   @Query(
-    """ SELECT article.*
-                FROM article
-                JOIN article_ensemble ON article.id = article_ensemble.article_id
-                WHERE article_ensemble.ensemble_id = :ensembleId """
+    """ SELECT article.* FROM article
+        JOIN article_ensemble ON article.id = article_ensemble.article_id
+        WHERE article_ensemble.ensemble_id = :ensembleId """
   )
   fun getAllEnsembleArticles(ensembleId: String): LiveData<List<ArticleEntity>>
 
   @Query("SELECT * FROM ensemble")
   fun getAllEnsembles(): Flow<List<EnsembleEntity>>
+
+  @Query(
+    """ SELECT * FROM ensemble
+        WHERE id = :ensembleId """
+  )
+  fun getEnsemble(ensembleId: String): Flow<EnsembleEntity>
 }

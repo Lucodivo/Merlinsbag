@@ -14,13 +14,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class Ensemble(
+  val id: String,
   val name: String,
   val thumbnailUriStrings: List<String> = emptyList()
 )
+
 data class EnsemblesUiState(
   val ensembles: List<Ensemble>,
   val showAddEnsembleDialog: Boolean,
 )
+
 data class SaveEnsembleData(
   val title: String,
 )
@@ -34,7 +37,7 @@ class EnsemblesViewModel @Inject constructor(
 
   val ensemblesUiState: StateFlow<List<Ensemble>> =
     ensemblesRepository.getAllEnsembles().map { ensembleEntities ->
-      ensembleEntities.map { Ensemble(it.title, emptyList()) }
+      ensembleEntities.map { Ensemble(it.id, it.title, emptyList()) }
     }.stateIn(
       scope = viewModelScope,
       started = SharingStarted.WhileSubscribed(),
