@@ -12,7 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImagesEntity
 import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 
@@ -21,7 +21,7 @@ import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 @RunWith(AndroidJUnit4::class)
 class DatabaseArticleWithImagesTests {
     // TODO: Remove DAO, test through repository only
-    private lateinit var articleWithImagesDao: ArticleWithImagesDao
+    private lateinit var articleDao: ArticleDao
     private lateinit var articleRepository: ArticleRepository
     private lateinit var database: InKnitDatabase
 
@@ -35,9 +35,9 @@ class DatabaseArticleWithImagesTests {
         database = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        articleWithImagesDao = database.ArticleWithImagesDao()
+        articleDao = database.ArticleDao()
         articleRepository = ArticleRepository(
-            articleWithImagesDao = articleWithImagesDao
+            articleDao = articleDao
         )
     }
 
@@ -73,16 +73,16 @@ class DatabaseArticleWithImagesTests {
         val articleImagesToInsert3 = createArticleImageEntity(3, ArticleId = articlesToInsert[2].id)
 
         // act
-        articleWithImagesDao.insertArticles(*articlesToInsert)
-        articleWithImagesDao.insertArticleImages(articleImagesToInsert1)
-        articleWithImagesDao.insertArticleImages(*articleImagesToInsert2)
-        articleWithImagesDao.insertArticleImages(*articleImagesToInsert3)
+        articleDao.insertArticles(*articlesToInsert)
+        articleDao.insertArticleImages(articleImagesToInsert1)
+        articleDao.insertArticleImages(*articleImagesToInsert2)
+        articleDao.insertArticleImages(*articleImagesToInsert3)
         val articlesWithImages1 = LiveDataTestUtil<ArticleWithImagesEntity>()
-            .getValue(articleWithImagesDao.getArticleWithImages(articlesToInsert[0].id))
+            .getValue(articleDao.getArticleWithImages(articlesToInsert[0].id))
         val articlesWithImages2 = LiveDataTestUtil<ArticleWithImagesEntity>()
-            .getValue(articleWithImagesDao.getArticleWithImages(articlesToInsert[1].id))
+            .getValue(articleDao.getArticleWithImages(articlesToInsert[1].id))
         val articlesWithImages3 = LiveDataTestUtil<ArticleWithImagesEntity>()
-            .getValue(articleWithImagesDao.getArticleWithImages(articlesToInsert[2].id))
+            .getValue(articleDao.getArticleWithImages(articlesToInsert[2].id))
 
         // assert
         assertEquals("Could not acquire article with images", 1, articlesWithImages1.images.size)

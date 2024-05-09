@@ -1,10 +1,19 @@
 package com.inasweaterpoorlyknit.inknit.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,12 +22,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,73 +51,90 @@ data class DialogUserData(
  */
 @Composable
 fun NoopAddEnsembleDialog(
+  visible: Boolean,
+  title: String,
+  positiveButtonLabel: String,
   modifier: Modifier = Modifier,
-  onPositive: (DialogUserData) -> Unit,
+  onPositive: () -> Unit,
   onClose: () -> Unit,
+  content: @Composable ColumnScope.() -> Unit
 ) {
   val headerHeight = 56.dp
   val padding = 16.dp
-  val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
-  Surface(
+  val scrimAlphaAnimatedScale by animateFloatAsState(
+    targetValue = if (visible) 1.0f else 0.0f,
+    label = "Dialog sheet scrim animated scale",
+  )
+  val scrimInteractionSource = remember { MutableInteractionSource() }
+  Box(
+    contentAlignment = Alignment.BottomCenter,
     modifier = Modifier
-      .fillMaxWidth(),
-    shape = Shapes.medium,
+      .fillMaxSize()
   ) {
-    Column(
-      verticalArrangement = Arrangement.Top,
-      horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-      Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+    if (scrimAlphaAnimatedScale > 0.0f) {
+      Box(
         modifier = Modifier
-          .fillMaxWidth()
-          .height(headerHeight),
+          .testTag("DialogSheetScrim")
+          .fillMaxSize()
+          .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f * scrimAlphaAnimatedScale))
+          .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = onClose)
+      )
+    }
+    AnimatedVisibility(
+      visible = visible,
+      modifier = Modifier,
+      enter = slideInVertically(initialOffsetY = { fullHeight -> fullHeight }),
+      exit = slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }),
+    ) {
+      Surface(
+        modifier = modifier
+          .fillMaxWidth(),
+        shape = Shapes.medium,
       ) {
-        Row(
-          horizontalArrangement = Arrangement.Start,
-          verticalAlignment = Alignment.CenterVertically,
+        Column(
+          verticalArrangement = Arrangement.Top,
+          horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-          Icon(
-            imageVector = NoopIcons.Close,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+          Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-              .size(headerHeight)
-              .padding(padding)
-              .clickable{ onClose() }
-          )
-          Text(
-            text = stringResource(id = R.string.Add_article_ensemble),
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = MaterialTheme.typography.titleLarge.fontSize,
-          )
-        }
-        Text(
-          text = stringResource(id = R.string.Save),
-          color = MaterialTheme.colorScheme.primary,
-          fontSize = MaterialTheme.typography.labelLarge.fontSize,
-          textAlign = TextAlign.End,
-          modifier = Modifier
-            .height(headerHeight)
-            .padding(padding)
-            .clickable{
-              onPositive(
-                DialogUserData(
-                  title = userInputTitle
-                )
+              .fillMaxWidth()
+              .height(headerHeight),
+          ) {
+            Row(
+              horizontalArrangement = Arrangement.Start,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Icon(
+                imageVector = NoopIcons.Close,
+                contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+                modifier = Modifier
+                  .size(headerHeight)
+                  .padding(padding)
+                  .clickable { onClose() }
+              )
+              Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
               )
             }
-        )
+            Text(
+              text = positiveButtonLabel,
+              color = MaterialTheme.colorScheme.primary,
+              fontSize = MaterialTheme.typography.labelLarge.fontSize,
+              textAlign = TextAlign.End,
+              modifier = Modifier
+                .height(headerHeight)
+                .padding(padding)
+                .clickable { onPositive() }
+            )
+          }
+          content()
+          Spacer(modifier = Modifier.height(padding))
+        }
       }
-      Row{
-        OutlinedTextField(
-          value = userInputTitle,
-          placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
-          onValueChange = { setUserInputTitle(it) },
-          label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
-        )
-      }
-      Spacer(modifier = Modifier.height(padding))
     }
   }
 }
@@ -114,6 +143,34 @@ fun NoopAddEnsembleDialog(
 @Composable
 fun PreviewNoopDialog() {
   NoopTheme {
-    NoopAddEnsembleDialog(onPositive = {}, onClose = {})
+    NoopAddEnsembleDialog(
+      visible = true,
+      title = "Dialog title",
+      positiveButtonLabel = "Save",
+      onPositive = {},
+      onClose = {}
+    ){
+      OutlinedTextField(
+        value = "",
+        placeholder = {},
+        onValueChange = {},
+        label = { Text(text = "Preview label") },
+      )
+      Spacer(modifier = Modifier.height(10.dp))
+      OutlinedTextField(
+        value = "user text",
+        placeholder = {},
+        onValueChange = {},
+        label = { Text(text = "Preview label") },
+      )
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ){
+        Switch(checked = false, onCheckedChange = {})
+        Spacer(modifier = Modifier.size(width = 30.dp, height = 0.dp))
+        Text(text = "Preview switch", textAlign = TextAlign.End)
+      }
+    }
   }
 }

@@ -18,7 +18,7 @@ data class ArticleWithImagesEntity(
 )
 
 @Dao
-interface ArticleWithImagesDao {
+interface ArticleDao {
   @Insert
   fun insertArticles(vararg articleEntity: ArticleEntity)
   @Update

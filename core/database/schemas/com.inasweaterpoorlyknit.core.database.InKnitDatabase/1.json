@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2b7020e81f66383a4a7a90d19ff471e1",
+    "identityHash": "91101c970334058d37ddb82e51c87319",
     "entities": [
       {
         "tableName": "article",
@@ -98,11 +98,17 @@
       },
       {
         "tableName": "ensemble",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `created` INTEGER NOT NULL, `modified` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `created` INTEGER NOT NULL, `modified` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -182,7 +188,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b7020e81f66383a4a7a90d19ff471e1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '91101c970334058d37ddb82e51c87319')"
     ]
   }
 }

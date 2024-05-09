@@ -7,6 +7,7 @@ import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+// TODO: ArticleDetailUiState
 @HiltViewModel
 class ArticleDetailViewModel @Inject constructor(
   private val articleRepository: ArticleRepository,

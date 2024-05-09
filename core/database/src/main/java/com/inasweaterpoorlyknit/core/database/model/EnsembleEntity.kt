@@ -10,6 +10,7 @@ import java.util.UUID
 @Entity(tableName = "ensemble")
 data class EnsembleEntity(
   @PrimaryKey val id: String = UUID.randomUUID().toString(),
+  val title: String,
   @ColumnInfo(name = "created") val createdEpoch: Long = Date().time,
   @ColumnInfo(name = "modified") val modifiedEpoch: Long = createdEpoch,
 )

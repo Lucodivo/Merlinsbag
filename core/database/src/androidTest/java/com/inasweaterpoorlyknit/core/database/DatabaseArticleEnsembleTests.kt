@@ -11,8 +11,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImagesDao
-import com.inasweaterpoorlyknit.core.database.dao.ArticleEnsembleDao
+import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
+import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
@@ -22,8 +22,8 @@ import org.junit.Assert.assertArrayEquals
 // If these aren't passing, something must be  wrong with the database as a whole.
 @RunWith(AndroidJUnit4::class)
 class DatabaseArticleEnsembleTests {
-  private lateinit var articleEnsembleDao: ArticleEnsembleDao
-  private lateinit var articleWithImagesDao: ArticleWithImagesDao
+  private lateinit var ensembleDao: EnsembleDao
+  private lateinit var articleDao: ArticleDao
   private lateinit var db: InKnitDatabase
 
   // NOTE: Used to observeForever on the main thread
@@ -36,8 +36,8 @@ class DatabaseArticleEnsembleTests {
     db = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
       .allowMainThreadQueries()
       .build()
-    articleEnsembleDao = db.ArticleEnsembleDao()
-    articleWithImagesDao = db.ArticleWithImagesDao()
+    ensembleDao = db.EnsembleDao()
+    articleDao = db.ArticleDao()
   }
 
   @After
@@ -48,24 +48,24 @@ class DatabaseArticleEnsembleTests {
 
   @Test
   @Throws(Exception::class)
-  fun getAllOutfitArticles() {
+  fun getAllEnsembleArticles() {
     // arrange
-    val newOutfit = EnsembleEntity()
+    val newEnsemble = EnsembleEntity(title = "TestEnsemble")
     val newArticles = createArticleEntity(3)
       .apply{ sortBy{ it.id }  }
-    val newOutfitArticles = Array(newArticles.size){ index ->
-      ArticleEnsembleEntity(articleId = newArticles[index].id, ensembleId = newOutfit.id)
+    val newEnsembleArticles = Array(newArticles.size){ index ->
+      ArticleEnsembleEntity(articleId = newArticles[index].id, ensembleId = newEnsemble.id)
     }
 
     // act
-    articleEnsembleDao.insertEnsemble(newOutfit)
-    articleWithImagesDao.insertArticles(*newArticles)
-    articleEnsembleDao.insertArticleEnsemble(*newOutfitArticles)
-    val outfitArticles = LiveDataTestUtil<List<ArticleEntity>>()
-      .getValue(articleEnsembleDao.getAllEnsembleArticles(newOutfit.id))
+    ensembleDao.insertEnsemble(newEnsemble)
+    articleDao.insertArticles(*newArticles)
+    ensembleDao.insertArticleEnsemble(*newEnsembleArticles)
+    val ensembleArticles = LiveDataTestUtil<List<ArticleEntity>>()
+      .getValue(ensembleDao.getAllEnsembleArticles(newEnsemble.id))
       .apply {sortedBy { it.id }}
 
     // assert
-    assertArrayEquals(" articles not added to array", newArticles.map{it.id}.toTypedArray(), outfitArticles.map{it.id}.toTypedArray())
+    assertArrayEquals(" articles not added to array", newArticles.map{it.id}.toTypedArray(), ensembleArticles.map{it.id}.toTypedArray())
   }
 }

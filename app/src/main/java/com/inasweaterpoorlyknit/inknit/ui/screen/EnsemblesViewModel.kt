@@ -2,7 +2,15 @@ package com.inasweaterpoorlyknit.inknit.ui.screen
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class Ensemble(
@@ -19,29 +27,27 @@ data class SaveEnsembleData(
 
 @HiltViewModel
 class EnsemblesViewModel @Inject constructor(
-//  val ensemblesRepository: EnsemblesRepository
-): ViewModel(){
-  val state = mutableStateOf(
-    EnsemblesUiState(
-      ensembles = emptyList(),
-      showAddEnsembleDialog = false,
+  val ensemblesRepository: EnsembleRepository
+): ViewModel() {
+
+  val showAddEnsembleDialog = mutableStateOf(false)
+
+  val ensemblesUiState: StateFlow<List<Ensemble>> =
+    ensemblesRepository.getAllEnsembles().map { ensembleEntities ->
+      ensembleEntities.map { Ensemble(it.title, emptyList()) }
+    }.stateIn(
+      scope = viewModelScope,
+      started = SharingStarted.WhileSubscribed(),
+      initialValue = emptyList()
     )
-  )
 
-  private fun closeDialog() {
-    state.value = state.value.copy(showAddEnsembleDialog = false)
-  }
-
-  fun onClickAddEnsemble() {
-    state.value = state.value.copy(showAddEnsembleDialog = true)
-  }
-
+  private fun closeDialog() { showAddEnsembleDialog.value = false }
+  fun onClickAddEnsemble() { showAddEnsembleDialog.value = true }
   fun onClickCloseAddEnsembleDialog() = closeDialog()
-
   fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
-    // TODO
     closeDialog()
+    viewModelScope.launch(Dispatchers.IO) {
+      ensemblesRepository.insertEnsemble(saveEnsembleData.title)
+    }
   }
-
-  fun onClickOutsideAddEnsembleDialog() = closeDialog()
 }

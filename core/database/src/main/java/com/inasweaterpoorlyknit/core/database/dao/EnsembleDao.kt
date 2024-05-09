@@ -8,9 +8,10 @@ import androidx.room.Update
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface ArticleEnsembleDao {
+interface EnsembleDao {
   @Insert
   fun insertEnsemble(vararg ensembleEntity: EnsembleEntity)
   @Update
@@ -26,4 +27,7 @@ interface ArticleEnsembleDao {
                 WHERE article_ensemble.ensemble_id = :ensembleId """
   )
   fun getAllEnsembleArticles(ensembleId: String): LiveData<List<ArticleEntity>>
+
+  @Query("SELECT * FROM ensemble")
+  fun getAllEnsembles(): Flow<List<EnsembleEntity>>
 }

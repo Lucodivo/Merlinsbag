@@ -1,11 +1,15 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,17 +17,24 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
@@ -34,6 +45,7 @@ import com.inasweaterpoorlyknit.inknit.ui.component.NoopFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import kotlin.math.max
 
 const val ENSEMBLES_ROUTE = "ensembles_route"
 
@@ -45,13 +57,13 @@ fun EnsembleRoute(
     modifier: Modifier = Modifier,
     ensemblesViewModel: EnsemblesViewModel = hiltViewModel()
 ){
-    val state = ensemblesViewModel.state
+    val ensemblesState by ensemblesViewModel.ensemblesUiState.collectAsStateWithLifecycle()
+    val showAddEnsembleDialog by ensemblesViewModel.showAddEnsembleDialog
     EnsemblesScreen(
-        ensembles = state.value.ensembles,
-        showAddEnsembleForm = state.value.showAddEnsembleDialog,
+        ensembles = ensemblesState,
+        showAddEnsembleDialog = showAddEnsembleDialog,
         onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
         onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
-        onClickOutsideAddEnsembleDialog = ensemblesViewModel::onClickOutsideAddEnsembleDialog,
         onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog ,
     )
 }
@@ -91,10 +103,9 @@ fun EnsembleRow(
 @Composable
 fun EnsemblesScreen(
     ensembles: List<Ensemble>,
-    showAddEnsembleForm: Boolean,
+    showAddEnsembleDialog: Boolean,
     onClickAddEnsemble: () -> Unit,
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
-    onClickOutsideAddEnsembleDialog: () -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
 ) {
     val sidePadding = 10.dp
@@ -123,30 +134,22 @@ fun EnsemblesScreen(
             iconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
             onClick = onClickAddEnsemble,
         )
-        val dialogSlideIn by animateFloatAsState(
-            targetValue = if (showAddEnsembleForm) 1.0f else 0.0f,
-            label = "Add article dialog slidein animation float",
-        )
 
-        if (dialogSlideIn != 0.0f) {
-            Box(
-                contentAlignment = Alignment.BottomCenter,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f * dialogSlideIn))
-                    .clickable {
-                        onClickOutsideAddEnsembleDialog()
-                    }
-            ) {
-                NoopAddEnsembleDialog(
-                    onClose = onCloseAddEnsembleDialog,
-                    onPositive = { userInputData ->
-                        onClickSaveEnsemble(
-                            SaveEnsembleData(
-                                title = userInputData.title,
-                            )
-                        )
-                    },
+        val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
+        NoopAddEnsembleDialog(
+            visible = showAddEnsembleDialog,
+            title = stringResource(id = R.string.Add_article_ensemble),
+            positiveButtonLabel = stringResource(id = R.string.Save),
+            modifier = Modifier,
+            onClose = onCloseAddEnsembleDialog,
+            onPositive = { onClickSaveEnsemble(SaveEnsembleData(title = userInputTitle)) },
+        ){
+            Row {
+                OutlinedTextField(
+                    value = userInputTitle,
+                    placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
+                    onValueChange = { setUserInputTitle(it) },
+                    label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
                 )
             }
         }
@@ -158,8 +161,8 @@ fun EnsemblesScreen(
 fun __PreviewUtilEnsembleScreen(
     ensembles: List<Ensemble>,
     showAddEnsembleForm: Boolean,
-) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleForm = showAddEnsembleForm, onClickAddEnsemble = {},
-        onClickSaveEnsemble = {}, onClickOutsideAddEnsembleDialog = {}, onCloseAddEnsembleDialog = {})
+) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleDialog = showAddEnsembleForm, onClickAddEnsemble = {},
+        onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {})
 
 @Preview
 @Composable

@@ -34,23 +34,27 @@ fun HorizontalOverlappingLayout(
     ) { measurables, constraints ->
       val showingPercentage = 1.0f - overlapPercentage
       val iconPlaceable = measurables.last().measure(constraints)
-      val thumbnailPlaceables = Array(measurables.size - 1) { index -> measurables[index].measure(constraints) }
+      val placeables = Array(measurables.size - 1) { index -> measurables[index].measure(constraints) }
       val maxHeight = min(
         constraints.maxHeight,
-        max(thumbnailPlaceables.maxOf { it.height }, iconPlaceable.height)
+        if(placeables.isNotEmpty()) {
+          max(placeables.maxOfOrNull{ it.height } ?: 0, iconPlaceable.height)
+        } else{ 0 }
       )
       val maxWidth = min(
         constraints.maxWidth,
-        thumbnailPlaceables.sumOf { (it.width * showingPercentage).toInt() } + (thumbnailPlaceables.last().width * overlapPercentage).toInt() + iconPlaceable.width
+        if(placeables.isNotEmpty()){
+          placeables.sumOf { (it.width * showingPercentage).toInt() } + (placeables.last().width * overlapPercentage).toInt() + iconPlaceable.width
+        } else { 0 }
       )
       layout(width = maxWidth, height = maxHeight) {
         var xPos = 0
-        for (i in 0..thumbnailPlaceables.lastIndex) {
-          val placeable = thumbnailPlaceables[i]
+        for (i in 0..placeables.lastIndex) {
+          val placeable = placeables[i]
           val widthInc = (placeable.width * showingPercentage).toInt()
           if ((xPos + placeable.width) > (constraints.maxWidth - iconPlaceable.width)) {
             if (i > 0) {
-              xPos += (thumbnailPlaceables[i - 1].width * overlapPercentage).toInt()
+              xPos += (placeables[i - 1].width * overlapPercentage).toInt()
               iconPlaceable.placeRelative(x = xPos, y = (maxHeight / 2) - (iconPlaceable.height / 2))
             }
             break

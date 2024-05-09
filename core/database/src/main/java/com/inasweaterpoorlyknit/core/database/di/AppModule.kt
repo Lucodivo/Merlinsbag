@@ -3,8 +3,10 @@ package com.inasweaterpoorlyknit.core.database.di
 import android.content.Context
 import androidx.room.Room
 import com.inasweaterpoorlyknit.core.database.InKnitDatabase
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImagesDao
+import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
+import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,13 +27,21 @@ object AppModule {
         ).build()
     }
 
+    /* DAOs */
     @Provides
     @Singleton
-    fun providesArticleWithImagesDao(appDatabase: InKnitDatabase): ArticleWithImagesDao = appDatabase.ArticleWithImagesDao()
+    fun providesArticleWithImagesDao(appDatabase: InKnitDatabase): ArticleDao = appDatabase.ArticleDao()
 
     @Provides
     @Singleton
-    fun providesArticleRepository(articleWithImagesDao: ArticleWithImagesDao): ArticleRepository{
-        return ArticleRepository(articleWithImagesDao)
-    }
+    fun providesEnsembleDao(appDatabase: InKnitDatabase): EnsembleDao = appDatabase.EnsembleDao()
+
+    /* Repositories */
+    @Provides
+    @Singleton
+    fun providesArticleRepository(articleDao: ArticleDao): ArticleRepository = ArticleRepository(articleDao)
+
+    @Provides
+    @Singleton
+    fun providesEnsembleRepository(ensembleDao: EnsembleDao): EnsembleRepository = EnsembleRepository(ensembleDao)
 }
