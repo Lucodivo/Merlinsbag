@@ -57,7 +57,7 @@ fun NavController.navigateToAddArticle(
 }
 
 @Composable
-fun ArticleImage(
+fun AddArticleImage(
   modifier: Modifier = Modifier,
   processedImage: Bitmap? = null,
   angle: Float = 0.0f,
@@ -163,7 +163,7 @@ fun AddArticleScreen(
     contentAlignment = Alignment.BottomCenter,
     modifier = Modifier.fillMaxSize()
   ) {
-    ArticleImage(
+    AddArticleImage(
       modifier = Modifier
         .padding(
           top = 16.dp,

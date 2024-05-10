@@ -47,6 +47,7 @@ Accessibility:
             - If form, app icons can be localized to a single file with content descriptions instead of writing descriptions per Icon usage
 Architecture:
     - Consolidate mutable states into UIStates, mostly in viewmodels and listened to in Screens
+    - Replace LiveData with StateFlow/MutableStateFlow
 App-wide UI:
     - EdgeToEdge
     - Explicit to Screen animations

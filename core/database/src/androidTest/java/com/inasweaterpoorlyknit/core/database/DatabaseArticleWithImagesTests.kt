@@ -15,6 +15,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 // These tests are for baseline sanity of the database.
 // If these aren't passing, something must be  wrong with the database as a whole.
@@ -55,8 +57,10 @@ class DatabaseArticleWithImagesTests {
         // act
         articleRepository.insertArticle(fullImageUris[0], thumbnailUriImageUris[0])
         articleRepository.insertArticle(fullImageUris[1], thumbnailUriImageUris[1])
-        val articlesWithImages = LiveDataTestUtil<List<ArticleWithImages>>()
-            .getValue(articleRepository.getAllArticlesWithImages())
+        val articlesWithImages: List<ArticleWithImages>
+        runBlocking {
+            articlesWithImages = articleRepository.getAllArticlesWithImages().first()
+        }
 
         // assert
         assertEquals("articles not properly inserted and retreived", fullImageUris.size, articlesWithImages.size)

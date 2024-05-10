@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -17,6 +18,9 @@ object Counter{
 
 fun createArticleEntity(id: String = Counter.next().toString()) = ArticleEntity(id = id)
 fun createArticleEntity(count: Int) = Array(count){ createArticleEntity() }
+
+fun createEnsembleEntity(id: String = Counter.next().toString()) = EnsembleEntity(id = id, title = "TestEnsemble$id")
+fun createEnsembleEntity(count: Int) = Array(count){ createEnsembleEntity() }
 
 fun createFakeUriString() = "content://com.inasweaterpoorlyknit.inknit/fakeimage${Counter.next()}"
 fun createFakeUriStrings(count: Int) = Array(count){ createFakeUriString() }

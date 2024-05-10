@@ -30,7 +30,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   val ensembleUiState = combine(
     ensemblesRepository.getEnsemble(ensembleId),
-    ensemblesRepository.getAllEnsembleArticleImages(ensembleId)
+    ensemblesRepository.getEnsembleArticleImages(ensembleId)
   ) { ensembleEntity, articleImages ->
     EnsembleDetailUiState(
       title = ensembleEntity.title,

@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
@@ -102,16 +103,15 @@ fun ArticlesRoute(
         }
     )
 
-    val thumbnailDetails = articlesViewModel.thumbnailDetails.observeAsState()
-    val showPermissionsAlert = articlesViewModel.showPermissionsAlert.observeAsState(false)
+    val articlesUiState by articlesViewModel.articlesUiState.collectAsStateWithLifecycle()
     var addButtonActive by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
-    articlesViewModel.openSettings.observeAsState().value?.getContentIfNotHandled()?.let { openAppSettings() }
+    articlesUiState.openSettings.getContentIfNotHandled()?.let { openAppSettings() }
 
     ArticlesScreen(
-        thumbnailUris = thumbnailDetails.value?.map { it.thumbnailUri } ?: emptyList(),
+        thumbnailUris = articlesUiState.thumbnailUris.map { it.thumbnailUri },
         addButtonActive = addButtonActive,
-        showPermissionsAlert = showPermissionsAlert.value,
-        onClickArticle = { i -> navController.navigateToArticleDetail(thumbnailDetails.value!![i].articleId) },
+        showPermissionsAlert = articlesUiState.showPermissionsAlert,
+        onClickArticle = { i -> navController.navigateToArticleDetail(articlesUiState.thumbnailUris[i].articleId) },
         onClickAddPhotoAlbum = { _photoAlbumLauncher.launch("image/*") },
         onClickAddPhotoCamera = { _cameraWithPermissionsCheckLauncher.launch(REQUIRED_PERMISSIONS) },
         onClickAddButton = { addButtonActive = !addButtonActive },

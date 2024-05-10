@@ -10,6 +10,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
+import kotlinx.coroutines.flow.Flow
 
 data class ArticleWithImages(
   @ColumnInfo("article_id") val articleId: String,
@@ -38,7 +39,7 @@ interface ArticleDao {
   @Transaction
   @Query("""SELECT article.id as article_id FROM article 
             ORDER BY article.modified DESC""")
-  fun getAllArticlesWithImages(): LiveData<List<ArticleWithImages>>
+  fun getAllArticlesWithImages(): Flow<List<ArticleWithImages>>
 
   @Transaction
   fun insertArticle(imageUri: String, thumbnailUri: String) {
