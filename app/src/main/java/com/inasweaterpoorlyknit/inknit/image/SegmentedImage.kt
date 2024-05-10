@@ -83,6 +83,7 @@ class SegmentedImage {
     val timer = Timer()
     fun process(context: Context, uri: Uri, successCallback: (Boolean) -> Unit) {
         timer.reset()
+        Log.d("SegmentedImage", "Processing image: $uri")
         val mlkitInputImage = InputImage.fromFilePath(context, uri)
         timer.logMilestone("SegmentedImage", "Create Input Image")
         process(mlkitInputImage, successCallback)
