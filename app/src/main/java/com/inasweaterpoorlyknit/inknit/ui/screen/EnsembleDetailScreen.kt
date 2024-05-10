@@ -1,9 +1,13 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,8 +22,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.database.model.ArticleImage
+import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 
 const val ENSEMBLE_ID_ARG = "ensembleId"
 const val ENSEMBLE_DETAIL_ROUTE_BASE = "ensembles_route"
@@ -42,8 +48,11 @@ fun EnsembleDetailRoute(
     }
   val ensembleUiState by ensembleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   EnsembleDetailScreen(
-    ensembleUiState.title,
-    ensembleUiState.thumbnailUriStrings,
+    title = ensembleUiState.title,
+    articleImages = ensembleUiState.articles,
+    onClickArticle = { articleId ->
+      navController.navigateToArticleDetail(articleId)
+    },
     modifier = modifier,
   )
 }
@@ -51,9 +60,13 @@ fun EnsembleDetailRoute(
 @Composable
 fun EnsembleDetailScreen(
   title: String,
-  thumbnailUriStrings: List<String>,
+  articleImages: List<ArticleImage>,
+  onClickArticle: (articleId: String) -> Unit,
   modifier: Modifier = Modifier,
 ){
+  val gridMinWidth = 100.dp
+  val gridItemPadding = 16.dp
+  val articlesGridState = rememberLazyStaggeredGridState()
   Surface(
     modifier = modifier.fillMaxSize()
   ) {
@@ -67,6 +80,25 @@ fun EnsembleDetailScreen(
         fontSize = MaterialTheme.typography.titleLarge.fontSize,
         modifier = Modifier.padding(20.dp)
       )
+      LazyVerticalStaggeredGrid(
+        // typical dp width of a smart phone is 320dp-480dp
+        columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
+        content = {
+          items(count = articleImages.size){ thumbnailGridItemIndex ->
+            val articleImage = articleImages[thumbnailGridItemIndex]
+            NoopImage(
+              uriString = articleImage.thumbUri,
+              contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+              modifier = Modifier
+                .padding(gridItemPadding)
+                .clickable { onClickArticle(articleImage.articleId) }
+                .fillMaxSize(),
+            )
+          }
+        },
+        modifier = Modifier.fillMaxSize(),
+        state = articlesGridState,
+      )
     }
   }
 }
@@ -77,7 +109,8 @@ fun PreviewEnsembleDetailScreen(){
   NoopTheme{
     EnsembleDetailScreen(
       title = "Ensemble Title",
-      thumbnailUriStrings = emptyList(),
+      articleImages = emptyList(),
+      onClickArticle = {},
     )
   }
 }

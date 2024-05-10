@@ -9,6 +9,8 @@ Database work:
         - https://developer.android.com/training/data-storage/room/defining-data#column-indexing
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
+    - Separate out database entities and data models used in the app
+    - ArticleImageEntity -> ImageEntity
 Camera:
     - Setting to allow user to use preferred camera app
     - Selfie camera

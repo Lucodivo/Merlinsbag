@@ -2,18 +2,19 @@ package com.inasweaterpoorlyknit.inknit.ui.screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.database.model.ArticleImage
 import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 data class EnsembleDetailUiState(
   val title: String,
-  val thumbnailUriStrings: List<String>,
+  val articles: List<ArticleImage>,
 )
 
 @HiltViewModel(assistedFactory = EnsembleDetailViewModel.EnsembleDetailViewModelFactory::class)
@@ -27,14 +28,17 @@ class EnsembleDetailViewModel @AssistedInject constructor(
     fun create(ensembleId: String): EnsembleDetailViewModel
   }
 
-  val ensembleUiState = ensemblesRepository.getEnsemble(ensembleId).map { ensembleEntity ->
+  val ensembleUiState = combine(
+    ensemblesRepository.getEnsemble(ensembleId),
+    ensemblesRepository.getAllEnsembleArticleImages(ensembleId)
+  ) { ensembleEntity, articleImages ->
     EnsembleDetailUiState(
       title = ensembleEntity.title,
-      thumbnailUriStrings = emptyList()
+      articles = articleImages,
     )
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(),
-    initialValue = EnsembleDetailUiState(title = "", thumbnailUriStrings = emptyList())
+    initialValue = EnsembleDetailUiState(title = "", articles = emptyList())
   )
 }

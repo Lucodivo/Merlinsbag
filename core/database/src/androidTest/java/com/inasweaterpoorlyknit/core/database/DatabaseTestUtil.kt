@@ -26,7 +26,7 @@ fun createFakeUris(count: Int) = Array(count){ createFakeUri() }
 fun createArticleImageEntity(ArticleId: String = randUUIDString()) = ArticleImageEntity(
     articleId = ArticleId,
     uri = createFakeUriString(),
-    thumbnailUri = createFakeUriString(),
+    thumbUri = createFakeUriString(),
 )
 fun createArticleImageEntity(count: Int, ArticleId: String = randUUIDString()) = Array(count){
     createArticleImageEntity(ArticleId = ArticleId)

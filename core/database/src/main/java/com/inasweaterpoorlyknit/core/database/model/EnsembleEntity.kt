@@ -16,7 +16,7 @@ data class EnsembleEntity(
 )
 
 // Ensemble & Article join table
-@Entity(tableName = "article_ensemble",
+@Entity(tableName = "ensemble_article",
   primaryKeys = ["article_id", "ensemble_id"],
   foreignKeys = [
     ForeignKey(
@@ -33,7 +33,13 @@ data class EnsembleEntity(
     ),
   ]
 )
-data class ArticleEnsembleEntity(
-  @ColumnInfo(name = "article_id") val articleId: String = UUID.randomUUID().toString(),
-  @ColumnInfo(name = "ensemble_id") val ensembleId: String = UUID.randomUUID().toString(),
+data class EnsembleArticleEntity(
+  @ColumnInfo(name = "article_id", index = true) val articleId: String = UUID.randomUUID().toString(),
+  @ColumnInfo(name = "ensemble_id", index = true) val ensembleId: String = UUID.randomUUID().toString(),
 )
+
+data class Ensemble(
+  val id: String,
+  val title: String,
+)
+fun EnsembleEntity.toExternalModel() = Ensemble(id = id, title = title)

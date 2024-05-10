@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.core.database.repository
 
+import androidx.lifecycle.map
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 
 class ArticleRepository(

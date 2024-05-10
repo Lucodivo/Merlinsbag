@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImagesEntity
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 
 // These tests are for baseline sanity of the database.
@@ -55,7 +55,7 @@ class DatabaseArticleWithImagesTests {
         // act
         articleRepository.insertArticle(fullImageUris[0], thumbnailUriImageUris[0])
         articleRepository.insertArticle(fullImageUris[1], thumbnailUriImageUris[1])
-        val articlesWithImages = LiveDataTestUtil<List<ArticleWithImagesEntity>>()
+        val articlesWithImages = LiveDataTestUtil<List<ArticleWithImages>>()
             .getValue(articleRepository.getAllArticlesWithImages())
 
         // assert
@@ -77,26 +77,26 @@ class DatabaseArticleWithImagesTests {
         articleDao.insertArticleImages(articleImagesToInsert1)
         articleDao.insertArticleImages(*articleImagesToInsert2)
         articleDao.insertArticleImages(*articleImagesToInsert3)
-        val articlesWithImages1 = LiveDataTestUtil<ArticleWithImagesEntity>()
+        val articlesWithImages1 = LiveDataTestUtil<ArticleWithImages>()
             .getValue(articleDao.getArticleWithImages(articlesToInsert[0].id))
-        val articlesWithImages2 = LiveDataTestUtil<ArticleWithImagesEntity>()
+        val articlesWithImages2 = LiveDataTestUtil<ArticleWithImages>()
             .getValue(articleDao.getArticleWithImages(articlesToInsert[1].id))
-        val articlesWithImages3 = LiveDataTestUtil<ArticleWithImagesEntity>()
+        val articlesWithImages3 = LiveDataTestUtil<ArticleWithImages>()
             .getValue(articleDao.getArticleWithImages(articlesToInsert[2].id))
 
         // assert
         assertEquals("Could not acquire article with images", 1, articlesWithImages1.images.size)
-        assertEquals("article with images contains wrong article id", articleImagesToInsert1.articleId, articlesWithImages1.articleEntity.id)
+        assertEquals("article with images contains wrong article id", articleImagesToInsert1.articleId, articlesWithImages1.articleId)
         assertEquals("article with images contains wrong uri", articleImagesToInsert1.uri, articlesWithImages1.images[0].uri)
         assertEquals("Could not acquire article with images", articleImagesToInsert2.size, articlesWithImages2.images.size)
-        assertEquals("article with images contains wrong article id", articleImagesToInsert2[0].articleId, articlesWithImages2.articleEntity.id)
-        assertEquals("article with images contains wrong article id", articleImagesToInsert2[1].articleId, articlesWithImages2.articleEntity.id)
+        assertEquals("article with images contains wrong article id", articleImagesToInsert2[0].articleId, articlesWithImages2.articleId)
+        assertEquals("article with images contains wrong article id", articleImagesToInsert2[1].articleId, articlesWithImages2.articleId)
         assertEquals("article with images contains wrong uri", articleImagesToInsert2[0].uri, articlesWithImages2.images[0].uri)
         assertEquals("article with images contains wrong uri", articleImagesToInsert2[1].uri, articlesWithImages2.images[1].uri)
         assertEquals("Could not acquire article with images", articleImagesToInsert3.size, articlesWithImages3.images.size)
-        assertEquals("article with images contains wrong article id", articleImagesToInsert3[0].articleId, articlesWithImages3.articleEntity.id)
-        assertEquals("article with images contains wrong article id", articleImagesToInsert3[1].articleId, articlesWithImages3.articleEntity.id)
-        assertEquals("article with images contains wrong article id", articleImagesToInsert3[2].articleId, articlesWithImages3.articleEntity.id)
+        assertEquals("article with images contains wrong article id", articleImagesToInsert3[0].articleId, articlesWithImages3.articleId)
+        assertEquals("article with images contains wrong article id", articleImagesToInsert3[1].articleId, articlesWithImages3.articleId)
+        assertEquals("article with images contains wrong article id", articleImagesToInsert3[2].articleId, articlesWithImages3.articleId)
         assertEquals("article with images contains wrong uri", articleImagesToInsert3[0].uri, articlesWithImages3.images[0].uri)
         assertEquals("article with images contains wrong uri", articleImagesToInsert3[1].uri, articlesWithImages3.images[1].uri)
         assertEquals("article with images contains wrong uri", articleImagesToInsert3[2].uri, articlesWithImages3.images[2].uri)

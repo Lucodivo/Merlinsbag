@@ -39,8 +39,8 @@ class ArticlesViewModel @Inject constructor(
     get() = articleRepository.getAllArticlesWithImages().map { articlesWithImages ->
         articlesWithImages.map {
           ArticleThumbnails(
-            articleId = it.articleEntity.id,
-            thumbnailUri = it.images[0].thumbnailUri
+            articleId = it.articleId,
+            thumbnailUri = it.images[0].thumbUri
           )
         }
       }

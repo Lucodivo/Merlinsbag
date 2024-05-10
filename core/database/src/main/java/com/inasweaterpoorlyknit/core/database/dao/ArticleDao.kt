@@ -1,8 +1,8 @@
 package com.inasweaterpoorlyknit.core.database.dao
 
 import androidx.lifecycle.LiveData
+import androidx.room.ColumnInfo
 import androidx.room.Dao
-import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Relation
@@ -11,9 +11,9 @@ import androidx.room.Update
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 
-data class ArticleWithImagesEntity(
-  @Embedded val articleEntity: ArticleEntity,
-  @Relation(parentColumn = "id", entityColumn = "article_id")
+data class ArticleWithImages(
+  @ColumnInfo("article_id") val articleId: String,
+  @Relation(parentColumn = "article_id", entityColumn = "article_id")
   val images: List<ArticleImageEntity>
 )
 
@@ -30,20 +30,20 @@ interface ArticleDao {
   // NOTE: @Transaction are necessary when using @Relation entities with the @Relation annotation
   @Transaction
   @Query(
-    """SELECT * FROM article
-              WHERE article.id = :articleId """
+    """SELECT article.id as article_id FROM article
+       WHERE article.id = :articleId """
   )
-  fun getArticleWithImages(articleId: String): LiveData<ArticleWithImagesEntity>
+  fun getArticleWithImages(articleId: String): LiveData<ArticleWithImages>
 
   @Transaction
-  @Query("""SELECT * FROM article 
-                ORDER BY article.modified DESC""")
-  fun getAllArticlesWithImages(): LiveData<List<ArticleWithImagesEntity>>
+  @Query("""SELECT article.id as article_id FROM article 
+            ORDER BY article.modified DESC""")
+  fun getAllArticlesWithImages(): LiveData<List<ArticleWithImages>>
 
   @Transaction
   fun insertArticle(imageUri: String, thumbnailUri: String) {
     val article = ArticleEntity()
-    val articleImage = ArticleImageEntity(articleId = article.id, uri = imageUri, thumbnailUri = thumbnailUri)
+    val articleImage = ArticleImageEntity(articleId = article.id, uri = imageUri, thumbUri = thumbnailUri)
     insertArticles(article)
     insertArticleImages(articleImage)
   }

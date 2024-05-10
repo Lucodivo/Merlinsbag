@@ -13,3 +13,6 @@ data class ArticleEntity(
     @ColumnInfo(name = "modified") val modifiedEpoch: Long = createdEpoch,
     // TODO: Categories
 )
+
+data class Article(val id: String)
+fun ArticleEntity.toExternalModel() = Article(id = id)

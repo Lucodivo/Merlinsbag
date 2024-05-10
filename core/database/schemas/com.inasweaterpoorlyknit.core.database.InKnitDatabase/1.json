@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "91101c970334058d37ddb82e51c87319",
+    "identityHash": "f4db5f92792a971ee9c7ac353c86a7c8",
     "entities": [
       {
         "tableName": "article",
@@ -135,7 +135,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "article_ensemble",
+        "tableName": "ensemble_article",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`article_id` TEXT NOT NULL, `ensemble_id` TEXT NOT NULL, PRIMARY KEY(`article_id`, `ensemble_id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY(`ensemble_id`) REFERENCES `ensemble`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED)",
         "fields": [
           {
@@ -158,7 +158,26 @@
             "ensemble_id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_ensemble_article_article_id",
+            "unique": false,
+            "columnNames": [
+              "article_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ensemble_article_article_id` ON `${TABLE_NAME}` (`article_id`)"
+          },
+          {
+            "name": "index_ensemble_article_ensemble_id",
+            "unique": false,
+            "columnNames": [
+              "ensemble_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ensemble_article_ensemble_id` ON `${TABLE_NAME}` (`ensemble_id`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "article",
@@ -188,7 +207,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '91101c970334058d37ddb82e51c87319')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f4db5f92792a971ee9c7ac353c86a7c8')"
     ]
   }
 }

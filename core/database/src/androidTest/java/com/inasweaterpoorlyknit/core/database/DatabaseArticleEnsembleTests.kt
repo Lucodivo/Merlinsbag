@@ -13,9 +13,12 @@ import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
-import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleEntity
+import com.inasweaterpoorlyknit.core.database.model.ArticleImage
+import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 
 // These tests are for baseline sanity of the database.
@@ -54,18 +57,23 @@ class DatabaseArticleEnsembleTests {
     val newArticles = createArticleEntity(3)
       .apply{ sortBy{ it.id }  }
     val newEnsembleArticles = Array(newArticles.size){ index ->
-      ArticleEnsembleEntity(articleId = newArticles[index].id, ensembleId = newEnsemble.id)
+      EnsembleArticleEntity(articleId = newArticles[index].id, ensembleId = newEnsemble.id)
+    }
+    val newArticleImages = Array(newArticles.size){ index ->
+      createArticleImageEntity(newArticles[index].id)
     }
 
     // act
     ensembleDao.insertEnsemble(newEnsemble)
     articleDao.insertArticles(*newArticles)
+    articleDao.insertArticleImages(*newArticleImages)
     ensembleDao.insertArticleEnsemble(*newEnsembleArticles)
-    val ensembleArticles = LiveDataTestUtil<List<ArticleEntity>>()
-      .getValue(ensembleDao.getAllEnsembleArticles(newEnsemble.id))
-      .apply {sortedBy { it.id }}
+    val ensembleArticles: List<ArticleImage>
+    runBlocking(Dispatchers.IO) {
+      ensembleArticles = ensembleDao.getAllEnsembleArticleImages(newEnsemble.id).first().sortedBy { it.articleId }
+    }
 
     // assert
-    assertArrayEquals(" articles not added to array", newArticles.map{it.id}.toTypedArray(), ensembleArticles.map{it.id}.toTypedArray())
+    assertArrayEquals(" articles not added to array", newArticles.map{it.id}.toTypedArray(), ensembleArticles.map{it.articleId}.toTypedArray())
   }
 }
