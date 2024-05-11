@@ -174,6 +174,7 @@ fun AddEnsembleDialog(
                     articleIds = selectedArticleIds.toList(),
                 )
             )
+            setUserInputTitle("")
         },
     ){
         Row {

@@ -24,6 +24,7 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_ID_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_ARG
+import com.inasweaterpoorlyknit.inknit.ui.screen.navigationSafeUriStringDecode
 import com.inasweaterpoorlyknit.inknit.viewmodels.Event
 
 data class ScreenSuccess(
@@ -95,7 +96,7 @@ fun InKnitNavHost(
       val imageUriStringArg = navBackStackEntry.arguments!!.getString(IMAGE_URI_STRING_ARG)!!
       AddArticleRoute(
         navController = navController,
-        imageUriString = imageUriStringArg,
+        imageUriString = navigationSafeUriStringDecode(imageUriStringArg),
         windowSizeClass = appState.windowSizeClass,
         onSuccess = { success -> setScreenSuccess(Event(success)) }
       )

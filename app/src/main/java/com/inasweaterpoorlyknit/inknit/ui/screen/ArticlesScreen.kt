@@ -18,9 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,14 +39,14 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
-import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
 
@@ -59,14 +59,6 @@ private val REQUIRED_CAMERA_PERMISSIONS =
     } else {
         arrayOf(permission.CAMERA)
     }
-private val REQUIRED_MEDIA_PERMISSIONS = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-    arrayOf(permission.READ_MEDIA_VISUAL_USER_SELECTED)
-} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    arrayOf(permission.READ_MEDIA_IMAGES)
-} else {
-    arrayOf(permission.READ_EXTERNAL_STORAGE)
-}
-
 
 fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ARTICLES_ROUTE, navOptions)
 
@@ -82,29 +74,8 @@ fun ArticlesRoute(
         }
     }){ uri ->
         if(uri != null) {
-            navController.navigateToAddArticle(uri.toString())
+            navController.navigateToAddArticle(navigationSafeUriStringEncode(uri))
         } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
-    }
-    val _photoAlbumWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
-        RequestMultiplePermissions()
-    ){ permissions ->
-        var permissionsGranted = true
-        var userCheckedNeverAskAgain = false
-        permissions.entries.forEach { entry ->
-            if(!entry.value) {
-                userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(navController.context.getActivity()!!, entry.key)
-                permissionsGranted = false
-            }
-        }
-        if(permissionsGranted) {
-            _photoAlbumLauncher.launch(arrayOf("image/*"))
-        } else {
-            if(userCheckedNeverAskAgain) {
-                articlesViewModel.userCheckedNeverAskAgain()
-            } else {
-                navController.context.toast("Media permissions required")
-            }
-        }
     }
     val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
         RequestMultiplePermissions()
@@ -145,7 +116,7 @@ fun ArticlesRoute(
         addButtonActive = addButtonActive,
         showPermissionsAlert = articlesUiState.showPermissionsAlert,
         onClickArticle = { i -> navController.navigateToArticleDetail(articlesUiState.thumbnailUris[i].articleId) },
-        onClickAddPhotoAlbum = { _photoAlbumWithPermissionsCheckLauncher.launch(REQUIRED_MEDIA_PERMISSIONS) },
+        onClickAddPhotoAlbum = { _photoAlbumLauncher.launch(arrayOf("image/*")) },
         onClickAddPhotoCamera = { _cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS) },
         onClickAddButton = { addButtonActive = !addButtonActive },
         onPermissionsAlertPositive = { articlesViewModel.onPermissionsAlertPositive() },
