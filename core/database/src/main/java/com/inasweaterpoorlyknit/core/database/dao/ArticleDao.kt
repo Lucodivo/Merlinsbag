@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.core.database.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Insert
@@ -34,7 +33,7 @@ interface ArticleDao {
     """SELECT article.id as article_id FROM article
        WHERE article.id = :articleId """
   )
-  fun getArticleWithImages(articleId: String): LiveData<ArticleWithImages>
+  fun getArticleWithImages(articleId: String): Flow<ArticleWithImages>
 
   @Transaction
   @Query("""SELECT article.id as article_id FROM article 

@@ -3,11 +3,12 @@ package com.inasweaterpoorlyknit.inknit.ui.screen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
@@ -44,9 +45,9 @@ fun ArticleDetailRoute(
   modifier: Modifier = Modifier,
   articleDetailViewModel: ArticleDetailViewModel = hiltViewModel(), // MainMenuViewModel
 ){
-  val articleDetail = articleDetailViewModel.getArticleDetails(articleId).observeAsState(initial = null)
+  val articleDetailUiState by articleDetailViewModel.articleDetailUiState(articleId).collectAsStateWithLifecycle()
   ArticleDetailScreen(
-    imageUriString = articleDetail.value?.imageUriString,
+    imageUriString = articleDetailUiState?.imageUriString,
     modifier = modifier,
   )
 }

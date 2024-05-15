@@ -8,6 +8,6 @@ class ArticleRepository(
   private val articleDao: ArticleDao
 ) {
   fun getAllArticlesWithImages(): Flow<List<ArticleWithImages>> = articleDao.getAllArticlesWithImages()
-  fun insertArticle(imageUri: String, thumbnailUri: String) = articleDao.insertArticle(imageUri, thumbnailUri)
-  fun getArticleWithImages(id: String) = articleDao.getArticleWithImages(id)
+  fun insertArticle(imageUri: String, thumbnailUri: String): Unit = articleDao.insertArticle(imageUri, thumbnailUri)
+  fun getArticleWithImages(id: String): Flow<ArticleWithImages> = articleDao.getArticleWithImages(id)
 }

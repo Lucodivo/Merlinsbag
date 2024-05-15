@@ -42,7 +42,7 @@ dependencies {
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
 
-  // LiveData testing
+  // TODO: REMOVE LiveData testing
   androidTestImplementation(libs.androidx.core.testing)
   androidTestImplementation(libs.kotlinx.coroutines.test)
 

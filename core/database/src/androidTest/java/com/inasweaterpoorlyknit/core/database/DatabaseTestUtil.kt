@@ -1,14 +1,10 @@
 package com.inasweaterpoorlyknit.core.database
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import java.util.UUID
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 fun randUUIDString() = UUID.randomUUID().toString()
 object Counter{
@@ -34,19 +30,4 @@ fun createArticleImageEntity(ArticleId: String = randUUIDString()) = ArticleImag
 )
 fun createArticleImageEntity(count: Int, ArticleId: String = randUUIDString()) = Array(count){
     createArticleImageEntity(ArticleId = ArticleId)
-}
-
-class LiveDataTestUtil<T> {
-    fun getValue(liveData: LiveData<T>): T {
-        var data: T? = null
-        val latch = CountDownLatch(1)
-        val observer = Observer<T> { t ->
-            data = t
-            latch.countDown()
-        }
-        liveData.observeForever(observer)
-        latch.await(2, TimeUnit.SECONDS)
-        liveData.removeObserver(observer)
-        return data ?: throw NullPointerException("LiveData value was null")
-    }
 }
