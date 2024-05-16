@@ -121,8 +121,6 @@ dependencies {
 
     // Proto DataStore
 //    implementation("libs.androidx.datastore")
-//    implementation("androidx.datastore:datastore-rxjava2:1.0.0")
-//    implementation("androidx.datastore:datastore-rxjava3:1.0.0")
 // Starting from Protobuf 3.8.0, use the lite runtime library
 //    implementation("libs.protobuf.kotlin.lite")
 }

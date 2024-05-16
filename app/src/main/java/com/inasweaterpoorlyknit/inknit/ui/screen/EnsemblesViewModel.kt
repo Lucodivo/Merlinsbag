@@ -45,16 +45,12 @@ class EnsemblesViewModel @Inject constructor(
   val showAddEnsembleDialog = MutableStateFlow(false)
   val ensemblesUiState: StateFlow<EnsemblesUiState> =
     combine(
-      ensemblesRepository.getAllEnsembleArticleImages(),
-      showAddEnsembleDialog,
-      articleRepository.getAllArticlesWithImages(),
-    ) { ensembleArticleImages, showDialog, articleImages ->
-      EnsemblesUiState(
-        ensembles = ensembleArticleImages.map {
+      ensemblesRepository.getAllEnsembleArticleImages().map { allEnsembleArticleImages ->
+        allEnsembleArticleImages.map {
           Ensemble(
             id = it.ensemble.id,
             name = it.ensemble.title,
-            articles = it.articles.map{ article ->
+            articles = it.articles.map { article ->
               ArticleImage(
                 articleId = article.articleId,
                 uri = article.uri,
@@ -62,7 +58,13 @@ class EnsemblesViewModel @Inject constructor(
               )
             }
           )
-        },
+        }
+      },
+      showAddEnsembleDialog,
+      articleRepository.getAllArticlesWithImages(),
+    ) { ensembles, showDialog, articleImages ->
+      EnsemblesUiState(
+        ensembles = ensembles,
         showAddEnsembleDialog = showDialog,
         addEnsembleDialogArticles = articleImages,
       )

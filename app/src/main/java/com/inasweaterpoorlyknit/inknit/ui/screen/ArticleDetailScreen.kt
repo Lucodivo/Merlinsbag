@@ -51,7 +51,7 @@ fun ArticleDetailRoute(
     }
   val articleDetailUiState by articleDetailViewModel.articleDetailUiState.collectAsStateWithLifecycle()
   ArticleDetailScreen(
-    imageUriString = articleDetailUiState?.imageUriString,
+    imageUriString = articleDetailUiState.imageUriString,
     modifier = modifier,
   )
 }

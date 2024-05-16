@@ -14,19 +14,6 @@ val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
-
-/* Montserrat
-googleFont = GoogleFont("Montserrat"),
-fontProvider = provider,
-weight = FontWeight.W700,
-style = FontStyle.Italic,
-
-googleFont = GoogleFont("Chakra Petch"),
-fontProvider = provider,
-weight = FontWeight.W700,
-style = FontStyle.Normal,
- */
-
 val bodyFontFamily = FontFamily(
     Font(
         googleFont = GoogleFont("Roboto"),

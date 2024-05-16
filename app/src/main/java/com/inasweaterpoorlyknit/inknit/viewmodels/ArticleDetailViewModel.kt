@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 data class ArticleDetailUiState(
-  val imageUriString: String
+  val imageUriString: String?
 )
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
@@ -28,11 +28,11 @@ class ArticleDetailViewModel @AssistedInject constructor(
     fun create(articleId: String): ArticleDetailViewModel
   }
 
-  val articleDetailUiState: StateFlow<ArticleDetailUiState?> = articleRepository.getArticleWithImages(articleId).map {
+  val articleDetailUiState: StateFlow<ArticleDetailUiState> = articleRepository.getArticleWithImages(articleId).map {
       ArticleDetailUiState(imageUriString = it.images[0].uri)
     }.stateIn(
       scope = viewModelScope,
       started = SharingStarted.WhileSubscribed(),
-      initialValue = null
+      initialValue = ArticleDetailUiState(imageUriString = null)
     )
 }
