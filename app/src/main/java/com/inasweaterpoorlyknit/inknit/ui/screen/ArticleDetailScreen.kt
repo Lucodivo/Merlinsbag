@@ -15,6 +15,7 @@ import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
 import com.inasweaterpoorlyknit.inknit.viewmodels.ArticleDetailViewModel
 
 const val ARTICLE_ID_ARG = "articleId"
@@ -43,9 +44,12 @@ fun ArticleDetailRoute(
   navController: NavController,
   articleId: String,
   modifier: Modifier = Modifier,
-  articleDetailViewModel: ArticleDetailViewModel = hiltViewModel(), // MainMenuViewModel
 ){
-  val articleDetailUiState by articleDetailViewModel.articleDetailUiState(articleId).collectAsStateWithLifecycle()
+  val articleDetailViewModel =
+    hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
+      factory.create(articleId)
+    }
+  val articleDetailUiState by articleDetailViewModel.articleDetailUiState.collectAsStateWithLifecycle()
   ArticleDetailScreen(
     imageUriString = articleDetailUiState?.imageUriString,
     modifier = modifier,
