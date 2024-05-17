@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,6 +37,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailGrid
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
@@ -168,10 +167,6 @@ fun ArticlesScreen(
     onPermissionsAlertNegative: () -> Unit,
     onPermissionsAlertOutside: () -> Unit,
 ) {
-    val gridMinWidth = 100.dp
-    val gridItemPadding = 16.dp
-    val articlesGridState = rememberLazyStaggeredGridState()
-
     if(showPermissionsAlert) {
         CameraPermissionsAlertDialog(
             onClickOutside = onPermissionsAlertOutside,
@@ -181,23 +176,9 @@ fun ArticlesScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyVerticalStaggeredGrid(
-            // typical dp width of a smart phone is 320dp-480dp
-            columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
-            content = {
-                items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
-                    NoopImage(
-                        uriString = thumbnailUris[thumbnailGridItemIndex],
-                        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-                        modifier = Modifier
-                            .padding(gridItemPadding)
-                            .clickable { onClickArticle(thumbnailGridItemIndex) }
-                            .fillMaxSize(),
-                    )
-                }
-            },
-            modifier = Modifier.fillMaxSize(),
-            state = articlesGridState,
+        ArticleThumbnailGrid(
+            articleThumbnailUris = thumbnailUris,
+            onClickArticle = onClickArticle,
         )
         NoopExpandingFloatingActionButton(
             expanded = addButtonActive,

@@ -37,9 +37,3 @@ data class EnsembleArticleEntity(
   @ColumnInfo(name = "article_id", index = true) val articleId: String = UUID.randomUUID().toString(),
   @ColumnInfo(name = "ensemble_id", index = true) val ensembleId: String = UUID.randomUUID().toString(),
 )
-
-data class Ensemble(
-  val id: String,
-  val title: String,
-)
-fun EnsembleEntity.toExternalModel() = Ensemble(id = id, title = title)

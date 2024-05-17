@@ -35,7 +35,7 @@ import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.DevicePreviews
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopRotatableImage
-import com.inasweaterpoorlyknit.inknit.ui.component.animateClosestRotationAsState
+import com.inasweaterpoorlyknit.inknit.ui.state.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.inknit.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap

@@ -8,9 +8,6 @@ import androidx.room.Query
 import androidx.room.Relation
 import androidx.room.Transaction
 import androidx.room.Update
-import com.inasweaterpoorlyknit.core.database.model.ArticleFull
-import com.inasweaterpoorlyknit.core.database.model.ArticleImage
-import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
@@ -38,14 +35,6 @@ interface EnsembleDao {
   fun updateEnsemble(ensembleEntity: EnsembleEntity)
   @Insert
   fun insertArticleEnsemble(vararg ensembleArticleEntity: EnsembleArticleEntity)
-
-  @Transaction
-  @Query(
-    """SELECT ensemble_article.article_id as article_id FROM ensemble_article 
-      JOIN article ON article.id = article_id
-      WHERE ensemble_article.ensemble_id = :ensembleId"""
-  )
-  fun getEnsembleArticleThumbnails(ensembleId: String): Flow<List<ArticleWithImages>>
 
   @Transaction
   @Query(

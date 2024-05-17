@@ -9,31 +9,36 @@ Database work:
         - https://developer.android.com/training/data-storage/room/defining-data#column-indexing
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
-    - Separate out database entities and data models used in the app
-    - ArticleImageEntity -> ImageEntity
+    - ImageEntity over ArticleImageEntity?
 Camera:
     - Setting to allow user to use preferred camera app
     - Selfie camera
     - Camera "feels" slow between clicking the "take picture" button to the AddArticleScreen
     - Delete unused external storage photos? Change to internal storage directory that gets cleared?
+Settings Screen:
+    - Creator attribution
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
-    - Thumbnail sizes could be better determined.
-        - In examples used in this project, the coat is a lot smaller than the jacket.
-            - Ideally, subjects with similar aspect ratios should have similar sizes
-        - Although... the articles currently fit well within an ensemble.
     - Use custom layout for AddArticleControls
 Ensembles:
     - Add Ensemble Dialog
         - Tags?
     - Search
     - Sort
+Ensemble Detail:
+    - Edit articles
+        - add / remove
+    - Edit title
+    - Article configuration
+        - Collage / Build outfit
+    - Delete ensemble
+    - edit article tags
 Article Detail:
-    - Swipe between items in current scope
-        - HorizontalPager?
-        - Transfer current list context from one screen into ArticleDetailViewmodel
-            - Context being essentially filters of any kind, most notably tags/ensembles
+    - Export article image
+    - delete article
+    - edit article title
+    - edit article tags
 Features:
     - Export data
         - Individual items
@@ -43,6 +48,7 @@ Multiple Form Factor Support:
     - Navigation Drawer / Navigation Rail
 Articles:
     - thumbnails with random "shimmer"/"rotation"
+    - delete articles
 Accessibility:
     - Icon content description
         - Research what kind of descriptions are desired for accessibility services? Describe the form only or function as well?
