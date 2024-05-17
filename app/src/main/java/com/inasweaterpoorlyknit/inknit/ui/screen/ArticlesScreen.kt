@@ -48,7 +48,7 @@ import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.toast
-import com.inasweaterpoorlyknit.inknit.viewmodels.ArticlesViewModel
+import com.inasweaterpoorlyknit.inknit.viewmodel.ArticlesViewModel
 
 const val ARTICLES_ROUTE = "articles_route"
 
@@ -115,7 +115,7 @@ fun ArticlesRoute(
         thumbnailUris = articlesUiState.thumbnailUris.map { it.thumbnailUri },
         addButtonActive = addButtonActive,
         showPermissionsAlert = articlesUiState.showPermissionsAlert,
-        onClickArticle = { i -> navController.navigateToArticleDetail(articlesUiState.thumbnailUris[i].articleId) },
+        onClickArticle = { i -> navController.navigateToArticleDetail(i) },
         onClickAddPhotoAlbum = { _photoAlbumLauncher.launch(arrayOf("image/*")) },
         onClickAddPhotoCamera = { _cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS) },
         onClickAddButton = { addButtonActive = !addButtonActive },

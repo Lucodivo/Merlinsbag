@@ -22,10 +22,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.database.model.ArticleImage
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
+import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.inknit.viewmodel.EnsembleDetailViewModel
 
 const val ENSEMBLE_ID_ARG = "ensembleId"
 const val ENSEMBLE_DETAIL_ROUTE_BASE = "ensembles_route"
@@ -49,10 +51,8 @@ fun EnsembleDetailRoute(
   val ensembleUiState by ensembleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   EnsembleDetailScreen(
     title = ensembleUiState.title,
-    articleImages = ensembleUiState.articles,
-    onClickArticle = { articleId ->
-      navController.navigateToArticleDetail(articleId)
-    },
+    articleThumbnails = ensembleUiState.articles,
+    onClickArticle = { i -> navController.navigateToArticleDetail(i, ensembleId) },
     modifier = modifier,
   )
 }
@@ -60,8 +60,8 @@ fun EnsembleDetailRoute(
 @Composable
 fun EnsembleDetailScreen(
   title: String,
-  articleImages: List<ArticleImage>,
-  onClickArticle: (articleId: String) -> Unit,
+  articleThumbnails: List<ArticleWithImages>,
+  onClickArticle: (index: Int) -> Unit,
   modifier: Modifier = Modifier,
 ){
   val gridMinWidth = 100.dp
@@ -84,14 +84,14 @@ fun EnsembleDetailScreen(
         // typical dp width of a smart phone is 320dp-480dp
         columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
         content = {
-          items(count = articleImages.size){ thumbnailGridItemIndex ->
-            val articleImage = articleImages[thumbnailGridItemIndex]
+          items(count = articleThumbnails.size){ thumbnailGridItemIndex ->
+            val articleImage = articleThumbnails[thumbnailGridItemIndex]
             NoopImage(
-              uriString = articleImage.thumbUri,
+              uriString = articleImage.images[0].thumbUri,
               contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                 .padding(gridItemPadding)
-                .clickable { onClickArticle(articleImage.articleId) }
+                .clickable { onClickArticle(thumbnailGridItemIndex) }
                 .fillMaxSize(),
             )
           }
@@ -109,7 +109,7 @@ fun PreviewEnsembleDetailScreen(){
   NoopTheme{
     EnsembleDetailScreen(
       title = "Ensemble Title",
-      articleImages = emptyList(),
+      articleThumbnails = emptyList(),
       onClickArticle = {},
     )
   }

@@ -42,7 +42,7 @@ import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
 import com.inasweaterpoorlyknit.inknit.ui.squareishArticle
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
-import com.inasweaterpoorlyknit.inknit.viewmodels.AddArticleViewModel
+import com.inasweaterpoorlyknit.inknit.viewmodel.AddArticleViewModel
 
 const val IMAGE_URI_STRING_ARG = "imageUriString"
 const val ADD_ARTICLES_BASE = "add_articles_route"

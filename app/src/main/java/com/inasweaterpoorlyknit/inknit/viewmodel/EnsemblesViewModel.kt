@@ -1,11 +1,9 @@
-package com.inasweaterpoorlyknit.inknit.ui.screen
+package com.inasweaterpoorlyknit.inknit.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.model.ArticleImage
-import com.inasweaterpoorlyknit.core.database.model.toExternalModel
+import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
 import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +20,7 @@ import javax.inject.Inject
 data class Ensemble(
   val id: String,
   val name: String,
-  val articles: List<ArticleImage>
+  val articles: List<ArticleThumbnail>
 )
 
 data class EnsemblesUiState(
@@ -51,9 +49,8 @@ class EnsemblesViewModel @Inject constructor(
             id = it.ensemble.id,
             name = it.ensemble.title,
             articles = it.articles.map { article ->
-              ArticleImage(
+              ArticleThumbnail(
                 articleId = article.articleId,
-                uri = article.uri,
                 thumbUri = article.thumbUri,
               )
             }
@@ -85,5 +82,9 @@ class EnsemblesViewModel @Inject constructor(
         saveEnsembleData.articleIds,
       )
     }
+  }
+
+  companion object {
+    val MAX_ENSEMBLE_TITLE_LENGTH = 128
   }
 }

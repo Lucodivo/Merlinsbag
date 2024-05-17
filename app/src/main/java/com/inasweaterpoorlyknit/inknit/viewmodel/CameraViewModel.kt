@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit.viewmodels
+package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel

@@ -1,7 +1,8 @@
-package com.inasweaterpoorlyknit.inknit.viewmodels
+package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -11,28 +12,33 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 data class ArticleDetailUiState(
-  val imageUriString: String?
+  val articleWithImages: List<ArticleWithImages>,
 )
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
-  @Assisted private val articleId: String,
+  @Assisted("articleIndex") private val articleIndex: Int,
+  @Assisted("ensembleId") private val ensembleId: String?,
   private val articleRepository: ArticleRepository,
 ): ViewModel() {
 
   @AssistedFactory
   interface ArticleDetailViewModelFactory {
-    fun create(articleId: String): ArticleDetailViewModel
+    fun create(
+      @Assisted("articleIndex") articleIndex: Int,
+      @Assisted("ensembleId") ensembleId: String?
+    ): ArticleDetailViewModel
   }
 
-  val articleDetailUiState: StateFlow<ArticleDetailUiState> = articleRepository.getArticleWithImages(articleId).map {
-      ArticleDetailUiState(imageUriString = it.images[0].uri)
+  val articleDetailUiState: StateFlow<ArticleDetailUiState> = articleRepository.getArticlesWithImages(ensembleId).map {
+      ArticleDetailUiState(articleWithImages = it)
     }.stateIn(
       scope = viewModelScope,
       started = SharingStarted.WhileSubscribed(),
-      initialValue = ArticleDetailUiState(imageUriString = null)
+      initialValue = ArticleDetailUiState(
+        articleWithImages = emptyList(),
+      )
     )
 }

@@ -19,13 +19,10 @@ data class ArticleWithImages(
 
 @Dao
 interface ArticleDao {
-  @Insert
-  fun insertArticles(vararg articleEntity: ArticleEntity)
-  @Update
-  fun updateArticle(articleEntity: ArticleEntity)
+  @Insert fun insertArticles(vararg articleEntity: ArticleEntity)
+  @Update fun updateArticle(articleEntity: ArticleEntity)
 
-  @Insert
-  fun insertArticleImages(vararg articleImageEntity: ArticleImageEntity)
+  @Insert fun insertArticleImages(vararg articleImageEntity: ArticleImageEntity)
 
   // NOTE: @Transaction are necessary when using @Relation entities with the @Relation annotation
   @Transaction

@@ -32,6 +32,7 @@ import com.inasweaterpoorlyknit.inknit.R
 val longArticle = "long_compose_preview.webp"
 val squareishArticle = "add_article_compose_preview.webp"
 val COMPOSE_PREVIEW_CONTENT_DESCRIPTION = "compose preview content description"
+val COMPOSE_ID = "compose preview id"
 
 @Composable
 fun previewAssetBitmap(filename: String): Bitmap = BitmapFactory.decodeStream(LocalContext.current.assets.open(filename))

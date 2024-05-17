@@ -1,7 +1,9 @@
 package com.inasweaterpoorlyknit.core.database.repository
 
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleArticles
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
+import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import com.inasweaterpoorlyknit.core.database.model.toExternalModel
@@ -13,7 +15,7 @@ class EnsembleRepository(
 ) {
   fun getAllEnsembles(): Flow<List<Ensemble>> = ensembleDao.getAllEnsembles().map { list -> list.map { it.toExternalModel() } }
   fun getAllEnsembleArticleImages(): Flow<List<EnsembleArticles>> = ensembleDao.getAllEnsembleArticleImages()
-  fun getEnsembleArticleImages(ensembleId: String) = ensembleDao.getEnsembleArticleImages(ensembleId)
+  fun getEnsembleArticleThumbnails(ensembleId: String): Flow<List<ArticleWithImages>> = ensembleDao.getEnsembleArticleThumbnails(ensembleId)
   fun getEnsemble(ensembleId: String): Flow<Ensemble> = ensembleDao.getEnsemble(ensembleId).map { it.toExternalModel() }
   fun insertEnsemble(
     title: String,

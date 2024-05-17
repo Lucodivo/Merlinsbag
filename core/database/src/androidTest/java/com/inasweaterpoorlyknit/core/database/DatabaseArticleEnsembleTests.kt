@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleArticles
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.ArticleImage
@@ -70,7 +71,7 @@ class DatabaseArticleEnsembleTests {
     articleDao.insertArticles(*newArticles)
     articleDao.insertArticleImages(*newArticleImages)
     ensembleDao.insertArticleEnsemble(*newEnsembleArticles)
-    val ensembleArticles: List<ArticleImage>
+    val ensembleArticles: List<ArticleWithImages>
     runBlocking(Dispatchers.IO) {
       ensembleArticles = ensembleDao.getEnsembleArticleImages(newEnsemble.id).first().sortedBy { it.articleId }
     }

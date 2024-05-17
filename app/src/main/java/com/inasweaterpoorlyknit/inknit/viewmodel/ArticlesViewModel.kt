@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit.viewmodels
+package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

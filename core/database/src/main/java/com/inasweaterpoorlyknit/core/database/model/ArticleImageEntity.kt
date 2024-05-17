@@ -17,20 +17,24 @@ import java.util.UUID
 )
 data class ArticleImageEntity(
   @PrimaryKey val id: String = UUID.randomUUID().toString(),
-  @ColumnInfo(name = "article_id", index = true) val articleId: String,
-  @ColumnInfo(name = "uri") val uri: String,
-  @ColumnInfo(name = "thumb_uri") val thumbUri: String,
+  @ColumnInfo("article_id", index = true) val articleId: String,
+  @ColumnInfo("uri") val uri: String,
+  @ColumnInfo("thumb_uri") val thumbUri: String,
   // TODO: image rank
+)
+
+data class ArticleThumbnail(
+  @ColumnInfo("article_id") val articleId: String,
+  @ColumnInfo("thumb_uri") val thumbUri: String,
+)
+
+data class ArticleFull(
+  @ColumnInfo("article_id") val articleId: String,
+  @ColumnInfo("uri") val uri: String,
 )
 
 data class ArticleImage(
   @ColumnInfo("article_id") val articleId: String,
   @ColumnInfo("uri") val uri: String,
   @ColumnInfo("thumb_uri") val thumbUri: String,
-)
-
-fun ArticleImageEntity.toExternalModel() = ArticleImage(
-  articleId = articleId,
-  uri = uri,
-  thumbUri = thumbUri
 )

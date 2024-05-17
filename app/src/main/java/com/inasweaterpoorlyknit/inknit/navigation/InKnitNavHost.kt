@@ -12,7 +12,7 @@ import com.inasweaterpoorlyknit.inknit.ui.InKnitAppState
 import com.inasweaterpoorlyknit.inknit.ui.screen.ADD_ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLE_DETAIL_ROUTE
-import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLE_ID_ARG
+import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLE_INDEX_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.AddArticleRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticlesRoute
@@ -25,7 +25,7 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigationSafeUriStringDecode
-import com.inasweaterpoorlyknit.inknit.viewmodels.Event
+import com.inasweaterpoorlyknit.inknit.viewmodel.Event
 
 data class ScreenSuccess(
   val id: String,
@@ -57,14 +57,23 @@ fun InKnitNavHost(
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(
-        navArgument(ARTICLE_ID_ARG) {
+        navArgument(ARTICLE_INDEX_ARG) {
           nullable = false;
+          type = NavType.IntType
+        },
+        navArgument(ENSEMBLE_ID_ARG) {
+          nullable = true;
           type = NavType.StringType
         },
       ),
     ) { navBackStackEntry ->
-      val articleIdArg = navBackStackEntry.arguments!!.getString(ARTICLE_ID_ARG)!!
-      ArticleDetailRoute(navController = navController, articleId = articleIdArg)
+      val articleIndexArg = navBackStackEntry.arguments!!.getInt(ARTICLE_INDEX_ARG)
+      val ensembleIdArg = navBackStackEntry.arguments!!.getString(ENSEMBLE_ID_ARG)
+      ArticleDetailRoute(
+        navController = navController,
+        articleIndex = articleIndexArg,
+        ensembleId = ensembleIdArg,
+      )
     }
     composable(
       route = ENSEMBLE_DETAIL_ROUTE,

@@ -39,7 +39,7 @@ object AppModule {
     /* Repositories */
     @Provides
     @Singleton
-    fun providesArticleRepository(articleDao: ArticleDao): ArticleRepository = ArticleRepository(articleDao)
+    fun providesArticleRepository(articleDao: ArticleDao, ensembleDao: EnsembleDao): ArticleRepository = ArticleRepository(articleDao, ensembleDao)
 
     @Provides
     @Singleton

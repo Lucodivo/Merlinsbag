@@ -1,8 +1,9 @@
-package com.inasweaterpoorlyknit.inknit.ui.screen
+package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.database.model.ArticleImage
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
+import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
 import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 
 data class EnsembleDetailUiState(
   val title: String,
-  val articles: List<ArticleImage>,
+  val articles: List<ArticleWithImages>,
 )
 
 @HiltViewModel(assistedFactory = EnsembleDetailViewModel.EnsembleDetailViewModelFactory::class)
@@ -30,7 +31,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   val ensembleUiState = combine(
     ensemblesRepository.getEnsemble(ensembleId),
-    ensemblesRepository.getEnsembleArticleImages(ensembleId)
+    ensemblesRepository.getEnsembleArticleThumbnails(ensembleId)
   ) { ensembleEntity, articleImages ->
     EnsembleDetailUiState(
       title = ensembleEntity.title,

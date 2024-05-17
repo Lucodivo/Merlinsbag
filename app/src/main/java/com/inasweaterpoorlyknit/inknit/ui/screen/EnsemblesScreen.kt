@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,10 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.PathSegment
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
-import androidx.compose.ui.text.input.ImeAction.Companion.Done
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,7 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.model.ArticleImage
+import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
@@ -50,8 +45,12 @@ import com.inasweaterpoorlyknit.inknit.ui.component.NoopFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.isComposePreview
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.inknit.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.inknit.viewmodel.Ensemble
+import com.inasweaterpoorlyknit.inknit.viewmodel.EnsemblesViewModel
+import com.inasweaterpoorlyknit.inknit.viewmodel.SaveEnsembleData
 
 const val ENSEMBLES_ROUTE = "ensembles_route"
 
@@ -186,7 +185,11 @@ fun AddEnsembleDialog(
             OutlinedTextField(
                 value = userInputTitle,
                 placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
-                onValueChange = { setUserInputTitle(it) },
+                onValueChange = { updatedTitle ->
+                    if(updatedTitle.length <= MAX_ENSEMBLE_TITLE_LENGTH){
+                        setUserInputTitle(updatedTitle)
+                    }
+                },
                 label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
                 singleLine = true,
             )
@@ -256,7 +259,7 @@ val previewEnsembles: List<Ensemble> =
             Ensemble(
                 id = index.toString(),
                 name = "Ensemble $index",
-                articles = thumbnailUriStrings.map { ArticleImage(articleId = "", uri = it, thumbUri = it) },
+                articles = thumbnailUriStrings.map { ArticleThumbnail(articleId = "", thumbUri = it) },
             )
         }
     }

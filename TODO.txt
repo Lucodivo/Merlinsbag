@@ -24,9 +24,11 @@ Add Article:
             - Ideally, subjects with similar aspect ratios should have similar sizes
         - Although... the articles currently fit well within an ensemble.
     - Use custom layout for AddArticleControls
-Outfits:
-    - add items to a list
-    - display lists
+Ensembles:
+    - Add Ensemble Dialog
+        - Tags?
+    - Search
+    - Sort
 Article Detail:
     - Swipe between items in current scope
         - HorizontalPager?

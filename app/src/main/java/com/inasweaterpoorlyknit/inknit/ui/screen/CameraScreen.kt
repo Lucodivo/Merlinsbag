@@ -28,7 +28,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.component.CameraPreview
 import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
-import com.inasweaterpoorlyknit.inknit.viewmodels.CameraViewModel
+import com.inasweaterpoorlyknit.inknit.viewmodel.CameraViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
