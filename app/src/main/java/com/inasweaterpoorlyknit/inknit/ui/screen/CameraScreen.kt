@@ -59,7 +59,7 @@ fun CameraRoute(
   if (finished){ return }
 
   cameraViewModel.addArticle.value.getContentIfNotHandled()?.let { uriString ->
-    navController.navigateToAddArticle(uriString)
+    navController.navigateToAddArticle(listOf(uriString))
   }
 
   val imageCapture = remember {

@@ -8,15 +8,11 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
+import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,11 +32,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailGrid
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionButton
-import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
 import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
@@ -67,13 +61,13 @@ fun ArticlesRoute(
     modifier: Modifier = Modifier,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ){
-    val _photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenDocument(){
+    val _photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments(){
         override fun createIntent(context: Context, input: Array<String>): Intent {
             return super.createIntent(context, input).apply { addCategory(Intent.CATEGORY_OPENABLE) }
         }
-    }){ uri ->
-        if(uri != null) {
-            navController.navigateToAddArticle(navigationSafeUriStringEncode(uri))
+    }){ uris ->
+        if(uris.isNotEmpty()) {
+            navController.navigateToAddArticle(uris.map{ navigationSafeUriStringEncode(it) })
         } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
     }
     val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(

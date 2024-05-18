@@ -23,7 +23,7 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_DETAIL_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_ID_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.EnsemblesRoute
-import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_ARG
+import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_LIST_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigationSafeUriStringDecode
 import com.inasweaterpoorlyknit.inknit.viewmodel.Event
 
@@ -96,16 +96,17 @@ fun InKnitNavHost(
     composable(
       route = ADD_ARTICLES_ROUTE,
       arguments = listOf(
-        navArgument(IMAGE_URI_STRING_ARG) {
-          nullable = false;
+        navArgument(IMAGE_URI_STRING_LIST_ARG) {
+          nullable = false
           type = NavType.StringType
         },
       ),
     ) { navBackStackEntry ->
-      val imageUriStringArg = navBackStackEntry.arguments!!.getString(IMAGE_URI_STRING_ARG)!!
+      val imageUriStringListArg = navBackStackEntry.arguments!!.getString(IMAGE_URI_STRING_LIST_ARG)!!
+      val imageUriStringList = imageUriStringListArg.split(",").map{ navigationSafeUriStringDecode(it) }
       AddArticleRoute(
         navController = navController,
-        imageUriString = navigationSafeUriStringDecode(imageUriStringArg),
+        imageUriStringList = imageUriStringList,
         windowSizeClass = appState.windowSizeClass,
         onSuccess = { success -> setScreenSuccess(Event(success)) }
       )

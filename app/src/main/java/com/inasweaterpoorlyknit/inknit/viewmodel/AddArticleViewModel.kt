@@ -40,16 +40,19 @@ open class Event<out T>(private val content: T?) {
 
 @HiltViewModel(assistedFactory = AddArticleViewModel.AddArticleViewModelFactory::class)
 class AddArticleViewModel @AssistedInject constructor(
-  @Assisted private val imageUriString: String,
+  @Assisted("imageUriStrings") private val imageUriStrings: List<String>,
   private val application: Application,
   private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
   @AssistedFactory
   interface AddArticleViewModelFactory {
-    fun create(uriImageString: String): AddArticleViewModel
+    fun create(
+      @Assisted("imageUriStrings") uriImageStrings: List<String>
+    ): AddArticleViewModel
   }
 
+  private var processingImageIndex = -1
   private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
   private var rotationIndex = 0
 
@@ -62,25 +65,41 @@ class AddArticleViewModel @AssistedInject constructor(
 
   private val segmentedImage = SegmentedImage()
 
-  init {
-    viewModelScope.launch(Dispatchers.Default) {
-      Uri.parse(imageUriString)?.let { imageUri ->
-        try {
-          segmentedImage.process(application, imageUri) { success ->
-            if(success){
-              if(segmentedImage.subjectsFound) {
-                multipleSubjects.value = segmentedImage.subjectCount > 1
-                refreshProcessedBitmap()
-              } else {
-                noSubjectFound.value = Event(Unit)
+  private fun processNextImage() {
+    processing.value = true
+    multipleSubjects.value = false
+    processedBitmap.value = null
+    rotationIndex = 0
+    rotation.floatValue = rotations[rotationIndex]
+
+    processingImageIndex += 1
+    if(processingImageIndex > imageUriStrings.lastIndex){
+      finished.value = Event(Unit)
+    } else {
+      viewModelScope.launch(Dispatchers.Default) {
+        Uri.parse(imageUriStrings[processingImageIndex])?.let { imageUri ->
+          try {
+            segmentedImage.process(application, imageUri) { success ->
+              if(success){
+                if(segmentedImage.subjectsFound) {
+                  multipleSubjects.value = segmentedImage.subjectCount > 1
+                  refreshProcessedBitmap()
+                } else {
+                  noSubjectFound.value = Event(Unit)
+                  processNextImage()
+                }
+              } else{
+                Log.e("processImage()", "ML Kit failed to process image")
               }
-            } else{
-              Log.e("processImage()", "ML Kit failed to process image")
             }
-          }
-        } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
+          } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
+        }
       }
     }
+  }
+
+  init {
+    processNextImage()
   }
 
   private fun refreshProcessedBitmap() {
@@ -125,20 +144,19 @@ class AddArticleViewModel @AssistedInject constructor(
   }
 
   fun onSave(){
+    val rotationMatrix = Matrix()
+    rotationMatrix.postRotate(rotation.floatValue)
+    val fullBitmapToSave = Bitmap.createBitmap(
+      segmentedImage.subjectBitmap,
+      segmentedImage.subjectBoundingBox.minX,
+      segmentedImage.subjectBoundingBox.minY,
+      segmentedImage.subjectBoundingBox.width,
+      segmentedImage.subjectBoundingBox.height,
+      rotationMatrix,
+      false // e.g. bilinear filtering of source
+    )
+
     viewModelScope.launch(Dispatchers.IO) {
-      val rotationMatrix = Matrix()
-      rotationMatrix.postRotate(rotation.floatValue)
-
-      val fullBitmapToSave = Bitmap.createBitmap(
-        segmentedImage.subjectBitmap,
-        segmentedImage.subjectBoundingBox.minX,
-        segmentedImage.subjectBoundingBox.minY,
-        segmentedImage.subjectBoundingBox.width,
-        segmentedImage.subjectBoundingBox.height,
-        rotationMatrix,
-        false // e.g. bilinear filtering of source
-      )
-
       var bitmapWidth = fullBitmapToSave.width
       var bitmapHeight = fullBitmapToSave.height
       while (bitmapWidth > 300 || bitmapHeight > 300) {
@@ -176,6 +194,6 @@ class AddArticleViewModel @AssistedInject constructor(
         thumbnailUri = thumbnailFile.toUri().toString()
       )
     }
-    finished.value = Event(Unit)
+    processNextImage()
   }
 }

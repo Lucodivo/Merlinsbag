@@ -14,6 +14,7 @@ import java.io.IOException
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
+import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -25,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 class DatabaseArticleWithImagesTests {
     // TODO: Remove DAO, test through repository only
     private lateinit var articleDao: ArticleDao
+    private lateinit var ensembleDao: EnsembleDao
     private lateinit var articleRepository: ArticleRepository
     private lateinit var database: InKnitDatabase
 
@@ -39,8 +41,10 @@ class DatabaseArticleWithImagesTests {
             .allowMainThreadQueries()
             .build()
         articleDao = database.ArticleDao()
+        ensembleDao = database.EnsembleDao()
         articleRepository = ArticleRepository(
-            articleDao = articleDao
+            articleDao = articleDao,
+            ensembleDao = ensembleDao,
         )
     }
 

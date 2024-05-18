@@ -44,15 +44,15 @@ import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.viewmodel.AddArticleViewModel
 
-const val IMAGE_URI_STRING_ARG = "imageUriString"
+const val IMAGE_URI_STRING_LIST_ARG = "imageUriStringArray"
 const val ADD_ARTICLES_BASE = "add_articles_route"
-const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_ARG={$IMAGE_URI_STRING_ARG}"
+const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG={$IMAGE_URI_STRING_LIST_ARG}"
 
 fun NavController.navigateToAddArticle(
-  uriString: String,
+  uriStringArray: List<String>,
   navOptions: NavOptions? = null
 ){
-  val route = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_ARG=$uriString"
+  val route = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG=${uriStringArray.joinToString(",")}"
   navigate(route, navOptions)
 }
 
@@ -192,22 +192,22 @@ fun AddArticleScreen(
 @Composable
 fun AddArticleRoute(
   navController: NavController,
-  imageUriString: String,
+  imageUriStringList: List<String>,
   windowSizeClass: WindowSizeClass,
   onSuccess: (ScreenSuccess) -> Unit, // Only called if user sucessfully added an article
 ){
   val addArticleViewModel =
     hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
-      factory.create(imageUriString)
+      factory.create(imageUriStringList)
     }
 
   addArticleViewModel.finished.value.getContentIfNotHandled()?.let {
-      onSuccess(ScreenSuccess(imageUriString, true))
+      onSuccess(ScreenSuccess(imageUriStringList[0], true))
       navController.popBackStack()
   }
 
   addArticleViewModel.noSubjectFound.value.getContentIfNotHandled()?.let {
-    onSuccess(ScreenSuccess(imageUriString, false))
+    onSuccess(ScreenSuccess(imageUriStringList[0], false))
     navController.popBackStack()
     Toast(msg = R.string.no_subject_found)
   }
@@ -228,7 +228,6 @@ fun AddArticleRoute(
   )
 }
 
-@Suppress("UNUSED_VARIABLE")
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @DevicePreviews
 @Composable

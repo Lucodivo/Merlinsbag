@@ -36,7 +36,7 @@ data class SaveEnsembleData(
 
 @HiltViewModel
 class EnsemblesViewModel @Inject constructor(
-  val articleRepository: ArticleRepository,
+  articleRepository: ArticleRepository,
   val ensemblesRepository: EnsembleRepository
 ): ViewModel() {
 
