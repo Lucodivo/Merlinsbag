@@ -32,16 +32,15 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.DevicePreviews
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopRotatableImage
-import com.inasweaterpoorlyknit.inknit.ui.state.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.inknit.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
 import com.inasweaterpoorlyknit.inknit.ui.squareishArticle
-import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.inknit.ui.state.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.viewmodel.AddArticleViewModel
 
 const val IMAGE_URI_STRING_LIST_ARG = "imageUriStringArray"
@@ -194,7 +193,6 @@ fun AddArticleRoute(
   navController: NavController,
   imageUriStringList: List<String>,
   windowSizeClass: WindowSizeClass,
-  onSuccess: (ScreenSuccess) -> Unit, // Only called if user sucessfully added an article
 ){
   val addArticleViewModel =
     hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
@@ -202,13 +200,10 @@ fun AddArticleRoute(
     }
 
   addArticleViewModel.finished.value.getContentIfNotHandled()?.let {
-      onSuccess(ScreenSuccess(imageUriStringList[0], true))
       navController.popBackStack()
   }
 
   addArticleViewModel.noSubjectFound.value.getContentIfNotHandled()?.let {
-    onSuccess(ScreenSuccess(imageUriStringList[0], false))
-    navController.popBackStack()
     Toast(msg = R.string.no_subject_found)
   }
 

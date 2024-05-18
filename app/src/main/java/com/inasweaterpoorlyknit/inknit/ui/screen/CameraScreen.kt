@@ -20,17 +20,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.inknit.navigation.ScreenSuccess
 import com.inasweaterpoorlyknit.inknit.ui.component.CameraPreview
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import com.inasweaterpoorlyknit.inknit.viewmodel.CameraViewModel
-import androidx.compose.ui.tooling.preview.Preview
-import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
 const val TAG = "CameraScreen"
 const val EXTERNAL_STORAGE_CAMERA_PIC_DIR = "Pictures/InKnit"
@@ -43,21 +42,8 @@ fun NavController.navigateToCamera(navOptions: NavOptions? = null) = navigate(CA
 fun CameraRoute(
   navController: NavController,
   modifier: Modifier = Modifier,
-  imageSuccessfullyUsed: ScreenSuccess? = null,
   cameraViewModel: CameraViewModel = hiltViewModel(),
 ){
-  // TODO: This should not be that hard
-  //   Pain points were that recomposition was happening multiple times
-  //   causing the backstack to be popped multiple times
-  //   while also maintaining a desire to not draw anything on subsequent recompositions
-  //   especially in terms of hiding system UI
-  var finished by remember { mutableStateOf(false) }
-  if(cameraViewModel.checkImageUsedSuccessfully(imageSuccessfullyUsed)){
-    finished = true
-    navController.popBackStack()
-  }
-  if (finished){ return }
-
   cameraViewModel.addArticle.value.getContentIfNotHandled()?.let { uriString ->
     navController.navigateToAddArticle(listOf(uriString))
   }

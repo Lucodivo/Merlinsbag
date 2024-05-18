@@ -51,7 +51,7 @@
     <string name="add">add</string>
     <string name="Ensembles">Ensembles</string>
     <string name="add_article">add article</string>
-    <string name="no_subject_found">Try again. No subject found.</string>
+    <string name="no_subject_found">Subject not found in image.</string>
     <string name="assorted_blocks">assorted blocks</string>
     <string name="folder_with_star">folder with star</string>
     <string name="Goth_2_Boss">Goth 2 Boss</string>

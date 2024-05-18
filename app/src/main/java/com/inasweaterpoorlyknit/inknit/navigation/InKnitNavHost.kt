@@ -1,8 +1,6 @@
 package com.inasweaterpoorlyknit.inknit.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,20 +15,14 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.AddArticleRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticlesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
-import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.CameraRoute
+import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_DETAIL_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_ID_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.IMAGE_URI_STRING_LIST_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigationSafeUriStringDecode
-import com.inasweaterpoorlyknit.inknit.viewmodel.Event
-
-data class ScreenSuccess(
-  val id: String,
-  val success: Boolean,
-)
 
 const val APP_START_DESTINATION = ARTICLES_ROUTE
 
@@ -41,7 +33,6 @@ fun InKnitNavHost(
   startDestination: String = APP_START_DESTINATION,
 ) {
   val navController = appState.navController
-  val (screenSuccess, setScreenSuccess) = remember { mutableStateOf(Event<ScreenSuccess>(null)) }
 
   NavHost(
     navController = navController,
@@ -90,7 +81,6 @@ fun InKnitNavHost(
     composable(route = CAMERA_ROUTE){
       CameraRoute(
         navController = navController,
-        imageSuccessfullyUsed = screenSuccess.getContentIfNotHandled(),
       )
     }
     composable(
@@ -108,7 +98,6 @@ fun InKnitNavHost(
         navController = navController,
         imageUriStringList = imageUriStringList,
         windowSizeClass = appState.windowSizeClass,
-        onSuccess = { success -> setScreenSuccess(Event(success)) }
       )
     }
   }
