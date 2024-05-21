@@ -52,8 +52,11 @@ class AddArticleViewModel @AssistedInject constructor(
     ): AddArticleViewModel
   }
 
+  companion object {
+    private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
+  }
+
   private var processingImageIndex = -1
-  private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
   private var rotationIndex = 0
 
   val processing = mutableStateOf(true)
@@ -64,6 +67,15 @@ class AddArticleViewModel @AssistedInject constructor(
   val noSubjectFound = mutableStateOf(Event<Unit>(null))
 
   private val segmentedImage = SegmentedImage()
+
+  init {
+    processNextImage()
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    segmentedImage.cleanup()
+  }
 
   private fun processNextImage() {
     processing.value = true
@@ -96,10 +108,6 @@ class AddArticleViewModel @AssistedInject constructor(
         }
       }
     }
-  }
-
-  init {
-    processNextImage()
   }
 
   private fun refreshProcessedBitmap() {

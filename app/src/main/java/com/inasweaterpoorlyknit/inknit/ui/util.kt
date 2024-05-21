@@ -61,3 +61,20 @@ fun Context.hideSystemUI(){
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE) // stable view of content (layout view size doesn't change)
   }
 }
+
+fun Context.hideStatusUI(){
+  val window = (this as Activity).window
+  if (Build.VERSION.SDK_INT >= 30) {
+    window.setDecorFitsSystemWindows(false) // fill window
+    with(WindowInsetsControllerCompat(window, window.decorView)){
+      hide(WindowInsetsCompat.Type.statusBars())
+      systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    }
+  } else {
+    @Suppress("DEPRECATION")
+    window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_FULLSCREEN or // fullscreen
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or // lay out view as if fullscreen
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE) // stable view of content (layout view size doesn't change)
+  }
+}

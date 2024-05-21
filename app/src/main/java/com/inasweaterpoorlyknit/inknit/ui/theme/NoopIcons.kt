@@ -3,14 +3,14 @@ package com.inasweaterpoorlyknit.inknit.ui.theme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Checkroom
@@ -26,9 +26,10 @@ import androidx.compose.material.icons.outlined.ZoomOutMap
 
 object NoopIcons {
   val Close = Icons.Filled.Close
-  val PhotoAlbum = Icons.Filled.PhotoAlbum
-  val AddPhoto = Icons.Filled.AddAPhoto
+  val AddPhotoAlbum = Icons.Filled.AddPhotoAlternate
+  val AddPhotoCamera = Icons.Filled.AddAPhoto
   val Remove = Icons.Filled.Remove
+  val Edit = Icons.Filled.Edit
   val Add = Icons.Filled.Add
   val MoreHorizontal = Icons.Filled.MoreHoriz
   val Previous = Icons.Outlined.SwitchLeft

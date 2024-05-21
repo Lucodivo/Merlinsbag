@@ -69,3 +69,9 @@ Performance:
         - bug: transition to articles from bottom bar hiccups a little
     - Logs report skipping frames:
         - Startup in articles screen up to 120 frames total!
+Bugs:
+    - OOM crash when processing an image in AddArticleScreen
+        - stems from java.nio.HeapFloatBuffer when called in com.google.mlkit.vision.segmentation.subject.internal
+        - Seen when running application on an Motorola Z Play, 3GB RAM, API 26
+        - settings android:largeHeap="true" in manifest has slightly alleviated the problem
+        - could it be linked to the memory size of thumbnails on the articles screen?

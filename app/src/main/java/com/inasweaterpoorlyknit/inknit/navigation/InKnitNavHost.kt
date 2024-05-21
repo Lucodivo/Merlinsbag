@@ -79,9 +79,7 @@ fun InKnitNavHost(
       EnsembleDetailRoute(navController = navController, ensembleId = ensembleIdArg)
     }
     composable(route = CAMERA_ROUTE){
-      CameraRoute(
-        navController = navController,
-      )
+      CameraRoute(navController = navController)
     }
     composable(
       route = ADD_ARTICLES_ROUTE,

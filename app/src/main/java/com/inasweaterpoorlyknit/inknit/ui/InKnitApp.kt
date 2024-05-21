@@ -99,7 +99,7 @@ class InKnitAppState(
                 if(!hideSystemUI != showSystemUI) {
                     showSystemUI = !hideSystemUI
                     val context = navController.context
-                    if(showSystemUI) context.showSystemUI() else context.hideSystemUI()
+                    if(showSystemUI) context.showSystemUI() else context.hideStatusUI()
                 }
                 val hideNavBar = hideSystemUI || route.contains(ADD_ARTICLES_BASE)
                 if(!hideNavBar != showBottomNavBar.value){ showBottomNavBar.value = !hideNavBar }

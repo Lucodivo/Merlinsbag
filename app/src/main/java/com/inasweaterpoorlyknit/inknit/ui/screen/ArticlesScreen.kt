@@ -176,11 +176,13 @@ fun ArticlesScreen(
         )
         NoopExpandingFloatingActionButton(
             expanded = addButtonActive,
+            collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
+            expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
             expandedButtons = listOf(
                 TextIconButtonData(
                     text = stringResource(id = R.string.Album),
                     icon = IconData(
-                        icon = NoopIcons.PhotoAlbum,
+                        icon = NoopIcons.AddPhotoAlbum,
                         contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                     ),
                     onClick = onClickAddPhotoAlbum
@@ -188,7 +190,7 @@ fun ArticlesScreen(
                 TextIconButtonData(
                     text = stringResource(id = R.string.Camera),
                     icon = IconData(
-                        icon = NoopIcons.AddPhoto,
+                        icon = NoopIcons.AddPhotoCamera,
                         contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                     ),
                     onClick = onClickAddPhotoCamera

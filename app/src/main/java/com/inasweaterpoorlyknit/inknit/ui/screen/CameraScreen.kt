@@ -9,6 +9,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -20,12 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.inknit.ui.LandscapePreview
 import com.inasweaterpoorlyknit.inknit.ui.component.CameraPreview
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
@@ -89,9 +92,11 @@ fun CameraRoute(
         }
       })
   }
+  val landscape: Boolean = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
   CameraScreen(
     imageCapture = imageCapture,
     onClick = ::takePhoto,
+    landscape = landscape,
   )
 }
 
@@ -99,18 +104,24 @@ fun CameraRoute(
 fun CameraScreen(
   imageCapture: ImageCapture,
   onClick: () -> Unit,
+  landscape: Boolean,
 ) {
   CameraPreview(imageCapture = imageCapture)
-  CameraControls(onClick = onClick)
+  CameraControls(landscape = landscape, onClick = onClick)
 }
 
 @Composable
 fun CameraControls(
+  landscape: Boolean,
   onClick: () -> Unit,
-){
+) {
+  val alignment = if(landscape) Alignment.CenterEnd else Alignment.BottomCenter
   var captureActivated by remember{ mutableStateOf(false) }
-  Box(contentAlignment = Alignment.BottomCenter,
-    modifier = Modifier.fillMaxSize()){
+  Box(contentAlignment = alignment,
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(70.dp)
+  ){
     Button(
       colors = ButtonColors(containerColor = Color.White, contentColor = Color.White, disabledContainerColor = Color.Gray, disabledContentColor = Color.Gray),
       shape = CircleShape,
@@ -119,7 +130,7 @@ fun CameraControls(
         captureActivated = true
         onClick()
       },
-      modifier = Modifier.padding(20.dp)
+      modifier = Modifier.size(50.dp)
     ){}
   }
 }
@@ -131,6 +142,21 @@ fun PreviewCameraScreen(){
   NoopTheme {
     CameraScreen(
       imageCapture = bogusPreviewImageCapture,
-      onClick = {})
+      onClick = {},
+      landscape = false
+    )
+  }
+}
+
+@LandscapePreview
+@Composable
+fun PreviewCameraScreen_landscape(){
+  val bogusPreviewImageCapture = ImageCapture.Builder().build()
+  NoopTheme {
+    CameraScreen(
+      imageCapture = bogusPreviewImageCapture,
+      onClick = {},
+      landscape = true
+    )
   }
 }

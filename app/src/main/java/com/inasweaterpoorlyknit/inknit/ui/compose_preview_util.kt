@@ -9,6 +9,7 @@ import androidx.annotation.RawRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.PhotoAlbum
@@ -55,6 +56,9 @@ fun resourceAsUriString(@RawRes resId: Int): String {
 @Preview(name = "tablet", device = "spec:shape=Normal,width=1280,height=800,unit=dp,dpi=480")
 annotation class DevicePreviews
 
+@Preview(name = "landscape", device = "spec:shape=Normal,width=640,height=360,unit=dp,dpi=480")
+annotation class LandscapePreview
+
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun currentWindowAdaptiveInfo(): WindowSizeClass {
@@ -88,7 +92,7 @@ object NoopComposePreviewIcons {
   val PhotoAlbum = Icons.Filled.PhotoAlbum
   val AddAPhoto = Icons.Filled.AddAPhoto
   val Remove = Icons.Filled.Remove
-  val Add = Icons.Filled.Add
+  val Add = Icons.Filled.AddPhotoAlternate
   val Save = Icons.Outlined.Save
   val Check = Icons.Outlined.Check
   val Category = Icons.Outlined.Category

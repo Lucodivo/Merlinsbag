@@ -48,6 +48,14 @@ class SegmentedImage {
     private var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
     var subjectIndex: Int = 0
     private var segmentationResult = PLACEHOLDER_RESULT
+    private val subjectSegmenter = SubjectSegmentation.getClient(
+        SubjectSegmenterOptions.Builder()
+            .enableMultipleSubjects(
+                SubjectSegmenterOptions.SubjectResultOptions.Builder()
+                    .enableConfidenceMask()
+                    .build())
+            .build()
+    )
 
     companion object {
         private val PLACEHOLDER_INT_ARRAY = IntArray(1)
@@ -61,23 +69,20 @@ class SegmentedImage {
         private val PLACEHOLDER_SUBJECT = Subject(EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP, 1, 1, 0, 0)
         private val PLACEHOLDER_RESULT = SubjectSegmentationResult(listOf(PLACEHOLDER_SUBJECT), EMPTY_FLOAT_BUFFER, PLACEHOLDER_BITMAP)
         private val PLACEHOLDER_BOUNDING_BOX = BoundingBox(0, 0, 1, 1)
-
-        private val subjectSegmenter = SubjectSegmentation.getClient(
-            SubjectSegmenterOptions.Builder()
-                .enableMultipleSubjects(
-                    SubjectSegmenterOptions.SubjectResultOptions.Builder()
-                        .enableConfidenceMask()
-                        .build())
-                .build()
-        )
     }
 
     init {
         // warm up the ML Kit Model
         val mlkitImage = InputImage.fromBitmap(PLACEHOLDER_BITMAP, 0)
         subjectSegmenter.process(mlkitImage)
-            .addOnSuccessListener { segmentationResult = it }
+            .addOnSuccessListener {
+                segmentationResult = it
+            }
             .addOnFailureListener{ Log.e("SegmentedImage", "ML Kit failed to process placeholder bitmap image") }
+    }
+
+    fun cleanup(){
+        subjectSegmenter.close()
     }
 
     val timer = Timer()
