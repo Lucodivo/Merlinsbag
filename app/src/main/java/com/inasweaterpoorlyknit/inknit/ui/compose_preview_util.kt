@@ -11,8 +11,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderSpecial
-import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Check
@@ -89,10 +89,11 @@ val repeatedThumbnailResourceIdsAsStrings = arrayListOf(*allTestThumbnailResourc
  And simply require *any* icon
 */
 object NoopComposePreviewIcons {
-  val PhotoAlbum = Icons.Filled.PhotoAlbum
-  val AddAPhoto = Icons.Filled.AddAPhoto
+  val AddPhotoAlbum = Icons.Filled.AddPhotoAlternate
+  val AddPhotoCamera = Icons.Filled.AddAPhoto
   val Remove = Icons.Filled.Remove
-  val Add = Icons.Filled.AddPhotoAlternate
+  val Add = Icons.Filled.Add
+  val Edit = Icons.Filled.Edit
   val Save = Icons.Outlined.Save
   val Check = Icons.Outlined.Check
   val Category = Icons.Outlined.Category

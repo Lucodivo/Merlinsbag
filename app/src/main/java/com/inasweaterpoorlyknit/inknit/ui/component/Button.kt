@@ -49,15 +49,25 @@ private fun _NoopExpandingFloatingActionButton(
         scaleY = openAnimateFloat
         scaleX = openAnimateFloat
         alpha = (-(openAnimateFloat - 1.0f) * (openAnimateFloat - 1.0f)) + 1.0f // https://www.desmos.com/calculator/6ru1kya9ar
-        transformOrigin = TransformOrigin(0.9f, 1.0f)
+        transformOrigin = TransformOrigin(0.5f, 1.0f)
       }) {
       expandedButtons.forEach { button ->
-        ExtendedFloatingActionButton(
-          text = { Text(button.text) },
-          icon = { Icon(button.icon.icon, button.icon.contentDescription) },
-          onClick = button.onClick,
-          modifier = Modifier.padding(bottom = expandedButtonPadding)
-        )
+        if(button.text.isNotEmpty()) {
+          ExtendedFloatingActionButton(
+            text = { Text(button.text) },
+            icon = { Icon(button.icon.icon, button.icon.contentDescription) },
+            onClick = button.onClick,
+            modifier = Modifier.padding(bottom = expandedButtonPadding)
+          )
+        } else {
+          FloatingActionButton(
+            onClick = button.onClick,
+            modifier = Modifier.padding(bottom = expandedButtonPadding)
+          ){
+            Icon(button.icon.icon, button.icon.contentDescription)
+            Text(button.text)
+          }
+        }
       }
     }
     _NoopFloatingActionButton(
@@ -123,7 +133,7 @@ fun NoopFloatingActionButton(
 fun PreviewNoopFloatingActionButton_Alone(){
   NoopTheme {
     _NoopFloatingActionButton(
-      iconData = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
+      iconData = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       onClick = {}
     )
   }
@@ -135,11 +145,11 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded_Alone(){
   NoopTheme{
     _NoopExpandingFloatingActionButton(
       expanded = true,
-      collapsedIcon = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
+      collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedButtons = listOf(
-        TextIconButtonData("Album", IconData(NoopComposePreviewIcons.PhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
-        TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddAPhoto, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
+        TextIconButtonData("Album", IconData(NoopComposePreviewIcons.AddPhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
+        TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddPhotoCamera, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
       ),
       onClickExpandCollapse = {}
     )
@@ -152,11 +162,11 @@ fun PreviewNoopExpandingFloatingActionButtonCollapsed_Alone(){
   NoopTheme{
     _NoopExpandingFloatingActionButton(
       expanded = false,
-      collapsedIcon = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
+      collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedButtons = listOf(
-        TextIconButtonData("Album", IconData(NoopComposePreviewIcons.PhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
-        TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddAPhoto, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
+        TextIconButtonData("Album", IconData(NoopComposePreviewIcons.AddPhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
+        TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddPhotoCamera, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
       ),
       onClickExpandCollapse = {}
     )
@@ -169,11 +179,11 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded_Full(){
   NoopTheme{
     NoopExpandingFloatingActionButton(
       expanded = true,
-      collapsedIcon = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
+      collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedButtons = listOf(
-        TextIconButtonData("Album", IconData(NoopComposePreviewIcons.PhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
-        TextIconButtonData("Camera", IconData(NoopComposePreviewIcons.AddAPhoto, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)){},
+        TextIconButtonData("", IconData(NoopComposePreviewIcons.AddPhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION), {}),
+        TextIconButtonData("", IconData(NoopComposePreviewIcons.AddPhotoCamera, COMPOSE_PREVIEW_CONTENT_DESCRIPTION), {}),
       ),
       onClickExpandCollapse = {}
     )
@@ -185,7 +195,7 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded_Full(){
 fun PreviewNoopFloatingActionButton_Full(){
   NoopTheme {
     NoopFloatingActionButton(
-      iconData = IconData(NoopComposePreviewIcons.Add, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
+      iconData = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       onClick = {}
     )
   }

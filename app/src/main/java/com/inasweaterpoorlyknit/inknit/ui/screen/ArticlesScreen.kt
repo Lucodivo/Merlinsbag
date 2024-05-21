@@ -180,7 +180,7 @@ fun ArticlesScreen(
             expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
             expandedButtons = listOf(
                 TextIconButtonData(
-                    text = stringResource(id = R.string.Album),
+                    text = "",
                     icon = IconData(
                         icon = NoopIcons.AddPhotoAlbum,
                         contentDescription = TODO_ICON_CONTENT_DESCRIPTION
@@ -188,7 +188,7 @@ fun ArticlesScreen(
                     onClick = onClickAddPhotoAlbum
                 ),
                 TextIconButtonData(
-                    text = stringResource(id = R.string.Camera),
+                    text = "",
                     icon = IconData(
                         icon = NoopIcons.AddPhotoCamera,
                         contentDescription = TODO_ICON_CONTENT_DESCRIPTION
