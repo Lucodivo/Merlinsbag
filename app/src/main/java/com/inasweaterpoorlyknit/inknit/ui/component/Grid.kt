@@ -48,8 +48,8 @@ fun ArticleThumbnailGrid(
 fun SelectableArticleThumbnailGrid(
   selectable: Boolean,
   onSelected: (index: Int) -> Unit,
-  articleThumbnailUris: List<String>,
-  articleSelected: Set<Int>,
+  thumbnailUris: List<String>,
+  selectedThumbnails: Set<Int>,
 ){
   val gridMinWidth = 100.dp
   val gridItemPadding = 16.dp
@@ -61,12 +61,12 @@ fun SelectableArticleThumbnailGrid(
       val gridItemModifier = Modifier
         .padding(gridItemPadding)
         .fillMaxSize()
-      items(count = articleThumbnailUris.size){ thumbnailGridItemIndex ->
+      items(count = thumbnailUris.size){ thumbnailGridItemIndex ->
         Box(contentAlignment = Alignment.Center) {
           SelectableNoopImage(
-            uriString = articleThumbnailUris[thumbnailGridItemIndex],
+            uriString = thumbnailUris[thumbnailGridItemIndex],
             contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-            selected = articleSelected.contains(thumbnailGridItemIndex),
+            selected = selectedThumbnails.contains(thumbnailGridItemIndex),
             selectable = selectable,
             modifier = gridItemModifier.clickable { onSelected(thumbnailGridItemIndex) },
 
@@ -96,8 +96,8 @@ fun PreviewSelectableArticleThumbnailGrid(
     SelectableArticleThumbnailGrid(
       selectable = true,
       onSelected = {},
-      articleThumbnailUris = repeatedThumbnailResourceIdsAsStrings,
-      articleSelected = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
+      thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+      selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
     )
   }
 }

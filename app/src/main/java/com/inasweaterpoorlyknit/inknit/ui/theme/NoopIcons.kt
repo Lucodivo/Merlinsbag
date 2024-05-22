@@ -42,7 +42,7 @@ object NoopIcons {
   val RotateCCW = Icons.Outlined.Rotate90DegreesCcw
   val Save = Icons.Outlined.Save
   val Delete = Icons.Outlined.Delete
-  val Discard = Icons.Outlined.Cancel
+  val Cancel = Icons.Outlined.Cancel
   val RotateCW = Icons.Outlined.Rotate90DegreesCw
   val HangUp = Icons.Outlined.Checkroom
   val HangUp2 = Icons.Outlined.DryCleaning

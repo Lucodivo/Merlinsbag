@@ -12,12 +12,7 @@ class EnsembleRepository(
   fun getAllEnsembleArticleImages(): Flow<List<EnsembleArticles>> = ensembleDao.getAllEnsembleArticleImages()
   fun getEnsembleArticleImages(ensembleId: String): Flow<List<ArticleWithImages>> = ensembleDao.getEnsembleArticleImages(ensembleId)
   fun getEnsemble(ensembleId: String): Flow<EnsembleEntity> = ensembleDao.getEnsemble(ensembleId)
-  fun insertEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(
-    ensemble = EnsembleEntity(title = title),
-    articleIds = articleIds
-  )
-
-  fun updateEnsemble(updatedEnsemble: EnsembleEntity) {
-    ensembleDao.updateEnsemble(updatedEnsemble)
-  }
+  fun insertEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(EnsembleEntity(title = title), articleIds)
+  fun deleteEnsembleArticles(ensembleId: String, articleIds: List<String>) = ensembleDao.deleteArticleEnsembles(ensembleId, articleIds)
+  fun updateEnsemble(updatedEnsemble: EnsembleEntity) = ensembleDao.updateEnsemble(updatedEnsemble)
 }

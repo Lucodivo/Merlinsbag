@@ -2,6 +2,7 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.inknit.common.listMap
@@ -12,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -26,7 +28,8 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   @Assisted private val ensembleId: String,
   private val ensemblesRepository: EnsembleRepository
 ): ViewModel() {
-  lateinit var ensemble: EnsembleEntity
+  private lateinit var ensemble: EnsembleEntity
+  private lateinit var ensembleArticles: List<ArticleWithImages>
 
   fun onTitleChanged(newTitle: String) {
     viewModelScope.launch(Dispatchers.IO) {
@@ -38,6 +41,10 @@ class EnsembleDetailViewModel @AssistedInject constructor(
     }
   }
 
+  fun removeEnsembleArticles(articleIds: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
+    ensemblesRepository.deleteEnsembleArticles(ensemble.id, articleIds.map { ensembleArticles[it].articleId })
+  }
+
   @AssistedFactory
   interface EnsembleDetailViewModelFactory {
     fun create(ensembleId: String): EnsembleDetailViewModel
@@ -45,7 +52,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   val ensembleUiState = combine(
     ensemblesRepository.getEnsemble(ensembleId).onEach { ensemble = it },
-    ensemblesRepository.getEnsembleArticleImages(ensembleId).listMap { it.images[0].thumbUri }
+    ensemblesRepository.getEnsembleArticleImages(ensembleId).onEach{ ensembleArticles = it }.listMap { it.images[0].thumbUri }
   ) { ensembleEntity, articleImages ->
     EnsembleDetailUiState(
       title = ensembleEntity.title,

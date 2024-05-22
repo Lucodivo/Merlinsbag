@@ -36,6 +36,9 @@ interface EnsembleDao {
   @Insert
   fun insertArticleEnsemble(vararg ensembleArticleEntity: EnsembleArticleEntity)
 
+  @Query("""DELETE FROM ensemble_article WHERE ensemble_id = :ensembleId AND article_id IN (:articleIds)""")
+  fun deleteArticleEnsembles(ensembleId: String, articleIds: List<String>)
+
   @Transaction
   @Query(
     """SELECT ensemble_article.article_id as article_id FROM ensemble_article 

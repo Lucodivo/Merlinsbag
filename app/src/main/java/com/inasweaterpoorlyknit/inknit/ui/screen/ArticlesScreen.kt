@@ -108,8 +108,7 @@ fun ArticlesRoute(
 
     val articlesUiState by articlesViewModel.articlesUiState.collectAsStateWithLifecycle()
     var editMode by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
-    val isItemSelected =
-        remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+    val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
     articlesUiState.openSettings.getContentIfNotHandled()?.let { openAppSettings() }
 
     ArticlesScreen(
@@ -209,8 +208,8 @@ fun ArticlesScreen(
             onSelected = { index ->
                 onClickArticle(index)
             },
-            articleThumbnailUris = thumbnailUris,
-            articleSelected = selectedThumbnails,
+            thumbnailUris = thumbnailUris,
+            selectedThumbnails = selectedThumbnails,
         )
         NoopExpandingFloatingActionButton(
             expanded = editMode,
@@ -222,7 +221,7 @@ fun ArticlesScreen(
                         TextIconButtonData(
                             text = "",
                             icon = IconData(
-                                icon = NoopIcons.Discard,
+                                icon = NoopIcons.Cancel,
                                 contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                             ),
                             onClick = onClickSelectionCancel
