@@ -7,8 +7,13 @@ import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
@@ -22,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -117,10 +124,13 @@ fun CameraControls(
 ) {
   val alignment = if(landscape) Alignment.CenterEnd else Alignment.BottomCenter
   var captureActivated by remember{ mutableStateOf(false) }
+  val padding = WindowInsets.safeDrawing.asPaddingValues().run {
+    16.dp + if(landscape) calculateEndPadding(LocalLayoutDirection.current) else calculateBottomPadding()
+  }
   Box(contentAlignment = alignment,
     modifier = Modifier
       .fillMaxSize()
-      .padding(70.dp)
+      .padding(padding)
   ){
     Button(
       colors = ButtonColors(containerColor = Color.White, contentColor = Color.White, disabledContainerColor = Color.Gray, disabledContentColor = Color.Gray),
