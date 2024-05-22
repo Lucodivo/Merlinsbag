@@ -23,12 +23,14 @@ data class EnsembleEntity(
       entity = ArticleEntity::class,
       parentColumns = arrayOf("id"),
       childColumns = arrayOf("article_id"),
+      onDelete = ForeignKey.CASCADE,
       deferred = true
     ),
     ForeignKey(
       entity = EnsembleEntity::class,
       parentColumns = arrayOf("id"),
       childColumns = arrayOf("ensemble_id"),
+      onDelete = ForeignKey.CASCADE,
       deferred = true
     ),
   ]

@@ -225,7 +225,7 @@ fun AddEnsembleDialog(
                     )
                     if(selected) {
                         Icon(
-                            imageVector = NoopIcons.SelectIndicator,
+                            imageVector = NoopIcons.SelectedIndicator,
                             contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
                             modifier = Modifier.align(Alignment.BottomEnd),
                             tint = MaterialTheme.colorScheme.primary,

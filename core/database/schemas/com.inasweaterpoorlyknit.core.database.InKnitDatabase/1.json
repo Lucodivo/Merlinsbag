@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f4db5f92792a971ee9c7ac353c86a7c8",
+    "identityHash": "1bc5a5c311a48f20a8b00eabb5040248",
     "entities": [
       {
         "tableName": "article",
@@ -38,7 +38,7 @@
       },
       {
         "tableName": "article_image",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `article_id` TEXT NOT NULL, `uri` TEXT NOT NULL, `thumb_uri` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `article_id` TEXT NOT NULL, `uri` TEXT NOT NULL, `thumb_uri` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED)",
         "fields": [
           {
             "fieldPath": "id",
@@ -59,7 +59,7 @@
             "notNull": true
           },
           {
-            "fieldPath": "thumbnailUri",
+            "fieldPath": "thumbUri",
             "columnName": "thumb_uri",
             "affinity": "TEXT",
             "notNull": true
@@ -85,7 +85,7 @@
         "foreignKeys": [
           {
             "table": "article",
-            "onDelete": "NO ACTION",
+            "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
               "article_id"
@@ -136,7 +136,7 @@
       },
       {
         "tableName": "ensemble_article",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`article_id` TEXT NOT NULL, `ensemble_id` TEXT NOT NULL, PRIMARY KEY(`article_id`, `ensemble_id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY(`ensemble_id`) REFERENCES `ensemble`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`article_id` TEXT NOT NULL, `ensemble_id` TEXT NOT NULL, PRIMARY KEY(`article_id`, `ensemble_id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY(`ensemble_id`) REFERENCES `ensemble`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED)",
         "fields": [
           {
             "fieldPath": "articleId",
@@ -181,7 +181,7 @@
         "foreignKeys": [
           {
             "table": "article",
-            "onDelete": "NO ACTION",
+            "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
               "article_id"
@@ -192,7 +192,7 @@
           },
           {
             "table": "ensemble",
-            "onDelete": "NO ACTION",
+            "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
               "ensemble_id"
@@ -207,7 +207,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f4db5f92792a971ee9c7ac353c86a7c8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1bc5a5c311a48f20a8b00eabb5040248')"
     ]
   }
 }

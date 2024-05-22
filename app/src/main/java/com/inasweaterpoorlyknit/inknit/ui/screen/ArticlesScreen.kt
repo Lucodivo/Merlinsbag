@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,9 +33,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.ui.component.ArticleThumbnailGrid
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.inknit.ui.component.SelectableArticleThumbnailGrid
 import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
@@ -101,20 +102,21 @@ fun ArticlesRoute(
     )
 
     val articlesUiState by articlesViewModel.articlesUiState.collectAsStateWithLifecycle()
-    var addButtonActive by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
+    var editMode by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
     articlesUiState.openSettings.getContentIfNotHandled()?.let { openAppSettings() }
 
     ArticlesScreen(
         thumbnailUris = articlesUiState.thumbnailUris.map { it.thumbnailUri },
-        addButtonActive = addButtonActive,
+        editMode = editMode,
         showPermissionsAlert = articlesUiState.showPermissionsAlert,
         onClickArticle = { i -> navController.navigateToArticleDetail(i) },
         onClickAddPhotoAlbum = { _photoAlbumLauncher.launch(arrayOf("image/*")) },
         onClickAddPhotoCamera = { _cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS) },
-        onClickAddButton = { addButtonActive = !addButtonActive },
-        onPermissionsAlertPositive = { articlesViewModel.onPermissionsAlertPositive() },
-        onPermissionsAlertNegative = { articlesViewModel.onPermissionsAlertNegative() },
-        onPermissionsAlertOutside = { articlesViewModel.onPermissionsAlertOutside() },
+        onClickEdit = { editMode = !editMode },
+        onClickDiscard = { selectedIndices -> articlesViewModel.onDiscard(selectedIndices.map { articlesUiState.thumbnailUris[it].articleId })},
+        onPermissionsAlertPositive = articlesViewModel::onPermissionsAlertPositive,
+        onPermissionsAlertNegative = articlesViewModel::onPermissionsAlertNegative,
+        onPermissionsAlertOutside = articlesViewModel::onPermissionsAlertOutside,
     )
 }
 
@@ -151,12 +153,13 @@ fun CameraPermissionsAlertDialog(
 @Composable
 fun ArticlesScreen(
     thumbnailUris: List<String>,
-    addButtonActive: Boolean,
+    editMode: Boolean,
     showPermissionsAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
     onClickAddPhotoAlbum: () -> Unit,
     onClickAddPhotoCamera: () -> Unit,
-    onClickAddButton: () -> Unit,
+    onClickEdit: () -> Unit,
+    onClickDiscard: (indices: List<Int>) -> Unit,
     onPermissionsAlertPositive: () -> Unit,
     onPermissionsAlertNegative: () -> Unit,
     onPermissionsAlertOutside: () -> Unit,
@@ -169,16 +172,35 @@ fun ArticlesScreen(
         )
     }
 
+    // TODO: No mutableStateSetOf ??
+    val isItemSelected = remember { mutableStateMapOf<Int,Unit>() }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        ArticleThumbnailGrid(
+        SelectableArticleThumbnailGrid(
+            selectable = editMode,
+            onSelected = { index ->
+                if(isItemSelected.contains(index)) isItemSelected.remove(index)
+                else isItemSelected[index] = Unit
+            },
             articleThumbnailUris = thumbnailUris,
-            onClickArticle = onClickArticle,
+            articleSelected = isItemSelected.keys,
         )
         NoopExpandingFloatingActionButton(
-            expanded = addButtonActive,
+            expanded = editMode,
             collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
             expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
             expandedButtons = listOf(
+                TextIconButtonData(
+                    text = "",
+                    icon = IconData(
+                        icon = NoopIcons.Discard,
+                        contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+                    ),
+                    onClick = {
+                        onClickDiscard(isItemSelected.keys.toList())
+                        isItemSelected.clear()
+                    }
+                ),
                 TextIconButtonData(
                     text = "",
                     icon = IconData(
@@ -196,17 +218,32 @@ fun ArticlesScreen(
                     onClick = onClickAddPhotoCamera
                 ),
             ),
-            onClickExpandCollapse = onClickAddButton,
+            onClickExpandCollapse = {
+                isItemSelected.clear()
+                onClickEdit()
+            },
         )
     }
 }
 
 //region COMPOSABLE PREVIEWS
 @Composable
-fun __PreviewUtilArticleScreen(thumbnailUris: List<String>, addButtonActive: Boolean, showPermissionsAlert: Boolean) =
-    ArticlesScreen(thumbnailUris = thumbnailUris, addButtonActive = addButtonActive, showPermissionsAlert = showPermissionsAlert,
-        onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickAddButton = {},
-        onPermissionsAlertPositive = {}, onPermissionsAlertNegative = {}, onPermissionsAlertOutside = {},)
+fun __PreviewUtilArticleScreen(thumbnailUris: List<String>, editMode: Boolean, showPermissionsAlert: Boolean) =
+    ArticlesScreen(thumbnailUris = thumbnailUris, editMode = editMode, showPermissionsAlert = showPermissionsAlert,
+        onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
+        onPermissionsAlertPositive = {}, onPermissionsAlertNegative = {}, onClickDiscard = {}, onPermissionsAlertOutside = {},)
+
+@Preview
+@Composable
+fun PreviewArticlesScreen_editMode() {
+    NoopTheme {
+        __PreviewUtilArticleScreen(
+            thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+            editMode = true,
+            showPermissionsAlert = false,
+        )
+    }
+}
 
 @Preview
 @Composable
@@ -214,7 +251,7 @@ fun PreviewArticlesScreen() {
     NoopTheme {
         __PreviewUtilArticleScreen(
             thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
-            addButtonActive = true,
+            editMode = false,
             showPermissionsAlert = false,
         )
     }
@@ -227,7 +264,7 @@ fun PreviewArticlesScreenWithAlert() {
         __PreviewUtilArticleScreen(
             thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             showPermissionsAlert = true,
-            addButtonActive = false,
+            editMode = true,
         )
     }
 }

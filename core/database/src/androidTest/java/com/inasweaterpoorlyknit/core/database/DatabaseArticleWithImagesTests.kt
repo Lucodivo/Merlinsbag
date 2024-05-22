@@ -43,6 +43,7 @@ class DatabaseArticleWithImagesTests {
         articleDao = database.ArticleDao()
         ensembleDao = database.EnsembleDao()
         articleRepository = ArticleRepository(
+            context = context,
             articleDao = articleDao,
             ensembleDao = ensembleDao,
         )

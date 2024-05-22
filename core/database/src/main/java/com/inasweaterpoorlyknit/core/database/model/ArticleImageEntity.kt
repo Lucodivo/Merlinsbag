@@ -12,6 +12,7 @@ import java.util.UUID
       entity = ArticleEntity::class,
       parentColumns = arrayOf("id"),
       childColumns = arrayOf("article_id"),
+      onDelete = ForeignKey.CASCADE,
       deferred = true
     )]
 )

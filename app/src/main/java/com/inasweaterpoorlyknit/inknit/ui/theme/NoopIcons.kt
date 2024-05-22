@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Checkroom
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DryCleaning
 import androidx.compose.material.icons.outlined.FolderSpecial
@@ -48,5 +49,6 @@ object NoopIcons {
   val ItemsSelected = Icons.Filled.Category
   val Ensembles = Icons.Outlined.FolderSpecial
   val EnsemblesSelected = Icons.Filled.FolderSpecial
-  val SelectIndicator = Icons.Filled.CheckCircleOutline
+  val SelectableIndicator = Icons.Outlined.Circle
+  val SelectedIndicator = Icons.Filled.CheckCircleOutline
 }

@@ -10,6 +10,7 @@ Database work:
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
     - ImageEntity over ArticleImageEntity?
+    - Consider not holding entire file path for images in the repository and simply use filenames and a known parent directory
 Camera:
     - Setting to allow user to use preferred camera app
     - Selfie camera
