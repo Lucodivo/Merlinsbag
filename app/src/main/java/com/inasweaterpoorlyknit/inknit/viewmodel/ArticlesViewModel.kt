@@ -62,7 +62,7 @@ class ArticlesViewModel @Inject constructor(
   }
   fun onPermissionsAlertNegative() { _showPermissionsAlert.value = false }
   fun onPermissionsAlertOutside() { _showPermissionsAlert.value = false }
-  fun onDiscard(articleIds: List<String>) {
+  fun onDelete(articleIds: List<String>) {
     viewModelScope.launch(Dispatchers.IO) { articleRepository.deleteArticles(articleIds) }
   }
 }

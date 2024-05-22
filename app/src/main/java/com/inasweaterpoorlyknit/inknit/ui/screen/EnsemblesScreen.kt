@@ -82,14 +82,14 @@ fun EnsemblesRow(
     ensemble: Ensemble,
     modifier: Modifier = Modifier,
 ){
-    val padding = 10.dp
-    val maxThumbnailSize = 70.dp
+    val thumbnailPadding = 10.dp
+    val maxThumbnailSize = 80.dp
     val overlapPercentage = 0.4f
     Card(
         modifier = modifier
     ){
         HorizontalOverlappingLayout(
-            modifier = Modifier.padding(horizontal = padding),
+            modifier = Modifier.padding(horizontal = thumbnailPadding),
             overlapPercentage = overlapPercentage,
         ) {
             for (article in ensemble.articles) {
@@ -98,14 +98,12 @@ fun EnsemblesRow(
                     contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
                     modifier = Modifier
                         .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
-                        .padding(top = padding)
+                        .padding(vertical = thumbnailPadding)
                 )
             }
         }
-        Text(
-            text = ensemble.name,
-            modifier = Modifier.padding(padding)
-        )
+        if(ensemble.name.isNotEmpty()) Text(text = ensemble.name,
+            modifier = Modifier.padding(top = 0.dp, end = thumbnailPadding, start = thumbnailPadding, bottom = 5.dp))
     }
 }
 
@@ -120,7 +118,7 @@ fun EnsemblesScreen(
     onCloseAddEnsembleDialog: () -> Unit,
 ) {
     val sidePadding = 10.dp
-    val ensembleSpacing = 5.dp
+    val ensembleSpacing = 3.dp
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -131,8 +129,8 @@ fun EnsemblesScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             items(ensembles.size) { index ->
-                val topPadding = if (index == 0) ensembleSpacing * 2 else ensembleSpacing
-                val bottomPadding = if (index == ensembles.lastIndex) ensembleSpacing * 2 else ensembleSpacing
+                val topPadding = if (index == 0) sidePadding else ensembleSpacing
+                val bottomPadding = if (index == ensembles.lastIndex) sidePadding else ensembleSpacing
                 val ensemble = ensembles[index]
                 EnsemblesRow(
                     ensemble = ensemble,
@@ -252,17 +250,18 @@ fun __PreviewUtilEnsembleScreen(
 val previewEnsembles: List<Ensemble> =
     repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
         listOf(
-            thumbnails.slice(0..5),
-            thumbnails.slice(1..7),
-            thumbnails.slice(3..5),
             thumbnails.slice(4..4),
-            thumbnails.slice(5..11),
+            thumbnails.slice(0..5),
             thumbnails.slice(6..16),
+            thumbnails.slice(1..12),
+            thumbnails.slice(3..5),
+            thumbnails.slice(5..11),
             thumbnails.slice(7..11),
+            thumbnails.slice(12..17),
         ).mapIndexed { index, thumbnailUriStrings ->
             Ensemble(
                 id = index.toString(),
-                name = "Ensemble $index",
+                name = if(index == 3) "" else "Ensemble ${index + 1}",
                 articles = thumbnailUriStrings.map { ArticleThumbnail(articleId = "", thumbUri = it) },
             )
         }

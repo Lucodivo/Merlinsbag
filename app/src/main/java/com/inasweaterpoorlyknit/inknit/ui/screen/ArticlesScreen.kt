@@ -135,10 +135,11 @@ fun ArticlesRoute(
             editMode = !editMode
             isItemSelected.clear()
         },
-        onClickDiscard = {
-            articlesViewModel.onDiscard(isItemSelected.keys.toList().map { articlesUiState.thumbnailUris[it].articleId })
+        onClickDelete = {
+            articlesViewModel.onDelete(isItemSelected.keys.toList().map { articlesUiState.thumbnailUris[it].articleId })
             isItemSelected.clear()
         },
+        onClickSelectionCancel = isItemSelected::clear,
         onPermissionsAlertPositive = articlesViewModel::onPermissionsAlertPositive,
         onPermissionsAlertNegative = articlesViewModel::onPermissionsAlertNegative,
         onPermissionsAlertOutside = articlesViewModel::onPermissionsAlertOutside,
@@ -188,7 +189,8 @@ fun ArticlesScreen(
     onClickAddPhotoAlbum: () -> Unit,
     onClickAddPhotoCamera: () -> Unit,
     onClickEdit: () -> Unit,
-    onClickDiscard: () -> Unit,
+    onClickDelete: () -> Unit,
+    onClickSelectionCancel: () -> Unit,
     onPermissionsAlertPositive: () -> Unit,
     onPermissionsAlertNegative: () -> Unit,
     onPermissionsAlertOutside: () -> Unit,
@@ -214,32 +216,46 @@ fun ArticlesScreen(
             expanded = editMode,
             collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
             expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-            expandedButtons = listOf(
-                TextIconButtonData(
-                    text = "",
-                    icon = IconData(
-                        icon = NoopIcons.Discard,
-                        contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                    ),
-                    onClick = onClickDiscard
-                ),
-                TextIconButtonData(
-                    text = "",
-                    icon = IconData(
-                        icon = NoopIcons.AddPhotoAlbum,
-                        contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                    ),
-                    onClick = onClickAddPhotoAlbum
-                ),
-                TextIconButtonData(
-                    text = "",
-                    icon = IconData(
-                        icon = NoopIcons.AddPhotoCamera,
-                        contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                    ),
-                    onClick = onClickAddPhotoCamera
-                ),
-            ),
+            expandedButtons =
+                if(selectedThumbnails.isNotEmpty()){
+                    listOf(
+                        TextIconButtonData(
+                            text = "",
+                            icon = IconData(
+                                icon = NoopIcons.Discard,
+                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+                            ),
+                            onClick = onClickSelectionCancel
+                        ),
+                        TextIconButtonData(
+                            text = "",
+                            icon = IconData(
+                                icon = NoopIcons.Delete,
+                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+                            ),
+                            onClick = onClickDelete
+                        ),
+                    )
+                } else {
+                    listOf(
+                        TextIconButtonData(
+                            text = "",
+                            icon = IconData(
+                                icon = NoopIcons.AddPhotoAlbum,
+                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+                            ),
+                            onClick = onClickAddPhotoAlbum
+                        ),
+                        TextIconButtonData(
+                            text = "",
+                            icon = IconData(
+                                icon = NoopIcons.AddPhotoCamera,
+                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+                            ),
+                            onClick = onClickAddPhotoCamera
+                        ),
+                    )
+                },
             onClickExpandCollapse = onClickEdit,
         )
     }
@@ -264,7 +280,8 @@ fun __PreviewUtilArticleScreen(
         onClickEdit = {},
         onPermissionsAlertPositive = {},
         onPermissionsAlertNegative = {},
-        onClickDiscard = {},
+        onClickDelete = {},
+        onClickSelectionCancel = {},
         onPermissionsAlertOutside = {},
     )
 

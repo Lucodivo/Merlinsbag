@@ -112,7 +112,7 @@ fun AddArticleControls(
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.width(columnSize.width),
         ){
-          Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.Discard, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
           Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
         }
       } else { // portrait
@@ -121,7 +121,7 @@ fun AddArticleControls(
         ){
           if(compactWidth) { buttonModifier = buttonModifier.weight(1f) }
           Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.Discard, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
           Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
