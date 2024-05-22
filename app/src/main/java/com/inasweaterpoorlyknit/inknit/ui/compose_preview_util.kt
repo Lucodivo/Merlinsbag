@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
+import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.inknit.R
 
 
@@ -82,6 +84,20 @@ val allTestThumbnailResourceIdsAsStrings = arrayOf(
     R.raw.test_thumb_7.toString(), R.raw.test_thumb_8.toString(), R.raw.test_thumb_9.toString(),
 )
 val repeatedThumbnailResourceIdsAsStrings = arrayListOf(*allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings)
+val repeatedArticleWithImages = repeatedFullResourceIdsAsStrings.zip(repeatedThumbnailResourceIdsAsStrings)
+  .mapIndexed { index, resourceId ->
+  ArticleWithImages(
+    articleId = index.toString(),
+    images = listOf(
+      ArticleImageEntity(
+        id = index.toString(),
+        articleId = index.toString(),
+        uri = resourceId.first,
+        thumbUri = resourceId.second,
+      )
+    ),
+  )
+}
 
 /*
  Switching icons for app shouldn't always change previews

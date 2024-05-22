@@ -8,7 +8,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.ui.tooling.preview.Preview as ComposePreview
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -16,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.inasweaterpoorlyknit.inknit.ui.isComposePreview
 import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
+import androidx.compose.ui.tooling.preview.Preview as ComposePreview
 
 @Composable
 fun CameraPreview(

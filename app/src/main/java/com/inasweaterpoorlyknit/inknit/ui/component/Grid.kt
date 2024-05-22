@@ -7,15 +7,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
 @Composable
 fun ArticleThumbnailGrid(
@@ -59,28 +58,46 @@ fun SelectableArticleThumbnailGrid(
     // typical dp width of a smart phone is 320dp-480dp
     columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
     content = {
+      val gridItemModifier = Modifier
+        .padding(gridItemPadding)
+        .fillMaxSize()
       items(count = articleThumbnailUris.size){ thumbnailGridItemIndex ->
         Box(contentAlignment = Alignment.Center) {
-          NoopImage(
+          SelectableNoopImage(
             uriString = articleThumbnailUris[thumbnailGridItemIndex],
             contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-            modifier = Modifier
-              .padding(gridItemPadding)
-              .clickable { onSelected(thumbnailGridItemIndex) }
-              .fillMaxSize(),
+            selected = articleSelected.contains(thumbnailGridItemIndex),
+            selectable = selectable,
+            modifier = gridItemModifier.clickable { onSelected(thumbnailGridItemIndex) },
+
           )
-          if(selectable) {
-            Icon(
-              imageVector = if(articleSelected.contains(thumbnailGridItemIndex)) NoopIcons.SelectedIndicator else NoopIcons.SelectableIndicator,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
-              modifier = Modifier.align(Alignment.BottomEnd),
-              tint = MaterialTheme.colorScheme.primary,
-            )
-          }
         }
       }
     },
     modifier = Modifier.fillMaxSize(),
     state = articlesGridState,
   )
+}
+
+@Preview
+@Composable
+fun PreviewArticleThumbnailGrid(
+){
+  NoopTheme{
+    ArticleThumbnailGrid(articleThumbnailUris = repeatedThumbnailResourceIdsAsStrings, onClickArticle = {})
+  }
+}
+
+@Preview
+@Composable
+fun PreviewSelectableArticleThumbnailGrid(
+){
+  NoopTheme{
+    SelectableArticleThumbnailGrid(
+      selectable = true,
+      onSelected = {},
+      articleThumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+      articleSelected = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
+    )
+  }
 }

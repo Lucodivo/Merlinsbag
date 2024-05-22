@@ -3,9 +3,12 @@ package com.inasweaterpoorlyknit.inknit.ui.component
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,12 +26,15 @@ import androidx.compose.ui.unit.IntSize
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import com.inasweaterpoorlyknit.inknit.R
+import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.inknit.ui.COMPOSE_PREVIEW_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.degToRad
 import com.inasweaterpoorlyknit.inknit.ui.isComposePreview
 import com.inasweaterpoorlyknit.inknit.ui.pixelsToDp
 import com.inasweaterpoorlyknit.inknit.ui.previewAssetBitmap
 import com.inasweaterpoorlyknit.inknit.ui.squareishArticle
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import kotlin.math.abs
 import kotlin.math.cos
@@ -66,6 +72,46 @@ fun NoopImage(
   }
 }
 
+@Composable
+fun SelectableNoopImage(
+  uriString: String?,
+  contentDescription: String,
+  selected: Boolean,
+  selectable: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  Box(contentAlignment = Alignment.Center) {
+    NoopImage(
+      uriString = uriString,
+      contentDescription = contentDescription,
+      modifier = modifier
+    )
+    if(selectable){
+      Icon(
+        imageVector = if (selected) NoopIcons.SelectedIndicator else NoopIcons.SelectableIndicator,
+        contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+        modifier = Modifier.align(Alignment.BottomEnd),
+        tint = MaterialTheme.colorScheme.primary,
+      )
+    }
+  }
+}
+
+@Preview
+@Composable
+fun PreviewSelectableNoopImage(){
+  NoopTheme {
+    Column {
+      SelectableNoopImage(uriString = R.raw.test_thumb_1.toString(), contentDescription = COMPOSE_PREVIEW_CONTENT_DESCRIPTION,
+        selected = false, selectable = false, modifier = Modifier,)
+      SelectableNoopImage(uriString = R.raw.test_thumb_1.toString(), contentDescription = COMPOSE_PREVIEW_CONTENT_DESCRIPTION,
+        selected = false, selectable = true, modifier = Modifier,)
+      SelectableNoopImage(uriString = R.raw.test_thumb_1.toString(), contentDescription = COMPOSE_PREVIEW_CONTENT_DESCRIPTION,
+        selected = true, selectable = true, modifier = Modifier,)
+    }
+  }
+}
+
 // TODO: Implement using custom layouts instead of onSizeChanged()
 //   less redraw
 //   stable composable previews
@@ -77,11 +123,13 @@ fun NoopRotatableImage(
 ) {
   var maxBoxSize by remember { mutableStateOf(IntSize(0, 0)) }
   Box(contentAlignment = Alignment.Center,
-    modifier = modifier.fillMaxSize().onSizeChanged { boxSize ->
-      if (boxSize.width != maxBoxSize.width || boxSize.height != maxBoxSize.height) {
-        maxBoxSize = boxSize
-      }
-    }) {
+    modifier = modifier
+      .fillMaxSize()
+      .onSizeChanged { boxSize ->
+        if (boxSize.width != maxBoxSize.width || boxSize.height != maxBoxSize.height) {
+          maxBoxSize = boxSize
+        }
+      }) {
     if (bitmap != null) {
       val absSin = abs(sin(ccwRotaitonAngle.degToRad()))
       val absCos = abs(cos(ccwRotaitonAngle.degToRad()))
@@ -92,7 +140,9 @@ fun NoopRotatableImage(
       Image(
         bitmap = bitmap.asImageBitmap(),
         contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-        modifier = Modifier.rotate(ccwRotaitonAngle).sizeIn(maxWidth = maxImageSize.width, maxHeight = maxImageSize.height)
+        modifier = Modifier
+          .rotate(ccwRotaitonAngle)
+          .sizeIn(maxWidth = maxImageSize.width, maxHeight = maxImageSize.height)
       )
     } else {
       CircularProgressIndicator()
@@ -102,7 +152,7 @@ fun NoopRotatableImage(
 
 @Preview
 @Composable
-fun PreviewArticleThumbnailImage() {
+fun PreviewNoopImage() {
   NoopTheme {
     NoopImage(uriString = R.raw.test_full_1.toString(), contentDescription = null)
   }
@@ -110,7 +160,7 @@ fun PreviewArticleThumbnailImage() {
 
 @Preview
 @Composable
-fun PreviewRotateableImage180(){
+fun PreviewNoopRotateableImage180(){
   NoopTheme{
     NoopRotatableImage(
       bitmap = previewAssetBitmap(filename = squareishArticle),
@@ -121,7 +171,7 @@ fun PreviewRotateableImage180(){
 
 @Preview
 @Composable
-fun PreviewRotateableImage90(){
+fun PreviewNoopRotateableImage90(){
   NoopTheme{
     NoopRotatableImage(
       bitmap = previewAssetBitmap(filename = squareishArticle),
@@ -132,7 +182,7 @@ fun PreviewRotateableImage90(){
 
 @Preview
 @Composable
-fun PreviewRotateableImage45(){
+fun PreviewNoopRotateableImage45(){
   NoopTheme{
     NoopRotatableImage(
       bitmap = previewAssetBitmap(filename = squareishArticle),

@@ -34,7 +34,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
-import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -43,13 +42,15 @@ import com.inasweaterpoorlyknit.inknit.ui.component.IconData
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopAddEnsembleDialog
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopFloatingActionButton
 import com.inasweaterpoorlyknit.inknit.ui.component.NoopImage
+import com.inasweaterpoorlyknit.inknit.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.inknit.ui.isComposePreview
+import com.inasweaterpoorlyknit.inknit.ui.repeatedArticleWithImages
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.inknit.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.viewmodel.Ensemble
 import com.inasweaterpoorlyknit.inknit.viewmodel.EnsemblesViewModel
+import com.inasweaterpoorlyknit.inknit.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.inknit.viewmodel.SaveEnsembleData
 
 const val ENSEMBLES_ROUTE = "ensembles_route"
@@ -208,7 +209,9 @@ fun AddEnsembleDialog(
                 val article = articles[articleIndex]
                 Box(contentAlignment = Alignment.Center){
                     val (selected, setSelected) = remember { mutableStateOf(selectedArticleIds.contains(article.articleId)) }
-                    NoopImage(
+                    SelectableNoopImage(
+                        selectable = true,
+                        selected = selected,
                         uriString = article.images[0].thumbUri,
                         contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
                         modifier = Modifier
@@ -242,7 +245,8 @@ fun AddEnsembleDialog(
 fun __PreviewUtilEnsembleScreen(
     ensembles: List<Ensemble>,
     showAddEnsembleForm: Boolean,
-) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleDialog = showAddEnsembleForm, addEnsembleDialogArticles = emptyList(),
+    addEnsembleDialogArticles: List<ArticleWithImages>,
+) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleDialog = showAddEnsembleForm, addEnsembleDialogArticles = addEnsembleDialogArticles,
     onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {})
 
 val previewEnsembles: List<Ensemble> =
@@ -268,11 +272,11 @@ val previewEnsembles: List<Ensemble> =
 @Preview
 @Composable
 fun PreviewEnsembleScreen(){
-    val thumbnails = repeatedThumbnailResourceIdsAsStrings
     NoopTheme {
         __PreviewUtilEnsembleScreen(
             ensembles = previewEnsembles,
-            showAddEnsembleForm = false
+            showAddEnsembleForm = false,
+            addEnsembleDialogArticles = repeatedArticleWithImages,
         )
     }
 }
@@ -280,11 +284,11 @@ fun PreviewEnsembleScreen(){
 @Preview
 @Composable
 fun PreviewEnsemblesScreenAddEnsembleDialog(){
-    val thumbnails = repeatedThumbnailResourceIdsAsStrings
     NoopTheme {
         __PreviewUtilEnsembleScreen(
             ensembles = previewEnsembles,
             showAddEnsembleForm = true,
+            addEnsembleDialogArticles = repeatedArticleWithImages
         )
     }
 }
@@ -292,23 +296,10 @@ fun PreviewEnsemblesScreenAddEnsembleDialog(){
 @Preview
 @Composable
 fun PreviewAddEnsembleDialog(){
-    fun createArticleImageEntity(index: Int, thumbnailUri: String) =
-        ArticleWithImages(articleId = "$index", images = listOf(ArticleImageEntity(id = "img$index", articleId = "$index", uri = "", thumbUri = thumbnailUri)))
-
     NoopTheme{
         AddEnsembleDialog(
             visible = true,
-            articles = listOf(
-                createArticleImageEntity(0, R.raw.test_thumb_1.toString()),
-                createArticleImageEntity(1, R.raw.test_thumb_2.toString()),
-                createArticleImageEntity(2, R.raw.test_thumb_3.toString()),
-                createArticleImageEntity(3, R.raw.test_thumb_4.toString()),
-                createArticleImageEntity(4, R.raw.test_thumb_5.toString()),
-                createArticleImageEntity(5, R.raw.test_thumb_6.toString()),
-                createArticleImageEntity(6, R.raw.test_thumb_7.toString()),
-                createArticleImageEntity(7, R.raw.test_thumb_8.toString()),
-                createArticleImageEntity(8, R.raw.test_thumb_9.toString()),
-            ),
+            articles = repeatedArticleWithImages,
             onClickSave = {},
             onClickClose = {},
         )

@@ -5,7 +5,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderSpecial
@@ -50,5 +50,5 @@ object NoopIcons {
   val Ensembles = Icons.Outlined.FolderSpecial
   val EnsemblesSelected = Icons.Filled.FolderSpecial
   val SelectableIndicator = Icons.Outlined.Circle
-  val SelectedIndicator = Icons.Filled.CheckCircleOutline
+  val SelectedIndicator = Icons.Filled.CheckCircle
 }

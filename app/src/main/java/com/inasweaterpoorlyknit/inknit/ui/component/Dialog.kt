@@ -13,12 +13,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,24 +26,16 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.inknit.ui.theme.Shapes
-
-data class DialogUserData(
-  val title: String,
-)
 
 /*
   Heavily based off of the Material 3 specks for fullscreen dialog:
@@ -68,16 +58,11 @@ fun NoopAddEnsembleDialog(
     label = "Dialog sheet scrim animated scale",
   )
   val scrimInteractionSource = remember { MutableInteractionSource() }
-  Box(
-    contentAlignment = Alignment.BottomCenter,
-    modifier = Modifier
-      .fillMaxSize()
-  ) {
+  Box(contentAlignment = Alignment.BottomCenter) {
     if (scrimAlphaAnimatedScale > 0.0f) {
       Box(
         modifier = Modifier
           .testTag("DialogSheetScrim")
-          .fillMaxSize()
           .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f * scrimAlphaAnimatedScale))
           .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = onClose)
       )
@@ -89,8 +74,7 @@ fun NoopAddEnsembleDialog(
       exit = slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }),
     ) {
       Surface(
-        modifier = modifier
-          .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
       ) {
         Column(

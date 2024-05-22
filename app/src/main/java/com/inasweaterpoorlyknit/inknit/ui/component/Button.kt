@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.COMPOSE_PREVIEW_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.NoopComposePreviewIcons
-import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
 @Composable
 private fun _NoopExpandingFloatingActionButton(

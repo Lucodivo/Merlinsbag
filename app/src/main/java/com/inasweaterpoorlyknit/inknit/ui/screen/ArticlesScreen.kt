@@ -48,44 +48,49 @@ const val ARTICLES_ROUTE = "articles_route"
 
 val additionalCameraPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_CAMERA_PERMISSIONS =
-   if(additionalCameraPermissionsRequired){
+    if (additionalCameraPermissionsRequired) {
         arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
     } else {
         arrayOf(permission.CAMERA)
     }
 
-fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ARTICLES_ROUTE, navOptions)
+fun NavController.navigateToArticles(navOptions: NavOptions? = null) =
+    navigate(ARTICLES_ROUTE, navOptions)
 
 @Composable
 fun ArticlesRoute(
     navController: NavController,
     modifier: Modifier = Modifier,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
-){
-    val _photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments(){
+) {
+    val _photoAlbumLauncher = rememberLauncherForActivityResult(object : OpenMultipleDocuments() {
         override fun createIntent(context: Context, input: Array<String>): Intent {
-            return super.createIntent(context, input).apply { addCategory(Intent.CATEGORY_OPENABLE) }
+            return super.createIntent(context, input)
+                .apply { addCategory(Intent.CATEGORY_OPENABLE) }
         }
-    }){ uris ->
-        if(uris.isNotEmpty()) {
-            navController.navigateToAddArticle(uris.map{ navigationSafeUriStringEncode(it) })
+    }) { uris ->
+        if (uris.isNotEmpty()) {
+            navController.navigateToAddArticle(uris.map { navigationSafeUriStringEncode(it) })
         } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
     }
     val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
         RequestMultiplePermissions()
-    ){ permissions ->
+    ) { permissions ->
         var permissionsGranted = true
         var userCheckedNeverAskAgain = false
         permissions.entries.forEach { entry ->
-            if(!entry.value) {
-                userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(navController.context.getActivity()!!, entry.key)
+            if (!entry.value) {
+                userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(
+                    navController.context.getActivity()!!,
+                    entry.key
+                )
                 permissionsGranted = false
             }
         }
-        if(permissionsGranted) {
+        if (permissionsGranted) {
             navController.navigateToCamera()
         } else {
-            if(userCheckedNeverAskAgain) {
+            if (userCheckedNeverAskAgain) {
                 articlesViewModel.userCheckedNeverAskAgain()
             } else {
                 navController.context.toast("Camera permissions required")
@@ -94,7 +99,7 @@ fun ArticlesRoute(
     }
 
     val packageName = LocalContext.current.packageName
-    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()){}
+    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()) {}
     fun openAppSettings() = _appSettingsLauncher.launch(
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", packageName, null)
@@ -103,17 +108,37 @@ fun ArticlesRoute(
 
     val articlesUiState by articlesViewModel.articlesUiState.collectAsStateWithLifecycle()
     var editMode by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
+    val isItemSelected =
+        remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
     articlesUiState.openSettings.getContentIfNotHandled()?.let { openAppSettings() }
 
     ArticlesScreen(
         thumbnailUris = articlesUiState.thumbnailUris.map { it.thumbnailUri },
+        selectedThumbnails = isItemSelected.keys,
         editMode = editMode,
         showPermissionsAlert = articlesUiState.showPermissionsAlert,
-        onClickArticle = { i -> navController.navigateToArticleDetail(i) },
+        onClickArticle = { index ->
+            if (editMode) {
+                if (isItemSelected.contains(index)) isItemSelected.remove(index)
+                else isItemSelected[index] = Unit
+            } else {
+                navController.navigateToArticleDetail(index)
+            }
+        },
         onClickAddPhotoAlbum = { _photoAlbumLauncher.launch(arrayOf("image/*")) },
-        onClickAddPhotoCamera = { _cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS) },
-        onClickEdit = { editMode = !editMode },
-        onClickDiscard = { selectedIndices -> articlesViewModel.onDiscard(selectedIndices.map { articlesUiState.thumbnailUris[it].articleId })},
+        onClickAddPhotoCamera = {
+            _cameraWithPermissionsCheckLauncher.launch(
+                REQUIRED_CAMERA_PERMISSIONS
+            )
+        },
+        onClickEdit = {
+            editMode = !editMode
+            isItemSelected.clear()
+        },
+        onClickDiscard = {
+            articlesViewModel.onDiscard(isItemSelected.keys.toList().map { articlesUiState.thumbnailUris[it].articleId })
+            isItemSelected.clear()
+        },
         onPermissionsAlertPositive = articlesViewModel::onPermissionsAlertPositive,
         onPermissionsAlertNegative = articlesViewModel::onPermissionsAlertNegative,
         onPermissionsAlertOutside = articlesViewModel::onPermissionsAlertOutside,
@@ -125,15 +150,18 @@ fun CameraPermissionsAlertDialog(
     onClickOutside: () -> Unit,
     onClickNegative: () -> Unit,
     onClickPositive: () -> Unit,
-){
+) {
     AlertDialog(
         title = {
             Text(text = stringResource(id = R.string.permission_alert_title))
         },
         text = {
-            Text(text = stringResource(id =
-            if(additionalCameraPermissionsRequired) R.string.permission_alert_justification_additional
-            else R.string.permission_alert_justification)
+            Text(
+                text = stringResource(
+                    id =
+                    if (additionalCameraPermissionsRequired) R.string.permission_alert_justification_additional
+                    else R.string.permission_alert_justification
+                )
             )
         },
         onDismissRequest = onClickOutside,
@@ -143,7 +171,7 @@ fun CameraPermissionsAlertDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onClickNegative){
+            TextButton(onClick = onClickNegative) {
                 Text(stringResource(id = R.string.permission_alert_negative))
             }
         }
@@ -153,18 +181,19 @@ fun CameraPermissionsAlertDialog(
 @Composable
 fun ArticlesScreen(
     thumbnailUris: List<String>,
+    selectedThumbnails: Set<Int>,
     editMode: Boolean,
     showPermissionsAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
     onClickAddPhotoAlbum: () -> Unit,
     onClickAddPhotoCamera: () -> Unit,
     onClickEdit: () -> Unit,
-    onClickDiscard: (indices: List<Int>) -> Unit,
+    onClickDiscard: () -> Unit,
     onPermissionsAlertPositive: () -> Unit,
     onPermissionsAlertNegative: () -> Unit,
     onPermissionsAlertOutside: () -> Unit,
 ) {
-    if(showPermissionsAlert) {
+    if (showPermissionsAlert) {
         CameraPermissionsAlertDialog(
             onClickOutside = onPermissionsAlertOutside,
             onClickNegative = onPermissionsAlertNegative,
@@ -172,18 +201,14 @@ fun ArticlesScreen(
         )
     }
 
-    // TODO: No mutableStateSetOf ??
-    val isItemSelected = remember { mutableStateMapOf<Int,Unit>() }
-
     Box(modifier = Modifier.fillMaxSize()) {
         SelectableArticleThumbnailGrid(
             selectable = editMode,
             onSelected = { index ->
-                if(isItemSelected.contains(index)) isItemSelected.remove(index)
-                else isItemSelected[index] = Unit
+                onClickArticle(index)
             },
             articleThumbnailUris = thumbnailUris,
-            articleSelected = isItemSelected.keys,
+            articleSelected = selectedThumbnails,
         )
         NoopExpandingFloatingActionButton(
             expanded = editMode,
@@ -196,10 +221,7 @@ fun ArticlesScreen(
                         icon = NoopIcons.Discard,
                         contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                     ),
-                    onClick = {
-                        onClickDiscard(isItemSelected.keys.toList())
-                        isItemSelected.clear()
-                    }
+                    onClick = onClickDiscard
                 ),
                 TextIconButtonData(
                     text = "",
@@ -218,20 +240,33 @@ fun ArticlesScreen(
                     onClick = onClickAddPhotoCamera
                 ),
             ),
-            onClickExpandCollapse = {
-                isItemSelected.clear()
-                onClickEdit()
-            },
+            onClickExpandCollapse = onClickEdit,
         )
     }
 }
 
 //region COMPOSABLE PREVIEWS
 @Composable
-fun __PreviewUtilArticleScreen(thumbnailUris: List<String>, editMode: Boolean, showPermissionsAlert: Boolean) =
-    ArticlesScreen(thumbnailUris = thumbnailUris, editMode = editMode, showPermissionsAlert = showPermissionsAlert,
-        onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
-        onPermissionsAlertPositive = {}, onPermissionsAlertNegative = {}, onClickDiscard = {}, onPermissionsAlertOutside = {},)
+fun __PreviewUtilArticleScreen(
+    thumbnailUris: List<String>,
+    editMode: Boolean,
+    showPermissionsAlert: Boolean,
+    selectedThumbnails: Set<Int> = emptySet(),
+) =
+    ArticlesScreen(
+        thumbnailUris = thumbnailUris,
+        selectedThumbnails = selectedThumbnails,
+        editMode = editMode,
+        showPermissionsAlert = showPermissionsAlert,
+        onClickArticle = {},
+        onClickAddPhotoAlbum = {},
+        onClickAddPhotoCamera = {},
+        onClickEdit = {},
+        onPermissionsAlertPositive = {},
+        onPermissionsAlertNegative = {},
+        onClickDiscard = {},
+        onPermissionsAlertOutside = {},
+    )
 
 @Preview
 @Composable
@@ -239,6 +274,7 @@ fun PreviewArticlesScreen_editMode() {
     NoopTheme {
         __PreviewUtilArticleScreen(
             thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+            selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
             editMode = true,
             showPermissionsAlert = false,
         )
@@ -271,9 +307,12 @@ fun PreviewArticlesScreenWithAlert() {
 
 @Preview
 @Composable
-fun PreviewCameraPermissionsAlert(){
+fun PreviewCameraPermissionsAlert() {
     NoopTheme {
-        CameraPermissionsAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
+        CameraPermissionsAlertDialog(
+            onClickPositive = {},
+            onClickNegative = {},
+            onClickOutside = {})
     }
 }
 //endregion
