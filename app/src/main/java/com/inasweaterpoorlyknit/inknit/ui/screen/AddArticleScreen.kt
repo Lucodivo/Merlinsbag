@@ -76,13 +76,11 @@ fun AddArticleControls(
   windowSizeClass: WindowSizeClass,
   landscape: Boolean = true,
   processing: Boolean = true,
-  multipleSubjects: Boolean = false,
-  onPrevClick: () -> Unit,
-  onNextClick: () -> Unit,
   onNarrowFocusClick: () -> Unit,
   onBroadenFocusClick: () -> Unit,
   onRotateCW: () -> Unit,
   onRotateCCW: () -> Unit,
+  onDiscard: () -> Unit,
   onSave: () -> Unit,
 ){
   val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
@@ -102,12 +100,6 @@ fun AddArticleControls(
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.wrapContentSize()
         ){
-          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(NoopIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(NoopIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
-        }
-        Row(horizontalArrangement = Arrangement.SpaceBetween,
-          modifier = Modifier.wrapContentSize()
-        ){
           Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
           Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
         }
@@ -120,6 +112,7 @@ fun AddArticleControls(
         Row(horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.width(columnSize.width),
         ){
+          Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.Discard, TODO_ICON_CONTENT_DESCRIPTION) }
           Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
         }
       } else { // portrait
@@ -127,15 +120,14 @@ fun AddArticleControls(
           modifier = if(compactWidth){ Modifier.fillMaxWidth() } else { Modifier.wrapContentSize() }
         ){
           if(compactWidth) { buttonModifier = buttonModifier.weight(1f) }
-          Button(onClick = onPrevClick, enabled = !processing && multipleSubjects, modifier = buttonModifier){ Icon(NoopIcons.Previous, TODO_ICON_CONTENT_DESCRIPTION) }
           Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.Discard, TODO_ICON_CONTENT_DESCRIPTION) }
           Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onNextClick, enabled = !processing && multipleSubjects, modifier = buttonModifier) { Icon(NoopIcons.Next, TODO_ICON_CONTENT_DESCRIPTION) }
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.width(columnSize.width)) {
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier.weight(1f)) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(2f)) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier.weight(1f)){ Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
+          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier){ Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
         }
       }
     }
@@ -146,15 +138,13 @@ fun AddArticleControls(
 fun AddArticleScreen(
   windowSizeClass: WindowSizeClass,
   processing: Boolean = true,
-  multipleSubjects: Boolean = false,
   processedImage: Bitmap? = null,
   imageRotation: Float = 0.0f,
-  onPrevClick: () -> Unit,
-  onNextClick: () -> Unit,
   onNarrowFocusClick: () -> Unit,
   onBroadenFocusClick: () -> Unit,
   onRotateCW: () -> Unit,
   onRotateCCW: () -> Unit,
+  onDiscard: () -> Unit,
   onSave: () -> Unit,
 ) {
   val landscape: Boolean = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -176,13 +166,11 @@ fun AddArticleScreen(
       windowSizeClass = windowSizeClass,
       landscape = landscape,
       processing = processing,
-      multipleSubjects = multipleSubjects,
-      onPrevClick = onPrevClick,
-      onNextClick = onNextClick,
       onNarrowFocusClick = onNarrowFocusClick,
       onBroadenFocusClick = onBroadenFocusClick,
       onRotateCW = onRotateCW,
       onRotateCCW = onRotateCCW,
+      onDiscard = onDiscard,
       onSave = onSave,
     )
   }
@@ -210,16 +198,14 @@ fun AddArticleRoute(
   AddArticleScreen(
     windowSizeClass = windowSizeClass,
     processing = addArticleViewModel.processing.value,
-    multipleSubjects = addArticleViewModel.multipleSubjects.value,
     processedImage = addArticleViewModel.processedBitmap.value,
     imageRotation = addArticleViewModel.rotation.floatValue,
-    onNarrowFocusClick = { addArticleViewModel.onFocusClicked() },
-    onBroadenFocusClick = { addArticleViewModel.onWidenClicked() },
-    onPrevClick = { addArticleViewModel.onPrevClicked() },
-    onNextClick = { addArticleViewModel.onNextClicked() },
-    onRotateCW = { addArticleViewModel.onRotateCW() },
-    onRotateCCW = { addArticleViewModel.onRotateCCW() },
-    onSave = { addArticleViewModel.onSave() },
+    onNarrowFocusClick = addArticleViewModel::onFocusClicked,
+    onBroadenFocusClick = addArticleViewModel::onWidenClicked,
+    onRotateCW = addArticleViewModel::onRotateCW,
+    onRotateCCW = addArticleViewModel::onRotateCCW,
+    onDiscard = addArticleViewModel::onDiscard,
+    onSave = addArticleViewModel::onSave,
   )
 }
 
@@ -231,10 +217,9 @@ fun PreviewAddArticleScreen(){
     AddArticleScreen(
       windowSizeClass = currentWindowAdaptiveInfo(),
       processing = false,
-      multipleSubjects = true,
       processedImage = previewAssetBitmap(filename = squareishArticle),
       imageRotation = 270.0f,
-      onNarrowFocusClick = {}, onBroadenFocusClick = {}, onPrevClick = {}, onNextClick = {}, onRotateCW = {}, onRotateCCW = {}, onSave = {},
+      onNarrowFocusClick = {}, onBroadenFocusClick = {}, onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {},
     )
   }
 }

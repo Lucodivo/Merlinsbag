@@ -60,7 +60,6 @@ class AddArticleViewModel @AssistedInject constructor(
   private var rotationIndex = 0
 
   val processing = mutableStateOf(true)
-  val multipleSubjects = mutableStateOf(false)
   val processedBitmap = mutableStateOf<Bitmap?>(null)
   val rotation = mutableFloatStateOf(rotations[rotationIndex])
   val finished = mutableStateOf(Event<Unit>(null))
@@ -78,23 +77,20 @@ class AddArticleViewModel @AssistedInject constructor(
   }
 
   private fun processNextImage() {
-    processing.value = true
-    multipleSubjects.value = false
-    processedBitmap.value = null
-    rotationIndex = 0
-    rotation.floatValue = rotations[rotationIndex]
-
     processingImageIndex += 1
     if(processingImageIndex > imageUriStrings.lastIndex){
       finished.value = Event(Unit)
     } else {
+      processedBitmap.value = null
+      rotationIndex = 0
+      rotation.floatValue = rotations[rotationIndex]
+      processing.value = true
       viewModelScope.launch(Dispatchers.Default) {
         Uri.parse(imageUriStrings[processingImageIndex])?.let { imageUri ->
           try {
             segmentedImage.process(application, imageUri) { success ->
               if(success){
                 if(segmentedImage.subjectsFound) {
-                  multipleSubjects.value = segmentedImage.subjectCount > 1
                   refreshProcessedBitmap()
                 } else {
                   noSubjectFound.value = Event(Unit)
@@ -131,17 +127,6 @@ class AddArticleViewModel @AssistedInject constructor(
     segmentedImage.increaseThreshold()
     refreshProcessedBitmap()
   }
-  fun onPrevClicked(){
-    processing.value = true
-    segmentedImage.prevSubject()
-    refreshProcessedBitmap()
-  }
-  fun onNextClicked(){
-    processing.value = true
-    segmentedImage.nextSubject()
-    refreshProcessedBitmap()
-  }
-
   fun onRotateCW(){
     rotationIndex = if(rotationIndex == rotations.lastIndex) 0 else rotationIndex + 1
     rotation.floatValue = rotations[rotationIndex]
@@ -150,7 +135,17 @@ class AddArticleViewModel @AssistedInject constructor(
     rotationIndex = if(rotationIndex == 0) rotations.lastIndex else rotationIndex - 1
     rotation.floatValue = rotations[rotationIndex]
   }
-
+  fun onDiscard() {
+    nextSubject()
+  }
+  fun nextSubject() {
+    if(segmentedImage.subjectIndex == (segmentedImage.subjectCount - 1)) {
+      processNextImage()
+    } else {
+      segmentedImage.nextSubject()
+      refreshProcessedBitmap()
+    }
+  }
   fun onSave(){
     val rotationMatrix = Matrix()
     rotationMatrix.postRotate(rotation.floatValue)
@@ -202,6 +197,6 @@ class AddArticleViewModel @AssistedInject constructor(
         thumbnailUri = thumbnailFile.toUri().toString()
       )
     }
-    processNextImage()
+    nextSubject()
   }
 }
