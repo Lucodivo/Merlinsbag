@@ -63,6 +63,20 @@ fun ArticlesRoute(
     modifier: Modifier = Modifier,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
+    val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
+    var showDeleteArticlesAlert by remember { mutableStateOf(false) }
+    var showPermissionsAlert by remember { mutableStateOf(false) }
+    var editMode by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
+    val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+
+    val packageName = LocalContext.current.packageName
+    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()) {}
+    fun openAppSettings() = _appSettingsLauncher.launch(
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+        }
+    )
+
     val _photoAlbumLauncher = rememberLauncherForActivityResult(object : OpenMultipleDocuments() {
         override fun createIntent(context: Context, input: Array<String>): Intent {
             return super.createIntent(context, input)
@@ -91,31 +105,19 @@ fun ArticlesRoute(
             navController.navigateToCamera()
         } else {
             if (userCheckedNeverAskAgain) {
-                articlesViewModel.userCheckedNeverAskAgain()
+                showPermissionsAlert = true
             } else {
                 navController.context.toast("Camera permissions required")
             }
         }
     }
 
-    val packageName = LocalContext.current.packageName
-    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()) {}
-    fun openAppSettings() = _appSettingsLauncher.launch(
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.fromParts("package", packageName, null)
-        }
-    )
-
-    val articlesUiState by articlesViewModel.articlesUiState.collectAsStateWithLifecycle()
-    var editMode by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
-    val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
-    articlesUiState.openSettings.getContentIfNotHandled()?.let { openAppSettings() }
-
     ArticlesScreen(
-        thumbnailUris = articlesUiState.thumbnailUris.map { it.thumbnailUri },
+        thumbnailUris = articleThumbnails,
         selectedThumbnails = isItemSelected.keys,
         editMode = editMode,
-        showPermissionsAlert = articlesUiState.showPermissionsAlert,
+        showPermissionsAlert = showPermissionsAlert,
+        showDeleteArticlesAlert = showDeleteArticlesAlert,
         onClickArticle = { index ->
             if (editMode) {
                 if (isItemSelected.contains(index)) isItemSelected.remove(index)
@@ -134,14 +136,19 @@ fun ArticlesRoute(
             editMode = !editMode
             isItemSelected.clear()
         },
-        onClickDelete = {
-            articlesViewModel.onDelete(isItemSelected.keys.toList().map { articlesUiState.thumbnailUris[it].articleId })
+        onClickDelete = { showDeleteArticlesAlert = true },
+        onClickSelectionCancel = isItemSelected::clear,
+        onPermissionsAlertPositive = {
+            showPermissionsAlert = false
+            openAppSettings()
+        },
+        onDeleteArticlesAlertPositive = {
+            showDeleteArticlesAlert = false
+            articlesViewModel.onDelete(isItemSelected.keys.toList())
             isItemSelected.clear()
         },
-        onClickSelectionCancel = isItemSelected::clear,
-        onPermissionsAlertPositive = articlesViewModel::onPermissionsAlertPositive,
-        onPermissionsAlertNegative = articlesViewModel::onPermissionsAlertNegative,
-        onPermissionsAlertOutside = articlesViewModel::onPermissionsAlertOutside,
+        onAlertNegative = {showDeleteArticlesAlert = false; showPermissionsAlert = false},
+        onAlertOutside = {showDeleteArticlesAlert = false; showPermissionsAlert = false},
     )
 }
 
@@ -152,27 +159,43 @@ fun CameraPermissionsAlertDialog(
     onClickPositive: () -> Unit,
 ) {
     AlertDialog(
-        title = {
-            Text(text = stringResource(id = R.string.permission_alert_title))
-        },
+        title = { Text(text = stringResource(id = R.string.permission_alert_title)) },
         text = {
             Text(
                 text = stringResource(
-                    id =
-                    if (additionalCameraPermissionsRequired) R.string.permission_alert_justification_additional
+                    id = if (additionalCameraPermissionsRequired) R.string.permission_alert_justification_additional
                     else R.string.permission_alert_justification
                 )
             )
         },
         onDismissRequest = onClickOutside,
         confirmButton = {
+            TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.permission_alert_positive)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.permission_alert_negative)) }
+        }
+    )
+}
+
+@Composable
+fun DeleteArticlesAlertDialog(
+    onClickOutside: () -> Unit,
+    onClickNegative: () -> Unit,
+    onClickPositive: () -> Unit,
+) {
+    AlertDialog(
+        title = { Text(text = stringResource(id = R.string.delete_articles)) },
+        text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
+        onDismissRequest = onClickOutside,
+        confirmButton = {
             TextButton(onClick = onClickPositive) {
-                Text(stringResource(id = R.string.permission_alert_positive))
+                Text(stringResource(id = R.string.delete_articles_alert_positive))
             }
         },
         dismissButton = {
             TextButton(onClick = onClickNegative) {
-                Text(stringResource(id = R.string.permission_alert_negative))
+                Text(stringResource(id = R.string.delete_articles_alert_negative))
             }
         }
     )
@@ -184,6 +207,7 @@ fun ArticlesScreen(
     selectedThumbnails: Set<Int>,
     editMode: Boolean,
     showPermissionsAlert: Boolean,
+    showDeleteArticlesAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
     onClickAddPhotoAlbum: () -> Unit,
     onClickAddPhotoCamera: () -> Unit,
@@ -191,14 +215,23 @@ fun ArticlesScreen(
     onClickDelete: () -> Unit,
     onClickSelectionCancel: () -> Unit,
     onPermissionsAlertPositive: () -> Unit,
-    onPermissionsAlertNegative: () -> Unit,
-    onPermissionsAlertOutside: () -> Unit,
+    onDeleteArticlesAlertPositive: () -> Unit,
+    onAlertNegative: () -> Unit,
+    onAlertOutside: () -> Unit,
 ) {
     if (showPermissionsAlert) {
         CameraPermissionsAlertDialog(
-            onClickOutside = onPermissionsAlertOutside,
-            onClickNegative = onPermissionsAlertNegative,
+            onClickOutside = onAlertOutside,
+            onClickNegative = onAlertNegative,
             onClickPositive = onPermissionsAlertPositive,
+        )
+    }
+
+    if (showDeleteArticlesAlert) {
+        DeleteArticlesAlertDialog(
+            onClickOutside = onAlertOutside,
+            onClickNegative = onAlertNegative,
+            onClickPositive = onDeleteArticlesAlertPositive,
         )
     }
 
@@ -216,45 +249,45 @@ fun ArticlesScreen(
             collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
             expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
             expandedButtons =
-                if(selectedThumbnails.isNotEmpty()){
-                    listOf(
-                        TextIconButtonData(
-                            text = "",
-                            icon = IconData(
-                                icon = NoopIcons.Cancel,
-                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                            ),
-                            onClick = onClickSelectionCancel
+            if (selectedThumbnails.isNotEmpty()) {
+                listOf(
+                    TextIconButtonData(
+                        text = "",
+                        icon = IconData(
+                            icon = NoopIcons.Cancel,
+                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                         ),
-                        TextIconButtonData(
-                            text = "",
-                            icon = IconData(
-                                icon = NoopIcons.Delete,
-                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                            ),
-                            onClick = onClickDelete
+                        onClick = onClickSelectionCancel
+                    ),
+                    TextIconButtonData(
+                        text = "",
+                        icon = IconData(
+                            icon = NoopIcons.Delete,
+                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                         ),
-                    )
-                } else {
-                    listOf(
-                        TextIconButtonData(
-                            text = "",
-                            icon = IconData(
-                                icon = NoopIcons.AddPhotoAlbum,
-                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                            ),
-                            onClick = onClickAddPhotoAlbum
+                        onClick = onClickDelete
+                    ),
+                )
+            } else {
+                listOf(
+                    TextIconButtonData(
+                        text = "",
+                        icon = IconData(
+                            icon = NoopIcons.AddPhotoAlbum,
+                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                         ),
-                        TextIconButtonData(
-                            text = "",
-                            icon = IconData(
-                                icon = NoopIcons.AddPhotoCamera,
-                                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                            ),
-                            onClick = onClickAddPhotoCamera
+                        onClick = onClickAddPhotoAlbum
+                    ),
+                    TextIconButtonData(
+                        text = "",
+                        icon = IconData(
+                            icon = NoopIcons.AddPhotoCamera,
+                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
                         ),
-                    )
-                },
+                        onClick = onClickAddPhotoCamera
+                    ),
+                )
+            },
             onClickExpandCollapse = onClickEdit,
         )
     }
@@ -263,58 +296,41 @@ fun ArticlesScreen(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun __PreviewUtilArticleScreen(
-    thumbnailUris: List<String>,
-    editMode: Boolean,
-    showPermissionsAlert: Boolean,
+    editMode: Boolean = false,
+    showPermissionsAlert: Boolean = false,
+    showDeleteArticlesAlert: Boolean = false,
     selectedThumbnails: Set<Int> = emptySet(),
-) =
-    ArticlesScreen(
-        thumbnailUris = thumbnailUris,
+) = ArticlesScreen(
+        thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
         selectedThumbnails = selectedThumbnails,
         editMode = editMode,
         showPermissionsAlert = showPermissionsAlert,
-        onClickArticle = {},
-        onClickAddPhotoAlbum = {},
-        onClickAddPhotoCamera = {},
-        onClickEdit = {},
-        onPermissionsAlertPositive = {},
-        onPermissionsAlertNegative = {},
-        onClickDelete = {},
-        onClickSelectionCancel = {},
-        onPermissionsAlertOutside = {},
+        showDeleteArticlesAlert = showDeleteArticlesAlert,
+        onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
+        onPermissionsAlertPositive = {}, onDeleteArticlesAlertPositive = {}, onAlertNegative = {},
+        onClickDelete = {}, onClickSelectionCancel = {}, onAlertOutside = {},
     )
+
+@Preview
+@Composable
+fun PreviewArticlesScreen() = NoopTheme { __PreviewUtilArticleScreen() }
 
 @Preview
 @Composable
 fun PreviewArticlesScreen_editMode() {
     NoopTheme {
         __PreviewUtilArticleScreen(
-            thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
             editMode = true,
-            showPermissionsAlert = false,
         )
     }
 }
 
 @Preview
 @Composable
-fun PreviewArticlesScreen() {
+fun PreviewArticlesScreenWithPermissionsAlert() {
     NoopTheme {
         __PreviewUtilArticleScreen(
-            thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
-            editMode = false,
-            showPermissionsAlert = false,
-        )
-    }
-}
-
-@Preview
-@Composable
-fun PreviewArticlesScreenWithAlert() {
-    NoopTheme {
-        __PreviewUtilArticleScreen(
-            thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
             showPermissionsAlert = true,
             editMode = true,
         )
@@ -323,12 +339,29 @@ fun PreviewArticlesScreenWithAlert() {
 
 @Preview
 @Composable
+fun PreviewArticlesScreenWithDeleteArticlesAlert() {
+    NoopTheme {
+        __PreviewUtilArticleScreen(
+            showDeleteArticlesAlert = true,
+            editMode = true,
+            selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
+        )
+    }
+}
+
+@Preview
+@Composable
 fun PreviewCameraPermissionsAlert() {
     NoopTheme {
-        CameraPermissionsAlertDialog(
-            onClickPositive = {},
-            onClickNegative = {},
-            onClickOutside = {})
+        CameraPermissionsAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
+    }
+}
+
+@Preview
+@Composable
+fun PreviewDeleteArticlesAlert() {
+    NoopTheme {
+        DeleteArticlesAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
     }
 }
 //endregion

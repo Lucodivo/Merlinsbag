@@ -81,16 +81,7 @@ fun SelectableArticleThumbnailGrid(
 
 @Preview
 @Composable
-fun PreviewArticleThumbnailGrid(
-){
-  NoopTheme{
-    ArticleThumbnailGrid(articleThumbnailUris = repeatedThumbnailResourceIdsAsStrings, onClickArticle = {})
-  }
-}
-
-@Preview
-@Composable
-fun PreviewSelectableArticleThumbnailGrid(
+fun PreviewSelectableArticleThumbnailGrid_selectable(
 ){
   NoopTheme{
     SelectableArticleThumbnailGrid(
@@ -99,5 +90,14 @@ fun PreviewSelectableArticleThumbnailGrid(
       thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
       selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
     )
+  }
+}
+
+@Preview
+@Composable
+fun PreviewSelectableArticleThumbnailGrid_notSelectable(
+){
+  NoopTheme{
+    SelectableArticleThumbnailGrid(selectable = false, onSelected = {}, thumbnailUris = repeatedThumbnailResourceIdsAsStrings, selectedThumbnails = emptySet())
   }
 }
