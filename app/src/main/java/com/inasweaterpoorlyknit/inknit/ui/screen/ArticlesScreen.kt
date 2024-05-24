@@ -1,13 +1,17 @@
 package com.inasweaterpoorlyknit.inknit.ui.screen
 
 import android.Manifest.permission
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -27,10 +31,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.google.firebase.components.BuildConfig
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
@@ -41,8 +47,10 @@ import com.inasweaterpoorlyknit.inknit.ui.getActivity
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodel.ArticlesViewModel
+import java.io.File
 
 const val ARTICLES_ROUTE = "articles_route"
 
@@ -63,6 +71,7 @@ fun ArticlesRoute(
     modifier: Modifier = Modifier,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
     var showDeleteArticlesAlert by remember { mutableStateOf(false) }
     var showPermissionsAlert by remember { mutableStateOf(false) }
@@ -87,30 +96,48 @@ fun ArticlesRoute(
             navController.navigateToAddArticle(uris.map { navigationSafeUriStringEncode(it) })
         } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
     }
+
+    var takePictureUri by remember { mutableStateOf<Uri?>(null) }
+    val _takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) navController.navigateToAddArticle(listOf( navigationSafeUriStringEncode(takePictureUri!!) ))
+            else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+        })
+
+
     val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
-        RequestMultiplePermissions()
-    ) { permissions ->
-        var permissionsGranted = true
-        var userCheckedNeverAskAgain = false
-        permissions.entries.forEach { entry ->
-            if (!entry.value) {
-                userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(
-                    navController.context.getActivity()!!,
-                    entry.key
-                )
-                permissionsGranted = false
+        contract = RequestMultiplePermissions(),
+        onResult = { permissions ->
+            var permissionsGranted = true
+            var userCheckedNeverAskAgain = false
+            permissions.entries.forEach { entry ->
+                if (!entry.value) {
+                    userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(
+                        navController.context.getActivity()!!,
+                        entry.key
+                    )
+                    permissionsGranted = false
+                }
             }
-        }
-        if (permissionsGranted) {
-            navController.navigateToCamera()
-        } else {
-            if (userCheckedNeverAskAgain) {
-                showPermissionsAlert = true
+            if (permissionsGranted) {
+                val contentResolver = context.contentResolver
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, "${timestampFileName()}.jpg")
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                }
+                takePictureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                _takePictureLauncher.launch(takePictureUri!!)
             } else {
-                navController.context.toast("Camera permissions required")
+                if (userCheckedNeverAskAgain) {
+                    showPermissionsAlert = true
+                } else {
+                    navController.context.toast("Camera permissions required")
+                }
             }
         }
-    }
+    )
 
     ArticlesScreen(
         thumbnailUris = articleThumbnails,

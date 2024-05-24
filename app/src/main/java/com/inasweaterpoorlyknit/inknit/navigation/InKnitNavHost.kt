@@ -14,8 +14,6 @@ import com.inasweaterpoorlyknit.inknit.ui.screen.ARTICLE_INDEX_ARG
 import com.inasweaterpoorlyknit.inknit.ui.screen.AddArticleRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticleDetailRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ArticlesRoute
-import com.inasweaterpoorlyknit.inknit.ui.screen.CAMERA_ROUTE
-import com.inasweaterpoorlyknit.inknit.ui.screen.CameraRoute
 import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLES_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_DETAIL_ROUTE
 import com.inasweaterpoorlyknit.inknit.ui.screen.ENSEMBLE_ID_ARG
@@ -77,9 +75,6 @@ fun InKnitNavHost(
     ) { navBackStackEntry ->
       val ensembleIdArg = navBackStackEntry.arguments!!.getString(ENSEMBLE_ID_ARG)!!
       EnsembleDetailRoute(navController = navController, ensembleId = ensembleIdArg)
-    }
-    composable(route = CAMERA_ROUTE){
-      CameraRoute(navController = navController)
     }
     composable(
       route = ADD_ARTICLES_ROUTE,

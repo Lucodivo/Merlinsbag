@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview as ComposePreview
 
 @Composable
 fun CameraPreview(
+  freezeCamera: Boolean,
   imageCapture: ImageCapture,
   modifier: Modifier = Modifier,
   cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
@@ -63,7 +64,7 @@ fun CameraPreview(
         try {
           // Must unbind the use-cases before rebinding them.
           cameraProvider.unbindAll()
-          cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
+          if(!freezeCamera) cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
         } catch (exc: Exception) {
           Log.e("InKnit", "Use case binding failed", exc)
         }
@@ -77,5 +78,5 @@ fun CameraPreview(
 @Composable
 fun PreviewCameraPreview(){
   val bogusPreviewImageCapture = ImageCapture.Builder().build()
-  CameraPreview(imageCapture = bogusPreviewImageCapture)
+  CameraPreview(freezeCamera = false, imageCapture = bogusPreviewImageCapture)
 }

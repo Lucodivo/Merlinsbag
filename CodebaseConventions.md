@@ -27,6 +27,7 @@ fun PreviewXxxXxx(){
 
 **Desired Outcome**: Compilation errors for custom composable components with missing or unsuitable parameters.  
 **Cons**: Slightly longer to write previews. Slightly longer when refactoring custom composable components.  
+**Additional**: Helper preview functions with default values can help reduce the pain of the cons.
 Example:
 
 ```
