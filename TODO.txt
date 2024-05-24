@@ -12,6 +12,8 @@ Database:
     - ImageEntity over ArticleImageEntity?
 Repository:
     - Don't automatically append image directory to avoid unnecessary work. Append when image is actually used.
+    - ArticleRepository and EnsembleRepository both return article images. Probably fine but separation may be desired.
+        - ArticleRepository could be a member of EnsembleRepository? Delegate by?
 Camera:
     - Delete unused external storage photos? Change to internal/cache storage directory that gets cleared?
 Settings Screen:

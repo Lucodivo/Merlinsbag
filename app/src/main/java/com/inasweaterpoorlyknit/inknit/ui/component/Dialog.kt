@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -58,24 +59,30 @@ fun NoopAddEnsembleDialog(
     label = "Dialog sheet scrim animated scale",
   )
   val scrimInteractionSource = remember { MutableInteractionSource() }
-  Box(contentAlignment = Alignment.BottomCenter) {
+  Box(
+    contentAlignment = Alignment.BottomCenter,
+    modifier = Modifier.fillMaxSize()
+  ) {
     if (scrimAlphaAnimatedScale > 0.0f) {
       Box(
         modifier = Modifier
           .testTag("DialogSheetScrim")
           .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f * scrimAlphaAnimatedScale))
           .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = onClose)
+          .fillMaxSize()
       )
     }
     AnimatedVisibility(
       visible = visible,
-      modifier = Modifier,
       enter = slideInVertically(initialOffsetY = { fullHeight -> fullHeight }),
       exit = slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }),
     ) {
       Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        tonalElevation = 1.dp,
+        shadowElevation = 1.dp,
       ) {
         Column(
           verticalArrangement = Arrangement.Top,

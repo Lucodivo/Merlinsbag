@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -34,6 +35,7 @@ object NoopIcons {
   val Remove = Icons.Filled.Remove
   val Edit = Icons.Filled.Edit
   val Add = Icons.Filled.Add
+  val Attachment = Icons.Filled.Attachment
   val MoreHorizontal = Icons.Filled.MoreHoriz
   val Previous = Icons.Outlined.SwitchLeft
   val FocusBroaden = Icons.Outlined.ZoomOutMap

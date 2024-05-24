@@ -84,6 +84,7 @@ val allTestThumbnailResourceIdsAsStrings = arrayOf(
     R.raw.test_thumb_7.toString(), R.raw.test_thumb_8.toString(), R.raw.test_thumb_9.toString(),
 )
 val repeatedThumbnailResourceIdsAsStrings = arrayListOf(*allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings)
+val repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
 val repeatedArticleWithImages = repeatedFullResourceIdsAsStrings.zip(repeatedThumbnailResourceIdsAsStrings)
   .mapIndexed { index, resourceId ->
   ArticleWithImages(
