@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.inknit.common
+package com.inasweaterpoorlyknit.core.common
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

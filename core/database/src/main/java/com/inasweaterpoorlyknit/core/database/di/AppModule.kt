@@ -43,5 +43,5 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesEnsembleRepository(ensembleDao: EnsembleDao): EnsembleRepository = EnsembleRepository(ensembleDao)
+    fun providesEnsembleRepository(@ApplicationContext context: Context,ensembleDao: EnsembleDao): EnsembleRepository = EnsembleRepository(context, ensembleDao)
 }

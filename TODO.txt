@@ -1,5 +1,5 @@
 // TODO
-Database work:
+Database:
     - Full text search
         - Room database @Fts3/@Fts4
             - https://developer.android.com/training/data-storage/room/defining-data#fts
@@ -10,12 +10,10 @@ Database work:
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
     - ImageEntity over ArticleImageEntity?
-    - Consider not holding entire file path for images in the repository and simply use filenames and a known parent directory
+Repository:
+    - Don't automatically append image directory to avoid unnecessary work. Append when image is actually used.
 Camera:
-    - Setting to allow user to use preferred camera app
-    - Selfie camera
-    - Camera "feels" slow between clicking the "take picture" button to the AddArticleScreen
-    - Delete unused external storage photos? Change to internal storage directory that gets cleared?
+    - Delete unused external storage photos? Change to internal/cache storage directory that gets cleared?
 Settings Screen:
     - Creator attribution
 Add Article:
@@ -76,4 +74,3 @@ Bugs:
         - Seen when running application on an Motorola Z Play, 3GB RAM, API 26
         - settings android:largeHeap="true" in manifest has slightly alleviated the problem
         - could it be linked to the memory size of thumbnails on the articles screen?
-    - Going to back from CameraScreen to ArticlesScreen creates large bottom padding?

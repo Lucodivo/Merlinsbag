@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(project(":core:common"))
     androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.androidx.navigation.compose)
 

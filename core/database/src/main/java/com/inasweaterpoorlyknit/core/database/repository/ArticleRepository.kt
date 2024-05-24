@@ -9,8 +9,11 @@ import androidx.core.net.toUri
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
+import com.inasweaterpoorlyknit.core.common.listMap
+import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
@@ -19,24 +22,48 @@ import java.util.Locale
 
 const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
 private fun timestampFileName(): String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
+fun articleFilesDir(context: Context) = File(context.filesDir, "articles")
+
+// TODO: Consider a more efficient way of appending file directory
+fun ArticleWithImages.appendDirectory(context: Context): ArticleWithImages {
+  val dir = articleFilesDir(context).toString()
+  return copy(images = images.map { image ->
+    image.copy(
+      uri = "$dir/${image.uri}",
+      thumbUri = "$dir/${image.thumbUri}"
+    )})
+}
+
+fun ArticleImageEntity.appendDirectory(context: Context): ArticleImageEntity {
+  val dir = articleFilesDir(context).toString()
+  return copy(
+    uri = "$dir/${uri}",
+    thumbUri = "$dir/${thumbUri}"
+  )
+}
 
 class ArticleRepository(
   private val context: Context,
   private val articleDao: ArticleDao,
   private val ensembleDao: EnsembleDao
 ) {
-  val articleFilesDir = File(context.filesDir, "articles").apply{ mkdirs() }
+  private val articleFilesDir = articleFilesDir(context)
 
-  fun getAllArticlesWithImages(): Flow<List<ArticleWithImages>> = articleDao.getAllArticlesWithImages()
-  fun getArticleWithImages(id: String): Flow<ArticleWithImages> = articleDao.getArticleWithImages(id)
+  fun getAllArticlesWithImages(): Flow<List<ArticleWithImages>> {
+    return articleDao.getAllArticlesWithImages().listMap { it.appendDirectory(context) }
+  }
+  fun getArticleWithImages(id: String): Flow<ArticleWithImages> {
+    return articleDao.getArticleWithImages(id).map { it.appendDirectory(context) }
+  }
   fun getArticlesWithImages(ensembleId: String?): Flow<List<ArticleWithImages>> {
     return if(ensembleId == null) getAllArticlesWithImages()
-    else ensembleDao.getEnsembleArticleImages(ensembleId)
+    else ensembleDao.getEnsembleArticleImages(ensembleId).listMap { it.appendDirectory(context) }
   }
 
   fun insertArticle(imageUri: String, thumbnailUri: String): Unit = articleDao.insertArticle(imageUri, thumbnailUri)
 
   fun insertArticle(bitmap: Bitmap) {
+    articleFilesDir.mkdirs()
     var bitmapWidth = bitmap.width
     var bitmapHeight = bitmap.height
     while (bitmapWidth > 300 || bitmapHeight > 300) {
@@ -69,8 +96,8 @@ class ArticleRepository(
       outStream.flush()
     }
     articleDao.insertArticle(
-      imageFile.toUri().toString(),
-      thumbnailFile.toUri().toString()
+      imageFilename,
+      thumbnailFilename
     )
   }
 
@@ -82,8 +109,8 @@ class ArticleRepository(
       // delete associated images
       articleWithImages.forEach { articleWithImage ->
         articleWithImage.images.forEach { articleImage ->
-          val imageFile = File(articleFilesDir, articleImage.uri.substringAfterLast("/"))
-          val thumbnailFile = File(articleFilesDir, articleImage.thumbUri.substringAfterLast("/"))
+          val imageFile = File(articleFilesDir, articleImage.uri)
+          val thumbnailFile = File(articleFilesDir, articleImage.thumbUri)
           if(!imageFile.delete()) Log.e("ArticleRepository", "Failed to delete image ${articleImage.uri}")
           if(!thumbnailFile.delete()) Log.e("ArticleRepository", "Failed to delete thumbnail ${articleImage.thumbUri}")
         }
