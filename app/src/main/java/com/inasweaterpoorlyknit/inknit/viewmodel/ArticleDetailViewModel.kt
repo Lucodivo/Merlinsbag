@@ -3,7 +3,7 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.repository.ArticleRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -21,7 +21,7 @@ data class ArticleDetailUiState(
 class ArticleDetailViewModel @AssistedInject constructor(
   @Assisted("articleIndex") private val articleIndex: Int,
   @Assisted("ensembleId") private val ensembleId: String?,
-  private val articleRepository: ArticleRepository,
+  private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
 ): ViewModel() {
 
   @AssistedFactory

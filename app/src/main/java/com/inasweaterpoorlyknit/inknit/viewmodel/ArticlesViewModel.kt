@@ -2,7 +2,7 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.repository.ArticleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ArticlesViewModel @Inject constructor(
-  private val articleRepository: ArticleRepository,
+  private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
 ) : ViewModel() {
   private lateinit var articleIds: List<String>
 

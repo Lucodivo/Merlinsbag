@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnail
-import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
-import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
+import com.inasweaterpoorlyknit.core.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,8 +36,8 @@ data class SaveEnsembleData(
 
 @HiltViewModel
 class EnsemblesViewModel @Inject constructor(
-  articleRepository: ArticleRepository,
-  val ensemblesRepository: EnsembleRepository
+  articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
+  val ensemblesRepository: com.inasweaterpoorlyknit.core.repository.EnsembleRepository
 ): ViewModel() {
 
   val showAddEnsembleDialog = MutableStateFlow(false)

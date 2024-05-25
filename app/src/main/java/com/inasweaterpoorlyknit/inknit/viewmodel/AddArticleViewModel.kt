@@ -9,7 +9,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.repository.ArticleRepository
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -36,7 +36,7 @@ open class Event<out T>(private val content: T?) {
 class AddArticleViewModel @AssistedInject constructor(
   @Assisted("imageUriStrings") private val imageUriStrings: List<String>,
   private val application: Application,
-  private val articleRepository: ArticleRepository,
+  private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
 ) : ViewModel() {
 
   @AssistedFactory

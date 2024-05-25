@@ -1,7 +1,6 @@
 package com.inasweaterpoorlyknit.core.database
 
 import android.content.Context
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -9,7 +8,6 @@ import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleArticles
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import com.inasweaterpoorlyknit.core.database.model.ArticleImage
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +17,6 @@ import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
@@ -31,10 +28,6 @@ class DatabaseArticleEnsembleTests {
   private lateinit var ensembleDao: EnsembleDao
   private lateinit var articleDao: ArticleDao
   private lateinit var db: InKnitDatabase
-
-  // NOTE: Used to observeForever on the main thread
-  @get:Rule
-  var instantTaskExecutorRule = InstantTaskExecutorRule()
 
   @Before
   fun createDb() {

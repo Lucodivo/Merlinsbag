@@ -1,27 +1,17 @@
 package com.inasweaterpoorlyknit.core.database
 
-import android.net.Uri
+import com.inasweaterpoorlyknit.core.common.Counter
+import com.inasweaterpoorlyknit.core.common.createFakeUriString
+import com.inasweaterpoorlyknit.core.common.randUUIDString
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
-import java.util.UUID
-
-fun randUUIDString() = UUID.randomUUID().toString()
-object Counter{
-    private var count = 0
-    fun next(): Int = count++
-}
 
 fun createArticleEntity(id: String = Counter.next().toString()) = ArticleEntity(id = id)
 fun createArticleEntity(count: Int) = Array(count){ createArticleEntity() }
 
 fun createEnsembleEntity(id: String = Counter.next().toString()) = EnsembleEntity(id = id, title = "TestEnsemble$id")
 fun createEnsembleEntity(count: Int) = Array(count){ createEnsembleEntity() }
-
-fun createFakeUriString() = "content://com.inasweaterpoorlyknit.inknit/fakeimage${Counter.next()}"
-fun createFakeUriStrings(count: Int) = Array(count){ createFakeUriString() }
-fun createFakeUri(): Uri = Uri.parse(createFakeUriString())
-fun createFakeUris(count: Int) = Array(count){ createFakeUri() }
 
 fun createArticleImageEntity(ArticleId: String = randUUIDString()) = ArticleImageEntity(
     articleId = ArticleId,

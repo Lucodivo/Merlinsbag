@@ -1,15 +1,14 @@
-package com.inasweaterpoorlyknit.core.database.repository
+package com.inasweaterpoorlyknit.core.repository
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import androidx.core.graphics.scale
-import androidx.core.net.toUri
+import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -60,7 +59,7 @@ class ArticleRepository(
     else ensembleDao.getEnsembleArticleImages(ensembleId).listMap { it.appendDirectory(context) }
   }
 
-  fun insertArticle(imageUri: String, thumbnailUri: String): Unit = articleDao.insertArticle(imageUri, thumbnailUri)
+  fun insertArticle(imageUri: String, thumbnailUri: String) = articleDao.insertArticle(imageUri, thumbnailUri)
 
   fun insertArticle(bitmap: Bitmap) {
     articleFilesDir.mkdirs()

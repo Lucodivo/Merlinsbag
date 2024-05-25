@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
-import com.inasweaterpoorlyknit.core.database.repository.ArticleRepository
-import com.inasweaterpoorlyknit.core.database.repository.EnsembleRepository
+import com.inasweaterpoorlyknit.core.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -27,8 +27,8 @@ data class ThumbnailUiState(
 @HiltViewModel(assistedFactory = EnsembleDetailViewModel.EnsembleDetailViewModelFactory::class)
 class EnsembleDetailViewModel @AssistedInject constructor(
   @Assisted private val ensembleId: String,
-  private val ensemblesRepository: EnsembleRepository,
-  private val articleRepository: ArticleRepository,
+  private val ensemblesRepository: com.inasweaterpoorlyknit.core.repository.EnsembleRepository,
+  private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
 ): ViewModel() {
   private lateinit var ensemble: EnsembleEntity
   private lateinit var ensembleArticles: List<ArticleWithImages>

@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.core.database.repository
+package com.inasweaterpoorlyknit.core.repository
 
 import android.content.Context
 import com.inasweaterpoorlyknit.core.common.listMap
