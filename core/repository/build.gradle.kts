@@ -33,9 +33,11 @@ android {
 
 dependencies {
 
+  // Project Modules
+  implementation(projects.core.database)
+  implementation(projects.core.common)
+
   implementation(libs.androidx.core.ktx)
-  implementation(project(":core:database"))
-  implementation(project(":core:common"))
 
   // Testing
   testImplementation(libs.junit)

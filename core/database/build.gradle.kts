@@ -36,13 +36,16 @@ android {
 }
 
 dependencies {
+
+  // Project Modules
+  androidTestImplementation(projects.core.common) // Test helpers
+
   implementation(libs.androidx.core.ktx)
 
   // Testing
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
-  androidTestImplementation(project(":core:common")) // Test helpers
 
   // Room
   implementation(libs.androidx.room.runtime)

@@ -31,12 +31,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
-import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.google.firebase.components.BuildConfig
+import com.inasweaterpoorlyknit.core.common.timestampFileName
+import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
@@ -44,13 +44,12 @@ import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionB
 import com.inasweaterpoorlyknit.inknit.ui.component.SelectableArticleThumbnailGrid
 import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
 import com.inasweaterpoorlyknit.inknit.ui.getActivity
+import com.inasweaterpoorlyknit.inknit.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.inknit.ui.timestampFileName
 import com.inasweaterpoorlyknit.inknit.ui.toast
 import com.inasweaterpoorlyknit.inknit.viewmodel.ArticlesViewModel
-import java.io.File
 
 const val ARTICLES_ROUTE = "articles_route"
 
@@ -68,7 +67,6 @@ fun NavController.navigateToArticles(navOptions: NavOptions? = null) =
 @Composable
 fun ArticlesRoute(
     navController: NavController,
-    modifier: Modifier = Modifier,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -230,7 +228,7 @@ fun DeleteArticlesAlertDialog(
 
 @Composable
 fun ArticlesScreen(
-    thumbnailUris: List<String>,
+    thumbnailUris: LazyUriStrings,
     selectedThumbnails: Set<Int>,
     editMode: Boolean,
     showPermissionsAlert: Boolean,
@@ -328,7 +326,7 @@ fun __PreviewUtilArticleScreen(
     showDeleteArticlesAlert: Boolean = false,
     selectedThumbnails: Set<Int> = emptySet(),
 ) = ArticlesScreen(
-        thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+        thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
         selectedThumbnails = selectedThumbnails,
         editMode = editMode,
         showPermissionsAlert = showPermissionsAlert,

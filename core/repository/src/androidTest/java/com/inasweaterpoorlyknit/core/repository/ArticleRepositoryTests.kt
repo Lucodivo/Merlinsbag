@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.common.createFakeUriStrings
 import com.inasweaterpoorlyknit.core.database.InKnitDatabase
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -20,12 +20,13 @@ import java.io.IOException
 // If these aren't passing, something must be  wrong with the database as a whole.
 @RunWith(AndroidJUnit4::class)
 class ArticleRepositoryTests {
+    private lateinit var context: Context
     private lateinit var articleRepository: ArticleRepository
     private lateinit var database: InKnitDatabase
 
     @Before
     fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+        context = ApplicationProvider.getApplicationContext()
         database = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
             .allowMainThreadQueries()
             .build()
@@ -44,18 +45,26 @@ class ArticleRepositoryTests {
     @Throws(Exception::class)
     fun insertArticle() {
         // arrange
+        val articleDirectory = articleFilesDirStr(context)
         val fullImageUris = createFakeUriStrings(2)
-        val thumbnailUriImageUris = createFakeUriStrings(2)
+        val thumbnailImageUris = createFakeUriStrings(2)
 
         // act
-        articleRepository.insertArticle(fullImageUris[0], thumbnailUriImageUris[0])
-        articleRepository.insertArticle(fullImageUris[1], thumbnailUriImageUris[1])
-        val articlesWithImages: List<ArticleWithImages>
+        articleRepository.insertArticle(fullImageUris[0], thumbnailImageUris[0])
+        articleRepository.insertArticle(fullImageUris[1], thumbnailImageUris[1])
+        val articlesWithThumbnails: LazyUriStrings
+        val articlesWithFullImages: LazyArticleFullImages
         runBlocking {
-            articlesWithImages = articleRepository.getAllArticlesWithImages().first()
+            articlesWithThumbnails = articleRepository.getAllArticlesWithThumbnails().first()
+            articlesWithFullImages = articleRepository.getAllArticlesWithFullImages().first()
         }
 
         // assert
-        assertEquals("articles not properly inserted and retreived", fullImageUris.size, articlesWithImages.size)
+        assertEquals("articles not properly inserted and retreived", fullImageUris.size, articlesWithThumbnails.size)
+        // NOTE: Ordered by newest insertion first (modified_by)
+        assertEquals("$articleDirectory/${fullImageUris[0]}", articlesWithFullImages.getUriString(1))
+        assertEquals("$articleDirectory/${thumbnailImageUris[0]}", articlesWithThumbnails.getUriString(1))
+        assertEquals("$articleDirectory/${fullImageUris[1]}", articlesWithFullImages.getUriString(0))
+        assertEquals("$articleDirectory/${thumbnailImageUris[1]}", articlesWithThumbnails.getUriString(0))
     }
 }

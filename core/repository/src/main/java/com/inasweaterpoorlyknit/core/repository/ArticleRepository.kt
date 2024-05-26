@@ -5,63 +5,61 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import androidx.core.graphics.scale
-import com.inasweaterpoorlyknit.core.common.listMap
+import com.inasweaterpoorlyknit.core.common.articleFilesDir
+import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
+import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithFullImages
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Locale
 
-const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-private fun timestampFileName(): String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
-fun articleFilesDir(context: Context) = File(context.filesDir, "articles")
-
-// TODO: Consider a more efficient way of appending file directory
-fun ArticleWithImages.appendDirectory(context: Context): ArticleWithImages {
-  val dir = articleFilesDir(context).toString()
-  return copy(images = images.map { image ->
-    image.copy(
-      uri = "$dir/${image.uri}",
-      thumbUri = "$dir/${image.thumbUri}"
-    )})
+interface LazyUriStrings {
+  companion object {
+    val Empty = object : LazyUriStrings {
+      override val size get() = 0
+      override fun getUriString(index: Int): String = ""
+    }
+  }
+  val size: Int
+  fun isEmpty() = size == 0
+  fun isNotEmpty() = size != 0
+  fun getUriString(index: Int): String
 }
 
-fun ArticleImageEntity.appendDirectory(context: Context): ArticleImageEntity {
-  val dir = articleFilesDir(context).toString()
-  return copy(
-    uri = "$dir/${uri}",
-    thumbUri = "$dir/${thumbUri}"
-  )
+class LazyArticleThumbnails(
+  val directory: String,
+  private var articleThumbnailPaths: List<ArticleWithThumbnails>
+): LazyUriStrings {
+  override val size get() = articleThumbnailPaths.size
+  fun getArticleId(index: Int) = articleThumbnailPaths[index].articleId
+  override fun getUriString(index: Int): String = "$directory/${articleThumbnailPaths[index].thumbnailPaths[0].uri}"
+  fun filter(keep: (ArticleWithThumbnails) -> Boolean) = LazyArticleThumbnails(directory, articleThumbnailPaths.filter(keep))
+  fun articleIds() = articleThumbnailPaths.map { it.articleId }
+}
+
+class LazyArticleFullImages(
+  val directory: String,
+  private var articleFullImagePaths: List<ArticleWithFullImages>
+): LazyUriStrings {
+  override val size get() = articleFullImagePaths.size
+  fun getArticleId(index: Int) = articleFullImagePaths[index].articleId
+  override fun getUriString(index: Int): String = "$directory/${articleFullImagePaths[index].fullImagePaths[0].uri}"
+  fun articleIds() = articleFullImagePaths.map { it.articleId }
 }
 
 class ArticleRepository(
   private val context: Context,
   private val articleDao: ArticleDao,
-  private val ensembleDao: EnsembleDao
+  private val ensembleDao: EnsembleDao,
 ) {
-  private val articleFilesDir = articleFilesDir(context)
-
-  fun getAllArticlesWithImages(): Flow<List<ArticleWithImages>> {
-    return articleDao.getAllArticlesWithImages().listMap { it.appendDirectory(context) }
-  }
-  fun getArticleWithImages(id: String): Flow<ArticleWithImages> {
-    return articleDao.getArticleWithImages(id).map { it.appendDirectory(context) }
-  }
-  fun getArticlesWithImages(ensembleId: String?): Flow<List<ArticleWithImages>> {
-    return if(ensembleId == null) getAllArticlesWithImages()
-    else ensembleDao.getEnsembleArticleImages(ensembleId).listMap { it.appendDirectory(context) }
-  }
-
   fun insertArticle(imageUri: String, thumbnailUri: String) = articleDao.insertArticle(imageUri, thumbnailUri)
-
   fun insertArticle(bitmap: Bitmap) {
+    val articleFilesDir = articleFilesDir(context)
     articleFilesDir.mkdirs()
     var bitmapWidth = bitmap.width
     var bitmapHeight = bitmap.height
@@ -76,24 +74,19 @@ class ArticleRepository(
     val thumbnailFilename = "${filenameBase}_thumb.webp"
     val imageFile = File(articleFilesDir, imageFilename)
     val thumbnailFile = File(articleFilesDir, thumbnailFilename)
+
     @Suppress("DEPRECATION")
     val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
 
-    // save article full bitmap
     FileOutputStream(imageFile).use { outStream ->
-      // Compress the bitmap into a JPEG (you could also use PNG)
       bitmap.compress(compressionFormat, 100, outStream)
-      // Flush and close the output stream
+      outStream.flush()
+    }
+    FileOutputStream(thumbnailFile).use { outStream ->
+      thumbnailBitmapToSave.compress(compressionFormat, 100, outStream)
       outStream.flush()
     }
 
-    // save article thumbnail bitmap
-    FileOutputStream(thumbnailFile).use { outStream ->
-      // Compress the bitmap into a JPEG (you could also use PNG)
-      thumbnailBitmapToSave.compress(compressionFormat, 100, outStream)
-      // Flush and close the output stream
-      outStream.flush()
-    }
     articleDao.insertArticle(
       imageFilename,
       thumbnailFilename
@@ -101,19 +94,25 @@ class ArticleRepository(
   }
 
   fun deleteArticles(articleIds: List<String>) {
+    val articleFilesDir = articleFilesDir(context)
     runBlocking {
       val articleWithImages = articleDao.getArticlesWithImages(articleIds).first()
       // delete records from database
       articleDao.deleteArticles(articleIds)
       // delete associated images
       articleWithImages.forEach { articleWithImage ->
-        articleWithImage.images.forEach { articleImage ->
+        articleWithImage.imagePaths.forEach { articleImage ->
           val imageFile = File(articleFilesDir, articleImage.uri)
-          val thumbnailFile = File(articleFilesDir, articleImage.thumbUri)
+          val thumbnailFile = File(articleFilesDir, articleImage.uriThumb)
           if(!imageFile.delete()) Log.e("ArticleRepository", "Failed to delete image ${articleImage.uri}")
-          if(!thumbnailFile.delete()) Log.e("ArticleRepository", "Failed to delete thumbnail ${articleImage.thumbUri}")
+          if(!thumbnailFile.delete()) Log.e("ArticleRepository", "Failed to delete thumbnail ${articleImage.uriThumb}")
         }
       }
     }
   }
+
+  fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }
+  fun getAllArticlesWithFullImages() = articleDao.getAllArticlesWithFullImages().map { LazyArticleFullImages(articleFilesDirStr(context), it) }
+  fun getArticlesWithFullImages(ensembleId: String?) = if(ensembleId == null) getAllArticlesWithFullImages()
+                                                  else ensembleDao.getEnsembleArticleFullImages(ensembleId).map { LazyArticleFullImages(articleFilesDirStr(context), it) }
 }

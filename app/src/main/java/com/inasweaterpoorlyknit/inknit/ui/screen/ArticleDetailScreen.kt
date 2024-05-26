@@ -15,8 +15,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.dao.ThumbnailPath
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.repository.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.COMPOSE_ID
@@ -36,7 +38,7 @@ fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String?
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArticleDetailScreen(
-  articlesWithImages: List<ArticleWithImages>,
+  articlesWithImages: LazyUriStrings,
   startingIndex: Int,
   modifier: Modifier = Modifier
 ) {
@@ -52,7 +54,7 @@ fun ArticleDetailScreen(
       state = pagerState
     ){ page ->
       NoopImage(
-        uriString = articlesWithImages[page].images[0].uri,
+        uriString = articlesWithImages.getUriString(page),
         contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
         modifier = modifier.fillMaxSize().padding(16.dp),
       )
@@ -73,7 +75,7 @@ fun ArticleDetailRoute(
     }
   val articleDetailUiState by articleDetailViewModel.articleDetailUiState.collectAsStateWithLifecycle()
   ArticleDetailScreen(
-    articlesWithImages = articleDetailUiState.articleWithImages,
+    articlesWithImages = articleDetailUiState.articleFullImages,
     startingIndex = articleIndex,
     modifier = modifier,
   )
@@ -82,19 +84,19 @@ fun ArticleDetailRoute(
 @Preview
 @Composable
 fun PreviewArticleDetailScreen(){
-  val articlesWithImages = listOf(
-    ArticleWithImages(
-      articleId = COMPOSE_ID,
-      images = listOf(
-        ArticleImageEntity(
-          id = COMPOSE_ID,
-          articleId = COMPOSE_ID,
-          uri = R.raw.test_full_1.toString(),
-          thumbUri = R.raw.test_thumb_1.toString(),
-        )
+  val articlesWithImages =
+    LazyArticleThumbnails(
+      directory = "",
+      articleThumbnailPaths = listOf(ArticleWithThumbnails(
+        articleId = COMPOSE_ID,
+        thumbnailPaths = listOf(
+          ThumbnailPath(
+            uri = R.raw.test_full_1.toString(),
+          ),
+        ),
+      )
       )
     )
-  )
   NoopTheme {
     ArticleDetailScreen(
       articlesWithImages = articlesWithImages,

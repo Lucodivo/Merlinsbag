@@ -52,9 +52,12 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.database)
 
-    implementation(libs.androidx.core.splashscreen)
+    // Project Modules
+    implementation(projects.core.database)
+    implementation(projects.core.repository)
+    implementation(projects.core.common)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -63,6 +66,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.tracing.ktx)
+    implementation(libs.androidx.core.splashscreen)
 
     // TODO: Move ML Kit code to their own module?
     implementation(libs.play.services.mlkit.subject.segmentation)
@@ -96,7 +100,6 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.ui.text.google.fonts)
-    implementation(project(":core:common"))
     androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.androidx.navigation.compose)
 

@@ -5,8 +5,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.dao.EnsembleArticles
+import com.inasweaterpoorlyknit.core.database.dao.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.database.dao.EnsembleArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
@@ -64,9 +64,9 @@ class DatabaseArticleEnsembleTests {
     articleDao.insertArticles(*newArticles)
     articleDao.insertArticleImages(*newArticleImages)
     ensembleDao.insertArticleEnsemble(*newEnsembleArticles)
-    val ensembleArticles: List<ArticleWithImages>
+    val ensembleArticles: List<ArticleWithThumbnails>
     runBlocking(Dispatchers.IO) {
-      ensembleArticles = ensembleDao.getEnsembleArticleImages(newEnsemble.id).first().sortedBy { it.articleId }
+      ensembleArticles = ensembleDao.getEnsembleArticleThumbnails(newEnsemble.id).first().sortedBy { it.articleId }
     }
 
     // assert
@@ -98,7 +98,7 @@ class DatabaseArticleEnsembleTests {
     articleDao.insertArticles(*newArticles)
     articleDao.insertArticleImages(*newArticleImages)
     ensembleDao.insertArticleEnsemble(*newEnsembleArticles)
-    val actualEnsembleArticles: List<EnsembleArticles>
+    val actualEnsembleArticles: List<EnsembleArticleThumbnails>
     runBlocking(Dispatchers.IO) {
       actualEnsembleArticles = ensembleDao.getAllEnsembleArticleImages().first()
     }

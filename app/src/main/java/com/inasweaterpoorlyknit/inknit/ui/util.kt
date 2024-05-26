@@ -12,13 +12,8 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 fun pixelsToDp(pixels: Int) = (pixels / Resources.getSystem().displayMetrics.density).dp
-
-const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-fun timestampFileName(): String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
 
 fun Float.degToRad() = this * Math.PI / 180.0
 fun Float.radToDeg() = this * 180.0 / Math.PI

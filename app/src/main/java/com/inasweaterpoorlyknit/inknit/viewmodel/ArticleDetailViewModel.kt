@@ -2,8 +2,8 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 data class ArticleDetailUiState(
-  val articleWithImages: List<ArticleWithImages>,
+  val articleFullImages: LazyUriStrings,
 )
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
   @Assisted("articleIndex") private val articleIndex: Int,
   @Assisted("ensembleId") private val ensembleId: String?,
-  private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
+  articleRepository: ArticleRepository,
 ): ViewModel() {
 
   @AssistedFactory
@@ -32,13 +32,13 @@ class ArticleDetailViewModel @AssistedInject constructor(
     ): ArticleDetailViewModel
   }
 
-  val articleDetailUiState: StateFlow<ArticleDetailUiState> = articleRepository.getArticlesWithImages(ensembleId).map {
-      ArticleDetailUiState(articleWithImages = it)
+  val articleDetailUiState: StateFlow<ArticleDetailUiState> = articleRepository.getArticlesWithFullImages(ensembleId).map {
+      ArticleDetailUiState(articleFullImages = it)
     }.stateIn(
       scope = viewModelScope,
       started = SharingStarted.WhileSubscribed(),
       initialValue = ArticleDetailUiState(
-        articleWithImages = emptyList(),
+        articleFullImages = LazyUriStrings.Empty,
       )
     )
 }

@@ -12,7 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.inknit.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
 
@@ -48,7 +50,7 @@ fun ArticleThumbnailGrid(
 fun SelectableArticleThumbnailGrid(
   selectable: Boolean,
   onSelected: (index: Int) -> Unit,
-  thumbnailUris: List<String>,
+  thumbnailUris: LazyUriStrings,
   selectedThumbnails: Set<Int>,
 ){
   val gridMinWidth = 100.dp
@@ -63,8 +65,9 @@ fun SelectableArticleThumbnailGrid(
         .fillMaxSize()
       items(count = thumbnailUris.size){ thumbnailGridItemIndex ->
         Box(contentAlignment = Alignment.Center) {
+          val uriString = thumbnailUris.getUriString(thumbnailGridItemIndex)
           SelectableNoopImage(
-            uriString = thumbnailUris[thumbnailGridItemIndex],
+            uriString = uriString,
             contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
             selected = selectedThumbnails.contains(thumbnailGridItemIndex),
             selectable = selectable,
@@ -79,25 +82,14 @@ fun SelectableArticleThumbnailGrid(
   )
 }
 
-@Preview
 @Composable
-fun PreviewSelectableArticleThumbnailGrid_selectable(
-){
-  NoopTheme{
-    SelectableArticleThumbnailGrid(
-      selectable = true,
-      onSelected = {},
-      thumbnailUris = repeatedThumbnailResourceIdsAsStrings,
-      selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
-    )
-  }
+fun __PreviewArticleThumbnailGrid(selectable: Boolean) = NoopTheme {
+  SelectableArticleThumbnailGrid(
+    selectable = selectable,
+    onSelected = {},
+    thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
+    selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
+  )
 }
-
-@Preview
-@Composable
-fun PreviewSelectableArticleThumbnailGrid_notSelectable(
-){
-  NoopTheme{
-    SelectableArticleThumbnailGrid(selectable = false, onSelected = {}, thumbnailUris = repeatedThumbnailResourceIdsAsStrings, selectedThumbnails = emptySet())
-  }
-}
+@Preview @Composable fun PreviewSelectableArticleThumbnailGrid_selectable() = __PreviewArticleThumbnailGrid(selectable = true)
+@Preview @Composable fun PreviewSelectableArticleThumbnailGrid_notSelectable() = __PreviewArticleThumbnailGrid(selectable = false)

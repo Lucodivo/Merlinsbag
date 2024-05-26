@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -47,6 +48,7 @@ import com.inasweaterpoorlyknit.inknit.ui.component.NoopExpandingFloatingActionB
 import com.inasweaterpoorlyknit.inknit.ui.component.SelectableArticleThumbnailGrid
 import com.inasweaterpoorlyknit.inknit.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.inknit.ui.component.TextIconButtonData
+import com.inasweaterpoorlyknit.inknit.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
@@ -136,8 +138,8 @@ fun EnsembleDetailScreen(
   title: String,
   editEnsemblesMode: Boolean,
   editingTitle: Boolean,
-  ensembleArticleThumbnailUris: List<String>,
-  addArticleThumbnailUris: List<String>,
+  ensembleArticleThumbnailUris: LazyUriStrings,
+  addArticleThumbnailUris: LazyUriStrings,
   selectedEditArticleIndices: Set<Int>,
   selectedAddArticleIndices: Set<Int>,
   onTitleClicked: () -> Unit,
@@ -274,7 +276,7 @@ fun EnsembleDetailScreen(
 @Composable
 fun AddArticlesDialog(
   visible: Boolean,
-  articleThumbnailUris: List<String>,
+  articleThumbnailUris: LazyUriStrings,
   selectedArticleIndices: Set<Int>,
   onSelectedArticle: (articleIndex: Int) -> Unit,
   onClose: () -> Unit,
@@ -296,7 +298,7 @@ fun AddArticlesDialog(
       ) {
         val padding = 10.dp
         items(count = articleThumbnailUris.size) { articleIndex ->
-          val addArticleThumbnailUri = articleThumbnailUris[articleIndex]
+          val addArticleThumbnailUri = articleThumbnailUris.getUriString(articleIndex)
           val selected = selectedArticleIndices.contains(articleIndex)
           Box(contentAlignment = Alignment.Center) {
             SelectableNoopImage(
@@ -337,9 +339,9 @@ fun __PreviewEnsembleDetailScreen(
   editEnsemblesMode = editMode,
   showAddArticlesDialog = showAddArticlesDialog,
   editingTitle = editingTitle,
-  ensembleArticleThumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+  ensembleArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   selectedEditArticleIndices = selectedArticleIndices,
-  addArticleThumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+  addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   selectedAddArticleIndices = selectedAddArticleIndices,
   onTitleClicked = {}, onTitleChanged = {}, onClickEdit = {}, onSelectedEditArticle = {}, onClickDelete = {}, onClickCancelSelection = {}, onAbandonEditTitle = {},
   onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {}, onClickAddArticles = {},
@@ -384,7 +386,7 @@ fun PreviewAddArticlesDialog() {
   NoopTheme {
     AddArticlesDialog(
       visible = true,
-      articleThumbnailUris = repeatedThumbnailResourceIdsAsStrings,
+      articleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
       selectedArticleIndices = repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet,
       onSelectedArticle = {}, onClose = {}, onConfirm = {},
       )
@@ -397,7 +399,7 @@ fun PreviewAddArticlesDialog_noAddArticles() {
   NoopTheme {
     AddArticlesDialog(
       visible = true,
-      articleThumbnailUris = emptyList(),
+      articleThumbnailUris = LazyUriStrings.Empty,
       selectedArticleIndices = emptySet(),
       onSelectedArticle = {}, onClose = {}, onConfirm = {},
     )

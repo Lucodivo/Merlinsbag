@@ -11,7 +11,6 @@ data class ArticleEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @ColumnInfo(name = "created") val createdEpoch: Long = Date().time,
     @ColumnInfo(name = "modified") val modifiedEpoch: Long = createdEpoch,
-    // TODO: Categories
 )
 
 data class Article(val id: String)

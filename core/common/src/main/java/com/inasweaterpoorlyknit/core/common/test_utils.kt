@@ -9,7 +9,7 @@ object Counter{
   fun next(): Int = count++
 }
 
-fun createFakeUriString() = "content://com.inasweaterpoorlyknit.inknit/fakeimage${Counter.next()}"
+fun createFakeUriString() = "fakeimage${Counter.next()}"
 fun createFakeUriStrings(count: Int) = Array(count){ createFakeUriString() }
 fun createFakeUri(): Uri = Uri.parse(createFakeUriString())
 fun createFakeUris(count: Int) = Array(count){ createFakeUri() }

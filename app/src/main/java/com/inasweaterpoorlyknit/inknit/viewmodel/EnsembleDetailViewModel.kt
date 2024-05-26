@@ -2,11 +2,9 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.common.listMap
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
-import com.inasweaterpoorlyknit.core.repository.ArticleRepository
-import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
+import com.inasweaterpoorlyknit.core.repository.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -20,8 +18,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class ThumbnailUiState(
-  val ensembleArticleThumbnailUris: List<String>,
-  val addArticleThumbnailUris: List<String>,
+  val ensembleArticleThumbnailUris: LazyUriStrings,
+  val addArticleThumbnailUris: LazyUriStrings,
 )
 
 @HiltViewModel(assistedFactory = EnsembleDetailViewModel.EnsembleDetailViewModelFactory::class)
@@ -31,8 +29,8 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
 ): ViewModel() {
   private lateinit var ensemble: EnsembleEntity
-  private lateinit var ensembleArticles: List<ArticleWithImages>
-  private lateinit var addArticles: List<ArticleWithImages>
+  private lateinit var ensembleArticles: LazyArticleThumbnails
+  private lateinit var addArticles: LazyArticleThumbnails
   private lateinit var ensembleArticleIds: Set<String>
 
   fun onTitleChanged(newTitle: String) {
@@ -45,14 +43,13 @@ class EnsembleDetailViewModel @AssistedInject constructor(
     }
   }
 
-  fun removeEnsembleArticles(articleIds: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
-    ensemblesRepository.deleteEnsembleArticles(ensemble.id, articleIds.map { ensembleArticles[it].articleId })
+  fun removeEnsembleArticles(articleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
+    ensemblesRepository.deleteEnsembleArticles(ensemble.id, articleIndices.map { ensembleArticles.getArticleId(it) })
   }
 
   fun addEnsembleArticles(addArticleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
-    ensemblesRepository.addEnsembleArticles(ensemble.id, addArticleIndices.map { addArticles[it].articleId })
+    ensemblesRepository.addEnsembleArticles(ensemble.id, addArticleIndices.map { addArticles.getArticleId(it) })
   }
-
 
   @AssistedFactory
   interface EnsembleDetailViewModelFactory {
@@ -71,21 +68,21 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   val ensembleUiState = combine(
     ensemblesRepository.getEnsembleArticleImages(ensembleId).onEach{ articlesWithImages ->
       ensembleArticles = articlesWithImages
-      ensembleArticleIds = ensembleArticles.map { it.articleId }.toSet()
-    }.listMap { it.images[0].thumbUri },
-    articleRepository.getAllArticlesWithImages(),
+      ensembleArticleIds = ensembleArticles.articleIds().toSet()
+    },
+    articleRepository.getAllArticlesWithThumbnails(),
   ) { ensembleThumbnailUris, allArticles ->
-    addArticles = allArticles.filterNot { ensembleArticleIds.contains(it.articleId) }
+    addArticles = allArticles.filter { !ensembleArticleIds.contains(it.articleId) }
     ThumbnailUiState(
       ensembleArticleThumbnailUris = ensembleThumbnailUris,
-      addArticleThumbnailUris = addArticles.map { it.images[0].thumbUri }
+      addArticleThumbnailUris = addArticles,
     )
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(),
     initialValue = ThumbnailUiState(
-      ensembleArticleThumbnailUris = emptyList(),
-      addArticleThumbnailUris = emptyList(),
+      ensembleArticleThumbnailUris = LazyUriStrings.Empty,
+      addArticleThumbnailUris = LazyUriStrings.Empty,
     )
   )
 }

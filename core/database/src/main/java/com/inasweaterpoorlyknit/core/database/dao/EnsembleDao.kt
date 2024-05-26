@@ -13,7 +13,7 @@ import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import kotlinx.coroutines.flow.Flow
 
-data class EnsembleArticles(
+data class EnsembleArticleThumbnails(
   @Embedded val ensemble: EnsembleEntity,
   @Relation(
     parentColumn = "id",
@@ -22,19 +22,17 @@ data class EnsembleArticles(
       value = EnsembleArticleEntity::class,
       parentColumn = "ensemble_id",
       entityColumn = "article_id",
-    )
+    ),
+    entity = ArticleImageEntity::class,
   )
-  val articles: List<ArticleImageEntity>
+  val articles: List<ArticleWithThumbnails>,
 )
 
 @Dao
 interface EnsembleDao {
-  @Insert
-  fun insertEnsemble(vararg ensembleEntity: EnsembleEntity)
-  @Update
-  fun updateEnsemble(ensembleEntity: EnsembleEntity)
-  @Insert
-  fun insertArticleEnsemble(vararg ensembleArticleEntity: EnsembleArticleEntity)
+  @Insert fun insertEnsemble(vararg ensembleEntity: EnsembleEntity)
+  @Update fun updateEnsemble(ensembleEntity: EnsembleEntity)
+  @Insert fun insertArticleEnsemble(vararg ensembleArticleEntity: EnsembleArticleEntity)
 
   @Query("""DELETE FROM ensemble_article WHERE ensemble_id = :ensembleId AND article_id IN (:articleIds)""")
   fun deleteArticleEnsembles(ensembleId: String, articleIds: List<String>)
@@ -45,14 +43,22 @@ interface EnsembleDao {
       JOIN article ON article.id = article_id
       WHERE ensemble_article.ensemble_id = :ensembleId"""
   )
-  fun getEnsembleArticleImages(ensembleId: String): Flow<List<ArticleWithImages>>
+  fun getEnsembleArticleThumbnails(ensembleId: String): Flow<List<ArticleWithThumbnails>>
 
   @Transaction
-  @Query("""SELECT * FROM ensemble""")
-  fun getAllEnsembleArticleImages(): Flow<List<EnsembleArticles>>
+  @Query(
+    """SELECT ensemble_article.article_id as article_id FROM ensemble_article 
+      JOIN article ON article.id = article_id
+      WHERE ensemble_article.ensemble_id = :ensembleId"""
+  )
+  fun getEnsembleArticleFullImages(ensembleId: String): Flow<List<ArticleWithFullImages>>
 
-  @Query("SELECT * FROM ensemble")
-  fun getAllEnsembles(): Flow<List<EnsembleEntity>>
+  @Transaction
+  @Query("""
+    SELECT * FROM ensemble
+    ORDER BY modified DESC
+    """)
+  fun getAllEnsembleArticleImages(): Flow<List<EnsembleArticleThumbnails>>
 
   @Query(
     """ SELECT * FROM ensemble
@@ -61,8 +67,8 @@ interface EnsembleDao {
   fun getEnsemble(ensembleId: String): Flow<EnsembleEntity>
 
   @Transaction
-  fun insertEnsembleWithArticles(ensemble: EnsembleEntity, articleIds: List<String>){
-    val ensembleArticles = Array(articleIds.size){ index ->
+  fun insertEnsembleWithArticles(ensemble: EnsembleEntity, articleIds: List<String>) {
+    val ensembleArticles = Array(articleIds.size) { index ->
       EnsembleArticleEntity(ensembleId = ensemble.id, articleId = articleIds[index])
     }
     insertEnsemble(ensemble)
