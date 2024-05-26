@@ -11,8 +11,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,6 +29,7 @@ import androidx.navigation.navOptions
 import com.inasweaterpoorlyknit.inknit.navigation.APP_START_DESTINATION
 import com.inasweaterpoorlyknit.inknit.navigation.InKnitNavHost
 import com.inasweaterpoorlyknit.inknit.navigation.TopLevelDestination
+import com.inasweaterpoorlyknit.inknit.ui.screen.ADD_ARTICLES_BASE
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.inknit.ui.screen.navigateToEnsembles
 
@@ -47,19 +50,21 @@ fun InKnitApp(
         contentColor = MaterialTheme.colorScheme.onBackground,
         contentWindowInsets = WindowInsets(0,0,0,0),
         bottomBar = {
-            InKnitBottomNavBar(
-                bottomNavBarDataItems = appState.topLevelDestinations,
-                onClick = { selectedIndex ->
-                    val previousIndex = currentTopLevelDestination.intValue
-                    currentTopLevelDestination.intValue = selectedIndex
-                    appState.navController.navigateToTopLevelDestination(
-                        TopLevelDestination.entries[previousIndex],
-                        TopLevelDestination.entries[selectedIndex]
-                    )
-                },
-                selectedIndex = currentTopLevelDestination.intValue,
-                modifier = Modifier.testTag("InKnitBottomBar"),
-            )
+            if(appState.showBottomNavBar.value){
+                InKnitBottomNavBar(
+                    bottomNavBarDataItems = appState.topLevelDestinations,
+                    onClick = { selectedIndex ->
+                        val previousIndex = currentTopLevelDestination.intValue
+                        currentTopLevelDestination.intValue = selectedIndex
+                        appState.navController.navigateToTopLevelDestination(
+                            TopLevelDestination.entries[previousIndex],
+                            TopLevelDestination.entries[selectedIndex]
+                        )
+                    },
+                    selectedIndex = currentTopLevelDestination.intValue,
+                    modifier = Modifier.testTag("InKnitBottomBar"),
+                )
+            }
         }
     ) { padding ->
         Surface(
@@ -83,6 +88,15 @@ class InKnitAppState(
     val windowSizeClass: WindowSizeClass,
 ) {
     val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
+    var showBottomNavBar = mutableStateOf(true)
+
+    init {
+      navController.addOnDestinationChangedListener { controller, destination, arguments ->
+          if(destination.route?.startsWith(ADD_ARTICLES_BASE) == true){
+              showBottomNavBar.value = false
+          } else if(!showBottomNavBar.value){ showBottomNavBar.value = true }
+      }
+    }
 }
 
 @Composable

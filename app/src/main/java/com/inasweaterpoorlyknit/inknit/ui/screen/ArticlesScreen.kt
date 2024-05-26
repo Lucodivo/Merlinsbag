@@ -72,7 +72,7 @@ fun ArticlesRoute(
     val context = LocalContext.current
     val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
     var showDeleteArticlesAlert by remember { mutableStateOf(false) }
-    var showPermissionsAlert by remember { mutableStateOf(false) }
+    var showPermissionsAlert by remember { mutableStateOf(false)}
     var editMode by remember { mutableStateOf(false) }
     val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
 
