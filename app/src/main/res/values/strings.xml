@@ -64,4 +64,8 @@
     <string name="delete_articles_alert_negative">Cancel</string>
     <string name="all_articles_already_in_ensemble">All articles already in ensemble.</string>
     <string name="Add_article">Add article</string>
+    <string name="delete_ensemble">Delete Ensemble</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="delete_ensemble_alert_positive">Delete Ensemble</string>
+    <string name="delete_ensemble_alert_negative">Cancel</string>
 </resources>

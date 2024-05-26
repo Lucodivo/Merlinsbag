@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -78,6 +80,7 @@ fun EnsembleDetailRoute(
   val ensembleUiState by ensembleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   var editingTitle by remember { mutableStateOf(false) }
   var editMode by remember { mutableStateOf(false) }
+  var showDeleteEnsembleDialog by remember { mutableStateOf(false) }
   val selectedEditArticleIndices = remember { mutableStateMapOf<Int, Unit>() }
   var showAddArticlesDialog by remember { mutableStateOf(false) }
   val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() }
@@ -111,9 +114,12 @@ fun EnsembleDetailRoute(
     onClickCancelSelection = {
       selectedEditArticleIndices.clear()
     },
-    onClickDelete = {
+    onClickRemoveArticles = {
       ensembleDetailViewModel.removeEnsembleArticles(selectedEditArticleIndices.keys.toList())
       selectedEditArticleIndices.clear()
+    },
+    onClickDeleteEnsemble = {
+      showDeleteEnsembleDialog = true
     },
     onAbandonEditTitle = { editingTitle = false },
     showAddArticlesDialog = showAddArticlesDialog,
@@ -129,7 +135,95 @@ fun EnsembleDetailRoute(
       selectedAddArticleIndices.clear()
     },
     onClickAddArticles = { showAddArticlesDialog = true },
+    showDeleteEnsembleAlertDialog = showDeleteEnsembleDialog,
+    onClickOutsideDeleteEnsembleDialog = { showDeleteEnsembleDialog = false },
+    onClickPositiveDeleteEnsembleDialog = {
+      ensembleDetailViewModel.deleteEnsemble()
+      navController.popBackStack()
+    },
+    onClickNegativeDeleteEnsembleDialog = { showDeleteEnsembleDialog = false },
     modifier = modifier,
+  )
+}
+
+@Composable
+fun DeleteEnsembleAlertDialog(
+  onClickOutside: () -> Unit,
+  onClickNegative: () -> Unit,
+  onClickPositive: () -> Unit,
+) {
+  AlertDialog(
+    title = { Text(text = stringResource(id = R.string.delete_ensemble)) },
+    text = { Text(text = stringResource(id = R.string.are_you_sure)) },
+    onDismissRequest = onClickOutside,
+    confirmButton = {
+      TextButton(onClick = onClickPositive) {
+        Text(stringResource(id = R.string.delete_ensemble_alert_positive))
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = onClickNegative) {
+        Text(stringResource(id = R.string.delete_ensemble_alert_negative))
+      }
+    }
+  )
+}
+
+@Composable
+fun EnsembleDetailFloatingActionButtons(
+  editEnsemblesMode: Boolean,
+  selectedEditArticleIndices: Set<Int>,
+  onClickEdit: () -> Unit,
+  onClickAddArticles: () -> Unit,
+  onClickCancelSelection: () -> Unit,
+  onClickRemoveArticles: () -> Unit,
+  onClickDeleteEnsemble: () -> Unit,
+){
+  NoopExpandingFloatingActionButton(
+    expanded = editEnsemblesMode,
+    collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
+    expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+    expandedButtons =
+    if (selectedEditArticleIndices.isNotEmpty()) {
+      listOf(
+        TextIconButtonData(
+          text = "",
+          icon = IconData(
+            icon = NoopIcons.Cancel,
+            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+          ),
+          onClick = onClickCancelSelection
+        ),
+        TextIconButtonData(
+          text = "",
+          icon = IconData(
+            icon = NoopIcons.Delete,
+            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+          ),
+          onClick = onClickRemoveArticles
+        ),
+      )
+    } else {
+      listOf(
+        TextIconButtonData(
+          text = "",
+          icon = IconData(
+            icon = NoopIcons.DeleteForever,
+            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+          ),
+          onClick = onClickDeleteEnsemble
+        ),
+        TextIconButtonData(
+          text = "",
+          icon = IconData(
+            icon = NoopIcons.Attachment,
+            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+          ),
+          onClick = onClickAddArticles
+        ),
+      )
+    },
+    onClickExpandCollapse = onClickEdit,
   )
 }
 
@@ -147,13 +241,18 @@ fun EnsembleDetailScreen(
   onClickEdit: () -> Unit,
   onClickAddArticles: () -> Unit,
   onSelectedEditArticle: (index: Int) -> Unit,
-  onClickDelete: () -> Unit,
+  onClickRemoveArticles: () -> Unit,
   onClickCancelSelection: () -> Unit,
+  onClickDeleteEnsemble: () -> Unit,
   onAbandonEditTitle: () -> Unit,
   showAddArticlesDialog: Boolean,
   onSelectedAddArticle: (articleIndex: Int) -> Unit,
   onClickConfirmAddArticles: () -> Unit,
   onCloseAddArticlesDialog: () -> Unit,
+  showDeleteEnsembleAlertDialog: Boolean,
+  onClickOutsideDeleteEnsembleDialog: () -> Unit,
+  onClickNegativeDeleteEnsembleDialog: () -> Unit,
+  onClickPositiveDeleteEnsembleDialog: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Surface(
@@ -225,43 +324,14 @@ fun EnsembleDetailScreen(
       }
     }
   }
-  NoopExpandingFloatingActionButton(
-    expanded = editEnsemblesMode,
-    collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
-    expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-    expandedButtons =
-    if (selectedEditArticleIndices.isNotEmpty()) {
-      listOf(
-        TextIconButtonData(
-          text = "",
-          icon = IconData(
-            icon = NoopIcons.Cancel,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-          ),
-          onClick = onClickCancelSelection
-        ),
-        TextIconButtonData(
-          text = "",
-          icon = IconData(
-            icon = NoopIcons.Delete,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-          ),
-          onClick = onClickDelete
-        ),
-      )
-    } else {
-      listOf(
-        TextIconButtonData(
-          text = "",
-          icon = IconData(
-            icon = NoopIcons.Attachment,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-          ),
-          onClick = onClickAddArticles
-        ),
-      )
-    },
-    onClickExpandCollapse = onClickEdit,
+  EnsembleDetailFloatingActionButtons(
+    editEnsemblesMode = editEnsemblesMode,
+    selectedEditArticleIndices = selectedEditArticleIndices,
+    onClickEdit = onClickEdit,
+    onClickAddArticles = onClickAddArticles,
+    onClickCancelSelection = onClickCancelSelection,
+    onClickRemoveArticles = onClickRemoveArticles,
+    onClickDeleteEnsemble = onClickDeleteEnsemble,
   )
   AddArticlesDialog(
     visible = showAddArticlesDialog,
@@ -271,6 +341,13 @@ fun EnsembleDetailScreen(
     onClose = onCloseAddArticlesDialog,
     onConfirm = onClickConfirmAddArticles,
   )
+  if(showDeleteEnsembleAlertDialog){
+    DeleteEnsembleAlertDialog(
+      onClickOutside = onClickOutsideDeleteEnsembleDialog,
+      onClickNegative = onClickNegativeDeleteEnsembleDialog,
+      onClickPositive = onClickPositiveDeleteEnsembleDialog,
+    )
+  }
 }
 
 @Composable
@@ -334,6 +411,7 @@ fun __PreviewEnsembleDetailScreen(
   showAddArticlesDialog: Boolean = false,
   selectedArticleIndices: Set<Int> = emptySet(),
   selectedAddArticleIndices: Set<Int> = emptySet(),
+  showDeleteEnsembleAlertDialog: Boolean = false,
 ) = EnsembleDetailScreen(
   title = "Ensemble Title",
   editEnsemblesMode = editMode,
@@ -343,8 +421,10 @@ fun __PreviewEnsembleDetailScreen(
   selectedEditArticleIndices = selectedArticleIndices,
   addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   selectedAddArticleIndices = selectedAddArticleIndices,
-  onTitleClicked = {}, onTitleChanged = {}, onClickEdit = {}, onSelectedEditArticle = {}, onClickDelete = {}, onClickCancelSelection = {}, onAbandonEditTitle = {},
-  onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {}, onClickAddArticles = {},
+  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
+  onTitleClicked = {}, onTitleChanged = {}, onClickEdit = {}, onSelectedEditArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {}, onAbandonEditTitle = {},
+  onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {}, onClickAddArticles = {}, onClickDeleteEnsemble = {}, onClickOutsideDeleteEnsembleDialog = {},
+  onClickPositiveDeleteEnsembleDialog = {}, onClickNegativeDeleteEnsembleDialog = {},
 )
 
 @Preview
@@ -363,6 +443,17 @@ fun PreviewEnsembleDetailScreen_Editing() {
       editMode = true,
       editingTitle = true,
       selectedArticleIndices = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
+    )
+  }
+}
+
+@Preview
+@Composable
+fun PreviewEnsembleDetailScreen_DeleteEnsembleAlertDialog() {
+  NoopTheme {
+    __PreviewEnsembleDetailScreen(
+      editMode = true,
+      showDeleteEnsembleAlertDialog = true,
     )
   }
 }
@@ -403,5 +494,29 @@ fun PreviewAddArticlesDialog_noAddArticles() {
       selectedArticleIndices = emptySet(),
       onSelectedArticle = {}, onClose = {}, onConfirm = {},
     )
+  }
+}
+
+@Composable
+fun _PreviewEnsembleDetailFloatingActionButtons(
+  editEnsemblesMode: Boolean,
+  selectedArticleIndices: Set<Int> = emptySet(),
+){
+  NoopTheme {
+    EnsembleDetailFloatingActionButtons(
+      editEnsemblesMode = editEnsemblesMode,
+      selectedEditArticleIndices = selectedArticleIndices,
+      onClickEdit = {}, onClickAddArticles = {}, onClickCancelSelection = {}, onClickRemoveArticles = {}, onClickDeleteEnsemble = {})
+  }
+}
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = _PreviewEnsembleDetailFloatingActionButtons(false)
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = _PreviewEnsembleDetailFloatingActionButtons(true)
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = _PreviewEnsembleDetailFloatingActionButtons(true, setOf(0))
+
+@Preview
+@Composable
+fun PreviewDeleteEnsembleAlertDialog(){
+  NoopTheme {
+    DeleteEnsembleAlertDialog(onClickOutside = {}, onClickNegative = {}, onClickPositive = {})
   }
 }

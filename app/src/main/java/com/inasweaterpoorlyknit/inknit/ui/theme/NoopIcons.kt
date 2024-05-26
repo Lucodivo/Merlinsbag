@@ -18,6 +18,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Checkroom
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.DryCleaning
 import androidx.compose.material.icons.outlined.FolderSpecial
 import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
@@ -44,6 +45,7 @@ object NoopIcons {
   val RotateCCW = Icons.Outlined.Rotate90DegreesCcw
   val Save = Icons.Outlined.Save
   val Delete = Icons.Outlined.Delete
+  val DeleteForever = Icons.Outlined.DeleteForever
   val Cancel = Icons.Outlined.Cancel
   val RotateCW = Icons.Outlined.Rotate90DegreesCw
   val HangUp = Icons.Outlined.Checkroom

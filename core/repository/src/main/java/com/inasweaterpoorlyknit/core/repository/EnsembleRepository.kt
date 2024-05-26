@@ -34,4 +34,5 @@ class EnsembleRepository(
     val ensembleArticles = Array(articleIds.size){ EnsembleArticleEntity(ensembleId, articleIds[it]) }
     ensembleDao.insertArticleEnsemble(*ensembleArticles)
   }
+  fun deleteEnsemble(ensembleId: String) = ensembleDao.deleteEnsemble(ensembleId)
 }

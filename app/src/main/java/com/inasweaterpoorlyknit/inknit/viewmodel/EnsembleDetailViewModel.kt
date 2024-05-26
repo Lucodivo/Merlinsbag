@@ -3,6 +3,8 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
+import com.inasweaterpoorlyknit.core.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import dagger.assisted.Assisted
@@ -25,22 +27,16 @@ data class ThumbnailUiState(
 @HiltViewModel(assistedFactory = EnsembleDetailViewModel.EnsembleDetailViewModelFactory::class)
 class EnsembleDetailViewModel @AssistedInject constructor(
   @Assisted private val ensembleId: String,
-  private val ensemblesRepository: com.inasweaterpoorlyknit.core.repository.EnsembleRepository,
-  private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
+  private val ensemblesRepository: EnsembleRepository,
+  private val articleRepository: ArticleRepository,
 ): ViewModel() {
   private lateinit var ensemble: Ensemble
   private lateinit var ensembleArticles: LazyArticleThumbnails
   private lateinit var addArticles: LazyArticleThumbnails
   private lateinit var ensembleArticleIds: Set<String>
 
-  fun onTitleChanged(newTitle: String) {
-    viewModelScope.launch(Dispatchers.IO) {
-      ensemblesRepository.updateEnsemble(
-        ensemble.copy(
-          title = newTitle
-        )
-      )
-    }
+  fun onTitleChanged(newTitle: String) = viewModelScope.launch(Dispatchers.IO) {
+    ensemblesRepository.updateEnsemble(ensemble.copy(title = newTitle))
   }
 
   fun removeEnsembleArticles(articleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
@@ -49,6 +45,10 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   fun addEnsembleArticles(addArticleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
     ensemblesRepository.addEnsembleArticles(ensemble.id, addArticleIndices.map { addArticles.getArticleId(it) })
+  }
+
+  fun deleteEnsemble() = viewModelScope.launch(Dispatchers.IO) {
+    ensemblesRepository.deleteEnsemble(ensemble.id)
   }
 
   @AssistedFactory
