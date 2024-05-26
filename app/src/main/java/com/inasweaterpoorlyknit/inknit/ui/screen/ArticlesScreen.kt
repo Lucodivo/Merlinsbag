@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.common.timestampFileName
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.component.IconData
@@ -73,7 +73,7 @@ fun ArticlesRoute(
     val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
     var showDeleteArticlesAlert by remember { mutableStateOf(false) }
     var showPermissionsAlert by remember { mutableStateOf(false) }
-    var editMode by remember { mutableStateOf(true) } // TODO: Revert to false on release, but useful to start as true for testing
+    var editMode by remember { mutableStateOf(false) }
     val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
 
     val packageName = LocalContext.current.packageName

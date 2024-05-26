@@ -3,7 +3,7 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings

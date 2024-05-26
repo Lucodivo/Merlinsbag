@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.repository.ArticleRepository
 import com.inasweaterpoorlyknit.inknit.image.SegmentedImage
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

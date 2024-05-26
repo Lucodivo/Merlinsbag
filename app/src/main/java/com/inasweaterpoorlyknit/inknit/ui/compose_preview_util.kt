@@ -27,12 +27,11 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.dao.ThumbnailPath
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithThumbnails
-import com.inasweaterpoorlyknit.core.database.dao.ImagePaths
-import com.inasweaterpoorlyknit.core.repository.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
+import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
+import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
+import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.inknit.R
 
 
@@ -91,7 +90,7 @@ val repeatedThumbnailResourceIdsAsStrings = arrayListOf(*allTestThumbnailResourc
 val lazyRepeatedThumbnailResourceIdsAsStrings =
   LazyArticleThumbnails("",
     articleThumbnailPaths = repeatedThumbnailResourceIdsAsStrings.mapIndexed { i, it ->
-      ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailPath(uri = it)))
+      ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
     }
   )
 val repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
@@ -100,7 +99,7 @@ val repeatedArticleWithImages = repeatedFullResourceIdsAsStrings.zip(repeatedThu
   ArticleWithImages(
     articleId = index.toString(),
     imagePaths = listOf(
-      ImagePaths(
+      ImageFilenames(
         uri = resourceId.first,
         uriThumb = resourceId.second,
       )

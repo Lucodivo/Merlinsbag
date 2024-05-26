@@ -5,8 +5,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithThumbnails
-import com.inasweaterpoorlyknit.core.database.dao.EnsembleArticleThumbnails
+import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity

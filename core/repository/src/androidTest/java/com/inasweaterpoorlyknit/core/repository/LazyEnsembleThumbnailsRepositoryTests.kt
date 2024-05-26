@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.common.createFakeUriString
 import com.inasweaterpoorlyknit.core.database.InKnitDatabase
-import com.inasweaterpoorlyknit.core.database.dao.EnsembleArticleThumbnails
+import com.inasweaterpoorlyknit.core.repository.model.LazyEnsembleThumbnails
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -19,7 +19,7 @@ import java.io.IOException
 // These tests are for baseline sanity of the database.
 // If these aren't passing, something must be  wrong with the database as a whole.
 @RunWith(AndroidJUnit4::class)
-class EnsembleRepositoryTests {
+class LazyEnsembleThumbnailsRepositoryTests {
   private lateinit var articleRepository: ArticleRepository
   private lateinit var ensembleRepository: EnsembleRepository
   private lateinit var database: InKnitDatabase
@@ -65,8 +65,8 @@ class EnsembleRepositoryTests {
     for (ensembleSize in ensembleSizes) {
       ensembleRepository.insertEnsemble("ensemble$ensembleSize", articleIds.slice(0..<ensembleSize))
     }
-    var ensembles: List<Ensemble>
-    runBlocking { ensembles = ensembleRepository.getAllEnsembleArticleImages().first() }
+    var ensembles: List<LazyEnsembleThumbnails>
+    runBlocking { ensembles = ensembleRepository.getAllEnsembleArticleThumbnails().first() }
 
     // assert
     assertEquals(ensembleSizes.size, ensembles.size)

@@ -3,10 +3,10 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
-import com.inasweaterpoorlyknit.core.repository.Ensemble
 import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
-import com.inasweaterpoorlyknit.core.repository.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.repository.model.LazyEnsembleThumbnails
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +24,7 @@ data class ArticleThumbnail(
 )
 
 data class EnsemblesUiState(
-  val ensembles: List<Ensemble>,
+  val ensembles: List<LazyEnsembleThumbnails>,
   val showAddEnsembleDialog: Boolean,
   val articleImages: LazyUriStrings,
 )
@@ -44,7 +44,7 @@ class EnsemblesViewModel @Inject constructor(
 
   val ensemblesUiState: StateFlow<EnsemblesUiState> =
     combine(
-      ensemblesRepository.getAllEnsembleArticleImages(),
+      ensemblesRepository.getAllEnsembleArticleThumbnails(),
       showAddEnsembleDialog,
       articleRepository.getAllArticlesWithThumbnails().onEach { articleImages = it },
     ) { ensembles, showDialog, articleImages ->
@@ -68,12 +68,14 @@ class EnsemblesViewModel @Inject constructor(
   fun onClickCloseAddEnsembleDialog() = closeDialog()
   fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
     closeDialog()
-    val articleIds = saveEnsembleData.articleIndices.map{ articleImages.getArticleId(it) }
-    viewModelScope.launch(Dispatchers.IO) {
-      ensemblesRepository.insertEnsemble(
-        saveEnsembleData.title,
-        articleIds,
-      )
+    if(saveEnsembleData.title.isNotEmpty() || saveEnsembleData.articleIndices.isNotEmpty()) {
+      val articleIds = saveEnsembleData.articleIndices.map{ articleImages.getArticleId(it) }
+      viewModelScope.launch(Dispatchers.IO) {
+        ensemblesRepository.insertEnsemble(
+          saveEnsembleData.title,
+          articleIds,
+        )
+      }
     }
   }
 

@@ -2,9 +2,9 @@ package com.inasweaterpoorlyknit.inknit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
-import com.inasweaterpoorlyknit.core.repository.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.database.model.Ensemble
+import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -28,7 +28,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   private val ensemblesRepository: com.inasweaterpoorlyknit.core.repository.EnsembleRepository,
   private val articleRepository: com.inasweaterpoorlyknit.core.repository.ArticleRepository,
 ): ViewModel() {
-  private lateinit var ensemble: EnsembleEntity
+  private lateinit var ensemble: Ensemble
   private lateinit var ensembleArticles: LazyArticleThumbnails
   private lateinit var addArticles: LazyArticleThumbnails
   private lateinit var ensembleArticleIds: Set<String>
@@ -66,7 +66,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
     )
 
   val ensembleUiState = combine(
-    ensemblesRepository.getEnsembleArticleImages(ensembleId).onEach{ articlesWithImages ->
+    ensemblesRepository.getEnsembleArticleThumbnails(ensembleId).onEach{ articlesWithImages ->
       ensembleArticles = articlesWithImages
       ensembleArticleIds = ensembleArticles.articleIds().toSet()
     },

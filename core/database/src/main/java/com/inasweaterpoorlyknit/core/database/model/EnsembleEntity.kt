@@ -36,6 +36,6 @@ data class EnsembleEntity(
   ]
 )
 data class EnsembleArticleEntity(
-  @ColumnInfo(name = "article_id", index = true) val articleId: String = UUID.randomUUID().toString(),
   @ColumnInfo(name = "ensemble_id", index = true) val ensembleId: String = UUID.randomUUID().toString(),
+  @ColumnInfo(name = "article_id", index = true) val articleId: String = UUID.randomUUID().toString(),
 )

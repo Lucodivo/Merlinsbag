@@ -4,11 +4,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,11 +34,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithThumbnails
-import com.inasweaterpoorlyknit.core.database.dao.ThumbnailPath
-import com.inasweaterpoorlyknit.core.repository.Ensemble
-import com.inasweaterpoorlyknit.core.repository.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
+import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.repository.model.LazyEnsembleThumbnails
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -51,7 +53,6 @@ import com.inasweaterpoorlyknit.inknit.ui.lazyRepeatedThumbnailResourceIdsAsStri
 import com.inasweaterpoorlyknit.inknit.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.inknit.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.inknit.viewmodel.ArticleThumbnail
 import com.inasweaterpoorlyknit.inknit.viewmodel.EnsemblesViewModel
 import com.inasweaterpoorlyknit.inknit.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.inknit.viewmodel.SaveEnsembleData
@@ -81,45 +82,52 @@ fun EnsemblesRoute(
 
 @Composable
 fun EnsemblesRow(
-    ensemble: Ensemble,
+    ensemble: LazyEnsembleThumbnails,
     modifier: Modifier = Modifier,
 ){
-    val thumbnailPadding = 10.dp
+    val thumbnailsPadding = 10.dp
     val maxThumbnailSize = 80.dp
+    val titleVerticalPadding = 5.dp
     val overlapPercentage = 0.4f
-    Card(
-        modifier = modifier,
-/*
-        colors = CardColors(
-            containerColor = MaterialTheme.colorScheme.onSurface,
-            contentColor = MaterialTheme.colorScheme.surface,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurface,,
-            disabledContentColor = MaterialTheme.colorScheme.surface,
-        )
-*/
-    ){
-        HorizontalOverlappingLayout(
-            modifier = Modifier.padding(horizontal = thumbnailPadding),
-            overlapPercentage = overlapPercentage,
-        ) {
-            repeat(ensemble.thumbnails.size) { index ->
-                NoopImage(
-                    uriString = ensemble.thumbnails.getUriString(index),
-                    contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-                    modifier = Modifier
-                        .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
-                        .padding(vertical = thumbnailPadding)
+    val minRowHeight = thumbnailsPadding * 4
+    Card(modifier = modifier){
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.heightIn(min = minRowHeight),
+        ){
+            HorizontalOverlappingLayout(
+                modifier = Modifier.padding(horizontal = thumbnailsPadding),
+                overlapPercentage = overlapPercentage,
+            ) {
+                repeat(ensemble.thumbnails.size) { index ->
+                    NoopImage(
+                        uriString = ensemble.thumbnails.getUriString(index),
+                        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+                        modifier = Modifier
+                            .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
+                            .padding(vertical = thumbnailsPadding)
+                    )
+                }
+            }
+            if(ensemble.title.isNotEmpty()) {
+                Text(
+                    text = ensemble.title,
+                    modifier = Modifier.padding(
+                        top = 0.dp,
+                        end = thumbnailsPadding,
+                        start = thumbnailsPadding,
+                        bottom = if(ensemble.thumbnails.isEmpty()) 0.dp else titleVerticalPadding
+                    )
                 )
             }
         }
-        if(ensemble.title.isNotEmpty()) Text(text = ensemble.title,
-            modifier = Modifier.padding(top = 0.dp, end = thumbnailPadding, start = thumbnailPadding, bottom = 5.dp))
     }
 }
 
 @Composable
 fun EnsemblesScreen(
-    ensembles: List<Ensemble>,
+    ensembles: List<LazyEnsembleThumbnails>,
     showAddEnsembleDialog: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
     onClickEnsemble: (id: String) -> Unit,
@@ -251,30 +259,32 @@ fun AddEnsembleDialog(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun __PreviewUtilEnsembleScreen(
-    ensembles: List<Ensemble>,
+    ensembles: List<LazyEnsembleThumbnails>,
     showAddEnsembleForm: Boolean,
 ) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleDialog = showAddEnsembleForm, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
     onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {})
 
-val previewEnsembles: List<Ensemble> =
+val previewEnsembles: List<LazyEnsembleThumbnails> =
     repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
         listOf(
             thumbnails.slice(4..4),
             thumbnails.slice(0..5),
             thumbnails.slice(6..16),
             thumbnails.slice(1..12),
+            emptyList(),
+            emptyList(),
             thumbnails.slice(3..5),
             thumbnails.slice(5..11),
             thumbnails.slice(7..11),
             thumbnails.slice(12..17),
         ).mapIndexed { index, thumbnailUriStrings ->
-            Ensemble(
+            LazyEnsembleThumbnails(
                 id = index.toString(),
-                title = if(index == 3) "" else "Ensemble ${index + 1}",
+                title = if(index == 3 || index == 4) "" else "Ensemble ${index + 1}",
                 thumbnails =
                 LazyArticleThumbnails("",
                     articleThumbnailPaths = thumbnailUriStrings.mapIndexed { i, it ->
-                        ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailPath(uri = it)))
+                        ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
                     }
                 )
             )

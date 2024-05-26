@@ -15,10 +15,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.database.dao.ThumbnailPath
-import com.inasweaterpoorlyknit.core.database.dao.ArticleWithThumbnails
-import com.inasweaterpoorlyknit.core.repository.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.repository.LazyUriStrings
+import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
+import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import com.inasweaterpoorlyknit.inknit.R
 import com.inasweaterpoorlyknit.inknit.common.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.inknit.ui.COMPOSE_ID
@@ -87,10 +87,11 @@ fun PreviewArticleDetailScreen(){
   val articlesWithImages =
     LazyArticleThumbnails(
       directory = "",
-      articleThumbnailPaths = listOf(ArticleWithThumbnails(
+      articleThumbnailPaths = listOf(
+        ArticleWithThumbnails(
         articleId = COMPOSE_ID,
         thumbnailPaths = listOf(
-          ThumbnailPath(
+          ThumbnailFilename(
             uri = R.raw.test_full_1.toString(),
           ),
         ),

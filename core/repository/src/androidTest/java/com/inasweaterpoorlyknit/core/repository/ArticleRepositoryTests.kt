@@ -7,6 +7,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.common.createFakeUriStrings
 import com.inasweaterpoorlyknit.core.database.InKnitDatabase
+import com.inasweaterpoorlyknit.core.repository.model.LazyArticleFullImages
+import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
