@@ -14,8 +14,9 @@
     - /sdcard/pictures/{app name}
 
 #### Change Adaptive App Icon
-- load monochrome icon with Image Asset tool using name "ic_launcher_monochrome"
-- load color icon with Image Asset tool using name "ic_launcher_color"
+- Open "Resource Manager"
+- load monochrome icon with "Image Asset" tool using name "ic_launcher_monochrome"
+- load color icon with "Image Asset" tool using name "ic_launcher_color"
 - Ensure that res/mipmap-anydpi-v26/ic_launcher & res/mipmap-anydpi-v26/ic_launcher_round.xml contain the following:
 ```
 <?xml version="1.0" encoding="utf-8"?>
