@@ -13,6 +13,19 @@
     - /sdcard/Android/data/{app name}
     - /sdcard/pictures/{app name}
 
+#### Change Adaptive App Icon
+- load monochrome icon with Image Asset tool using name "ic_launcher_monochrome"
+- load color icon with Image Asset tool using name "ic_launcher_color"
+- Ensure that res/mipmap-anydpi-v26/ic_launcher & res/mipmap-anydpi-v26/ic_launcher_round.xml contain the following:
+```
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_color_background"/>
+    <foreground android:drawable="@drawable/ic_launcher_color_foreground"/>
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome_foreground"/>
+</adaptive-icon>
+```
+
 ## IDE Errors
 #### Error running 'Android Java Debugger (pid: 28478, debug port: 53060)' Unable to open debugger port (localhost:53060): java.net.SocketException "Connection reset"
 - Restart Android Studio (killing adb server did not work)
