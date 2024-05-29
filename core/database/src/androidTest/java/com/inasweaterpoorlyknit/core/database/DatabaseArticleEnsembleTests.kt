@@ -27,12 +27,12 @@ import java.io.IOException
 class DatabaseArticleEnsembleTests {
   private lateinit var ensembleDao: EnsembleDao
   private lateinit var articleDao: ArticleDao
-  private lateinit var db: InKnitDatabase
+  private lateinit var db: NoopDatabase
 
   @Before
   fun createDb() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    db = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
+    db = Room.inMemoryDatabaseBuilder(context, NoopDatabase::class.java)
       .allowMainThreadQueries()
       .build()
     ensembleDao = db.EnsembleDao()

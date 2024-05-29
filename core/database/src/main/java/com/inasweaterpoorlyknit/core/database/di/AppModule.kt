@@ -2,7 +2,7 @@ package com.inasweaterpoorlyknit.core.database.di
 
 import android.content.Context
 import androidx.room.Room
-import com.inasweaterpoorlyknit.core.database.InKnitDatabase
+import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import dagger.Module
@@ -17,20 +17,20 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    internal fun providesAppDatabase(@ApplicationContext context: Context): InKnitDatabase {
+    internal fun providesAppDatabase(@ApplicationContext context: Context): NoopDatabase {
         return Room.databaseBuilder(
             context,
-            InKnitDatabase::class.java,
-            "inknit-database"
+            NoopDatabase::class.java,
+            "noop-database"
         ).build()
     }
 
     /* DAOs */
     @Provides
     @Singleton
-    fun providesArticleWithImagesDao(appDatabase: InKnitDatabase): ArticleDao = appDatabase.ArticleDao()
+    fun providesArticleWithImagesDao(appDatabase: NoopDatabase): ArticleDao = appDatabase.ArticleDao()
 
     @Provides
     @Singleton
-    fun providesEnsembleDao(appDatabase: InKnitDatabase): EnsembleDao = appDatabase.EnsembleDao()
+    fun providesEnsembleDao(appDatabase: NoopDatabase): EnsembleDao = appDatabase.EnsembleDao()
 }

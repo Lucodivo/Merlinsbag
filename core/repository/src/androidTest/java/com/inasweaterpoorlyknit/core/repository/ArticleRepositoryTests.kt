@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.common.createFakeUriStrings
-import com.inasweaterpoorlyknit.core.database.InKnitDatabase
+import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.repository.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import kotlinx.coroutines.flow.first
@@ -24,12 +24,12 @@ import java.io.IOException
 class ArticleRepositoryTests {
     private lateinit var context: Context
     private lateinit var articleRepository: ArticleRepository
-    private lateinit var database: InKnitDatabase
+    private lateinit var database: NoopDatabase
 
     @Before
     fun createDb() {
         context = ApplicationProvider.getApplicationContext()
-        database = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
+        database = Room.inMemoryDatabaseBuilder(context, NoopDatabase::class.java)
             .allowMainThreadQueries()
             .build()
         articleRepository = ArticleRepository(

@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.common.createFakeUriString
-import com.inasweaterpoorlyknit.core.database.InKnitDatabase
+import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.repository.model.LazyEnsembleThumbnails
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -22,12 +22,12 @@ import java.io.IOException
 class LazyEnsembleThumbnailsRepositoryTests {
   private lateinit var articleRepository: ArticleRepository
   private lateinit var ensembleRepository: EnsembleRepository
-  private lateinit var database: InKnitDatabase
+  private lateinit var database: NoopDatabase
 
   @Before
   fun createDb() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    database = Room.inMemoryDatabaseBuilder(context, InKnitDatabase::class.java)
+    database = Room.inMemoryDatabaseBuilder(context, NoopDatabase::class.java)
       .allowMainThreadQueries()
       .build()
     articleRepository = ArticleRepository(

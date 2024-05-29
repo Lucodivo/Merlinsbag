@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.inasweaterpoorlyknit.inknit"
+    namespace = "com.inasweaterpoorlyknit.merlinsbag"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.inasweaterpoorlyknit.inknit"
+        applicationId = "com.inasweaterpoorlyknit.merlinsbag"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -41,9 +41,6 @@ android {
         compose = true
         viewBinding = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.7"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -57,7 +54,6 @@ dependencies {
     implementation(projects.core.database)
     implementation(projects.core.repository)
     implementation(projects.core.common)
-
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
