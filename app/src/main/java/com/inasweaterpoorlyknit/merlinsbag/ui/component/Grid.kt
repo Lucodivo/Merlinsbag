@@ -60,19 +60,20 @@ fun SelectableArticleThumbnailGrid(
     // typical dp width of a smart phone is 320dp-480dp
     columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
     content = {
-      val gridItemModifier = Modifier
-        .padding(gridItemPadding)
-        .fillMaxSize()
       items(count = thumbnailUris.size){ thumbnailGridItemIndex ->
-        Box(contentAlignment = Alignment.Center) {
+        Box(
+          contentAlignment = Alignment.Center,
+          modifier = Modifier
+            .clickable { onSelected(thumbnailGridItemIndex) }
+            .padding(gridItemPadding)
+            .fillMaxSize(),
+        ) {
           val uriString = thumbnailUris.getUriString(thumbnailGridItemIndex)
           SelectableNoopImage(
             uriString = uriString,
             contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
             selected = selectedThumbnails.contains(thumbnailGridItemIndex),
             selectable = selectable,
-            modifier = gridItemModifier.clickable { onSelected(thumbnailGridItemIndex) },
-
           )
         }
       }
