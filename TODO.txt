@@ -22,6 +22,7 @@ Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
     - Use custom layout for AddArticleControls
+    - stop the article from overlapping with the buttons
 Ensembles:
     - Add Ensemble Dialog
         - Tags?

@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
+import com.inasweaterpoorlyknit.merlinsbag.common.Event
 import com.inasweaterpoorlyknit.merlinsbag.image.SegmentedImage
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -18,19 +19,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
-
-// Helps avoid events from being handled multiple times after reconfiguration
-open class Event<out T>(private val content: T?) {
-  var hasBeenHandled = false
-    private set
-
-  fun getContentIfNotHandled(): T? {
-    return if (!hasBeenHandled) {
-      hasBeenHandled = true
-      content
-    } else null
-  }
-}
 
 @HiltViewModel(assistedFactory = AddArticleViewModel.AddArticleViewModelFactory::class)
 class AddArticleViewModel @AssistedInject constructor(

@@ -95,13 +95,17 @@ fun ArticlesRoute(
         } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
     }
 
-    var takePictureUri by remember { mutableStateOf<Uri?>(null) }
     val _takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
-            if (success) navController.navigateToAddArticle(listOf( navigationSafeUriStringEncode(takePictureUri!!) ))
-            else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+            if (success) {
+                val cameraPictureUri = articlesViewModel.takePictureUri
+                if(cameraPictureUri != null) navController.navigateToAddArticle(listOf(navigationSafeUriStringEncode(cameraPictureUri)))
+                else Log.i("GetContent ActivityResultContract", "Camera picture URI was null")
+            }
+            else Log.i("GetContent ActivityResultContract", "Picture was not returned from camera")
         })
+    articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { _takePictureLauncher.launch(it) }
 
 
     val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
@@ -119,14 +123,7 @@ fun ArticlesRoute(
                 }
             }
             if (permissionsGranted) {
-                val contentResolver = context.contentResolver
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, "${timestampFileName()}.jpg")
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-                }
-                takePictureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                _takePictureLauncher.launch(takePictureUri!!)
+                articlesViewModel.onTakePicture(context)
             } else {
                 if (userCheckedNeverAskAgain) {
                     showPermissionsAlert = true

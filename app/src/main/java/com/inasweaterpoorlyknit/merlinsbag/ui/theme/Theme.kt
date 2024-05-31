@@ -21,9 +21,11 @@ fun NoopTheme(
   val context = LocalContext.current
   val colorScheme = when {
       // TODO: Uncomment for release? Not working properly on local device. Always the same blue despite system color palette.
+/*
       Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
           if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
       }
+*/
       darkTheme -> darkScheme
       else -> lightScheme
   }
