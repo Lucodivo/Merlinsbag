@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.navigationSafeArgs)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -25,6 +27,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -80,6 +85,11 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // Firebase (crashlytics)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.google.firebase.crashlytics.ktx)
+    implementation(libs.google.firebase.analytics.ktx)
 
     // Coil
     implementation(libs.coil)
