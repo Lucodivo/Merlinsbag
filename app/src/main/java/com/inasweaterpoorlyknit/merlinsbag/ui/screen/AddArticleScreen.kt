@@ -30,7 +30,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.DevicePreviews
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopRotatableImage
 import com.inasweaterpoorlyknit.merlinsbag.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.merlinsbag.ui.previewAssetBitmap
-import com.inasweaterpoorlyknit.merlinsbag.ui.squareishArticle
+import com.inasweaterpoorlyknit.merlinsbag.ui.composePreviewArticleAsset
 import com.inasweaterpoorlyknit.merlinsbag.ui.state.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
@@ -204,7 +204,7 @@ fun PreviewAddArticleScreen(){
     AddArticleScreen(
       windowSizeClass = currentWindowAdaptiveInfo(),
       processing = false,
-      processedImage = previewAssetBitmap(filename = squareishArticle),
+      processedImage = previewAssetBitmap(filename = composePreviewArticleAsset),
       imageRotation = 270.0f,
       onNarrowFocusClick = {}, onBroadenFocusClick = {}, onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {},
     )

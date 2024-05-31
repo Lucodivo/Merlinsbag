@@ -35,10 +35,9 @@ import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.merlinsbag.R
 
 
-val longArticle = "long_compose_preview.webp"
-val squareishArticle = "add_article_compose_preview.webp"
-val COMPOSE_PREVIEW_CONTENT_DESCRIPTION = "compose preview content description"
-val COMPOSE_ID = "compose preview id"
+const val composePreviewArticleAsset = "compose_preview_article_full.webp"
+const val COMPOSE_PREVIEW_CONTENT_DESCRIPTION = "compose preview content description"
+const val COMPOSE_ID = "compose preview id"
 
 @Composable
 fun previewAssetBitmap(filename: String): Bitmap = BitmapFactory.decodeStream(LocalContext.current.assets.open(filename))

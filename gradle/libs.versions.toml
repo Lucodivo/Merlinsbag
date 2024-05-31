@@ -3,9 +3,9 @@ agp = "8.4.1"
 coil = "2.6.0"
 coreSplashscreen = "1.0.1"
 coreTesting = "2.2.0"
+firebaseBom = "33.1.0"
 hilt = "2.51"
 kotlinxCoroutinesTest = "1.8.0"
-camerax = "1.4.0-beta01"
 datastore = "1.1.1"
 kotlin = "2.0.0"
 ksp = "2.0.0-1.0.21"
@@ -14,34 +14,30 @@ junit = "4.13.2"
 junitVersion = "1.1.5"
 androidxHiltNavigationCompose = "1.2.0"
 espressoCore = "3.5.1"
-lifecycle = "2.8.0"
+lifecycle = "2.8.1"
 navigationFragmentKtx = "2.7.7"
-noopmathkt = "v0.2.4-alpha"
 playServicesMlkitSubjectSegmentation = "16.0.0-beta1"
-guava-android = "33.0.0-android"
 androidxComposeRuntimeTracing = "1.0.0-beta01"
 protobufKotlinLite = "3.25.2"
 compose = "1.6.7"
 composeActivity = "1.9.0"
 composeMaterial3 = "1.2.1"
 room = "2.6.1"
-androidxComposeMaterial3Adaptive = "1.0.0-beta01"
+androidxComposeMaterial3Adaptive = "1.0.0-beta02"
 androidxTracing = "1.3.0-alpha02"
 composeMaterial = "1.3.1"
 uiTextGoogleFonts = "1.6.7"
 
 [libraries]
+
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
-androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
-androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
-androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "camerax" }
-androidx-camera-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "camerax" }
-androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
-androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobufKotlinLite" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
@@ -56,14 +52,12 @@ androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:na
 androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-androidx-room-guava = { module = "androidx.room:room-guava", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
@@ -78,12 +72,9 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "compose"}
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "composeMaterial3" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
-noopmathkt = { module = "com.github.lucodivo:NoopMathKt", version.ref = "noopmathkt" }
 play-services-mlkit-subject-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "playServicesMlkitSubjectSegmentation" }
-guava-android = {module = "com.google.guava:guava", version.ref = "guava-android"}
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "composeActivity" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 androidx-tracing-ktx = { group = "androidx.tracing", name = "tracing-ktx", version.ref = "androidxTracing" }

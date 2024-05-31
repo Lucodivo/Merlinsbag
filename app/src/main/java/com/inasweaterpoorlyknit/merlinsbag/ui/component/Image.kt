@@ -33,7 +33,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.degToRad
 import com.inasweaterpoorlyknit.merlinsbag.ui.isComposePreview
 import com.inasweaterpoorlyknit.merlinsbag.ui.pixelsToDp
 import com.inasweaterpoorlyknit.merlinsbag.ui.previewAssetBitmap
-import com.inasweaterpoorlyknit.merlinsbag.ui.squareishArticle
+import com.inasweaterpoorlyknit.merlinsbag.ui.composePreviewArticleAsset
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import kotlin.math.abs
@@ -163,7 +163,7 @@ fun PreviewNoopImage() {
 fun PreviewNoopRotateableImage180(){
   NoopTheme{
     NoopRotatableImage(
-      bitmap = previewAssetBitmap(filename = squareishArticle),
+      bitmap = previewAssetBitmap(filename = composePreviewArticleAsset),
       ccwRotaitonAngle = 180.0f
     )
   }
@@ -174,7 +174,7 @@ fun PreviewNoopRotateableImage180(){
 fun PreviewNoopRotateableImage90(){
   NoopTheme{
     NoopRotatableImage(
-      bitmap = previewAssetBitmap(filename = squareishArticle),
+      bitmap = previewAssetBitmap(filename = composePreviewArticleAsset),
       ccwRotaitonAngle = 90.0f
     )
   }
@@ -185,7 +185,7 @@ fun PreviewNoopRotateableImage90(){
 fun PreviewNoopRotateableImage45(){
   NoopTheme{
     NoopRotatableImage(
-      bitmap = previewAssetBitmap(filename = squareishArticle),
+      bitmap = previewAssetBitmap(filename = composePreviewArticleAsset),
       ccwRotaitonAngle = 45.0f
     )
   }
