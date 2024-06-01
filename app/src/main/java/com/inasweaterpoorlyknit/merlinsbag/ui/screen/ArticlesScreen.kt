@@ -266,52 +266,52 @@ fun ArticlesScreen(
             thumbnailUris = thumbnailUris,
             selectedThumbnails = selectedThumbnails,
         )
-        NoopExpandingFloatingActionButton(
-            expanded = editMode,
-            collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
-            expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-            expandedButtons =
-            if (selectedThumbnails.isNotEmpty()) {
-                listOf(
-                    TextIconButtonData(
-                        text = "",
-                        icon = IconData(
-                            icon = NoopIcons.Cancel,
-                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                        ),
-                        onClick = onClickSelectionCancel
-                    ),
-                    TextIconButtonData(
-                        text = "",
-                        icon = IconData(
-                            icon = NoopIcons.Delete,
-                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                        ),
-                        onClick = onClickDelete
-                    ),
-                )
-            } else {
-                listOf(
-                    TextIconButtonData(
-                        text = "",
-                        icon = IconData(
-                            icon = NoopIcons.AddPhotoAlbum,
-                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                        ),
-                        onClick = onClickAddPhotoAlbum
-                    ),
-                    TextIconButtonData(
-                        text = "",
-                        icon = IconData(
-                            icon = NoopIcons.AddPhotoCamera,
-                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-                        ),
-                        onClick = onClickAddPhotoCamera
-                    ),
-                )
-            },
-            onClickExpandCollapse = onClickEdit,
-        )
+      NoopExpandingFloatingActionButton(
+        expanded = editMode,
+        collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
+        expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+        expandedButtons =
+        if (selectedThumbnails.isNotEmpty()) {
+          listOf(
+            TextIconButtonData(
+              text = "",
+              icon = IconData(
+                icon = NoopIcons.Cancel,
+                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              ),
+              onClick = onClickSelectionCancel
+            ),
+            TextIconButtonData(
+              text = "",
+              icon = IconData(
+                icon = NoopIcons.Delete,
+                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              ),
+              onClick = onClickDelete
+            ),
+          )
+        } else {
+          listOf(
+            TextIconButtonData(
+              text = "",
+              icon = IconData(
+                icon = NoopIcons.AddPhotoAlbum,
+                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              ),
+              onClick = onClickAddPhotoAlbum
+            ),
+            TextIconButtonData(
+              text = "",
+              icon = IconData(
+                icon = NoopIcons.AddPhotoCamera,
+                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              ),
+              onClick = onClickAddPhotoCamera
+            ),
+          )
+        },
+        onClickExpandCollapse = onClickEdit,
+      )
     }
 }
 

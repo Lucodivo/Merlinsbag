@@ -13,6 +13,11 @@
     - /sdcard/Android/data/{app name}
     - /sdcard/pictures/{app name}
 
+#### Upload ML Kit NDK Debug Symbols (NOTE: There must be a more automatic way to do this.)
+- zip everything in the directory app/build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib into a single file
+- In Google Play Console, click the vertical "More" icon
+- Upload the zip as "native debug symbols (.zip)"
+
 #### Change Adaptive App Icon
 - Open "Resource Manager"
 - load monochrome icon with "Image Asset" tool using name "ic_launcher_monochrome"

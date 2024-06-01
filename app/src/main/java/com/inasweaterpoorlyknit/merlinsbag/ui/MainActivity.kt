@@ -3,6 +3,7 @@ package com.inasweaterpoorlyknit.merlinsbag.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
@@ -18,7 +19,8 @@ class MainActivity : ComponentActivity(){
     super.onCreate(savedInstanceState)
 
     setContent {
-      // TODO: Edge2Edge
+      // TODO: Properly handle edge to edge in app
+      //  https://developer.android.com/develop/ui/compose/layouts/insets
 /*
       val darkTheme = isSystemInDarkTheme()
       DisposableEffect(darkTheme) {
@@ -35,6 +37,7 @@ class MainActivity : ComponentActivity(){
         onDispose {}
       }
 */
+      hideSystemUI()
 
       val appState = rememberNoopAppState(
         windowSizeClass = calculateWindowSizeClass(this)
