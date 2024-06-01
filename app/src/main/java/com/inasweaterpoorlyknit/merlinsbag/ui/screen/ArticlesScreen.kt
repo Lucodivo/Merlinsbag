@@ -101,7 +101,7 @@ fun ArticlesRoute(
             if (success) {
                 val cameraPictureUri = articlesViewModel.takePictureUri
                 if(cameraPictureUri != null) navController.navigateToAddArticle(listOf(navigationSafeUriStringEncode(cameraPictureUri)))
-                else Log.i("GetContent ActivityResultContract", "Camera picture URI was null")
+                else Log.e("GetContent ActivityResultContract", "Camera picture URI was null")
             }
             else Log.i("GetContent ActivityResultContract", "Picture was not returned from camera")
         })
