@@ -5,13 +5,9 @@ Database:
             - https://developer.android.com/training/data-storage/room/defining-data#fts
             - Potentially create separate tables specifically for text search, as demonstrated here:
                 https://github.com/android/nowinandroid/tree/afad1b9ac7e3d5efc798e786bd6548229a55735c/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/model
-    - Indices for commonly queried fields
-        - https://developer.android.com/training/data-storage/room/defining-data#column-indexing
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
-    - ImageEntity over ArticleImageEntity?
 Repository:
-    - Don't automatically append image directory to avoid unnecessary work. Append when image is actually used.
     - ArticleRepository and EnsembleRepository both return article images. Probably fine but separation may be desired.
         - ArticleRepository could be a member of EnsembleRepository? Delegate by?
 Camera:
@@ -21,36 +17,25 @@ Settings Screen:
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
-    - Use custom layout for AddArticleControls
     - stop the article from overlapping with the buttons
 Ensembles:
-    - Add Ensemble Dialog
-        - Tags?
     - Search
     - Sort
-Ensemble Detail:
-    - Edit articles
-        - add / remove
-    - Edit title
-    - Article configuration
-        - Collage / Build outfit
-    - Delete ensemble
-    - edit article tags
 Article Detail:
     - Export article image
     - delete article
     - edit article title
-    - edit article tags
 Features:
     - Export data
         - Individual items
         - All items
+    - Collage
+    - Tags
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - Navigation Drawer / Navigation Rail
 Articles:
     - thumbnails with random "shimmer"/"rotation"
-    - delete articles
 Accessibility:
     - Icon content description
         - Research what kind of descriptions are desired for accessibility services? Describe the form only or function as well?
@@ -58,24 +43,14 @@ Accessibility:
 App-wide UI:
     - EdgeToEdge
     - Explicit to Screen animations
-Splash screen
-    - androidx.core:core-splashscreen
-        installSplashScreen()
-        splashScreen.setKeepOnScreenCondition { when (uiState) { Loading -> true is Success -> false } }
 Build time:
     - Look into removing AsyncImage since images are local
 Tooling:
     - UI Catalog
-Performance:
-    - Bottom bar navigation
-        - bug: transition to articles from bottom bar hiccups a little
-    - Logs report skipping frames:
-        - Startup in articles screen up to 120 frames total!
 Bugs:
-    - OOM crash when processing an image in AddArticleScreen
+    - Out of Memory (OOM) crash when processing an image in AddArticleScreen
         - stems from java.nio.HeapFloatBuffer when called in com.google.mlkit.vision.segmentation.subject.internal
         - Seen when running application on an Motorola Z Play, 3GB RAM, API 26
         - settings android:largeHeap="true" in manifest has slightly alleviated the problem
         - could it be linked to the memory size of thumbnails on the articles screen?
-    - DeleteEnsembleAlertDialog sticks around too long after positive button is pressed.
     - Samsung's One UI doesn't seem to respect dynamic theming. Work around? UI is a blue-ish color for these devices.

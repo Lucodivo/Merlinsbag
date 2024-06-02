@@ -1,7 +1,6 @@
 [versions]
 agp = "8.4.1"
 coil = "2.6.0"
-coreSplashscreen = "1.0.1"
 coreTesting = "2.2.0"
 firebaseBom = "33.1.0"
 firebaseBomVersion = "33.0.0"
@@ -34,7 +33,6 @@ firebaseCrashlytics = "3.0.1"
 [libraries]
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }

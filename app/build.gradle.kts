@@ -65,7 +65,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.tracing.ktx)
-    implementation(libs.androidx.core.splashscreen)
 
     // TODO: Move ML Kit code to their own module?
     implementation(libs.play.services.mlkit.subject.segmentation)

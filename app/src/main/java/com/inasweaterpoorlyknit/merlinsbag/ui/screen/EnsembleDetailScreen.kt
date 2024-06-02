@@ -138,6 +138,7 @@ fun EnsembleDetailRoute(
     showDeleteEnsembleAlertDialog = showDeleteEnsembleDialog,
     onClickOutsideDeleteEnsembleDialog = { showDeleteEnsembleDialog = false },
     onClickPositiveDeleteEnsembleDialog = {
+      showDeleteEnsembleDialog = false
       ensembleDetailViewModel.deleteEnsemble()
       navController.popBackStack()
     },
