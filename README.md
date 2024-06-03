@@ -1,17 +1,19 @@
 # Merlinsbag
 
-<a href="https://play.google.com/apps/internaltest/4701048209300859521"><img alt="Download" src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/logo/merlin_logo_96x96_rounded.png"></a><br>
+<a href="https://play.google.com/apps/internaltest/4701048209300859521"><img alt="Download" src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/logo/merlinsbag_logo_96x96_rounded.png"></a><br>
 <a href="https://play.google.com/apps/internaltest/4701048209300859521"><img alt="Download" src="https://img.shields.io/badge/Google%20Play-%20?logo=googleplay&amp;color=grey"></a>
 
 Merlinsbag is an Android application for virtualizing & organizing a user's wardrobe and favorite items.
 
 ## Features
 
-### Adding Articles
-"Articles" refers to an item that a user has digitized, stemming from an "article of clothing".  
-Users can provide photos of the things they love and the app will utilize ML Kit's Subject Segmentation to provide a stencil. Due to imperfections in the model's output, the user can adjust the tightness of the stencil around the isolated subject. The user can also rotate the image by 90 or 180 degrees.
+### Add Article
+"Article" refers to an item that has been digitized, stemming from an "article of clothing".  
+Users can provide photos of the things they love and the app will utilize ML Kit's Subject Segmentation to provide a stencil.  
+Due to imperfections in the model's output, the user can adjust the tightness of the stencil around the isolated subject.  
+The user can also rotate the image by 90 or 180 degrees.  
 
-### Adding Ensembles
+### Add Ensemble
 
 "Ensembles" refers to a collection of articles.
 Users can create titled ensembles that contains any articles currently available in their catalog.

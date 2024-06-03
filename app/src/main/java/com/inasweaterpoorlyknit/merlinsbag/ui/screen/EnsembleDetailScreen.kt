@@ -405,8 +405,9 @@ fun AddArticlesDialog(
   }
 }
 
+//region COMPOSABLE PREVIEWS
 @Composable
-fun __PreviewEnsembleDetailScreen(
+fun PreviewUtilEnsembleDetailScreen(
   editingTitle: Boolean = false,
   editMode: Boolean = false,
   showAddArticlesDialog: Boolean = false,
@@ -428,96 +429,82 @@ fun __PreviewEnsembleDetailScreen(
   onClickPositiveDeleteEnsembleDialog = {}, onClickNegativeDeleteEnsembleDialog = {},
 )
 
-@Preview
 @Composable
-fun PreviewEnsembleDetailScreen() {
-  NoopTheme {
-    __PreviewEnsembleDetailScreen(editingTitle = false)
-  }
-}
-
-@Preview
-@Composable
-fun PreviewEnsembleDetailScreen_Editing() {
-  NoopTheme {
-    __PreviewEnsembleDetailScreen(
-      editMode = true,
-      editingTitle = true,
-      selectedArticleIndices = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
-    )
-  }
-}
-
-@Preview
-@Composable
-fun PreviewEnsembleDetailScreen_DeleteEnsembleAlertDialog() {
-  NoopTheme {
-    __PreviewEnsembleDetailScreen(
-      editMode = true,
-      showDeleteEnsembleAlertDialog = true,
-    )
-  }
-}
-
-@Preview
-@Composable
-fun PreviewEnsembleDetailScreen_AddArticlesDialog() {
-  NoopTheme {
-    __PreviewEnsembleDetailScreen(
-      editMode = false,
-      editingTitle = false,
-      showAddArticlesDialog = true,
-      selectedArticleIndices = repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet,
-    )
-  }
-}
-
-@Preview
-@Composable
-fun PreviewAddArticlesDialog() {
-  NoopTheme {
-    AddArticlesDialog(
-      visible = true,
-      articleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
-      selectedArticleIndices = repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet,
-      onSelectedArticle = {}, onClose = {}, onConfirm = {},
-      )
-  }
-}
-
-@Preview
-@Composable
-fun PreviewAddArticlesDialog_noAddArticles() {
-  NoopTheme {
-    AddArticlesDialog(
-      visible = true,
-      articleThumbnailUris = LazyUriStrings.Empty,
-      selectedArticleIndices = emptySet(),
-      onSelectedArticle = {}, onClose = {}, onConfirm = {},
-    )
-  }
-}
-
-@Composable
-fun _PreviewEnsembleDetailFloatingActionButtons(
+fun PreviewUtilEnsembleDetailFloatingActionButtons(
   editEnsemblesMode: Boolean,
   selectedArticleIndices: Set<Int> = emptySet(),
-){
-  NoopTheme {
-    EnsembleDetailFloatingActionButtons(
-      editEnsemblesMode = editEnsemblesMode,
-      selectedEditArticleIndices = selectedArticleIndices,
-      onClickEdit = {}, onClickAddArticles = {}, onClickCancelSelection = {}, onClickRemoveArticles = {}, onClickDeleteEnsemble = {})
-  }
+) = NoopTheme {
+  EnsembleDetailFloatingActionButtons(
+    editEnsemblesMode = editEnsemblesMode,
+    selectedEditArticleIndices = selectedArticleIndices,
+    onClickEdit = {}, onClickAddArticles = {}, onClickCancelSelection = {}, onClickRemoveArticles = {}, onClickDeleteEnsemble = {}
+  )
 }
-@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = _PreviewEnsembleDetailFloatingActionButtons(false)
-@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = _PreviewEnsembleDetailFloatingActionButtons(true)
-@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = _PreviewEnsembleDetailFloatingActionButtons(true, setOf(0))
 
 @Preview
 @Composable
-fun PreviewDeleteEnsembleAlertDialog(){
-  NoopTheme {
-    DeleteEnsembleAlertDialog(onClickOutside = {}, onClickNegative = {}, onClickPositive = {})
-  }
+fun PreviewEnsembleDetailScreen() = NoopTheme {
+  PreviewUtilEnsembleDetailScreen(editingTitle = false)
 }
+
+@Preview
+@Composable
+fun PreviewEnsembleDetailScreen_Editing() = NoopTheme {
+  PreviewUtilEnsembleDetailScreen(
+    editMode = true,
+    editingTitle = true,
+    selectedArticleIndices = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
+  )
+}
+
+@Preview
+@Composable
+fun PreviewEnsembleDetailScreen_DeleteEnsembleAlertDialog() = NoopTheme {
+  PreviewUtilEnsembleDetailScreen(
+    editMode = true,
+    showDeleteEnsembleAlertDialog = true,
+  )
+}
+
+@Preview
+@Composable
+fun PreviewEnsembleDetailScreen_AddArticlesDialog() = NoopTheme {
+  PreviewUtilEnsembleDetailScreen(
+    editMode = false,
+    editingTitle = false,
+    showAddArticlesDialog = true,
+    selectedArticleIndices = repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet,
+  )
+}
+
+@Preview
+@Composable
+fun PreviewAddArticlesDialog() = NoopTheme {
+  AddArticlesDialog(
+    visible = true,
+    articleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
+    selectedArticleIndices = repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet,
+    onSelectedArticle = {}, onClose = {}, onConfirm = {},
+  )
+}
+
+@Preview
+@Composable
+fun PreviewAddArticlesDialog_noAddArticles() = NoopTheme {
+  AddArticlesDialog(
+    visible = true,
+    articleThumbnailUris = LazyUriStrings.Empty,
+    selectedArticleIndices = emptySet(),
+    onSelectedArticle = {}, onClose = {}, onConfirm = {},
+  )
+}
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = PreviewUtilEnsembleDetailFloatingActionButtons(false)
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = PreviewUtilEnsembleDetailFloatingActionButtons(true)
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(true, setOf(0))
+
+@Preview
+@Composable
+fun PreviewDeleteEnsembleAlertDialog() = NoopTheme {
+  DeleteEnsembleAlertDialog(onClickOutside = {}, onClickNegative = {}, onClickPositive = {})
+}
+//endregion

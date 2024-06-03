@@ -258,11 +258,17 @@ fun AddEnsembleDialog(
 
 //region COMPOSABLE PREVIEWS
 @Composable
-fun __PreviewUtilEnsembleScreen(
+fun PreviewUtilEnsembleScreen(
     ensembles: List<LazyEnsembleThumbnails>,
     showAddEnsembleForm: Boolean,
-) = EnsemblesScreen(ensembles = ensembles, showAddEnsembleDialog = showAddEnsembleForm, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
-    onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {})
+) = NoopTheme{
+    EnsemblesScreen(
+        ensembles = ensembles,
+        showAddEnsembleDialog = showAddEnsembleForm,
+        addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
+        onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {}
+    )
+}
 
 val previewEnsembles: List<LazyEnsembleThumbnails> =
     repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
@@ -294,36 +300,26 @@ val previewEnsembles: List<LazyEnsembleThumbnails> =
 
 @Preview
 @Composable
-fun PreviewEnsembleScreen(){
-    NoopTheme {
-        __PreviewUtilEnsembleScreen(
-            ensembles = previewEnsembles,
-            showAddEnsembleForm = false,
-        )
-    }
-}
+fun PreviewEnsembleScreen() = PreviewUtilEnsembleScreen(
+    ensembles = previewEnsembles,
+    showAddEnsembleForm = false,
+)
 
 @Preview
 @Composable
-fun PreviewEnsemblesScreenAddEnsembleDialog(){
-    NoopTheme {
-        __PreviewUtilEnsembleScreen(
-            ensembles = previewEnsembles,
-            showAddEnsembleForm = true,
-        )
-    }
-}
+fun PreviewEnsemblesScreenAddEnsembleDialog() = PreviewUtilEnsembleScreen(
+    ensembles = previewEnsembles,
+    showAddEnsembleForm = true,
+)
 
 @Preview
 @Composable
-fun PreviewAddEnsembleDialog(){
-    NoopTheme{
-        AddEnsembleDialog(
-            visible = true,
-            articleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
-            onClickSave = {},
-            onClickClose = {},
-        )
-    }
+fun PreviewAddEnsembleDialog() = NoopTheme{
+    AddEnsembleDialog(
+        visible = true,
+        articleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
+        onClickSave = {},
+        onClickClose = {},
+    )
 }
 //endregion

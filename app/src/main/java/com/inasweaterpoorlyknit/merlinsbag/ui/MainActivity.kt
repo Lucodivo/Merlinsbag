@@ -37,7 +37,6 @@ class MainActivity : ComponentActivity(){
         onDispose {}
       }
 */
-      hideSystemUI()
 
       val appState = rememberNoopAppState(
         windowSizeClass = calculateWindowSizeClass(this)

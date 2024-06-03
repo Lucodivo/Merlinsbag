@@ -23,6 +23,11 @@
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="subject_segment"/>
 
+        <!-- deactivate Firebase Crashlytics when specified in gradle build. -->
+        <meta-data
+            android:name="firebase_analytics_collection_deactivated"
+            android:value="@bool/FIREBASE_ANALYTICS_DEACTIVATED"/>
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true">

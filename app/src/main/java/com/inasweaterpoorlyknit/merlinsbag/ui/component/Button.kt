@@ -25,7 +25,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 
 @Composable
-private fun _NoopExpandingFloatingActionButton(
+fun NoopExpandingFloatingActionButton(
   expanded: Boolean,
   collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
   expandedIcon: IconData = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
@@ -34,78 +34,51 @@ private fun _NoopExpandingFloatingActionButton(
 ) {
   val columnPadding = 20.dp
   val expandedButtonPadding = 4.dp
-  Column(
-    horizontalAlignment = Alignment.End,
-    modifier = Modifier.padding(columnPadding)
-  ) {
-    val openAnimateFloat by animateFloatAsState(
-      targetValue = if (expanded) 1.0f else 0.0f,
-      animationSpec = tween(),
-      label = "floating action button size"
-    )
-    Column(
-      horizontalAlignment = Alignment.End,
-      modifier = Modifier.graphicsLayer {
-        scaleY = openAnimateFloat
-        scaleX = openAnimateFloat
-        alpha = (-(openAnimateFloat - 1.0f) * (openAnimateFloat - 1.0f)) + 1.0f // https://www.desmos.com/calculator/6ru1kya9ar
-        transformOrigin = TransformOrigin(0.5f, 1.0f)
-      }) {
-      expandedButtons.forEach { button ->
-        if(button.text.isNotEmpty()) {
-          ExtendedFloatingActionButton(
-            text = { Text(button.text) },
-            icon = { Icon(button.icon.icon, button.icon.contentDescription) },
-            onClick = button.onClick,
-            modifier = Modifier.padding(bottom = expandedButtonPadding)
-          )
-        } else {
-          FloatingActionButton(
-            onClick = button.onClick,
-            modifier = Modifier.padding(bottom = expandedButtonPadding)
-          ){
-            Icon(button.icon.icon, button.icon.contentDescription)
-            Text(button.text)
-          }
-        }
-      }
-    }
-    _NoopFloatingActionButton(
-      iconData = if(expanded) expandedIcon else collapsedIcon,
-      onClick = onClickExpandCollapse,
-    )
-  }
-}
-
-@Composable
-fun NoopExpandingFloatingActionButton(
-  expanded: Boolean,
-  collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
-  expandedIcon: IconData = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-  onClickExpandCollapse: () -> Unit,
-  expandedButtons: List<TextIconButtonData>,
-) {
   Box(
     contentAlignment = Alignment.BottomEnd,
     modifier = Modifier.fillMaxSize()
   ) {
-    _NoopExpandingFloatingActionButton(
-      expanded = expanded,
-      collapsedIcon = collapsedIcon,
-      expandedIcon = expandedIcon,
-      onClickExpandCollapse = onClickExpandCollapse,
-      expandedButtons = expandedButtons,
-    )
-  }
-}
-
-@Composable
-private fun _NoopFloatingActionButton(
-  iconData: IconData,
-  onClick: () -> Unit,
-) {
-  FloatingActionButton(onClick = { onClick() }) {
-    Icon(iconData.icon, iconData.contentDescription)
+    Column(
+      horizontalAlignment = Alignment.End,
+      modifier = Modifier.padding(columnPadding)
+    ) {
+      val openAnimateFloat by animateFloatAsState(
+        targetValue = if (expanded) 1.0f else 0.0f,
+        animationSpec = tween(),
+        label = "floating action button size"
+      )
+      Column(
+        horizontalAlignment = Alignment.End,
+        modifier = Modifier.graphicsLayer {
+          scaleY = openAnimateFloat
+          scaleX = openAnimateFloat
+          alpha = (-(openAnimateFloat - 1.0f) * (openAnimateFloat - 1.0f)) + 1.0f // https://www.desmos.com/calculator/6ru1kya9ar
+          transformOrigin = TransformOrigin(0.5f, 1.0f)
+        }) {
+        expandedButtons.forEach { button ->
+          if(button.text.isNotEmpty()) {
+            ExtendedFloatingActionButton(
+              text = { Text(button.text) },
+              icon = { Icon(button.icon.icon, button.icon.contentDescription) },
+              onClick = button.onClick,
+              modifier = Modifier.padding(bottom = expandedButtonPadding)
+            )
+          } else {
+            FloatingActionButton(
+              onClick = button.onClick,
+              modifier = Modifier.padding(bottom = expandedButtonPadding)
+            ){
+              Icon(button.icon.icon, button.icon.contentDescription)
+              Text(button.text)
+            }
+          }
+        }
+      }
+      FloatingActionButton(onClick = onClickExpandCollapse) {
+        val iconData = if(expanded) expandedIcon else collapsedIcon
+        Icon(iconData.icon, iconData.contentDescription)
+      }
+    }
   }
 }
 
@@ -128,22 +101,27 @@ fun NoopFloatingActionButton(
   }
 }
 
-@Preview
+//region Previews
+// Allows previews to take up less space in the preview window
+@Preview(name = "NoopFloatingActionButtonPreview", device = "spec:shape=Normal,width=200,height=300,unit=dp,dpi=480")
+annotation class NoopFloatingActionButtonPreview
+
+@NoopFloatingActionButtonPreview
 @Composable
 fun PreviewNoopFloatingActionButton_Alone(){
   NoopTheme {
-    _NoopFloatingActionButton(
+    NoopFloatingActionButton(
       iconData = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       onClick = {}
     )
   }
 }
 
-@Preview
+@NoopFloatingActionButtonPreview
 @Composable
-fun PreviewNoopExpandingFloatingActionButtonExpanded_Alone(){
+fun PreviewNoopExpandingFloatingActionButtonExpanded(){
   NoopTheme{
-    _NoopExpandingFloatingActionButton(
+    NoopExpandingFloatingActionButton(
       expanded = true,
       collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
@@ -156,11 +134,11 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded_Alone(){
   }
 }
 
-@Preview
+@NoopFloatingActionButtonPreview
 @Composable
-fun PreviewNoopExpandingFloatingActionButtonCollapsed_Alone(){
+fun PreviewNoopExpandingFloatingActionButtonCollapsed(){
   NoopTheme{
-    _NoopExpandingFloatingActionButton(
+    NoopExpandingFloatingActionButton(
       expanded = false,
       collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
@@ -172,31 +150,4 @@ fun PreviewNoopExpandingFloatingActionButtonCollapsed_Alone(){
     )
   }
 }
-
-@Preview
-@Composable
-fun PreviewNoopExpandingFloatingActionButtonExpanded_Full(){
-  NoopTheme{
-    NoopExpandingFloatingActionButton(
-      expanded = true,
-      collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
-      expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
-      expandedButtons = listOf(
-        TextIconButtonData("", IconData(NoopComposePreviewIcons.AddPhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION), {}),
-        TextIconButtonData("", IconData(NoopComposePreviewIcons.AddPhotoCamera, COMPOSE_PREVIEW_CONTENT_DESCRIPTION), {}),
-      ),
-      onClickExpandCollapse = {}
-    )
-  }
-}
-
-@Preview
-@Composable
-fun PreviewNoopFloatingActionButton_Full(){
-  NoopTheme {
-    NoopFloatingActionButton(
-      iconData = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
-      onClick = {}
-    )
-  }
-}
+//endregion

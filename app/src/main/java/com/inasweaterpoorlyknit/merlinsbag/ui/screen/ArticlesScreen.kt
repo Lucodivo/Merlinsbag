@@ -1,13 +1,10 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.Manifest.permission
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,7 +32,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.common.TODO_ICON_CONTENT_DESCRIPTION
@@ -317,73 +313,59 @@ fun ArticlesScreen(
 
 //region COMPOSABLE PREVIEWS
 @Composable
-fun __PreviewUtilArticleScreen(
+fun PreviewUtilArticleScreen(
     editMode: Boolean = false,
     showPermissionsAlert: Boolean = false,
     showDeleteArticlesAlert: Boolean = false,
     selectedThumbnails: Set<Int> = emptySet(),
-) = ArticlesScreen(
-        thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
-        selectedThumbnails = selectedThumbnails,
-        editMode = editMode,
-        showPermissionsAlert = showPermissionsAlert,
-        showDeleteArticlesAlert = showDeleteArticlesAlert,
-        onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
-        onPermissionsAlertPositive = {}, onDeleteArticlesAlertPositive = {}, onAlertNegative = {},
-        onClickDelete = {}, onClickSelectionCancel = {}, onAlertOutside = {},
-    )
-
-@Preview
-@Composable
-fun PreviewArticlesScreen() = NoopTheme { __PreviewUtilArticleScreen() }
-
-@Preview
-@Composable
-fun PreviewArticlesScreen_editMode() {
-    NoopTheme {
-        __PreviewUtilArticleScreen(
-            selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
-            editMode = true,
-        )
-    }
+) = NoopTheme {
+  ArticlesScreen(
+    thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
+    selectedThumbnails = selectedThumbnails,
+    editMode = editMode,
+    showPermissionsAlert = showPermissionsAlert,
+    showDeleteArticlesAlert = showDeleteArticlesAlert,
+    onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
+    onPermissionsAlertPositive = {}, onDeleteArticlesAlertPositive = {}, onAlertNegative = {},
+    onClickDelete = {}, onClickSelectionCancel = {}, onAlertOutside = {},
+  )
 }
 
 @Preview
 @Composable
-fun PreviewArticlesScreenWithPermissionsAlert() {
-    NoopTheme {
-        __PreviewUtilArticleScreen(
-            showPermissionsAlert = true,
-            editMode = true,
-        )
-    }
+fun PreviewArticlesScreen() = PreviewUtilArticleScreen()
+
+@Preview
+@Composable
+fun PreviewArticlesScreen_editMode() = PreviewUtilArticleScreen(
+  selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
+  editMode = true,
+)
+
+@Preview
+@Composable
+fun PreviewArticlesScreenWithPermissionsAlert() = PreviewUtilArticleScreen(
+  showPermissionsAlert = true,
+  editMode = true,
+)
+
+@Preview
+@Composable
+fun PreviewArticlesScreenWithDeleteArticlesAlert() = PreviewUtilArticleScreen(
+  showDeleteArticlesAlert = true,
+  editMode = true,
+  selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
+)
+
+@Preview
+@Composable
+fun PreviewCameraPermissionsAlert() = NoopTheme {
+  CameraPermissionsAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
 }
 
 @Preview
 @Composable
-fun PreviewArticlesScreenWithDeleteArticlesAlert() {
-    NoopTheme {
-        __PreviewUtilArticleScreen(
-            showDeleteArticlesAlert = true,
-            editMode = true,
-            selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
-        )
-    }
-}
-
-@Preview
-@Composable
-fun PreviewCameraPermissionsAlert() {
-    NoopTheme {
-        CameraPermissionsAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
-    }
-}
-
-@Preview
-@Composable
-fun PreviewDeleteArticlesAlert() {
-    NoopTheme {
-        DeleteArticlesAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
-    }
+fun PreviewDeleteArticlesAlert() = NoopTheme {
+  DeleteArticlesAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
 }
 //endregion

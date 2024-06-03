@@ -2,10 +2,7 @@ package com.inasweaterpoorlyknit.merlinsbag.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -22,34 +19,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.LandscapePreview
 import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
-
-@Composable
-fun ArticleThumbnailGrid(
-  articleThumbnailUris: List<String>,
-  onClickArticle: (index: Int) -> Unit,
-){
-  val gridMinWidth = 100.dp
-  val gridItemPadding = 16.dp
-  val articlesGridState = rememberLazyStaggeredGridState()
-  LazyVerticalStaggeredGrid(
-    // typical dp width of a smart phone is 320dp-480dp
-    columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
-    content = {
-      items(count = articleThumbnailUris.size){ thumbnailGridItemIndex ->
-        NoopImage(
-          uriString = articleThumbnailUris[thumbnailGridItemIndex],
-          contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-          modifier = Modifier
-            .padding(gridItemPadding)
-            .clickable { onClickArticle(thumbnailGridItemIndex) }
-            .fillMaxSize(),
-        )
-      }
-    },
-    modifier = Modifier.fillMaxSize(),
-    state = articlesGridState,
-  )
-}
 
 @Composable
 fun SelectableArticleThumbnailGrid(
@@ -88,8 +57,9 @@ fun SelectableArticleThumbnailGrid(
   )
 }
 
+//region COMPOSABLE PREVIEWS
 @Composable
-fun __PreviewArticleThumbnailGrid(selectable: Boolean) = NoopTheme {
+fun PreviewUtilArticleThumbnailGrid(selectable: Boolean) = NoopTheme {
   SelectableArticleThumbnailGrid(
     selectable = selectable,
     onSelected = {},
@@ -97,6 +67,7 @@ fun __PreviewArticleThumbnailGrid(selectable: Boolean) = NoopTheme {
     selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
   )
 }
-@Preview @Composable fun PreviewSelectableArticleThumbnailGrid_selectable() = __PreviewArticleThumbnailGrid(selectable = true)
-@Preview @Composable fun PreviewSelectableArticleThumbnailGrid_notSelectable() = __PreviewArticleThumbnailGrid(selectable = false)
-@LandscapePreview @Composable fun PreviewSelectableArticleThumbnailGrid_landscape() = __PreviewArticleThumbnailGrid(selectable = false)
+@Preview @Composable fun PreviewSelectableArticleThumbnailGrid_selectable() = PreviewUtilArticleThumbnailGrid(selectable = true)
+@Preview @Composable fun PreviewSelectableArticleThumbnailGrid_notSelectable() = PreviewUtilArticleThumbnailGrid(selectable = false)
+@LandscapePreview @Composable fun PreviewSelectableArticleThumbnailGrid_landscape() = PreviewUtilArticleThumbnailGrid(selectable = false)
+//endregion
