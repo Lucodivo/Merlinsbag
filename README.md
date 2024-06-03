@@ -1,5 +1,8 @@
 # Merlinsbag
 
+<a href="https://play.google.com/apps/internaltest/4701048209300859521"><img alt="Download" src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/logo/merlin_logo_96x96_rounded.png"></a><br>
+<a href="https://play.google.com/apps/internaltest/4701048209300859521"><img alt="Download" src="https://img.shields.io/badge/Google%20Play-%20?logo=googleplay&amp;color=grey"></a>
+
 Merlinsbag is an Android application for virtualizing & organizing a user's wardrobe and favorite items.
 
 ## Features
@@ -23,6 +26,17 @@ All articles can be viewed as a catalog, where they can be deleted if chosen
 Articles can be viewed in their full glory and navigated through swiping based on selected filters.
 
 ### Screenshots
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Articles.jpg" alt="Articles Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/ArticleDetail.jpg" alt="Article Detail Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/AddArticle.jpg" alt="Add Article Screen" width="200"/><br>
+</p>
+<p float="left">
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Ensembles.jpg" alt="Ensembles Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/AddEnsemble.jpg" alt="Add Ensemble Dialog" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/EnsembleDetail.jpg" alt="EnsembleDetail" width="200"/>
+</p>
 
 ## Codebase
 
