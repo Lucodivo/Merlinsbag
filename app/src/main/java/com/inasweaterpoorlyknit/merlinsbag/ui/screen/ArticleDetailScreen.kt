@@ -35,6 +35,25 @@ fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String?
   navigate(route, navOptions)
 }
 
+@Composable
+fun ArticleDetailRoute(
+    navController: NavController,
+    articleIndex: Int,
+    ensembleId: String?,
+    modifier: Modifier = Modifier,
+) {
+  val articleDetailViewModel =
+      hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
+        factory.create(articleIndex, ensembleId)
+      }
+  val articleDetailUiState by articleDetailViewModel.articleDetailUiState.collectAsStateWithLifecycle()
+  ArticleDetailScreen(
+    articlesWithImages = articleDetailUiState.articleFullImages,
+    startingIndex = articleIndex,
+    modifier = modifier,
+  )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArticleDetailScreen(
@@ -62,25 +81,6 @@ fun ArticleDetailScreen(
       )
     }
   }
-}
-
-@Composable
-fun ArticleDetailRoute(
-    navController: NavController,
-    articleIndex: Int,
-    ensembleId: String?,
-    modifier: Modifier = Modifier,
-) {
-  val articleDetailViewModel =
-      hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
-        factory.create(articleIndex, ensembleId)
-      }
-  val articleDetailUiState by articleDetailViewModel.articleDetailUiState.collectAsStateWithLifecycle()
-  ArticleDetailScreen(
-    articlesWithImages = articleDetailUiState.articleFullImages,
-    startingIndex = articleIndex,
-    modifier = modifier,
-  )
 }
 
 @Preview

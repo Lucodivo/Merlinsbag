@@ -1,13 +1,18 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -19,21 +24,25 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.APP_START_DESTINATION
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
+import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 fun NoopApp(
     appState: NoopAppState,
     modifier: Modifier = Modifier,
@@ -43,30 +52,20 @@ fun NoopApp(
       TopLevelDestination.entries.indexOf(TopLevelDestination.routeToTopLevelDestination(APP_START_DESTINATION))
     )
   }
-  Scaffold(
-    modifier = modifier.semantics {
-      testTagsAsResourceId = true
+  val topLevelDestinations = remember { appState.topLevelDestinations }
+  NoopScaffold(
+    showBottomNavBar = appState.showBottomNavBar.value,
+    bottomNavBarDataItems = topLevelDestinations,
+    selectedNavBarIndex = currentTopLevelDestination.intValue,
+    onSelectedNavBarItem = { selectedIndex ->
+      val previousIndex = currentTopLevelDestination.intValue
+      currentTopLevelDestination.intValue = selectedIndex
+      appState.navController.navigateToTopLevelDestination(
+        TopLevelDestination.entries[previousIndex],
+        TopLevelDestination.entries[selectedIndex]
+      )
     },
-    containerColor = Color.Transparent,
-    contentColor = MaterialTheme.colorScheme.onBackground,
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
-    bottomBar = {
-      if(appState.showBottomNavBar.value) {
-        NoopBottomNavBar(
-          bottomNavBarDataItems = appState.topLevelDestinations,
-          onClick = { selectedIndex ->
-            val previousIndex = currentTopLevelDestination.intValue
-            currentTopLevelDestination.intValue = selectedIndex
-            appState.navController.navigateToTopLevelDestination(
-              TopLevelDestination.entries[previousIndex],
-              TopLevelDestination.entries[selectedIndex]
-            )
-          },
-          selectedIndex = currentTopLevelDestination.intValue,
-          modifier = Modifier.testTag("NoopBottomBar"),
-        )
-      }
-    }
+    modifier = modifier,
   ) { padding ->
     Surface(
       modifier = modifier
@@ -82,6 +81,35 @@ fun NoopApp(
     }
   }
 }
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+fun NoopScaffold(
+    showBottomNavBar: Boolean,
+    bottomNavBarDataItems: List<BottomNavBarData>,
+    selectedNavBarIndex: Int,
+    onSelectedNavBarItem: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (PaddingValues) -> Unit,
+) = Scaffold(
+  modifier = modifier.semantics {
+    testTagsAsResourceId = true
+  },
+  containerColor = Color.Transparent,
+  contentColor = MaterialTheme.colorScheme.onBackground,
+  contentWindowInsets = WindowInsets(0, 0, 0, 0),
+  bottomBar = {
+    if(showBottomNavBar) {
+      NoopBottomNavBar(
+        bottomNavBarDataItems = bottomNavBarDataItems,
+        onClick = onSelectedNavBarItem,
+        selectedIndex = selectedNavBarIndex,
+        modifier = Modifier.testTag("NoopBottomBar"),
+      )
+    }
+  },
+  content = content,
+)
 
 @Stable
 class NoopAppState(
@@ -130,3 +158,31 @@ fun NavHostController.navigateToTopLevelDestination(from: TopLevelDestination, t
     TopLevelDestination.ENSEMBLES -> navigateToEnsembles(topLevelNavOptions)
   }
 }
+
+@Composable
+fun PreviewUtilNoopScaffold(
+    showBottomNavBar: Boolean,
+    bottomNavBarSelectedIndex: Int,
+) = NoopTheme {
+  NoopScaffold(
+    showBottomNavBar = showBottomNavBar,
+    bottomNavBarDataItems = TopLevelDestination.entries,
+    selectedNavBarIndex = bottomNavBarSelectedIndex,
+    onSelectedNavBarItem = {},
+    content = {},
+  )
+}
+
+@Preview
+@Composable
+fun PreviewNoopScaffold_Selected0() = PreviewUtilNoopScaffold(
+  showBottomNavBar = true,
+  bottomNavBarSelectedIndex = 0,
+)
+
+@Preview
+@Composable
+fun PreviewNoopScaffold_Selected1() = PreviewUtilNoopScaffold(
+  showBottomNavBar = true,
+  bottomNavBarSelectedIndex = 1,
+)

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.FolderSpecial
@@ -118,6 +119,7 @@ object NoopComposePreviewIcons {
   val Remove = Icons.Filled.Remove
   val Add = Icons.Filled.Add
   val Edit = Icons.Filled.Edit
+  val Settings = Icons.Filled.Settings
   val Save = Icons.Outlined.Save
   val Check = Icons.Outlined.Check
   val Category = Icons.Outlined.Category

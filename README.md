@@ -40,6 +40,10 @@ Articles can be viewed in their full glory and navigated through swiping based o
   <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/EnsembleDetail.jpg" alt="EnsembleDetail" width="200"/>
 </p>
 
+## Video Demo
+
+[![YouTube Demo Video of Merlinsbag App](https://img.youtube.com/vi/adMqfD-zBIQ/0.jpg)](https://youtu.be/adMqfD-zBIQ)
+
 ## Codebase
 
 ### Terminology

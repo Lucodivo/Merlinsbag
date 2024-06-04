@@ -18,8 +18,6 @@ val bodyFontFamily = FontFamily(
   Font(
     googleFont = GoogleFont("Roboto"),
     fontProvider = provider,
-    weight = FontWeight.W700,
-    style = FontStyle.Normal,
   )
 )
 

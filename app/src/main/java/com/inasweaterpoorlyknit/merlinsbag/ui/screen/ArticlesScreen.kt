@@ -38,7 +38,7 @@ import com.inasweaterpoorlyknit.merlinsbag.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableArticleThumbnailGrid
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextIconButtonData
+import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextButtonData
 import com.inasweaterpoorlyknit.merlinsbag.ui.getActivity
 import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings
@@ -155,6 +155,7 @@ fun ArticlesRoute(
     },
     onClickDelete = { showDeleteArticlesAlert = true },
     onClickSelectionCancel = isItemSelected::clear,
+    onClickSettings = { navController.navigateToSettings() },
     onPermissionsAlertPositive = {
       showPermissionsAlert = false
       openAppSettings()
@@ -231,6 +232,7 @@ fun ArticlesScreen(
     onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
     onClickSelectionCancel: () -> Unit,
+    onClickSettings: () -> Unit,
     onPermissionsAlertPositive: () -> Unit,
     onDeleteArticlesAlertPositive: () -> Unit,
     onAlertNegative: () -> Unit,
@@ -261,23 +263,21 @@ fun ArticlesScreen(
       thumbnailUris = thumbnailUris,
       selectedThumbnails = selectedThumbnails,
     )
+    val articlesAreSelected = selectedThumbnails.isNotEmpty()
     NoopExpandingFloatingActionButton(
       expanded = editMode,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-      expandedButtons =
-      if(selectedThumbnails.isNotEmpty()) {
+      verticalExpandedButtons = if(articlesAreSelected) {
         listOf(
-          TextIconButtonData(
-            text = "",
+          TextButtonData(
             icon = IconData(
               icon = NoopIcons.Cancel,
               contentDescription = TODO_ICON_CONTENT_DESCRIPTION
             ),
             onClick = onClickSelectionCancel
           ),
-          TextIconButtonData(
-            text = "",
+          TextButtonData(
             icon = IconData(
               icon = NoopIcons.Delete,
               contentDescription = TODO_ICON_CONTENT_DESCRIPTION
@@ -287,16 +287,14 @@ fun ArticlesScreen(
         )
       } else {
         listOf(
-          TextIconButtonData(
-            text = "",
+          TextButtonData(
             icon = IconData(
               icon = NoopIcons.AddPhotoAlbum,
               contentDescription = TODO_ICON_CONTENT_DESCRIPTION
             ),
             onClick = onClickAddPhotoAlbum
           ),
-          TextIconButtonData(
-            text = "",
+          TextButtonData(
             icon = IconData(
               icon = NoopIcons.AddPhotoCamera,
               contentDescription = TODO_ICON_CONTENT_DESCRIPTION
@@ -305,7 +303,18 @@ fun ArticlesScreen(
           ),
         )
       },
-      onClickExpandCollapse = onClickEdit,
+      horizontalExpandedButtons = if(!articlesAreSelected) {
+        listOf(
+          TextButtonData(
+            icon = IconData(
+              icon = NoopIcons.Settings,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+            ),
+            onClick = onClickSettings,
+          ),
+        )
+      } else emptyList(),
+      onClick = onClickEdit,
     )
   }
 }
@@ -326,7 +335,7 @@ fun PreviewUtilArticleScreen(
     showDeleteArticlesAlert = showDeleteArticlesAlert,
     onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
     onPermissionsAlertPositive = {}, onDeleteArticlesAlertPositive = {}, onAlertNegative = {},
-    onClickDelete = {}, onClickSelectionCancel = {}, onAlertOutside = {},
+    onClickDelete = {}, onClickSelectionCancel = {}, onClickSettings = {}, onAlertOutside = {},
   )
 }
 

@@ -49,7 +49,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopAddEnsembleDialog
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableArticleThumbnailGrid
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableNoopImage
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextIconButtonData
+import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextButtonData
 import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
@@ -184,19 +184,17 @@ fun EnsembleDetailFloatingActionButtons(
     expanded = editEnsemblesMode,
     collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
     expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-    expandedButtons =
+    verticalExpandedButtons =
     if(selectedEditArticleIndices.isNotEmpty()) {
       listOf(
-        TextIconButtonData(
-          text = "",
+        TextButtonData(
           icon = IconData(
             icon = NoopIcons.Cancel,
             contentDescription = TODO_ICON_CONTENT_DESCRIPTION
           ),
           onClick = onClickCancelSelection
         ),
-        TextIconButtonData(
-          text = "",
+        TextButtonData(
           icon = IconData(
             icon = NoopIcons.Delete,
             contentDescription = TODO_ICON_CONTENT_DESCRIPTION
@@ -206,16 +204,14 @@ fun EnsembleDetailFloatingActionButtons(
       )
     } else {
       listOf(
-        TextIconButtonData(
-          text = "",
+        TextButtonData(
           icon = IconData(
             icon = NoopIcons.DeleteForever,
             contentDescription = TODO_ICON_CONTENT_DESCRIPTION
           ),
           onClick = onClickDeleteEnsemble
         ),
-        TextIconButtonData(
-          text = "",
+        TextButtonData(
           icon = IconData(
             icon = NoopIcons.Attachment,
             contentDescription = TODO_ICON_CONTENT_DESCRIPTION
@@ -224,7 +220,7 @@ fun EnsembleDetailFloatingActionButtons(
         ),
       )
     },
-    onClickExpandCollapse = onClickEdit,
+    onClick = onClickEdit,
   )
 }
 
