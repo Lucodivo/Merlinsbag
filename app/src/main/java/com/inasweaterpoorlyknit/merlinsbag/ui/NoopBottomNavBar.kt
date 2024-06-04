@@ -17,18 +17,18 @@ import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 
 open class BottomNavBarData(
-  val selectedIcon: ImageVector,
-  val unselectedIcon: ImageVector,
-  @StringRes val iconTextId: Int,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+    @StringRes val iconTextId: Int,
 )
 
 @Composable
 fun NoopBottomNavBar(
-  bottomNavBarDataItems: List<BottomNavBarData>,
-  onClick: (index: Int) -> Unit,
-  selectedIndex: Int,
-  modifier: Modifier = Modifier,
-){
+    bottomNavBarDataItems: List<BottomNavBarData>,
+    onClick: (index: Int) -> Unit,
+    selectedIndex: Int,
+    modifier: Modifier = Modifier,
+) {
   NoopNavBar(
     modifier = modifier
   ) {
@@ -57,9 +57,9 @@ fun NoopBottomNavBar(
 
 @Composable
 private fun NoopNavBar(
-  modifier: Modifier = Modifier,
-  content: @Composable RowScope.() -> Unit,
-){
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit,
+) {
   NavigationBar(
     modifier = modifier,
     tonalElevation = 0.dp,
@@ -69,19 +69,19 @@ private fun NoopNavBar(
 
 @Composable
 private fun RowScope.NoopNavigationBarItem(
-  selected: Boolean,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier,
-  enabled: Boolean = true,
-  alwaysShowLabel: Boolean = true,
-  icon: @Composable () -> Unit,
-  selectedIcon: @Composable () -> Unit = icon,
-  label: @Composable (() -> Unit)? = null,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    alwaysShowLabel: Boolean = true,
+    icon: @Composable () -> Unit,
+    selectedIcon: @Composable () -> Unit = icon,
+    label: @Composable (() -> Unit)? = null,
 ) {
   NavigationBarItem(
     selected = selected,
     onClick = onClick,
-    icon = if (selected) selectedIcon else icon,
+    icon = if(selected) selectedIcon else icon,
     modifier = modifier,
     enabled = enabled,
     label = label,
@@ -91,24 +91,20 @@ private fun RowScope.NoopNavigationBarItem(
 
 @Preview
 @Composable
-fun PreviewNoopBottomNavBarPreviewLight(){
-  NoopTheme(darkTheme = false) {
-    NoopBottomNavBar(
-      bottomNavBarDataItems = TopLevelDestination.entries,
-      onClick = {_ ->},
-      selectedIndex = 0,
-    )
-  }
+fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkTheme = false) {
+  NoopBottomNavBar(
+    bottomNavBarDataItems = TopLevelDestination.entries,
+    onClick = { _ -> },
+    selectedIndex = 0,
+  )
 }
 
 @Preview
 @Composable
-fun PreviewNoopBottomNavBarDark(){
-  NoopTheme(darkTheme = true) {
-    NoopBottomNavBar(
-      bottomNavBarDataItems = TopLevelDestination.entries,
-      onClick = {_ ->},
-      selectedIndex = TopLevelDestination.entries.lastIndex,
-    )
-  }
+fun PreviewNoopBottomNavBarDark() = NoopTheme(darkTheme = true) {
+  NoopBottomNavBar(
+    bottomNavBarDataItems = TopLevelDestination.entries,
+    onClick = { _ -> },
+    selectedIndex = TopLevelDestination.entries.lastIndex,
+  )
 }

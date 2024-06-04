@@ -20,10 +20,10 @@ import kotlin.math.min
 
 @Composable
 fun HorizontalOverlappingLayout(
-  modifier: Modifier = Modifier,
-  overlapPercentage: Float = 0.5f,
-  overflowIcon: IconData = IconData(icon = NoopIcons.MoreHorizontal, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
-  content: @Composable () -> Unit
+    modifier: Modifier = Modifier,
+    overlapPercentage: Float = 0.5f,
+    overflowIcon: IconData = IconData(icon = NoopIcons.MoreHorizontal, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+    content: @Composable () -> Unit,
 ) {
   Box(modifier = modifier) {
     Layout(
@@ -38,22 +38,22 @@ fun HorizontalOverlappingLayout(
       val maxHeight = min(
         constraints.maxHeight,
         if(placeables.isNotEmpty()) {
-          max(placeables.maxOfOrNull{ it.height } ?: 0, iconPlaceable.height)
-        } else{ 0 }
+          max(placeables.maxOfOrNull { it.height } ?: 0, iconPlaceable.height)
+        } else 0
       )
       val maxWidth = min(
         constraints.maxWidth,
-        if(placeables.isNotEmpty()){
+        if(placeables.isNotEmpty()) {
           placeables.sumOf { (it.width * showingPercentage).toInt() } + (placeables.last().width * overlapPercentage).toInt() + iconPlaceable.width
-        } else { 0 }
+        } else 0
       )
       layout(width = maxWidth, height = maxHeight) {
         var xPos = 0
-        for (i in 0..placeables.lastIndex) {
+        for(i in 0..placeables.lastIndex) {
           val placeable = placeables[i]
           val widthInc = (placeable.width * showingPercentage).toInt()
-          if ((xPos + placeable.width) > (constraints.maxWidth - iconPlaceable.width)) {
-            if (i > 0) {
+          if((xPos + placeable.width) > (constraints.maxWidth - iconPlaceable.width)) {
+            if(i > 0) {
               xPos += (placeables[i - 1].width * overlapPercentage).toInt()
               iconPlaceable.placeRelative(x = xPos, y = (maxHeight / 2) - (iconPlaceable.height / 2))
             }
@@ -72,22 +72,20 @@ fun HorizontalOverlappingLayout(
 //region COMPOSABLE PREVIEWS
 @Preview
 @Composable
-fun PreviewHorizontalOverlappingLayout() {
+fun PreviewHorizontalOverlappingLayout() = NoopTheme {
   val thumbnailUriStrings = repeatedThumbnailResourceIdsAsStrings.slice(6..16)
   val padding = 10.dp
-  NoopTheme{
-    Surface {
-      HorizontalOverlappingLayout(
-        modifier = Modifier
+  Surface {
+    HorizontalOverlappingLayout(
+      modifier = Modifier
           .fillMaxWidth()
           .padding(padding)
-      ) {
-        thumbnailUriStrings.forEach { thumbnailUriString ->
-          NoopImage(
-            uriString = thumbnailUriString,
-            contentDescription = COMPOSE_PREVIEW_CONTENT_DESCRIPTION,
-          )
-        }
+    ) {
+      thumbnailUriStrings.forEach { thumbnailUriString ->
+        NoopImage(
+          uriString = thumbnailUriString,
+          contentDescription = COMPOSE_PREVIEW_CONTENT_DESCRIPTION,
+        )
       }
     }
   }
@@ -95,22 +93,20 @@ fun PreviewHorizontalOverlappingLayout() {
 
 @Preview
 @Composable
-fun PreviewHorizontalOverlappigLayoutOverflow() {
+fun PreviewHorizontalOverlappigLayoutOverflow() = NoopTheme {
   val thumbnailUriStrings = repeatedThumbnailResourceIdsAsStrings.slice(5..11)
   val padding = 10.dp
-  NoopTheme{
-    Surface{
-      HorizontalOverlappingLayout(
-        modifier = Modifier
+  Surface {
+    HorizontalOverlappingLayout(
+      modifier = Modifier
           .fillMaxWidth()
           .padding(padding)
-      ){
-        thumbnailUriStrings.forEach { thumbnailUriString ->
-          NoopImage(
-            uriString = thumbnailUriString,
-            contentDescription = COMPOSE_PREVIEW_CONTENT_DESCRIPTION,
-          )
-        }
+    ) {
+      thumbnailUriStrings.forEach { thumbnailUriString ->
+        NoopImage(
+          uriString = thumbnailUriString,
+          contentDescription = COMPOSE_PREVIEW_CONTENT_DESCRIPTION,
+        )
       }
     }
   }

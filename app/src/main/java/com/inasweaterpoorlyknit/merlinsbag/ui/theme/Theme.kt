@@ -16,19 +16,20 @@ import androidx.core.view.WindowCompat
 @Composable
 fun NoopTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable() () -> Unit,
 ) {
   val context = LocalContext.current
   val colorScheme = when {
-      // TODO: Samsung's One UI seems to not respect this whatsoever. Always a shade of blue...
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      darkTheme -> darkScheme
-      else -> lightScheme
+    // TODO: Samsung's One UI seems to not respect this whatsoever. Always a shade of blue...
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+      if(darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    }
+
+    darkTheme -> darkScheme
+    else -> lightScheme
   }
   val view = LocalView.current
-  if (!view.isInEditMode) {
+  if(!view.isInEditMode) {
     SideEffect {
       val window = (view.context as Activity).window
       window.statusBarColor = colorScheme.primary.toArgb()

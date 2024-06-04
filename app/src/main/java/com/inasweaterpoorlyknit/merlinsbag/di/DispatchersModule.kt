@@ -15,18 +15,18 @@ import javax.inject.Qualifier
 annotation class Dispatcher(val dispatcher: InjectDispatcher)
 
 enum class InjectDispatcher {
-    Default,
-    IO,
+  Default,
+  IO,
 }
 
 @Module
 @InstallIn(SingletonComponent::class)
 object DispatchersModule {
-    @Provides
-    @Dispatcher(IO)
-    fun providesIODispatcher(): CoroutineDispatcher = Dispatchers.IO
+  @Provides
+  @Dispatcher(IO)
+  fun providesIODispatcher(): CoroutineDispatcher = Dispatchers.IO
 
-    @Provides
-    @Dispatcher(Default)
-    fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+  @Provides
+  @Dispatcher(Default)
+  fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 }

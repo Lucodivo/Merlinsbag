@@ -20,15 +20,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class ThumbnailUiState(
-  val ensembleArticleThumbnailUris: LazyUriStrings,
-  val addArticleThumbnailUris: LazyUriStrings,
+    val ensembleArticleThumbnailUris: LazyUriStrings,
+    val addArticleThumbnailUris: LazyUriStrings,
 )
 
 @HiltViewModel(assistedFactory = EnsembleDetailViewModel.EnsembleDetailViewModelFactory::class)
 class EnsembleDetailViewModel @AssistedInject constructor(
-  @Assisted private val ensembleId: String,
-  private val ensemblesRepository: EnsembleRepository,
-  private val articleRepository: ArticleRepository,
+    @Assisted private val ensembleId: String,
+    private val ensemblesRepository: EnsembleRepository,
+    private val articleRepository: ArticleRepository,
 ): ViewModel() {
   private lateinit var ensemble: Ensemble
   private lateinit var ensembleArticles: LazyArticleThumbnails
@@ -57,16 +57,16 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   }
 
   val ensembleTitle = ensemblesRepository.getEnsemble(ensembleId)
-    .onEach { ensemble = it }
-    .map { it.title }
-    .stateIn(
-      scope = viewModelScope,
-      started = SharingStarted.WhileSubscribed(),
-      initialValue = "",
-    )
+      .onEach { ensemble = it }
+      .map { it.title }
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = "",
+      )
 
   val ensembleUiState = combine(
-    ensemblesRepository.getEnsembleArticleThumbnails(ensembleId).onEach{ articlesWithImages ->
+    ensemblesRepository.getEnsembleArticleThumbnails(ensembleId).onEach { articlesWithImages ->
       ensembleArticles = articlesWithImages
       ensembleArticleIds = ensembleArticles.articleIds().toSet()
     },

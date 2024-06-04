@@ -44,18 +44,18 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
  */
 @Composable
 fun NoopAddEnsembleDialog(
-  visible: Boolean,
-  title: String,
-  positiveButtonLabel: String,
-  modifier: Modifier = Modifier,
-  onPositive: () -> Unit,
-  onClose: () -> Unit,
-  content: @Composable ColumnScope.() -> Unit
+    visible: Boolean,
+    title: String,
+    positiveButtonLabel: String,
+    modifier: Modifier = Modifier,
+    onPositive: () -> Unit,
+    onClose: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
   val headerHeight = 56.dp
   val padding = 16.dp
   val scrimAlphaAnimatedScale by animateFloatAsState(
-    targetValue = if (visible) 1.0f else 0.0f,
+    targetValue = if(visible) 1.0f else 0.0f,
     label = "Dialog sheet scrim animated scale",
   )
   val scrimInteractionSource = remember { MutableInteractionSource() }
@@ -63,13 +63,13 @@ fun NoopAddEnsembleDialog(
     contentAlignment = Alignment.BottomCenter,
     modifier = Modifier.fillMaxSize()
   ) {
-    if (scrimAlphaAnimatedScale > 0.0f) {
+    if(scrimAlphaAnimatedScale > 0.0f) {
       Box(
         modifier = Modifier
-          .testTag("DialogSheetScrim")
-          .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f * scrimAlphaAnimatedScale))
-          .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = onClose)
-          .fillMaxSize()
+            .testTag("DialogSheetScrim")
+            .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f * scrimAlphaAnimatedScale))
+            .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = onClose)
+            .fillMaxSize()
       )
     }
     AnimatedVisibility(
@@ -92,8 +92,8 @@ fun NoopAddEnsembleDialog(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-              .fillMaxWidth()
-              .height(headerHeight),
+                .fillMaxWidth()
+                .height(headerHeight),
           ) {
             Row(
               horizontalArrangement = Arrangement.Start,
@@ -103,9 +103,9 @@ fun NoopAddEnsembleDialog(
                 imageVector = NoopIcons.Close,
                 contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
                 modifier = Modifier
-                  .size(headerHeight)
-                  .padding(padding)
-                  .clickable { onClose() }
+                    .size(headerHeight)
+                    .padding(padding)
+                    .clickable { onClose() }
               )
               Text(
                 text = title,
@@ -119,9 +119,9 @@ fun NoopAddEnsembleDialog(
               fontSize = MaterialTheme.typography.labelLarge.fontSize,
               textAlign = TextAlign.End,
               modifier = Modifier
-                .height(headerHeight)
-                .padding(padding)
-                .clickable { onPositive() }
+                  .height(headerHeight)
+                  .padding(padding)
+                  .clickable { onPositive() }
             )
           }
           content()
@@ -143,7 +143,7 @@ fun PreviewNoopDialog() {
       positiveButtonLabel = "Save",
       onPositive = {},
       onClose = {}
-    ){
+    ) {
       OutlinedTextField(
         value = "",
         placeholder = {},
@@ -160,7 +160,7 @@ fun PreviewNoopDialog() {
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-      ){
+      ) {
         Switch(checked = false, onCheckedChange = {})
         Spacer(modifier = Modifier.size(width = 30.dp, height = 0.dp))
         Text(text = "Preview switch", textAlign = TextAlign.End)

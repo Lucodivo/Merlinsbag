@@ -22,15 +22,15 @@ import java.io.IOException
 
 @HiltViewModel(assistedFactory = AddArticleViewModel.AddArticleViewModelFactory::class)
 class AddArticleViewModel @AssistedInject constructor(
-  @Assisted("imageUriStrings") private val imageUriStrings: List<String>,
-  private val application: Application,
-  private val articleRepository: ArticleRepository,
-) : ViewModel() {
+    @Assisted("imageUriStrings") private val imageUriStrings: List<String>,
+    private val application: Application,
+    private val articleRepository: ArticleRepository,
+): ViewModel() {
 
   @AssistedFactory
   interface AddArticleViewModelFactory {
     fun create(
-      @Assisted("imageUriStrings") uriImageStrings: List<String>
+        @Assisted("imageUriStrings") uriImageStrings: List<String>,
     ): AddArticleViewModel
   }
 
@@ -60,7 +60,7 @@ class AddArticleViewModel @AssistedInject constructor(
 
   private fun processNextImage() {
     processingImageIndex += 1
-    if(processingImageIndex > imageUriStrings.lastIndex){
+    if(processingImageIndex > imageUriStrings.lastIndex) {
       finished.value = Event(Unit)
     } else {
       processedBitmap.value = null
@@ -71,18 +71,20 @@ class AddArticleViewModel @AssistedInject constructor(
         Uri.parse(imageUriStrings[processingImageIndex])?.let { imageUri ->
           try {
             segmentedImage.process(application, imageUri) { success ->
-              if(success){
+              if(success) {
                 if(segmentedImage.subjectsFound) {
                   refreshProcessedBitmap()
                 } else {
                   noSubjectFound.value = Event(Unit)
                   processNextImage()
                 }
-              } else{
+              } else {
                 Log.e("processImage()", "ML Kit failed to process image")
               }
             }
-          } catch (e: IOException) { Log.e("processImage()", "ML Kit failed to open image - ${e.message}") }
+          } catch(e: IOException){
+            Log.e("processImage()", "ML Kit failed to open image - ${e.message}")
+          }
         }
       }
     }
@@ -99,27 +101,32 @@ class AddArticleViewModel @AssistedInject constructor(
     processing.value = false
   }
 
-  fun onWidenClicked(){
+  fun onWidenClicked() {
     processing.value = true
     segmentedImage.decreaseThreshold()
     refreshProcessedBitmap()
   }
+
   fun onFocusClicked() {
     processing.value = true
     segmentedImage.increaseThreshold()
     refreshProcessedBitmap()
   }
-  fun onRotateCW(){
+
+  fun onRotateCW() {
     rotationIndex = if(rotationIndex == rotations.lastIndex) 0 else rotationIndex + 1
     rotation.floatValue = rotations[rotationIndex]
   }
-  fun onRotateCCW(){
+
+  fun onRotateCCW() {
     rotationIndex = if(rotationIndex == 0) rotations.lastIndex else rotationIndex - 1
     rotation.floatValue = rotations[rotationIndex]
   }
+
   fun onDiscard() {
     nextSubject()
   }
+
   fun nextSubject() {
     if(segmentedImage.subjectIndex == (segmentedImage.subjectCount - 1)) {
       processNextImage()
@@ -128,7 +135,8 @@ class AddArticleViewModel @AssistedInject constructor(
       refreshProcessedBitmap()
     }
   }
-  fun onSave(){
+
+  fun onSave() {
     val rotationMatrix = Matrix()
     rotationMatrix.postRotate(rotation.floatValue)
     val bitmapToSave = Bitmap.createBitmap(

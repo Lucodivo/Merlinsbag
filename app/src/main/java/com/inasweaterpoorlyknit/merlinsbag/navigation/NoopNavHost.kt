@@ -26,9 +26,9 @@ const val APP_START_DESTINATION = ARTICLES_ROUTE
 
 @Composable
 fun NoopNavHost(
-  appState: NoopAppState,
-  modifier: Modifier = Modifier,
-  startDestination: String = APP_START_DESTINATION,
+    appState: NoopAppState,
+    modifier: Modifier = Modifier,
+    startDestination: String = APP_START_DESTINATION,
 ) {
   val navController = appState.navController
 
@@ -36,7 +36,7 @@ fun NoopNavHost(
     navController = navController,
     startDestination = startDestination,
     modifier = modifier,
-  ){
+  ) {
     composable(route = ARTICLES_ROUTE) {
       ArticlesRoute(navController = navController)
     }
@@ -47,11 +47,11 @@ fun NoopNavHost(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(
         navArgument(ARTICLE_INDEX_ARG) {
-          nullable = false;
+          nullable = false
           type = NavType.IntType
         },
         navArgument(ENSEMBLE_ID_ARG) {
-          nullable = true;
+          nullable = true
           type = NavType.StringType
         },
       ),
@@ -68,7 +68,7 @@ fun NoopNavHost(
       route = ENSEMBLE_DETAIL_ROUTE,
       arguments = listOf(
         navArgument(ENSEMBLE_ID_ARG) {
-          nullable = false;
+          nullable = false
           type = NavType.StringType
         },
       ),
@@ -86,7 +86,7 @@ fun NoopNavHost(
       ),
     ) { navBackStackEntry ->
       val imageUriStringListArg = navBackStackEntry.arguments!!.getString(IMAGE_URI_STRING_LIST_ARG)!!
-      val imageUriStringList = imageUriStringListArg.split(",").map{ navigationSafeUriStringDecode(it) }
+      val imageUriStringList = imageUriStringListArg.split(",").map { navigationSafeUriStringDecode(it) }
       AddArticleRoute(
         navController = navController,
         imageUriStringList = imageUriStringList,

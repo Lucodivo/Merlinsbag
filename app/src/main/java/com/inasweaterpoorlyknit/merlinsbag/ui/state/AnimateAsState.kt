@@ -15,14 +15,14 @@ import kotlin.math.abs
  */
 @Composable
 fun animateClosestRotationAsState(
-  targetDegrees: Float,
-  label: String = "RotationAnimation",
+    targetDegrees: Float,
+    label: String = "RotationAnimation",
 ): State<Float> {
   val (lastRotation, setLastRotation) = remember { mutableFloatStateOf(0.0f) }
 
   val modLast = lastRotation % 360.0f
   val deltaRotation = targetDegrees - modLast
-  val (degreeDeltaCW, degreeDeltaCCW) = if(targetDegrees > modLast){
+  val (degreeDeltaCW, degreeDeltaCCW) = if(targetDegrees > modLast) {
     Pair(deltaRotation - 360.0f, deltaRotation)
   } else {
     Pair(deltaRotation, deltaRotation + 360.0f)

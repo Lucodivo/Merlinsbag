@@ -24,24 +24,24 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ArticlesViewModel @Inject constructor(
-  private val articleRepository: ArticleRepository,
-) : ViewModel() {
+    private val articleRepository: ArticleRepository,
+): ViewModel() {
 
   private lateinit var lazyArticleImages: LazyArticleThumbnails
   var takePictureUri: Uri? = null
 
   val articleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
-    .onEach { lazyArticleImages = it }
-    .stateIn(
-      scope = viewModelScope,
-      started = SharingStarted.WhileSubscribed(),
-      initialValue = LazyUriStrings.Empty,
-    )
+      .onEach { lazyArticleImages = it }
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = LazyUriStrings.Empty,
+      )
 
-   val launchCamera = mutableStateOf(Event<Uri>(null))
+  val launchCamera = mutableStateOf(Event<Uri>(null))
 
   fun onDelete(articleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
-    val articleIds = List(articleIndices.size){ lazyArticleImages.getArticleId(articleIndices[it]) }
+    val articleIds = List(articleIndices.size) { lazyArticleImages.getArticleId(articleIndices[it]) }
     articleRepository.deleteArticles(articleIds)
   }
 

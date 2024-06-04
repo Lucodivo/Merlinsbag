@@ -18,58 +18,54 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ArticleThumbnail(
-  val articleId: String,
-  val thumbUri: String,
-)
-
 data class EnsemblesUiState(
-  val ensembles: List<LazyEnsembleThumbnails>,
-  val showAddEnsembleDialog: Boolean,
-  val articleImages: LazyUriStrings,
+    val ensembles: List<LazyEnsembleThumbnails>,
+    val showAddEnsembleDialog: Boolean,
+    val articleImages: LazyUriStrings,
 )
 
 data class SaveEnsembleData(
-  val title: String,
-  val articleIndices: List<Int>,
+    val title: String,
+    val articleIndices: List<Int>,
 )
 
 @HiltViewModel
 class EnsemblesViewModel @Inject constructor(
-  articleRepository: ArticleRepository,
-  val ensemblesRepository: EnsembleRepository
+    articleRepository: ArticleRepository,
+    val ensemblesRepository: EnsembleRepository,
 ): ViewModel() {
   val showAddEnsembleDialog = MutableStateFlow(false)
   private lateinit var articleImages: LazyArticleThumbnails
 
   val ensemblesUiState: StateFlow<EnsemblesUiState> =
-    combine(
-      ensemblesRepository.getAllEnsembleArticleThumbnails(),
-      showAddEnsembleDialog,
-      articleRepository.getAllArticlesWithThumbnails().onEach { articleImages = it },
-    ) { ensembles, showDialog, articleImages ->
-      EnsemblesUiState(
-        ensembles = ensembles,
-        showAddEnsembleDialog = showDialog,
-        articleImages = articleImages,
+      combine(
+        ensemblesRepository.getAllEnsembleArticleThumbnails(),
+        showAddEnsembleDialog,
+        articleRepository.getAllArticlesWithThumbnails().onEach { articleImages = it },
+      ) { ensembles, showDialog, articleImages ->
+        EnsemblesUiState(
+          ensembles = ensembles,
+          showAddEnsembleDialog = showDialog,
+          articleImages = articleImages,
+        )
+      }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = EnsemblesUiState(
+          ensembles = emptyList(),
+          showAddEnsembleDialog = false,
+          articleImages = LazyUriStrings.Empty,
+        ),
       )
-    }.stateIn(
-      scope = viewModelScope,
-      started = SharingStarted.WhileSubscribed(),
-      initialValue = EnsemblesUiState(
-        ensembles = emptyList(),
-        showAddEnsembleDialog = false,
-        articleImages = LazyUriStrings.Empty,
-      ),
-    )
 
   private fun closeDialog() { showAddEnsembleDialog.value = false }
+
   fun onClickAddEnsemble() { showAddEnsembleDialog.value = true }
   fun onClickCloseAddEnsembleDialog() = closeDialog()
   fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
     closeDialog()
     if(saveEnsembleData.title.isNotEmpty() || saveEnsembleData.articleIndices.isNotEmpty()) {
-      val articleIds = saveEnsembleData.articleIndices.map{ articleImages.getArticleId(it) }
+      val articleIds = saveEnsembleData.articleIndices.map { articleImages.getArticleId(it) }
       viewModelScope.launch(Dispatchers.IO) {
         ensemblesRepository.insertEnsemble(
           saveEnsembleData.title,

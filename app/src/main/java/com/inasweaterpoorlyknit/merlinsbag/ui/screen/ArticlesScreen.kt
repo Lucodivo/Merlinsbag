@@ -51,10 +51,10 @@ const val ARTICLES_ROUTE = "articles_route"
 
 val additionalCameraPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_CAMERA_PERMISSIONS =
-    if (additionalCameraPermissionsRequired) {
-        arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
+    if(additionalCameraPermissionsRequired) {
+      arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
     } else {
-        arrayOf(permission.CAMERA)
+      arrayOf(permission.CAMERA)
     }
 
 fun NavController.navigateToArticles(navOptions: NavOptions? = null) =
@@ -65,109 +65,108 @@ fun ArticlesRoute(
     navController: NavController,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
-    val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
-    var showDeleteArticlesAlert by remember { mutableStateOf(false) }
-    var showPermissionsAlert by remember { mutableStateOf(false)}
-    var editMode by remember { mutableStateOf(false) }
-    val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+  val context = LocalContext.current
+  val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
+  var showDeleteArticlesAlert by remember { mutableStateOf(false) }
+  var showPermissionsAlert by remember { mutableStateOf(false) }
+  var editMode by remember { mutableStateOf(false) }
+  val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
 
-    val packageName = LocalContext.current.packageName
-    val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()) {}
-    fun openAppSettings() = _appSettingsLauncher.launch(
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.fromParts("package", packageName, null)
-        }
-    )
-
-    val _photoAlbumLauncher = rememberLauncherForActivityResult(object : OpenMultipleDocuments() {
-        override fun createIntent(context: Context, input: Array<String>): Intent {
-            return super.createIntent(context, input)
-                .apply { addCategory(Intent.CATEGORY_OPENABLE) }
-        }
-    }) { uris ->
-        if (uris.isNotEmpty()) {
-            navController.navigateToAddArticle(uris.map { navigationSafeUriStringEncode(it) })
-        } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+  val packageName = LocalContext.current.packageName
+  val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()) {}
+  fun openAppSettings() = _appSettingsLauncher.launch(
+    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+      data = Uri.fromParts("package", packageName, null)
     }
+  )
 
-    val _takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                val cameraPictureUri = articlesViewModel.takePictureUri
-                if(cameraPictureUri != null) navController.navigateToAddArticle(listOf(navigationSafeUriStringEncode(cameraPictureUri)))
-                else Log.e("GetContent ActivityResultContract", "Camera picture URI was null")
-            }
-            else Log.i("GetContent ActivityResultContract", "Picture was not returned from camera")
-        })
-    articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { _takePictureLauncher.launch(it) }
+  val _photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments() {
+    override fun createIntent(context: Context, input: Array<String>): Intent {
+      return super.createIntent(context, input)
+          .apply { addCategory(Intent.CATEGORY_OPENABLE) }
+    }
+  }) { uris ->
+    if(uris.isNotEmpty()) {
+      navController.navigateToAddArticle(uris.map { navigationSafeUriStringEncode(it) })
+    } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+  }
+
+  val _takePictureLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.TakePicture(),
+    onResult = { success ->
+      if(success) {
+        val cameraPictureUri = articlesViewModel.takePictureUri
+        if(cameraPictureUri != null) navController.navigateToAddArticle(listOf(navigationSafeUriStringEncode(cameraPictureUri)))
+        else Log.e("GetContent ActivityResultContract", "Camera picture URI was null")
+      } else Log.i("GetContent ActivityResultContract", "Picture was not returned from camera")
+    })
+  articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { _takePictureLauncher.launch(it) }
 
 
-    val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
-        contract = RequestMultiplePermissions(),
-        onResult = { permissions ->
-            var permissionsGranted = true
-            var userCheckedNeverAskAgain = false
-            permissions.entries.forEach { entry ->
-                if (!entry.value) {
-                    userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(
-                        navController.context.getActivity()!!,
-                        entry.key
-                    )
-                    permissionsGranted = false
-                }
-            }
-            if (permissionsGranted) {
-                articlesViewModel.onTakePicture(context)
-            } else {
-                if (userCheckedNeverAskAgain) {
-                    showPermissionsAlert = true
-                } else {
-                    navController.context.toast("Camera permissions required")
-                }
-            }
+  val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
+    contract = RequestMultiplePermissions(),
+    onResult = { permissions ->
+      var permissionsGranted = true
+      var userCheckedNeverAskAgain = false
+      permissions.entries.forEach { entry ->
+        if(!entry.value) {
+          userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(
+            navController.context.getActivity()!!,
+            entry.key
+          )
+          permissionsGranted = false
         }
-    )
+      }
+      if(permissionsGranted) {
+        articlesViewModel.onTakePicture(context)
+      } else {
+        if(userCheckedNeverAskAgain) {
+          showPermissionsAlert = true
+        } else {
+          navController.context.toast("Camera permissions required")
+        }
+      }
+    }
+  )
 
-    ArticlesScreen(
-        thumbnailUris = articleThumbnails,
-        selectedThumbnails = isItemSelected.keys,
-        editMode = editMode,
-        showPermissionsAlert = showPermissionsAlert,
-        showDeleteArticlesAlert = showDeleteArticlesAlert,
-        onClickArticle = { index ->
-            if (editMode) {
-                if (isItemSelected.contains(index)) isItemSelected.remove(index)
-                else isItemSelected[index] = Unit
-            } else {
-                navController.navigateToArticleDetail(index)
-            }
-        },
-        onClickAddPhotoAlbum = { _photoAlbumLauncher.launch(arrayOf("image/*")) },
-        onClickAddPhotoCamera = {
-            _cameraWithPermissionsCheckLauncher.launch(
-                REQUIRED_CAMERA_PERMISSIONS
-            )
-        },
-        onClickEdit = {
-            editMode = !editMode
-            isItemSelected.clear()
-        },
-        onClickDelete = { showDeleteArticlesAlert = true },
-        onClickSelectionCancel = isItemSelected::clear,
-        onPermissionsAlertPositive = {
-            showPermissionsAlert = false
-            openAppSettings()
-        },
-        onDeleteArticlesAlertPositive = {
-            showDeleteArticlesAlert = false
-            articlesViewModel.onDelete(isItemSelected.keys.toList())
-            isItemSelected.clear()
-        },
-        onAlertNegative = {showDeleteArticlesAlert = false; showPermissionsAlert = false},
-        onAlertOutside = {showDeleteArticlesAlert = false; showPermissionsAlert = false},
-    )
+  ArticlesScreen(
+    thumbnailUris = articleThumbnails,
+    selectedThumbnails = isItemSelected.keys,
+    editMode = editMode,
+    showPermissionsAlert = showPermissionsAlert,
+    showDeleteArticlesAlert = showDeleteArticlesAlert,
+    onClickArticle = { index ->
+      if(editMode) {
+        if(isItemSelected.contains(index)) isItemSelected.remove(index)
+        else isItemSelected[index] = Unit
+      } else {
+        navController.navigateToArticleDetail(index)
+      }
+    },
+    onClickAddPhotoAlbum = { _photoAlbumLauncher.launch(arrayOf("image/*")) },
+    onClickAddPhotoCamera = {
+      _cameraWithPermissionsCheckLauncher.launch(
+        REQUIRED_CAMERA_PERMISSIONS
+      )
+    },
+    onClickEdit = {
+      editMode = !editMode
+      isItemSelected.clear()
+    },
+    onClickDelete = { showDeleteArticlesAlert = true },
+    onClickSelectionCancel = isItemSelected::clear,
+    onPermissionsAlertPositive = {
+      showPermissionsAlert = false
+      openAppSettings()
+    },
+    onDeleteArticlesAlertPositive = {
+      showDeleteArticlesAlert = false
+      articlesViewModel.onDelete(isItemSelected.keys.toList())
+      isItemSelected.clear()
+    },
+    onAlertNegative = { showDeleteArticlesAlert = false; showPermissionsAlert = false },
+    onAlertOutside = { showDeleteArticlesAlert = false; showPermissionsAlert = false },
+  )
 }
 
 @Composable
@@ -176,24 +175,24 @@ fun CameraPermissionsAlertDialog(
     onClickNegative: () -> Unit,
     onClickPositive: () -> Unit,
 ) {
-    AlertDialog(
-        title = { Text(text = stringResource(id = R.string.permission_alert_title)) },
-        text = {
-            Text(
-                text = stringResource(
-                    id = if (additionalCameraPermissionsRequired) R.string.permission_alert_justification_additional
-                    else R.string.permission_alert_justification
-                )
-            )
-        },
-        onDismissRequest = onClickOutside,
-        confirmButton = {
-            TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.permission_alert_positive)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.permission_alert_negative)) }
-        }
-    )
+  AlertDialog(
+    title = { Text(text = stringResource(id = R.string.permission_alert_title)) },
+    text = {
+      Text(
+        text = stringResource(
+          id = if(additionalCameraPermissionsRequired) R.string.permission_alert_justification_additional
+          else R.string.permission_alert_justification
+        )
+      )
+    },
+    onDismissRequest = onClickOutside,
+    confirmButton = {
+      TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.permission_alert_positive)) }
+    },
+    dismissButton = {
+      TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.permission_alert_negative)) }
+    }
+  )
 }
 
 @Composable
@@ -202,21 +201,21 @@ fun DeleteArticlesAlertDialog(
     onClickNegative: () -> Unit,
     onClickPositive: () -> Unit,
 ) {
-    AlertDialog(
-        title = { Text(text = stringResource(id = R.string.delete_articles)) },
-        text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
-        onDismissRequest = onClickOutside,
-        confirmButton = {
-            TextButton(onClick = onClickPositive) {
-                Text(stringResource(id = R.string.delete_articles_alert_positive))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onClickNegative) {
-                Text(stringResource(id = R.string.delete_articles_alert_negative))
-            }
-        }
-    )
+  AlertDialog(
+    title = { Text(text = stringResource(id = R.string.delete_articles)) },
+    text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
+    onDismissRequest = onClickOutside,
+    confirmButton = {
+      TextButton(onClick = onClickPositive) {
+        Text(stringResource(id = R.string.delete_articles_alert_positive))
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = onClickNegative) {
+        Text(stringResource(id = R.string.delete_articles_alert_negative))
+      }
+    }
+  )
 }
 
 @Composable
@@ -237,78 +236,78 @@ fun ArticlesScreen(
     onAlertNegative: () -> Unit,
     onAlertOutside: () -> Unit,
 ) {
-    if (showPermissionsAlert) {
-        CameraPermissionsAlertDialog(
-            onClickOutside = onAlertOutside,
-            onClickNegative = onAlertNegative,
-            onClickPositive = onPermissionsAlertPositive,
-        )
-    }
+  if(showPermissionsAlert) {
+    CameraPermissionsAlertDialog(
+      onClickOutside = onAlertOutside,
+      onClickNegative = onAlertNegative,
+      onClickPositive = onPermissionsAlertPositive,
+    )
+  }
 
-    if (showDeleteArticlesAlert) {
-        DeleteArticlesAlertDialog(
-            onClickOutside = onAlertOutside,
-            onClickNegative = onAlertNegative,
-            onClickPositive = onDeleteArticlesAlertPositive,
-        )
-    }
+  if(showDeleteArticlesAlert) {
+    DeleteArticlesAlertDialog(
+      onClickOutside = onAlertOutside,
+      onClickNegative = onAlertNegative,
+      onClickPositive = onDeleteArticlesAlertPositive,
+    )
+  }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        SelectableArticleThumbnailGrid(
-            selectable = editMode,
-            onSelected = { index ->
-                onClickArticle(index)
-            },
-            thumbnailUris = thumbnailUris,
-            selectedThumbnails = selectedThumbnails,
+  Box(modifier = Modifier.fillMaxSize()) {
+    SelectableArticleThumbnailGrid(
+      selectable = editMode,
+      onSelected = { index ->
+        onClickArticle(index)
+      },
+      thumbnailUris = thumbnailUris,
+      selectedThumbnails = selectedThumbnails,
+    )
+    NoopExpandingFloatingActionButton(
+      expanded = editMode,
+      collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
+      expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+      expandedButtons =
+      if(selectedThumbnails.isNotEmpty()) {
+        listOf(
+          TextIconButtonData(
+            text = "",
+            icon = IconData(
+              icon = NoopIcons.Cancel,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+            ),
+            onClick = onClickSelectionCancel
+          ),
+          TextIconButtonData(
+            text = "",
+            icon = IconData(
+              icon = NoopIcons.Delete,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+            ),
+            onClick = onClickDelete
+          ),
         )
-      NoopExpandingFloatingActionButton(
-        expanded = editMode,
-        collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
-        expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-        expandedButtons =
-        if (selectedThumbnails.isNotEmpty()) {
-          listOf(
-            TextIconButtonData(
-              text = "",
-              icon = IconData(
-                icon = NoopIcons.Cancel,
-                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-              ),
-              onClick = onClickSelectionCancel
+      } else {
+        listOf(
+          TextIconButtonData(
+            text = "",
+            icon = IconData(
+              icon = NoopIcons.AddPhotoAlbum,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
             ),
-            TextIconButtonData(
-              text = "",
-              icon = IconData(
-                icon = NoopIcons.Delete,
-                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-              ),
-              onClick = onClickDelete
+            onClick = onClickAddPhotoAlbum
+          ),
+          TextIconButtonData(
+            text = "",
+            icon = IconData(
+              icon = NoopIcons.AddPhotoCamera,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
             ),
-          )
-        } else {
-          listOf(
-            TextIconButtonData(
-              text = "",
-              icon = IconData(
-                icon = NoopIcons.AddPhotoAlbum,
-                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-              ),
-              onClick = onClickAddPhotoAlbum
-            ),
-            TextIconButtonData(
-              text = "",
-              icon = IconData(
-                icon = NoopIcons.AddPhotoCamera,
-                contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-              ),
-              onClick = onClickAddPhotoCamera
-            ),
-          )
-        },
-        onClickExpandCollapse = onClickEdit,
-      )
-    }
+            onClick = onClickAddPhotoCamera
+          ),
+        )
+      },
+      onClickExpandCollapse = onClickEdit,
+    )
+  }
 }
 
 //region COMPOSABLE PREVIEWS

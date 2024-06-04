@@ -30,7 +30,7 @@ const val ARTICLE_INDEX_ARG = "articleIndex"
 const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
 const val ARTICLE_DETAIL_ROUTE = "$ARTICLE_DETAIL_ROUTE_BASE?$ARTICLE_INDEX_ARG={$ARTICLE_INDEX_ARG}?$ENSEMBLE_ID_ARG={$ENSEMBLE_ID_ARG}"
 
-fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null){
+fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null) {
   val route = "${ARTICLE_DETAIL_ROUTE_BASE}?$ARTICLE_INDEX_ARG=$articleIndex?$ENSEMBLE_ID_ARG=$ensembleId"
   navigate(route, navOptions)
 }
@@ -38,11 +38,11 @@ fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String?
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArticleDetailScreen(
-  articlesWithImages: LazyUriStrings,
-  startingIndex: Int,
-  modifier: Modifier = Modifier
+    articlesWithImages: LazyUriStrings,
+    startingIndex: Int,
+    modifier: Modifier = Modifier,
 ) {
-  if(articlesWithImages.isEmpty()){
+  if(articlesWithImages.isEmpty()) {
     CircularProgressIndicator()
   } else {
     val pagerState = rememberPagerState(
@@ -52,11 +52,13 @@ fun ArticleDetailScreen(
     )
     HorizontalPager(
       state = pagerState
-    ){ page ->
+    ) { page ->
       NoopImage(
         uriString = articlesWithImages.getUriString(page),
         contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-        modifier = modifier.fillMaxSize().padding(16.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
       )
     }
   }
@@ -64,15 +66,15 @@ fun ArticleDetailScreen(
 
 @Composable
 fun ArticleDetailRoute(
-  navController: NavController,
-  articleIndex: Int,
-  ensembleId: String?,
-  modifier: Modifier = Modifier,
-){
+    navController: NavController,
+    articleIndex: Int,
+    ensembleId: String?,
+    modifier: Modifier = Modifier,
+) {
   val articleDetailViewModel =
-    hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
-      factory.create(articleIndex, ensembleId)
-    }
+      hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
+        factory.create(articleIndex, ensembleId)
+      }
   val articleDetailUiState by articleDetailViewModel.articleDetailUiState.collectAsStateWithLifecycle()
   ArticleDetailScreen(
     articlesWithImages = articleDetailUiState.articleFullImages,
@@ -83,21 +85,21 @@ fun ArticleDetailRoute(
 
 @Preview
 @Composable
-fun PreviewArticleDetailScreen(){
+fun PreviewArticleDetailScreen() {
   val articlesWithImages =
-    LazyArticleThumbnails(
-      directory = "",
-      articleThumbnailPaths = listOf(
-        ArticleWithThumbnails(
-        articleId = COMPOSE_ID,
-        thumbnailPaths = listOf(
-          ThumbnailFilename(
-            uri = R.raw.test_full_1.toString(),
-          ),
-        ),
+      LazyArticleThumbnails(
+        directory = "",
+        articleThumbnailPaths = listOf(
+          ArticleWithThumbnails(
+            articleId = COMPOSE_ID,
+            thumbnailPaths = listOf(
+              ThumbnailFilename(
+                uri = R.raw.test_full_1.toString(),
+              ),
+            ),
+          )
+        )
       )
-      )
-    )
   NoopTheme {
     ArticleDetailScreen(
       articlesWithImages = articlesWithImages,

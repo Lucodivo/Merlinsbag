@@ -22,11 +22,11 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 
 @Composable
 fun SelectableArticleThumbnailGrid(
-  selectable: Boolean,
-  onSelected: (index: Int) -> Unit,
-  thumbnailUris: LazyUriStrings,
-  selectedThumbnails: Set<Int>,
-){
+    selectable: Boolean,
+    onSelected: (index: Int) -> Unit,
+    thumbnailUris: LazyUriStrings,
+    selectedThumbnails: Set<Int>,
+) {
   val gridMinWidth = 90.dp
   val gridItemPadding = 8.dp
   val articlesGridState = rememberLazyStaggeredGridState()
@@ -34,12 +34,12 @@ fun SelectableArticleThumbnailGrid(
     // typical dp width of a smart phone is 320dp-480dp
     columns = StaggeredGridCells.Adaptive(minSize = gridMinWidth),
     content = {
-      items(count = thumbnailUris.size){ thumbnailGridItemIndex ->
+      items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
         Box(
           contentAlignment = Alignment.Center,
           modifier = Modifier
-            .clickable { onSelected(thumbnailGridItemIndex) }
-            .padding(gridItemPadding)
+              .clickable { onSelected(thumbnailGridItemIndex) }
+              .padding(gridItemPadding)
         ) {
           val uriString = thumbnailUris.getUriString(thumbnailGridItemIndex)
           SelectableNoopImage(
@@ -67,6 +67,7 @@ fun PreviewUtilArticleThumbnailGrid(selectable: Boolean) = NoopTheme {
     selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
   )
 }
+
 @Preview @Composable fun PreviewSelectableArticleThumbnailGrid_selectable() = PreviewUtilArticleThumbnailGrid(selectable = true)
 @Preview @Composable fun PreviewSelectableArticleThumbnailGrid_notSelectable() = PreviewUtilArticleThumbnailGrid(selectable = false)
 @LandscapePreview @Composable fun PreviewSelectableArticleThumbnailGrid_landscape() = PreviewUtilArticleThumbnailGrid(selectable = false)

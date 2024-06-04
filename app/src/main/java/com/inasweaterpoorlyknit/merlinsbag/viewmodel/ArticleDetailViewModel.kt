@@ -14,31 +14,31 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 data class ArticleDetailUiState(
-  val articleFullImages: LazyUriStrings,
+    val articleFullImages: LazyUriStrings,
 )
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
-  @Assisted("articleIndex") private val articleIndex: Int,
-  @Assisted("ensembleId") private val ensembleId: String?,
-  articleRepository: ArticleRepository,
+    @Assisted("articleIndex") private val articleIndex: Int,
+    @Assisted("ensembleId") private val ensembleId: String?,
+    articleRepository: ArticleRepository,
 ): ViewModel() {
 
   @AssistedFactory
   interface ArticleDetailViewModelFactory {
     fun create(
-      @Assisted("articleIndex") articleIndex: Int,
-      @Assisted("ensembleId") ensembleId: String?
+        @Assisted("articleIndex") articleIndex: Int,
+        @Assisted("ensembleId") ensembleId: String?,
     ): ArticleDetailViewModel
   }
 
   val articleDetailUiState: StateFlow<ArticleDetailUiState> = articleRepository.getArticlesWithFullImages(ensembleId).map {
-      ArticleDetailUiState(articleFullImages = it)
-    }.stateIn(
-      scope = viewModelScope,
-      started = SharingStarted.WhileSubscribed(),
-      initialValue = ArticleDetailUiState(
-        articleFullImages = LazyUriStrings.Empty,
-      )
+    ArticleDetailUiState(articleFullImages = it)
+  }.stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(),
+    initialValue = ArticleDetailUiState(
+      articleFullImages = LazyUriStrings.Empty,
     )
+  )
 }

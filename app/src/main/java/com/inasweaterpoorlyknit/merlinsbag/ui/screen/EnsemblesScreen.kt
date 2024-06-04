@@ -64,65 +64,65 @@ fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate
 @Composable
 fun EnsemblesRoute(
     navController: NavController,
-    ensemblesViewModel: EnsemblesViewModel = hiltViewModel()
-){
-    val ensemblesUiState by ensemblesViewModel.ensemblesUiState.collectAsStateWithLifecycle()
-    EnsemblesScreen (
-        ensembles = ensemblesUiState.ensembles,
-        showAddEnsembleDialog = ensemblesUiState.showAddEnsembleDialog,
-        addEnsembleDialogArticles = ensemblesUiState.articleImages,
-        onClickEnsemble = { id ->
-            navController.navigateToEnsembleDetail(ensembleId = id)
-        },
-        onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
-        onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
-        onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog ,
-    )
+    ensemblesViewModel: EnsemblesViewModel = hiltViewModel(),
+) {
+  val ensemblesUiState by ensemblesViewModel.ensemblesUiState.collectAsStateWithLifecycle()
+  EnsemblesScreen(
+    ensembles = ensemblesUiState.ensembles,
+    showAddEnsembleDialog = ensemblesUiState.showAddEnsembleDialog,
+    addEnsembleDialogArticles = ensemblesUiState.articleImages,
+    onClickEnsemble = { id ->
+      navController.navigateToEnsembleDetail(ensembleId = id)
+    },
+    onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
+    onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
+    onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog,
+  )
 }
 
 @Composable
 fun EnsemblesRow(
     ensemble: LazyEnsembleThumbnails,
     modifier: Modifier = Modifier,
-){
-    val thumbnailsPadding = 10.dp
-    val maxThumbnailSize = 80.dp
-    val titleVerticalPadding = 5.dp
-    val overlapPercentage = 0.4f
-    val minRowHeight = thumbnailsPadding * 4
-    Card(modifier = modifier){
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier.heightIn(min = minRowHeight),
-        ){
-            HorizontalOverlappingLayout(
-                modifier = Modifier.padding(horizontal = thumbnailsPadding),
-                overlapPercentage = overlapPercentage,
-            ) {
-                repeat(ensemble.thumbnails.size) { index ->
-                    NoopImage(
-                        uriString = ensemble.thumbnails.getUriString(index),
-                        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-                        modifier = Modifier
-                            .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
-                            .padding(vertical = thumbnailsPadding)
-                    )
-                }
-            }
-            if(ensemble.title.isNotEmpty()) {
-                Text(
-                    text = ensemble.title,
-                    modifier = Modifier.padding(
-                        top = 0.dp,
-                        end = thumbnailsPadding,
-                        start = thumbnailsPadding,
-                        bottom = if(ensemble.thumbnails.isEmpty()) 0.dp else titleVerticalPadding
-                    )
-                )
-            }
+) {
+  val thumbnailsPadding = 10.dp
+  val maxThumbnailSize = 80.dp
+  val titleVerticalPadding = 5.dp
+  val overlapPercentage = 0.4f
+  val minRowHeight = thumbnailsPadding * 4
+  Card(modifier = modifier) {
+    Column(
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.Start,
+      modifier = Modifier.heightIn(min = minRowHeight),
+    ) {
+      HorizontalOverlappingLayout(
+        modifier = Modifier.padding(horizontal = thumbnailsPadding),
+        overlapPercentage = overlapPercentage,
+      ) {
+        repeat(ensemble.thumbnails.size) { index ->
+          NoopImage(
+            uriString = ensemble.thumbnails.getUriString(index),
+            contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+            modifier = Modifier
+                .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
+                .padding(vertical = thumbnailsPadding)
+          )
         }
+      }
+      if(ensemble.title.isNotEmpty()) {
+        Text(
+          text = ensemble.title,
+          modifier = Modifier.padding(
+            top = 0.dp,
+            end = thumbnailsPadding,
+            start = thumbnailsPadding,
+            bottom = if(ensemble.thumbnails.isEmpty()) 0.dp else titleVerticalPadding
+          )
+        )
+      }
     }
+  }
 }
 
 @Composable
@@ -135,41 +135,41 @@ fun EnsemblesScreen(
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
 ) {
-    val sidePadding = 10.dp
-    val ensembleSpacing = 3.dp
-    Surface(
-        modifier = Modifier.fillMaxSize(),
+  val sidePadding = 10.dp
+  val ensembleSpacing = 3.dp
+  Surface(
+    modifier = Modifier.fillMaxSize(),
+  ) {
+    LazyColumn(
+      verticalArrangement = Arrangement.Top,
+      horizontalAlignment = Alignment.CenterHorizontally,
+      contentPadding = PaddingValues(horizontal = sidePadding),
+      modifier = Modifier.fillMaxWidth()
     ) {
-        LazyColumn(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(horizontal = sidePadding),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(ensembles.size) { index ->
-                val topPadding = if (index == 0) sidePadding else ensembleSpacing
-                val bottomPadding = if (index == ensembles.lastIndex) sidePadding else ensembleSpacing
-                val ensemble = ensembles[index]
-                EnsemblesRow(
-                    ensemble = ensemble,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = topPadding, bottom = bottomPadding)
-                        .clickable { onClickEnsemble(ensemble.id) }
-                )
-            }
-        }
-        NoopFloatingActionButton(
-            iconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
-            onClick = onClickAddEnsemble,
+      items(ensembles.size) { index ->
+        val topPadding = if(index == 0) sidePadding else ensembleSpacing
+        val bottomPadding = if(index == ensembles.lastIndex) sidePadding else ensembleSpacing
+        val ensemble = ensembles[index]
+        EnsemblesRow(
+          ensemble = ensemble,
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(top = topPadding, bottom = bottomPadding)
+              .clickable { onClickEnsemble(ensemble.id) }
         )
-        AddEnsembleDialog(
-            visible = showAddEnsembleDialog,
-            articleThumbnails = addEnsembleDialogArticles,
-            onClickSave = onClickSaveEnsemble,
-            onClickClose = onCloseAddEnsembleDialog,
-        )
+      }
     }
+    NoopFloatingActionButton(
+      iconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
+      onClick = onClickAddEnsemble,
+    )
+    AddEnsembleDialog(
+      visible = showAddEnsembleDialog,
+      articleThumbnails = addEnsembleDialogArticles,
+      onClickSave = onClickSaveEnsemble,
+      onClickClose = onCloseAddEnsembleDialog,
+    )
+  }
 }
 
 @Composable
@@ -178,148 +178,147 @@ fun AddEnsembleDialog(
     articleThumbnails: LazyUriStrings,
     onClickSave: (SaveEnsembleData) -> Unit,
     onClickClose: () -> Unit,
-){
-    BackHandler(enabled = visible){ onClickClose() }
-    val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
-    val selectedArticleIndices = if(isComposePreview) remember { mutableSetOf(0, 1) } else remember { mutableSetOf() }
-    NoopAddEnsembleDialog(
-        visible = visible,
-        title = stringResource(id = R.string.Add_ensemble),
-        positiveButtonLabel = stringResource(id = R.string.Save),
-        onClose = onClickClose,
-        onPositive = {
-            onClickSave(
-                SaveEnsembleData(
-                    title = userInputTitle,
-                    articleIndices = selectedArticleIndices.toList(),
-                )
-            )
-            selectedArticleIndices.clear()
-            setUserInputTitle("")
-        },
-    ){
-        Row {
-            OutlinedTextField(
-                value = userInputTitle,
-                placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
-                onValueChange = { updatedTitle ->
-                    if(updatedTitle.length <= MAX_ENSEMBLE_TITLE_LENGTH){
-                        setUserInputTitle(updatedTitle)
-                    }
-                },
-                label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
-                singleLine = true,
-            )
-        }
-        Text(
-            text = stringResource(id = R.string.Articles),
-            modifier = Modifier.padding(10.dp)
+) {
+  BackHandler(enabled = visible) { onClickClose() }
+  val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
+  val selectedArticleIndices = if(isComposePreview) remember { mutableSetOf(0, 1) } else remember { mutableSetOf() }
+  NoopAddEnsembleDialog(
+    visible = visible,
+    title = stringResource(id = R.string.Add_ensemble),
+    positiveButtonLabel = stringResource(id = R.string.Save),
+    onClose = onClickClose,
+    onPositive = {
+      onClickSave(
+        SaveEnsembleData(
+          title = userInputTitle,
+          articleIndices = selectedArticleIndices.toList(),
         )
-        LazyRow(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.height(110.dp)
-        ) {
-            val padding = 10.dp
-            items(count = articleThumbnails.size) { articleIndex ->
-                val articleThumbnailUriString = articleThumbnails.getUriString(articleIndex)
-                Box(contentAlignment = Alignment.Center){
-                    val (selected, setSelected) = remember { mutableStateOf(selectedArticleIndices.contains(articleIndex)) }
-                    SelectableNoopImage(
-                        selectable = true,
-                        selected = selected,
-                        uriString = articleThumbnailUriString,
-                        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-                        modifier = Modifier
-                            .padding(padding)
-                            .clickable {
-                                if(selected) {
-                                    selectedArticleIndices.remove(articleIndex)
-                                    setSelected(false)
-                                } else {
-                                    selectedArticleIndices.add(articleIndex)
-                                    setSelected(true)
-                                }
-                            }
-                    )
+      )
+      selectedArticleIndices.clear()
+      setUserInputTitle("")
+    },
+  ) {
+    Row {
+      OutlinedTextField(
+        value = userInputTitle,
+        placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
+        onValueChange = { updatedTitle ->
+          if(updatedTitle.length <= MAX_ENSEMBLE_TITLE_LENGTH) {
+            setUserInputTitle(updatedTitle)
+          }
+        },
+        label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
+        singleLine = true,
+      )
+    }
+    Text(
+      text = stringResource(id = R.string.Articles),
+      modifier = Modifier.padding(10.dp)
+    )
+    LazyRow(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Start,
+      modifier = Modifier.height(110.dp)
+    ) {
+      val padding = 10.dp
+      items(count = articleThumbnails.size) { articleIndex ->
+        val articleThumbnailUriString = articleThumbnails.getUriString(articleIndex)
+        Box(contentAlignment = Alignment.Center) {
+          val (selected, setSelected) = remember { mutableStateOf(selectedArticleIndices.contains(articleIndex)) }
+          SelectableNoopImage(
+            selectable = true,
+            selected = selected,
+            uriString = articleThumbnailUriString,
+            contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+            modifier = Modifier
+                .padding(padding)
+                .clickable {
                     if(selected) {
-                        Icon(
-                            imageVector = NoopIcons.SelectedIndicator,
-                            contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
-                            modifier = Modifier.align(Alignment.BottomEnd),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
+                        selectedArticleIndices.remove(articleIndex)
+                        setSelected(false)
+                    } else {
+                        selectedArticleIndices.add(articleIndex)
+                        setSelected(true)
                     }
                 }
-            }
+          )
+          if(selected) {
+            Icon(
+              imageVector = NoopIcons.SelectedIndicator,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+              modifier = Modifier.align(Alignment.BottomEnd),
+              tint = MaterialTheme.colorScheme.primary,
+            )
+          }
         }
+      }
     }
+  }
 }
 
 //region COMPOSABLE PREVIEWS
+val previewEnsembles: List<LazyEnsembleThumbnails> =
+    repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
+      listOf(
+        thumbnails.slice(4..4),
+        thumbnails.slice(0..5),
+        thumbnails.slice(6..16),
+        thumbnails.slice(1..12),
+        emptyList(),
+        emptyList(),
+        thumbnails.slice(3..5),
+        thumbnails.slice(5..11),
+        thumbnails.slice(7..11),
+        thumbnails.slice(12..17),
+      ).mapIndexed { index, thumbnailUriStrings ->
+        LazyEnsembleThumbnails(
+          id = index.toString(),
+          title = if(index == 3 || index == 4) "" else "Ensemble ${index + 1}",
+          thumbnails =
+          LazyArticleThumbnails("",
+            articleThumbnailPaths = thumbnailUriStrings.mapIndexed { i, it ->
+              ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
+            }
+          )
+        )
+      }
+    }
+
 @Composable
 fun PreviewUtilEnsembleScreen(
     ensembles: List<LazyEnsembleThumbnails>,
     showAddEnsembleForm: Boolean,
-) = NoopTheme{
-    EnsemblesScreen(
-        ensembles = ensembles,
-        showAddEnsembleDialog = showAddEnsembleForm,
-        addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
-        onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {}
-    )
+) = NoopTheme {
+  EnsemblesScreen(
+    ensembles = ensembles,
+    showAddEnsembleDialog = showAddEnsembleForm,
+    addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
+    onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {}
+  )
 }
-
-val previewEnsembles: List<LazyEnsembleThumbnails> =
-    repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
-        listOf(
-            thumbnails.slice(4..4),
-            thumbnails.slice(0..5),
-            thumbnails.slice(6..16),
-            thumbnails.slice(1..12),
-            emptyList(),
-            emptyList(),
-            thumbnails.slice(3..5),
-            thumbnails.slice(5..11),
-            thumbnails.slice(7..11),
-            thumbnails.slice(12..17),
-        ).mapIndexed { index, thumbnailUriStrings ->
-            LazyEnsembleThumbnails(
-                id = index.toString(),
-                title = if(index == 3 || index == 4) "" else "Ensemble ${index + 1}",
-                thumbnails =
-                LazyArticleThumbnails("",
-                    articleThumbnailPaths = thumbnailUriStrings.mapIndexed { i, it ->
-                        ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
-                    }
-                )
-            )
-        }
-    }
-
 
 @Preview
 @Composable
 fun PreviewEnsembleScreen() = PreviewUtilEnsembleScreen(
-    ensembles = previewEnsembles,
-    showAddEnsembleForm = false,
+  ensembles = previewEnsembles,
+  showAddEnsembleForm = false,
 )
 
 @Preview
 @Composable
 fun PreviewEnsemblesScreenAddEnsembleDialog() = PreviewUtilEnsembleScreen(
-    ensembles = previewEnsembles,
-    showAddEnsembleForm = true,
+  ensembles = previewEnsembles,
+  showAddEnsembleForm = true,
 )
 
 @Preview
 @Composable
-fun PreviewAddEnsembleDialog() = NoopTheme{
-    AddEnsembleDialog(
-        visible = true,
-        articleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
-        onClickSave = {},
-        onClickClose = {},
-    )
+fun PreviewAddEnsembleDialog() = NoopTheme {
+  AddEnsembleDialog(
+    visible = true,
+    articleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
+    onClickSave = {},
+    onClickClose = {},
+  )
 }
 //endregion

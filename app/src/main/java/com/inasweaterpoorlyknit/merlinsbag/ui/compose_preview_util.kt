@@ -47,10 +47,10 @@ fun previewAssetBitmap(filename: String, context: Context): Bitmap = BitmapFacto
 fun resourceAsUriString(@RawRes resId: Int): String {
   val resources = LocalContext.current.resources
   return Uri.parse(
-    ContentResolver.SCHEME_ANDROID_RESOURCE +
-        "://" + resources.getResourcePackageName(resId)
-        + '/' + resources.getResourceTypeName(resId)
-        + '/' + resources.getResourceEntryName(resId)
+    ContentResolver.SCHEME_ANDROID_RESOURCE
+    + "://" + resources.getResourcePackageName(resId)
+    + '/' + resources.getResourceTypeName(resId)
+    + '/' + resources.getResourceEntryName(resId)
   ).toString()
 }
 
@@ -82,30 +82,30 @@ val allTestFullResourceIdsAsStrings = arrayOf(
 )
 val repeatedFullResourceIdsAsStrings = arrayListOf(*allTestFullResourceIdsAsStrings, *allTestFullResourceIdsAsStrings, *allTestFullResourceIdsAsStrings)
 val allTestThumbnailResourceIdsAsStrings = arrayOf(
-    R.raw.test_thumb_1.toString(), R.raw.test_thumb_2.toString(), R.raw.test_thumb_3.toString(),
-    R.raw.test_thumb_4.toString(), R.raw.test_thumb_5.toString(), R.raw.test_thumb_6.toString(),
-    R.raw.test_thumb_7.toString(), R.raw.test_thumb_8.toString(), R.raw.test_thumb_9.toString(),
+  R.raw.test_thumb_1.toString(), R.raw.test_thumb_2.toString(), R.raw.test_thumb_3.toString(),
+  R.raw.test_thumb_4.toString(), R.raw.test_thumb_5.toString(), R.raw.test_thumb_6.toString(),
+  R.raw.test_thumb_7.toString(), R.raw.test_thumb_8.toString(), R.raw.test_thumb_9.toString(),
 )
 val repeatedThumbnailResourceIdsAsStrings = arrayListOf(*allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings)
 val lazyRepeatedThumbnailResourceIdsAsStrings =
-  LazyArticleThumbnails("",
-    articleThumbnailPaths = repeatedThumbnailResourceIdsAsStrings.mapIndexed { i, it ->
-      ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
-    }
-  )
+    LazyArticleThumbnails("",
+      articleThumbnailPaths = repeatedThumbnailResourceIdsAsStrings.mapIndexed { i, it ->
+        ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
+      }
+    )
 val repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
 val repeatedArticleWithImages = repeatedFullResourceIdsAsStrings.zip(repeatedThumbnailResourceIdsAsStrings)
-  .mapIndexed { index, resourceId ->
-  ArticleWithImages(
-    articleId = index.toString(),
-    imagePaths = listOf(
-      ImageFilenames(
-        uri = resourceId.first,
-        uriThumb = resourceId.second,
+    .mapIndexed { index, resourceId ->
+      ArticleWithImages(
+        articleId = index.toString(),
+        imagePaths = listOf(
+          ImageFilenames(
+            uri = resourceId.first,
+            uriThumb = resourceId.second,
+          )
+        ),
       )
-    ),
-  )
-}
+    }
 
 /*
  Switching icons for app shouldn't always change previews

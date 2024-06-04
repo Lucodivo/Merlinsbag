@@ -68,14 +68,14 @@ fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOp
 
 @Composable
 fun EnsembleDetailRoute(
-  navController: NavController,
-  ensembleId: String,
-  modifier: Modifier = Modifier,
+    navController: NavController,
+    ensembleId: String,
+    modifier: Modifier = Modifier,
 ) {
   val ensembleDetailViewModel =
-    hiltViewModel<EnsembleDetailViewModel, EnsembleDetailViewModel.EnsembleDetailViewModelFactory> { factory ->
-      factory.create(ensembleId)
-    }
+      hiltViewModel<EnsembleDetailViewModel, EnsembleDetailViewModel.EnsembleDetailViewModelFactory> { factory ->
+        factory.create(ensembleId)
+      }
   val ensembleTitle by ensembleDetailViewModel.ensembleTitle.collectAsStateWithLifecycle()
   val ensembleUiState by ensembleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   var editingTitle by remember { mutableStateOf(false) }
@@ -98,18 +98,18 @@ fun EnsembleDetailRoute(
       editingTitle = false
     },
     onClickEdit = {
-      if (editMode) selectedEditArticleIndices.clear()
+      if(editMode) selectedEditArticleIndices.clear()
       editMode = !editMode
     },
     onSelectedEditArticle = { index ->
-      if (editMode) {
-        if (selectedEditArticleIndices.containsKey(index)) selectedEditArticleIndices.remove(index) else selectedEditArticleIndices[index] = Unit
+      if(editMode) {
+        if(selectedEditArticleIndices.containsKey(index)) selectedEditArticleIndices.remove(index) else selectedEditArticleIndices[index] = Unit
       } else {
         navController.navigateToArticleDetail(index, ensembleId)
       }
     },
     onSelectedAddArticle = { index ->
-      if (selectedAddArticleIndices.containsKey(index)) selectedAddArticleIndices.remove(index) else selectedAddArticleIndices[index] = Unit
+      if(selectedAddArticleIndices.containsKey(index)) selectedAddArticleIndices.remove(index) else selectedAddArticleIndices[index] = Unit
     },
     onClickCancelSelection = {
       selectedEditArticleIndices.clear()
@@ -124,7 +124,7 @@ fun EnsembleDetailRoute(
     onAbandonEditTitle = { editingTitle = false },
     showAddArticlesDialog = showAddArticlesDialog,
     onClickConfirmAddArticles = {
-      if(selectedAddArticleIndices.isNotEmpty()){
+      if(selectedAddArticleIndices.isNotEmpty()) {
         ensembleDetailViewModel.addEnsembleArticles(selectedAddArticleIndices.keys.toList())
         selectedAddArticleIndices.clear()
       }
@@ -149,9 +149,9 @@ fun EnsembleDetailRoute(
 
 @Composable
 fun DeleteEnsembleAlertDialog(
-  onClickOutside: () -> Unit,
-  onClickNegative: () -> Unit,
-  onClickPositive: () -> Unit,
+    onClickOutside: () -> Unit,
+    onClickNegative: () -> Unit,
+    onClickPositive: () -> Unit,
 ) {
   AlertDialog(
     title = { Text(text = stringResource(id = R.string.delete_ensemble)) },
@@ -172,20 +172,20 @@ fun DeleteEnsembleAlertDialog(
 
 @Composable
 fun EnsembleDetailFloatingActionButtons(
-  editEnsemblesMode: Boolean,
-  selectedEditArticleIndices: Set<Int>,
-  onClickEdit: () -> Unit,
-  onClickAddArticles: () -> Unit,
-  onClickCancelSelection: () -> Unit,
-  onClickRemoveArticles: () -> Unit,
-  onClickDeleteEnsemble: () -> Unit,
-){
+    editEnsemblesMode: Boolean,
+    selectedEditArticleIndices: Set<Int>,
+    onClickEdit: () -> Unit,
+    onClickAddArticles: () -> Unit,
+    onClickCancelSelection: () -> Unit,
+    onClickRemoveArticles: () -> Unit,
+    onClickDeleteEnsemble: () -> Unit,
+) {
   NoopExpandingFloatingActionButton(
     expanded = editEnsemblesMode,
     collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
     expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
     expandedButtons =
-    if (selectedEditArticleIndices.isNotEmpty()) {
+    if(selectedEditArticleIndices.isNotEmpty()) {
       listOf(
         TextIconButtonData(
           text = "",
@@ -230,31 +230,31 @@ fun EnsembleDetailFloatingActionButtons(
 
 @Composable
 fun EnsembleDetailScreen(
-  title: String,
-  editEnsemblesMode: Boolean,
-  editingTitle: Boolean,
-  ensembleArticleThumbnailUris: LazyUriStrings,
-  addArticleThumbnailUris: LazyUriStrings,
-  selectedEditArticleIndices: Set<Int>,
-  selectedAddArticleIndices: Set<Int>,
-  onTitleClicked: () -> Unit,
-  onTitleChanged: (String) -> Unit,
-  onClickEdit: () -> Unit,
-  onClickAddArticles: () -> Unit,
-  onSelectedEditArticle: (index: Int) -> Unit,
-  onClickRemoveArticles: () -> Unit,
-  onClickCancelSelection: () -> Unit,
-  onClickDeleteEnsemble: () -> Unit,
-  onAbandonEditTitle: () -> Unit,
-  showAddArticlesDialog: Boolean,
-  onSelectedAddArticle: (articleIndex: Int) -> Unit,
-  onClickConfirmAddArticles: () -> Unit,
-  onCloseAddArticlesDialog: () -> Unit,
-  showDeleteEnsembleAlertDialog: Boolean,
-  onClickOutsideDeleteEnsembleDialog: () -> Unit,
-  onClickNegativeDeleteEnsembleDialog: () -> Unit,
-  onClickPositiveDeleteEnsembleDialog: () -> Unit,
-  modifier: Modifier = Modifier,
+    title: String,
+    editEnsemblesMode: Boolean,
+    editingTitle: Boolean,
+    ensembleArticleThumbnailUris: LazyUriStrings,
+    addArticleThumbnailUris: LazyUriStrings,
+    selectedEditArticleIndices: Set<Int>,
+    selectedAddArticleIndices: Set<Int>,
+    onTitleClicked: () -> Unit,
+    onTitleChanged: (String) -> Unit,
+    onClickEdit: () -> Unit,
+    onClickAddArticles: () -> Unit,
+    onSelectedEditArticle: (index: Int) -> Unit,
+    onClickRemoveArticles: () -> Unit,
+    onClickCancelSelection: () -> Unit,
+    onClickDeleteEnsemble: () -> Unit,
+    onAbandonEditTitle: () -> Unit,
+    showAddArticlesDialog: Boolean,
+    onSelectedAddArticle: (articleIndex: Int) -> Unit,
+    onClickConfirmAddArticles: () -> Unit,
+    onCloseAddArticlesDialog: () -> Unit,
+    showDeleteEnsembleAlertDialog: Boolean,
+    onClickOutsideDeleteEnsembleDialog: () -> Unit,
+    onClickNegativeDeleteEnsembleDialog: () -> Unit,
+    onClickPositiveDeleteEnsembleDialog: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   Surface(
     modifier = modifier.fillMaxSize()
@@ -268,18 +268,18 @@ fun EnsembleDetailScreen(
       Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-          .height(height = 90.dp)
-          .fillMaxWidth()
-          .clickable(
-            interactionSource = titleRowInteractionSource,
-            indication = null,
-            onClick = { if (!editingTitle) onTitleClicked() }
-          ),
+            .height(height = 90.dp)
+            .fillMaxWidth()
+            .clickable(
+              interactionSource = titleRowInteractionSource,
+              indication = null,
+              onClick = { if(!editingTitle) onTitleClicked() }
+            ),
       ) {
         val titleModifier = Modifier.fillMaxWidth()
         val titleAlign = TextAlign.Center
         val titleFontSize = MaterialTheme.typography.titleLarge.fontSize
-        if (editingTitle) {
+        if(editingTitle) {
           val (editTitle, setEditTitle) = remember { mutableStateOf("") }
           val focusRequester = FocusRequester()
           OutlinedTextField(
@@ -290,13 +290,13 @@ fun EnsembleDetailScreen(
             label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
             keyboardActions = KeyboardActions(onDone = { onTitleChanged(editTitle) }),
             modifier = titleModifier
-              .padding(start = 20.dp, end = 20.dp)
-              .focusRequester(focusRequester)
+                .padding(start = 20.dp, end = 20.dp)
+                .focusRequester(focusRequester)
           )
           LaunchedEffect(Unit) { focusRequester.requestFocus() }
           BackHandler { onAbandonEditTitle() }
         } else {
-          if (title.isNotEmpty()) {
+          if(title.isNotEmpty()) {
             Text(text = title, textAlign = titleAlign, fontSize = titleFontSize, modifier = titleModifier)
           } else {
             Text(text = "[untitled]", textAlign = titleAlign, fontSize = titleFontSize, color = Color.Gray, modifier = titleModifier)
@@ -310,16 +310,16 @@ fun EnsembleDetailScreen(
           thumbnailUris = ensembleArticleThumbnailUris,
           selectedThumbnails = selectedEditArticleIndices,
         )
-        if (editingTitle) {
+        if(editingTitle) {
           Box(
             modifier = Modifier
-              .testTag("DialogSheetScrim")
-              .fillMaxSize()
-              .clickable(
-                interactionSource = outsideKeyboardRowInteractionSource,
-                indication = null,
-                onClick = onAbandonEditTitle
-              )
+                .testTag("DialogSheetScrim")
+                .fillMaxSize()
+                .clickable(
+                  interactionSource = outsideKeyboardRowInteractionSource,
+                  indication = null,
+                  onClick = onAbandonEditTitle
+                )
           )
         }
       }
@@ -342,7 +342,7 @@ fun EnsembleDetailScreen(
     onClose = onCloseAddArticlesDialog,
     onConfirm = onClickConfirmAddArticles,
   )
-  if(showDeleteEnsembleAlertDialog){
+  if(showDeleteEnsembleAlertDialog) {
     DeleteEnsembleAlertDialog(
       onClickOutside = onClickOutsideDeleteEnsembleDialog,
       onClickNegative = onClickNegativeDeleteEnsembleDialog,
@@ -353,12 +353,12 @@ fun EnsembleDetailScreen(
 
 @Composable
 fun AddArticlesDialog(
-  visible: Boolean,
-  articleThumbnailUris: LazyUriStrings,
-  selectedArticleIndices: Set<Int>,
-  onSelectedArticle: (articleIndex: Int) -> Unit,
-  onClose: () -> Unit,
-  onConfirm: () -> Unit,
+    visible: Boolean,
+    articleThumbnailUris: LazyUriStrings,
+    selectedArticleIndices: Set<Int>,
+    onSelectedArticle: (articleIndex: Int) -> Unit,
+    onClose: () -> Unit,
+    onConfirm: () -> Unit,
 ) {
   val addArticlesAvailable = articleThumbnailUris.isNotEmpty()
   NoopAddEnsembleDialog(
@@ -366,9 +366,9 @@ fun AddArticlesDialog(
     title = stringResource(id = R.string.Add_article),
     positiveButtonLabel = if(addArticlesAvailable) stringResource(id = R.string.Save) else "",
     onClose = onClose,
-    onPositive = onConfirm ,
+    onPositive = onConfirm,
   ) {
-    if(addArticlesAvailable){
+    if(addArticlesAvailable) {
       LazyRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
@@ -385,10 +385,10 @@ fun AddArticlesDialog(
               uriString = addArticleThumbnailUri,
               contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
-                .padding(padding)
-                .clickable { onSelectedArticle(articleIndex) }
+                  .padding(padding)
+                  .clickable { onSelectedArticle(articleIndex) }
             )
-            if (selected) {
+            if(selected) {
               Icon(
                 imageVector = NoopIcons.SelectedIndicator,
                 contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
@@ -408,12 +408,12 @@ fun AddArticlesDialog(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilEnsembleDetailScreen(
-  editingTitle: Boolean = false,
-  editMode: Boolean = false,
-  showAddArticlesDialog: Boolean = false,
-  selectedArticleIndices: Set<Int> = emptySet(),
-  selectedAddArticleIndices: Set<Int> = emptySet(),
-  showDeleteEnsembleAlertDialog: Boolean = false,
+    editingTitle: Boolean = false,
+    editMode: Boolean = false,
+    showAddArticlesDialog: Boolean = false,
+    selectedArticleIndices: Set<Int> = emptySet(),
+    selectedAddArticleIndices: Set<Int> = emptySet(),
+    showDeleteEnsembleAlertDialog: Boolean = false,
 ) = EnsembleDetailScreen(
   title = "Ensemble Title",
   editEnsemblesMode = editMode,
@@ -431,8 +431,8 @@ fun PreviewUtilEnsembleDetailScreen(
 
 @Composable
 fun PreviewUtilEnsembleDetailFloatingActionButtons(
-  editEnsemblesMode: Boolean,
-  selectedArticleIndices: Set<Int> = emptySet(),
+    editEnsemblesMode: Boolean,
+    selectedArticleIndices: Set<Int> = emptySet(),
 ) = NoopTheme {
   EnsembleDetailFloatingActionButtons(
     editEnsemblesMode = editEnsemblesMode,
@@ -498,6 +498,7 @@ fun PreviewAddArticlesDialog_noAddArticles() = NoopTheme {
     onSelectedArticle = {}, onClose = {}, onConfirm = {},
   )
 }
+
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = PreviewUtilEnsembleDetailFloatingActionButtons(false)
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = PreviewUtilEnsembleDetailFloatingActionButtons(true)
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(true, setOf(0))
