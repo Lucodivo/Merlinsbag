@@ -2,20 +2,25 @@ package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentRecomposeScope
@@ -44,6 +49,7 @@ import kotlinx.coroutines.launch
 
 const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
 const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
+const val DELETE_ALL_CAPTCHA = "1234"
 
 const val SETTINGS_ROUTE = "settings_route"
 
@@ -206,13 +212,44 @@ fun DeleteAllDataAlertDialog(
     onClickNegative: () -> Unit,
     onClickPositive: () -> Unit,
 ) {
+  val enteredText = remember { mutableStateOf("") }
+  val label: @Composable () -> Unit = {
+    Row{
+      Icon(imageVector = NoopIcons.Key, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+      Spacer(modifier = Modifier.width(8.dp))
+      Text(text = DELETE_ALL_CAPTCHA)
+    }
+  }
   AlertDialog(
     title = { Text(text = stringResource(id = R.string.delete_all_data)) },
-    text = { Text(text = stringResource(id = R.string.deleted_all_data_unrecoverable)) },
+    icon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    text = {
+      Column{
+        Text(text = stringResource(id = R.string.deleted_all_data_unrecoverable))
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+          value = enteredText.value,
+          label = label,
+          placeholder = {Text("1234")},
+          onValueChange = { enteredText.value = it },
+        )
+      }
+    },
     onDismissRequest = onClickOutside,
     confirmButton = {
-      TextButton(onClick = onClickPositive) {
-        Text(stringResource(id = R.string.delete_all_data_positive))
+      if(enteredText.value == DELETE_ALL_CAPTCHA) {
+        TextButton(onClick = onClickPositive) {
+          Text(stringResource(id = R.string.delete_all_data_positive))
+        }
+      } else {
+        Box(contentAlignment = Alignment.Center) {
+          TextButton(onClick = {}){} // Note: Simply to match height of delete button
+          Icon(
+            imageVector = NoopIcons.Lock,
+            contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+            tint = Color.Gray,
+          )
+        }
       }
     },
     dismissButton = {

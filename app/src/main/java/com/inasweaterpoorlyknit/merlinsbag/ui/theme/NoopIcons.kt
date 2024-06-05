@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderSpecial
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
@@ -55,4 +57,6 @@ object NoopIcons {
   val Web = Icons.Filled.Web
   val Code = Icons.Filled.Code
   val Clean = Icons.Filled.CleaningServices
+  val Key = Icons.Filled.Key
+  val Lock = Icons.Filled.Lock
 }
