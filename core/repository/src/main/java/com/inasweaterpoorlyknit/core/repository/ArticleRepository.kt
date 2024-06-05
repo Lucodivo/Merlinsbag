@@ -50,6 +50,7 @@ class ArticleRepository(
       }
     }
   }
+  fun deleteArticle(articleId: String) = deleteArticles(listOf(articleId))
 
   fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }
   fun getAllArticlesWithFullImages() = articleDao.getAllArticlesWithFullImages().map { LazyArticleFullImages(articleFilesDirStr(context), it) }

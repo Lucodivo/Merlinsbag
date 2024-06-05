@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.Key
@@ -59,4 +60,5 @@ object NoopIcons {
   val Clean = Icons.Filled.CleaningServices
   val Key = Icons.Filled.Key
   val Lock = Icons.Filled.Lock
+  val Download = Icons.Filled.Download
 }

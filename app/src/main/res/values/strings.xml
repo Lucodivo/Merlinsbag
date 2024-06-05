@@ -34,4 +34,7 @@
     <string name="cache_cleared">Cache cleared!</string>
     <string name="all_data_deleted">All data deleted!</string>
     <string name="captcha_1234">1234</string>
+    <string name="delete_article">Delete Article</string>
+    <string name="delete_article_alert_positive">Delete</string>
+    <string name="delete_article_alert_negative">Cancel</string>
 </resources>

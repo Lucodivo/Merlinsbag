@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -205,6 +206,7 @@ fun DeleteArticlesAlertDialog(
   AlertDialog(
     title = { Text(text = stringResource(id = R.string.delete_articles)) },
     text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
+    icon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
     onDismissRequest = onClickOutside,
     confirmButton = {
       TextButton(onClick = onClickPositive) {
@@ -279,7 +281,7 @@ fun ArticlesScreen(
           ),
           TextButtonData(
             icon = IconData(
-              icon = NoopIcons.Delete,
+              icon = NoopIcons.DeleteForever,
               contentDescription = TODO_ICON_CONTENT_DESCRIPTION
             ),
             onClick = onClickDelete

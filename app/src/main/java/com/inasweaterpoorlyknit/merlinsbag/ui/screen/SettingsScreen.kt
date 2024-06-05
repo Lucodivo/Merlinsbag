@@ -20,13 +20,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,8 +41,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
 const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
@@ -62,7 +57,6 @@ fun SettingsRoute(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
-  val scope = rememberCoroutineScope()
   val uriHandler = LocalUriHandler.current
   val showDeleteAllDataAlertDialog = remember{ mutableStateOf(false) }
 
