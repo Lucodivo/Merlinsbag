@@ -26,7 +26,7 @@ class LazyArticleFullImages(
 ): LazyUriStrings {
   override val size get() = articleFullImagePaths.size
   fun getArticleId(index: Int) = articleFullImagePaths[index].articleId
-  override fun getUriString(index: Int): String = "$directory${articleFullImagePaths[index].fullImagePaths[0].uri}"
+  override fun getUriString(index: Int): String = "$directory${articleFullImagePaths[index].fullImagePaths[0].filename}"
 }
 
 class LazyArticleThumbnails(
@@ -35,7 +35,7 @@ class LazyArticleThumbnails(
 ): LazyUriStrings {
   override val size get() = articleThumbnailPaths.size
   fun getArticleId(index: Int) = articleThumbnailPaths[index].articleId
-  override fun getUriString(index: Int): String = "$directory${articleThumbnailPaths[index].thumbnailPaths[0].uri}"
+  override fun getUriString(index: Int): String = "$directory${articleThumbnailPaths[index].thumbnailPaths[0].filenameThumb}"
   fun filter(keep: (ArticleWithThumbnails) -> Boolean) = LazyArticleThumbnails(directory, articleThumbnailPaths.filter(keep))
   fun articleIds() = articleThumbnailPaths.map { it.articleId }
 }

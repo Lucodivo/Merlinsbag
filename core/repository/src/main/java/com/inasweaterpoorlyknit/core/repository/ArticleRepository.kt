@@ -2,11 +2,15 @@ package com.inasweaterpoorlyknit.core.repository
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.util.Log
 import androidx.core.graphics.scale
+import androidx.core.net.toUri
 import com.inasweaterpoorlyknit.core.common.articleFilesDir
 import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
+import com.inasweaterpoorlyknit.core.common.exportFilesDir
 import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
@@ -14,7 +18,6 @@ import com.inasweaterpoorlyknit.core.repository.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
 
@@ -37,20 +40,29 @@ class ArticleRepository(
     articleDao.insertArticle(fullImageFilename, thumbnailFilename)
   }
 
-  fun deleteArticles(articleIds: List<String>) {
+  suspend fun deleteArticles(articleIds: List<String>) {
     val articleFilesDir = articleFilesDir(context)
-    runBlocking {
-      val articleWithImages = articleDao.getArticlesWithImages(articleIds).first()
-      articleDao.deleteArticles(articleIds)
-      articleWithImages.forEach { articleWithImage ->
-        articleWithImage.imagePaths.forEach { articleImage ->
-          if(!File(articleFilesDir, articleImage.uri).delete()) Log.e("ArticleRepository", "Failed to delete image ${articleImage.uri}")
-          if(!File(articleFilesDir, articleImage.uriThumb).delete()) Log.e("ArticleRepository", "Failed to delete thumbnail ${articleImage.uriThumb}")
-        }
+    val articleWithImages = articleDao.getArticlesWithImages(articleIds).first()
+    articleDao.deleteArticles(articleIds)
+    articleWithImages.forEach { articleWithImage ->
+      articleWithImage.imagePaths.forEach { articleImage ->
+        if(!File(articleFilesDir, articleImage.filename).delete()) Log.e("ArticleRepository", "Failed to delete image ${articleImage.filename}")
+        if(!File(articleFilesDir, articleImage.filenameThumb).delete()) Log.e("ArticleRepository", "Failed to delete thumbnail ${articleImage.filenameThumb}")
       }
     }
   }
-  fun deleteArticle(articleId: String) = deleteArticles(listOf(articleId))
+  suspend fun deleteArticle(articleId: String) = deleteArticles(listOf(articleId))
+
+  suspend fun exportArticle(articleId: String): Uri {
+    val articleFilenames = articleDao.getArticleFilenames(articleId).first()
+    val articleFilename = articleFilenames.imagePaths[0].filename
+    val articleFilesDir = articleFilesDir(context)
+    val articleFile = File(articleFilesDir, articleFilename)
+    val exportDir = exportFilesDir(context).apply { mkdirs() }
+    val exportFile = File(exportDir, articleFilename)
+    articleFile.copyTo(exportFile, true)
+    return exportFile.toUri()
+  }
 
   fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }
   fun getAllArticlesWithFullImages() = articleDao.getAllArticlesWithFullImages().map { LazyArticleFullImages(articleFilesDirStr(context), it) }

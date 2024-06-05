@@ -91,7 +91,7 @@ val repeatedThumbnailResourceIdsAsStrings = arrayListOf(*allTestThumbnailResourc
 val lazyRepeatedThumbnailResourceIdsAsStrings =
     LazyArticleThumbnails("",
       articleThumbnailPaths = repeatedThumbnailResourceIdsAsStrings.mapIndexed { i, it ->
-        ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
+        ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(filenameThumb = it)))
       }
     )
 val repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
@@ -101,8 +101,8 @@ val repeatedArticleWithImages = repeatedFullResourceIdsAsStrings.zip(repeatedThu
         articleId = index.toString(),
         imagePaths = listOf(
           ImageFilenames(
-            uri = resourceId.first,
-            uriThumb = resourceId.second,
+            filename = resourceId.first,
+            filenameThumb = resourceId.second,
           )
         ),
       )

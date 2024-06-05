@@ -15,8 +15,8 @@ fun createEnsembleEntity(count: Int) = Array(count){ createEnsembleEntity() }
 
 fun createArticleImageEntity(ArticleId: String = randUUIDString()) = ArticleImageEntity(
     articleId = ArticleId,
-    uri = createFakeUriString(),
-    thumbUri = createFakeUriString(),
+    filename = createFakeUriString(),
+    filenameThumb = createFakeUriString(),
 )
 fun createArticleImageEntity(count: Int, ArticleId: String = randUUIDString()) = Array(count){
     createArticleImageEntity(ArticleId = ArticleId)

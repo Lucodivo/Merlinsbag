@@ -277,7 +277,7 @@ val previewEnsembles: List<LazyEnsembleThumbnails> =
           thumbnails =
           LazyArticleThumbnails("",
             articleThumbnailPaths = thumbnailUriStrings.mapIndexed { i, it ->
-              ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(uri = it)))
+              ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(filenameThumb = it)))
             }
           )
         )

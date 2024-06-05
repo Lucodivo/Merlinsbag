@@ -1,6 +1,13 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import android.Manifest
+import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_ONE_SHOT
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,22 +20,29 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.common.createFakeUri
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
+import com.inasweaterpoorlyknit.merlinsbag.NOOP_NOTIFICATION_CHANNEL
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.common.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -42,7 +56,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-
+import kotlin.math.exp
 
 const val ARTICLE_INDEX_ARG = "articleIndex"
 const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
@@ -53,6 +67,36 @@ fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String?
   navigate(route, navOptions)
 }
 
+fun launchDownloadNotification(
+    context: Context,
+    fileUri: Uri,
+) {
+  val notificationManager = NotificationManagerCompat.from(context)
+  if (ActivityCompat.checkSelfPermission(
+        context,
+        Manifest.permission.POST_NOTIFICATIONS
+      ) == PackageManager.PERMISSION_GRANTED
+  ) {
+    val intent = Intent().apply {
+      setAction(Intent.ACTION_VIEW)
+      addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+      setDataAndType(fileUri, "image/*")
+    }
+    val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+    val notification = NotificationCompat.Builder(context, NOOP_NOTIFICATION_CHANNEL)
+        .setSmallIcon(R.drawable.download)
+        .setContentTitle("Merlinsbag")
+        .setContentText("Article Image Exported")
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setSilent(true)
+        .setContentIntent(pIntent)
+        .build()
+    // TODO: Increment number? Or keep same id to avoid multiple notifications?
+    notificationManager.notify(0, notification)
+  }
+}
+
 @Composable
 fun ArticleDetailRoute(
     navController: NavController,
@@ -60,6 +104,7 @@ fun ArticleDetailRoute(
     ensembleId: String?,
     modifier: Modifier = Modifier,
 ) {
+  val context = LocalContext.current
   val articleDetailViewModel =
       hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
         factory.create(ensembleId)
@@ -72,13 +117,18 @@ fun ArticleDetailRoute(
     initialPageOffsetFraction = 0.0f,
     pageCount = { articleDetailUiState.articleFullImages.size },
   )
+  LaunchedEffect(articleDetailViewModel.exportedImageUri) {
+    articleDetailViewModel.exportedImageUri.collect { exportedImageUri ->
+      launchDownloadNotification(context, fileUri = exportedImageUri)
+    }
+  }
   ArticleDetailScreen(
     articlesWithImages = articleDetailUiState.articleFullImages,
     pagerState = pagerState,
     floatingActionButtonExpanded = floatingActionButtonExpanded.value,
     showDeleteArticleAlertDialog = showDeleteArticleAlertDialog.value,
     onClickEdit = { floatingActionButtonExpanded.value = !floatingActionButtonExpanded.value },
-    onClickExport = articleDetailViewModel::exportArticle,
+    onClickExport = { articleDetailViewModel.exportArticle(pagerState.currentPage) },
     onClickDelete = { showDeleteArticleAlertDialog.value = true },
     onDismissDeleteDialog = { showDeleteArticleAlertDialog.value = false },
     onConfirmDeleteDialog = {
@@ -134,7 +184,7 @@ fun FloatingActionButtonDetailScreen(
     expanded: Boolean,
     onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
-    onClickExport: () -> Unit
+    onClickExport: () -> Unit,
 ) {
   NoopExpandingFloatingActionButton(
     expanded = expanded,
@@ -193,7 +243,7 @@ fun PreviewUtilArticleDetailScreen(
             articleId = COMPOSE_ID,
             thumbnailPaths = listOf(
               ThumbnailFilename(
-                uri = R.raw.test_full_1.toString(),
+                filenameThumb = R.raw.test_full_1.toString(),
               ),
             ),
           )

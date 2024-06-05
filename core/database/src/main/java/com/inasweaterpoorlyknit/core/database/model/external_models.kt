@@ -10,16 +10,16 @@ data class Ensemble(
 )
 
 data class ImageFilenames(
-  @ColumnInfo("uri") val uri: String,
-  @ColumnInfo("thumb_uri") val uriThumb: String,
+    @ColumnInfo("filename") val filename: String,
+    @ColumnInfo("filename_thumb") val filenameThumb: String,
 )
 
 data class FullImageFilename(
-  @ColumnInfo("uri") val uri: String,
+  @ColumnInfo("filename") val filename: String,
 )
 
 data class ThumbnailFilename(
-  @ColumnInfo("thumb_uri") val uri: String,
+  @ColumnInfo("filename_thumb") val filenameThumb: String,
 )
 
 data class ArticleWithThumbnails(

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1bc5a5c311a48f20a8b00eabb5040248",
+    "identityHash": "4a059452ab09a4b915dd1b26eb75a39e",
     "entities": [
       {
         "tableName": "article",
@@ -38,7 +38,7 @@
       },
       {
         "tableName": "article_image",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `article_id` TEXT NOT NULL, `uri` TEXT NOT NULL, `thumb_uri` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `article_id` TEXT NOT NULL, `filename` TEXT NOT NULL, `filename_thumb` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`article_id`) REFERENCES `article`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED)",
         "fields": [
           {
             "fieldPath": "id",
@@ -53,14 +53,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "uri",
-            "columnName": "uri",
+            "fieldPath": "filename",
+            "columnName": "filename",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "thumbUri",
-            "columnName": "thumb_uri",
+            "fieldPath": "filenameThumb",
+            "columnName": "filename_thumb",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -207,7 +207,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1bc5a5c311a48f20a8b00eabb5040248')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4a059452ab09a4b915dd1b26eb75a39e')"
     ]
   }
 }

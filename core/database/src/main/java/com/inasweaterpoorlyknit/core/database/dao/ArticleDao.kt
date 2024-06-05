@@ -25,9 +25,9 @@ interface ArticleDao {
   fun deleteAllArticles()
 
   @Transaction
-  fun insertArticle(imageUri: String, thumbnailUri: String) {
+  fun insertArticle(filename: String, filenameThumb: String) {
     val article = ArticleEntity()
-    val articleImage = ArticleImageEntity(articleId = article.id, uri = imageUri, thumbUri = thumbnailUri)
+    val articleImage = ArticleImageEntity(articleId = article.id, filename = filename, filenameThumb = filenameThumb)
     insertArticles(article)
     insertArticleImages(articleImage)
   }
@@ -53,4 +53,9 @@ interface ArticleDao {
         WHERE article.id IN (:articleIds)
         ORDER BY article.modified DESC""")
   fun getArticlesWithImages(articleIds: List<String>): Flow<List<ArticleWithImages>>
+
+  @Transaction @Query(
+    """SELECT article.id as article_id FROM article
+        WHERE article.id = :articleId""")
+  fun getArticleFilenames(articleId: String): Flow<ArticleWithImages>
 }

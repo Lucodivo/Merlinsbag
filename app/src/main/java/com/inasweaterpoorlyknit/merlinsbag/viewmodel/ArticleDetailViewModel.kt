@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithFullImages
@@ -11,6 +12,8 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -30,13 +33,17 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   lateinit var articlesWithFullImages: LazyArticleFullImages
 
+  private val _exportedImageUri = MutableSharedFlow<Uri>()
+  val exportedImageUri: SharedFlow<Uri> = _exportedImageUri
+
   fun deleteArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
     val articleId = articlesWithFullImages.getArticleId(index)
     articleRepository.deleteArticle(articleId)
   }
 
-  fun exportArticle() {
-    TODO()
+  fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
+    val exportedImageUri = articleRepository.exportArticle(articlesWithFullImages.getArticleId(index))
+    _exportedImageUri.emit(exportedImageUri)
   }
 
   @AssistedFactory
