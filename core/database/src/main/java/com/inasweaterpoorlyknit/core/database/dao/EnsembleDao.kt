@@ -24,6 +24,7 @@ interface EnsembleDao {
     insertArticleEnsemble(*articleIds.map{ EnsembleArticleEntity(ensemble.id, it) }.toTypedArray())
   }
   @Query("""DELETE FROM ensemble WHERE id = :ensembleId""") fun deleteEnsemble(ensembleId: String)
+  @Query("""DELETE FROM ensemble""") fun deleteAllEnsembles()
 
   @Update fun updateEnsemble(ensembleEntity: EnsembleEntity)
   fun updateEnsemble(ensemble: Ensemble) = updateEnsemble(EnsembleEntity(title = ensemble.title, id = ensemble.id))

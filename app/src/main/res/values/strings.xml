@@ -13,9 +13,13 @@
     <string name="Add_ensemble">Add ensemble</string>
     <string name="Save">Save</string>
     <string name="delete_articles">Delete Articles</string>
-    <string name="deleted_articles_unrecoverable">Deleting articles is a permantent action and cannot be reversed. They will be removed from associated ensembles. Photos used to generate articles will not be affected.</string>
+    <string name="delete_all_data">Delete All Data</string>
+    <string name="deleted_articles_unrecoverable">Deleting articles is a permanent action and cannot be reversed. They will be removed from associated ensembles. Photos used to generate articles will not be affected.</string>
+    <string name="deleted_all_data_unrecoverable">Deleting all data is a permanent action and cannot be reversed. All articles and ensembles will be destroyed. Photos used to generate articles will not be affected.</string>
     <string name="delete_articles_alert_positive">Delete Articles</string>
+    <string name="delete_all_data_positive">Delete</string>
     <string name="delete_articles_alert_negative">Cancel</string>
+    <string name="delete_all_data_negative">Cancel</string>
     <string name="all_articles_already_in_ensemble">All articles already in ensemble.</string>
     <string name="Add_article">Add article</string>
     <string name="delete_ensemble">Delete Ensemble</string>
@@ -25,4 +29,8 @@
     <string name="author">Connor Alexander Haskins</string>
     <string name="info">Info</string>
     <string name="source">Source</string>
+    <string name="settings">Settings</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="cache_cleared">Cache cleared!</string>
+    <string name="all_data_deleted">All data deleted!</string>
 </resources>

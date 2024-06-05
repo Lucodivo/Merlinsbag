@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Edit
@@ -53,4 +54,5 @@ object NoopIcons {
   val Settings = Icons.Filled.Settings
   val Web = Icons.Filled.Web
   val Code = Icons.Filled.Code
+  val Clean = Icons.Filled.CleaningServices
 }

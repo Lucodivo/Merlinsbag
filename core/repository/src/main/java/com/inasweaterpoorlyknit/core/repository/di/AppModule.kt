@@ -3,8 +3,10 @@ package com.inasweaterpoorlyknit.core.repository.di
 import android.content.Context
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
+import com.inasweaterpoorlyknit.core.database.dao.PurgeDao
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
+import com.inasweaterpoorlyknit.core.repository.PurgeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,4 +25,8 @@ object AppModule {
   @Provides
   @Singleton
   fun providesEnsembleRepository(@ApplicationContext context: Context, ensembleDao: EnsembleDao): EnsembleRepository = EnsembleRepository(context, ensembleDao)
+
+  @Provides
+  @Singleton
+  fun providesPurgeRepository(@ApplicationContext context: Context, purgeDao: PurgeDao): PurgeRepository = PurgeRepository(context, purgeDao)
 }

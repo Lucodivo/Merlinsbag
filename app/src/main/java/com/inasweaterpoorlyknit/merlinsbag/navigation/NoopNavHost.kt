@@ -41,7 +41,7 @@ fun NoopNavHost(
   ) {
     composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController) }
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController) }
-    composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController) }
+    composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController, snackbarHostState = appState.snackbarHostState) }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(

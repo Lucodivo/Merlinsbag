@@ -10,6 +10,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -55,6 +57,7 @@ fun NoopApp(
   val topLevelDestinations = remember { appState.topLevelDestinations }
   NoopScaffold(
     showBottomNavBar = appState.showBottomNavBar.value,
+    snackbarHostState = appState.snackbarHostState,
     bottomNavBarDataItems = topLevelDestinations,
     selectedNavBarIndex = currentTopLevelDestination.intValue,
     onSelectedNavBarItem = { selectedIndex ->
@@ -86,6 +89,7 @@ fun NoopApp(
 @Composable
 fun NoopScaffold(
     showBottomNavBar: Boolean,
+    snackbarHostState: SnackbarHostState,
     bottomNavBarDataItems: List<BottomNavBarData>,
     selectedNavBarIndex: Int,
     onSelectedNavBarItem: (Int) -> Unit,
@@ -108,6 +112,7 @@ fun NoopScaffold(
       )
     }
   },
+  snackbarHost = { SnackbarHost(snackbarHostState) },
   content = content,
 )
 
@@ -115,6 +120,7 @@ fun NoopScaffold(
 class NoopAppState(
     val navController: NavHostController,
     val windowSizeClass: WindowSizeClass,
+    val snackbarHostState: SnackbarHostState,
 ) {
   val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
   var showBottomNavBar = mutableStateOf(true)
@@ -134,11 +140,13 @@ class NoopAppState(
 fun rememberNoopAppState(
     windowSizeClass: WindowSizeClass,
     navController: NavHostController = rememberNavController(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 ): NoopAppState {
   return remember(navController, windowSizeClass) {
     NoopAppState(
       navController = navController,
       windowSizeClass = windowSizeClass,
+      snackbarHostState = snackbarHostState,
     )
   }
 }
@@ -165,6 +173,7 @@ fun PreviewUtilNoopScaffold(
     bottomNavBarSelectedIndex: Int,
 ) = NoopTheme {
   NoopScaffold(
+    snackbarHostState = SnackbarHostState(),
     showBottomNavBar = showBottomNavBar,
     bottomNavBarDataItems = TopLevelDestination.entries,
     selectedNavBarIndex = bottomNavBarSelectedIndex,

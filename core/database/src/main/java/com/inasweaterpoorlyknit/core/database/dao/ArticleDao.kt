@@ -21,6 +21,9 @@ interface ArticleDao {
   @Query("""DELETE FROM article WHERE id IN (:articleIds)""")
   fun deleteArticles(articleIds: List<String>)
 
+  @Query("""DELETE FROM article""")
+  fun deleteAllArticles()
+
   @Transaction
   fun insertArticle(imageUri: String, thumbnailUri: String) {
     val article = ArticleEntity()

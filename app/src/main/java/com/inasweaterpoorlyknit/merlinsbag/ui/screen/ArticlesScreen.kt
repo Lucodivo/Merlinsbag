@@ -151,7 +151,7 @@ fun ArticlesRoute(
     },
     onClickEdit = {
       editMode = !editMode
-      isItemSelected.clear()
+      if(editMode) isItemSelected.clear()
     },
     onClickDelete = { showDeleteArticlesAlert = true },
     onClickSelectionCancel = isItemSelected::clear,
