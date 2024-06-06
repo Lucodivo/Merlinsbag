@@ -56,3 +56,5 @@ Settings Screen:
 Bugs:
     - Camera not triggering on Oreo device
     - Exporting article requires write permissions on Oreo device
+Aesthetics:
+    - Most Toasts may need to be Snackbars

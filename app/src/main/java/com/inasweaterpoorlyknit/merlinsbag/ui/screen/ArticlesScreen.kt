@@ -10,7 +10,6 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
-import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -36,12 +34,14 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.common.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.merlinsbag.ui.SettingsLauncher
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableArticleThumbnailGrid
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextButtonData
-import com.inasweaterpoorlyknit.merlinsbag.ui.getActivity
 import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.merlinsbag.ui.rememberLauncherForActivityResultPermissions
+import com.inasweaterpoorlyknit.merlinsbag.ui.rememberSettingsLauncher
 import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
@@ -73,15 +73,8 @@ fun ArticlesRoute(
   var editMode by remember { mutableStateOf(false) }
   val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
 
-  val packageName = LocalContext.current.packageName
-  val _appSettingsLauncher = rememberLauncherForActivityResult(StartActivityForResult()) {}
-  fun openAppSettings() = _appSettingsLauncher.launch(
-    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-      data = Uri.fromParts("package", packageName, null)
-    }
-  )
-
-  val _photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments() {
+  val appSettingsLauncher = rememberSettingsLauncher()
+  val photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments() {
     override fun createIntent(context: Context, input: Array<String>): Intent {
       return super.createIntent(context, input)
           .apply { addCategory(Intent.CATEGORY_OPENABLE) }
@@ -92,7 +85,7 @@ fun ArticlesRoute(
     } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
   }
 
-  val _takePictureLauncher = rememberLauncherForActivityResult(
+  val takePictureLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.TakePicture(),
     onResult = { success ->
       if(success) {
@@ -101,33 +94,13 @@ fun ArticlesRoute(
         else Log.e("GetContent ActivityResultContract", "Camera picture URI was null")
       } else Log.i("GetContent ActivityResultContract", "Picture was not returned from camera")
     })
-  articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { _takePictureLauncher.launch(it) }
+  articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { takePictureLauncher.launch(it) }
 
 
-  val _cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResult(
-    contract = RequestMultiplePermissions(),
-    onResult = { permissions ->
-      var permissionsGranted = true
-      var userCheckedNeverAskAgain = false
-      permissions.entries.forEach { entry ->
-        if(!entry.value) {
-          userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(
-            navController.context.getActivity()!!,
-            entry.key
-          )
-          permissionsGranted = false
-        }
-      }
-      if(permissionsGranted) {
-        articlesViewModel.onTakePicture(context)
-      } else {
-        if(userCheckedNeverAskAgain) {
-          showPermissionsAlert = true
-        } else {
-          navController.context.toast("Camera permissions required")
-        }
-      }
-    }
+  val cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
+    onPermissionsGranted = { articlesViewModel.onTakePicture(context) },
+    onPermissionDenied = { navController.context.toast("Camera permissions required") },
+    onNeverAskAgain = { showPermissionsAlert = true },
   )
 
   ArticlesScreen(
@@ -144,9 +117,9 @@ fun ArticlesRoute(
         navController.navigateToArticleDetail(index)
       }
     },
-    onClickAddPhotoAlbum = { _photoAlbumLauncher.launch(arrayOf("image/*")) },
+    onClickAddPhotoAlbum = { photoAlbumLauncher.launch(arrayOf("image/*")) },
     onClickAddPhotoCamera = {
-      _cameraWithPermissionsCheckLauncher.launch(
+      cameraWithPermissionsCheckLauncher.launch(
         REQUIRED_CAMERA_PERMISSIONS
       )
     },
@@ -159,7 +132,7 @@ fun ArticlesRoute(
     onClickSettings = { navController.navigateToSettings() },
     onPermissionsAlertPositive = {
       showPermissionsAlert = false
-      openAppSettings()
+      appSettingsLauncher.launch()
     },
     onDeleteArticlesAlertPositive = {
       showDeleteArticlesAlert = false
@@ -172,51 +145,27 @@ fun ArticlesRoute(
 }
 
 @Composable
-fun CameraPermissionsAlertDialog(
-    onClickOutside: () -> Unit,
-    onClickNegative: () -> Unit,
-    onClickPositive: () -> Unit,
-) {
+fun CameraPermissionsAlertDialog(onClickOutside: () -> Unit, onClickNegative: () -> Unit, onClickPositive: () -> Unit) {
+  val justificationText = stringResource(id = if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
+                                                      else R.string.camera_permission_alert_justification)
   AlertDialog(
     title = { Text(text = stringResource(id = R.string.permission_alert_title)) },
-    text = {
-      Text(
-        text = stringResource(
-          id = if(additionalCameraPermissionsRequired) R.string.permission_alert_justification_additional
-          else R.string.permission_alert_justification
-        )
-      )
-    },
+    text = { Text(text = justificationText) },
     onDismissRequest = onClickOutside,
-    confirmButton = {
-      TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.permission_alert_positive)) }
-    },
-    dismissButton = {
-      TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.permission_alert_negative)) }
-    }
+    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.permission_alert_positive)) } },
+    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.permission_alert_negative)) } }
   )
 }
 
 @Composable
-fun DeleteArticlesAlertDialog(
-    onClickOutside: () -> Unit,
-    onClickNegative: () -> Unit,
-    onClickPositive: () -> Unit,
-) {
+fun DeleteArticlesAlertDialog(onClickOutside: () -> Unit, onClickNegative: () -> Unit, onClickPositive: () -> Unit) {
   AlertDialog(
     title = { Text(text = stringResource(id = R.string.delete_articles)) },
     text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
     icon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
     onDismissRequest = onClickOutside,
-    confirmButton = {
-      TextButton(onClick = onClickPositive) {
-        Text(stringResource(id = R.string.delete_articles_alert_positive))
-      }
-    },
-    dismissButton = {
-      TextButton(onClick = onClickNegative) {
-        Text(stringResource(id = R.string.delete_articles_alert_negative))
-      }
+    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.delete_articles_alert_positive)) } },
+    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.delete_articles_alert_negative)) }
     }
   )
 }

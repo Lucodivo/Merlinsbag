@@ -3,13 +3,26 @@ package com.inasweaterpoorlyknit.merlinsbag.ui
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
@@ -74,3 +87,52 @@ fun Context.hideStatusUI() {
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE) // stable view of content (layout view size doesn't change)
   }
 }
+
+@Composable
+fun rememberLauncherForActivityResultPermissions(
+    onPermissionsGranted: () -> Unit,
+    onNeverAskAgain: () -> Unit,
+    onPermissionDenied: () -> Unit,
+): ActivityResultLauncher<Array<String>> {
+  val context = LocalContext.current
+  return rememberLauncherForActivityResult(
+    contract = RequestMultiplePermissions(),
+    onResult = { permissions ->
+      var permissionsGranted = true
+      var userCheckedNeverAskAgain = false
+      permissions.entries.forEach { entry ->
+        if(!entry.value) {
+          userCheckedNeverAskAgain = !shouldShowRequestPermissionRationale(
+            context.getActivity()!!,
+            entry.key
+          )
+          permissionsGranted = false
+        }
+      }
+      if(permissionsGranted) onPermissionsGranted()
+      else if(userCheckedNeverAskAgain) onNeverAskAgain() else onPermissionDenied()
+    }
+  )
+}
+
+class SettingsLauncher private constructor(
+  val activityResultLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+  val packageName: String,
+) {
+  companion object {
+    @Composable
+    fun Remember(): SettingsLauncher{
+      val packageName = LocalContext.current.packageName
+      return SettingsLauncher(rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()){}, packageName)
+    }
+  }
+
+  fun launch() = activityResultLauncher.launch(
+    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+      data = Uri.fromParts("package", packageName, null)
+    }
+  )
+}
+
+@Composable
+fun rememberSettingsLauncher() = SettingsLauncher.Remember()
