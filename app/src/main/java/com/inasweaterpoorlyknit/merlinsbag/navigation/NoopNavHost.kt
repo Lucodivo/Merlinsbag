@@ -59,6 +59,7 @@ fun NoopNavHost(
       val ensembleIdArg = navBackStackEntry.arguments!!.getString(ENSEMBLE_ID_ARG)
       ArticleDetailRoute(
         navController = navController,
+        snackbarHostState = appState.snackbarHostState,
         articleIndex = articleIndexArg,
         ensembleId = ensembleIdArg,
       )

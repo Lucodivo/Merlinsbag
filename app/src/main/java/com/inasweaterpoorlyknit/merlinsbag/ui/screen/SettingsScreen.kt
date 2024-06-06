@@ -62,13 +62,13 @@ fun SettingsRoute(
 
   LaunchedEffect(settingsViewModel.cacheClearedTrigger) {
     settingsViewModel.cacheClearedTrigger.collect {
-      snackbarHostState.showSnackbar(context.getString(R.string.cache_cleared))
+      snackbarHostState.showSnackbar(message = context.getString(R.string.cache_cleared), withDismissAction = true)
     }
   }
 
   LaunchedEffect(settingsViewModel.allDataDeletedTrigger) {
     settingsViewModel.allDataDeletedTrigger.collect {
-      snackbarHostState.showSnackbar(context.getString(R.string.all_data_deleted))
+      snackbarHostState.showSnackbar(message = context.getString(R.string.all_data_deleted), withDismissAction = true)
     }
   }
 

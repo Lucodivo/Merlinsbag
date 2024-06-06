@@ -15,6 +15,8 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,7 +40,6 @@ import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.NOOP_NOTIFICATION_CHANNEL
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.common.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.common.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -60,42 +61,10 @@ fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String?
   navigate(route, navOptions)
 }
 
-// TODO: Switch over to less annoying snackbar
-fun launchDownloadNotification(
-    context: Context,
-    fileUri: Uri,
-) {
-  val notificationManager = NotificationManagerCompat.from(context)
-  val messageTitle = context.getString(R.string.app_name)
-  val messageText = context.getString(R.string.image_exported)
-  if (ActivityCompat.checkSelfPermission(
-        context,
-        Manifest.permission.POST_NOTIFICATIONS
-      ) == PackageManager.PERMISSION_GRANTED
-  ) {
-    val intent = Intent().apply {
-      setAction(Intent.ACTION_VIEW)
-      addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-      setDataAndType(fileUri, "image/webp")
-    }
-    val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-    val notification = NotificationCompat.Builder(context, NOOP_NOTIFICATION_CHANNEL)
-        .setSmallIcon(R.drawable.download)
-        .setContentTitle(messageTitle)
-        .setContentText(messageText)
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setBadgeIconType(NotificationCompat.BADGE_ICON_NONE) // BADGES MAKE THE WORLD WORSE
-        .setSilent(true)
-        .setContentIntent(pIntent)
-        .build()
-    notificationManager.notify(0, notification)
-  }
-}
-
 @Composable
 fun ArticleDetailRoute(
     navController: NavController,
+    snackbarHostState: SnackbarHostState,
     articleIndex: Int,
     ensembleId: String?,
     modifier: Modifier = Modifier,
@@ -115,7 +84,22 @@ fun ArticleDetailRoute(
   )
   LaunchedEffect(articleDetailViewModel.exportedImageUri) {
     articleDetailViewModel.exportedImageUri.collect { exportedImageUri ->
-      launchDownloadNotification(context, fileUri = exportedImageUri)
+      when(snackbarHostState.showSnackbar(
+        message = context.getString(R.string.image_exported),
+        actionLabel = context.getString(R.string.open),
+      )){
+        SnackbarResult.Dismissed -> {}
+        SnackbarResult.ActionPerformed -> {
+          val intent = Intent().apply {
+            setAction(Intent.ACTION_VIEW)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            setDataAndType(exportedImageUri, "image/webp")
+          }
+          val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+          pIntent.send()
+
+        }
+      }
     }
   }
   ArticleDetailScreen(
