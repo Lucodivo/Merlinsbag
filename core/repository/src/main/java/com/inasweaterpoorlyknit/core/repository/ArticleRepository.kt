@@ -1,16 +1,17 @@
 package com.inasweaterpoorlyknit.core.repository
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import androidx.core.graphics.scale
-import androidx.core.net.toUri
 import com.inasweaterpoorlyknit.core.common.articleFilesDir
 import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
-import com.inasweaterpoorlyknit.core.common.exportFilesDir
 import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
@@ -20,6 +21,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import kotlin.math.exp
+
 
 val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
 
@@ -53,15 +58,44 @@ class ArticleRepository(
   }
   suspend fun deleteArticle(articleId: String) = deleteArticles(listOf(articleId))
 
-  suspend fun exportArticle(articleId: String): Uri {
+  suspend fun exportArticle(articleId: String): Uri? {
     val articleFilenames = articleDao.getArticleFilenames(articleId).first()
     val articleFilename = articleFilenames.imagePaths[0].filename
     val articleFilesDir = articleFilesDir(context)
     val articleFile = File(articleFilesDir, articleFilename)
-    val exportDir = exportFilesDir(context).apply { mkdirs() }
-    val exportFile = File(exportDir, articleFilename)
-    articleFile.copyTo(exportFile, true)
-    return exportFile.toUri()
+
+    var exportUri: Uri? = null
+    val exportFolderName = "Merlinsbag"
+    var success = false
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      val resolver = context.contentResolver
+      val contentValues = ContentValues()
+      contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, articleFilename)
+      contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
+      contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures${File.separator}$exportFolderName")
+      exportUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+      exportUri?.let { uri ->
+        resolver.openOutputStream(uri)?.let { fileOutputStream ->
+          fileOutputStream.write(articleFile.readBytes())
+          fileOutputStream.flush()
+          fileOutputStream.close()
+          success = true
+        }
+      }
+    } else {
+      val exportDir = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)}${File.separator}$exportFolderName"
+      val exportFile = File(exportDir, articleFilename)
+      try {
+        articleFile.copyTo(exportFile, true)
+        MediaScannerConnection.scanFile(context, arrayOf(exportFile.toString()), null, null)
+        exportUri = Uri.fromFile(exportFile)
+        success = true
+      } catch(e: IOException){
+        Log.e("Export Article", "${e.message}\nFailed to copy article image to public directory: ${articleFile.path} -> ${exportFile.path}")
+      }
+    }
+
+    return if(success) exportUri else null
   }
 
   fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }

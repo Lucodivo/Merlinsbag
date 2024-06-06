@@ -11,4 +11,5 @@ fun timestampFileName(): String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).f
 fun articleFilesDir(context: Context) = File(context.filesDir, "articles")
 fun articleFilesDirStr(context: Context) = articleFilesDir(context).toString() + '/'
 
-fun exportFilesDir(context: Context) = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Merlinsbag")
+fun exportFilesDirStr() = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)}"
+fun exportFilesDir() = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)

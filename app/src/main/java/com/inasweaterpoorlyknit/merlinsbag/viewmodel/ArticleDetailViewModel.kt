@@ -43,7 +43,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
     val exportedImageUri = articleRepository.exportArticle(articlesWithFullImages.getArticleId(index))
-    _exportedImageUri.emit(exportedImageUri)
+    exportedImageUri?.let { _exportedImageUri.emit(it) }
   }
 
   @AssistedFactory

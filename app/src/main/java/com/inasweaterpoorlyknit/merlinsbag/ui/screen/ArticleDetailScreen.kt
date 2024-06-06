@@ -3,7 +3,6 @@ package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.Manifest
 import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_ONE_SHOT
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,7 +14,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -37,7 +34,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.common.createFakeUri
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
@@ -54,9 +50,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextButtonData
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlin.math.exp
 
 const val ARTICLE_INDEX_ARG = "articleIndex"
 const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
@@ -67,11 +60,14 @@ fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String?
   navigate(route, navOptions)
 }
 
+// TODO: Switch over to less annoying snackbar
 fun launchDownloadNotification(
     context: Context,
     fileUri: Uri,
 ) {
   val notificationManager = NotificationManagerCompat.from(context)
+  val messageTitle = context.getString(R.string.app_name)
+  val messageText = context.getString(R.string.image_exported)
   if (ActivityCompat.checkSelfPermission(
         context,
         Manifest.permission.POST_NOTIFICATIONS
@@ -80,19 +76,19 @@ fun launchDownloadNotification(
     val intent = Intent().apply {
       setAction(Intent.ACTION_VIEW)
       addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-      setDataAndType(fileUri, "image/*")
+      setDataAndType(fileUri, "image/webp")
     }
     val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
     val notification = NotificationCompat.Builder(context, NOOP_NOTIFICATION_CHANNEL)
         .setSmallIcon(R.drawable.download)
-        .setContentTitle("Merlinsbag")
-        .setContentText("Article Image Exported")
+        .setContentTitle(messageTitle)
+        .setContentText(messageText)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setBadgeIconType(NotificationCompat.BADGE_ICON_NONE) // BADGES MAKE THE WORLD WORSE
         .setSilent(true)
         .setContentIntent(pIntent)
         .build()
-    // TODO: Increment number? Or keep same id to avoid multiple notifications?
     notificationManager.notify(0, notification)
   }
 }
