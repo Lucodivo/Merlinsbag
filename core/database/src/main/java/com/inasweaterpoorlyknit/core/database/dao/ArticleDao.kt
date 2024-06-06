@@ -58,4 +58,7 @@ interface ArticleDao {
     """SELECT article.id as article_id FROM article
         WHERE article.id = :articleId""")
   fun getArticleFilenames(articleId: String): Flow<ArticleWithImages>
+
+  // NOTE: Only used for tests
+  @Query("""SELECT COUNT(id) FROM article""") fun getArticlesCount(): Flow<Int>
 }

@@ -1,7 +1,6 @@
 package com.inasweaterpoorlyknit.core.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -16,11 +15,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EnsembleDao {
-  @Insert fun insertEnsemble(vararg ensembleEntity: EnsembleEntity)
+  @Insert fun insertEnsembles(vararg ensembleEntity: EnsembleEntity)
   @Insert fun insertArticleEnsemble(vararg ensembleArticleEntity: EnsembleArticleEntity)
   @Transaction fun insertEnsembleWithArticles(title: String, articleIds: List<String>) {
     val ensemble = EnsembleEntity(title = title)
-    insertEnsemble(ensemble)
+    insertEnsembles(ensemble)
     insertArticleEnsemble(*articleIds.map{ EnsembleArticleEntity(ensemble.id, it) }.toTypedArray())
   }
   @Query("""DELETE FROM ensemble WHERE id = :ensembleId""") fun deleteEnsemble(ensembleId: String)
@@ -46,6 +45,7 @@ interface EnsembleDao {
   )
   fun getEnsembleArticleFullImages(ensembleId: String): Flow<List<ArticleWithFullImages>>
 
+
   @Transaction @Query(
     """ SELECT ensemble.id as ensemble_id, ensemble.title as ensemble_title FROM ensemble
          ORDER BY modified DESC """)
@@ -54,4 +54,7 @@ interface EnsembleDao {
   @Query(""" SELECT ensemble.id, ensemble.title FROM ensemble
              WHERE id = :ensembleId """)
   fun getEnsemble(ensembleId: String): Flow<Ensemble>
+
+  // NOTE: Only used for tests
+  @Query("""SELECT COUNT(id) FROM ensemble""") fun getEnsemblesCount(): Flow<Int>
 }

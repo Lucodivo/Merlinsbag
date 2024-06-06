@@ -9,7 +9,7 @@ android {
   namespace = "com.inasweaterpoorlyknit.core.database"
   compileSdk = 34
   defaultConfig {
-    minSdk = 24
+    minSdk = 26
     ksp {
       arg("room.schemaLocation","$projectDir/schemas")
     }
@@ -21,12 +21,18 @@ android {
   kotlinOptions {
     jvmTarget = "11"
   }
+  testOptions {
+    unitTests {
+      isIncludeAndroidResources = true
+    }
+  }
 }
 
 dependencies {
 
   // Project Modules
   androidTestImplementation(projects.core.common) // Test helpers
+  testImplementation(projects.core.common) // Test helpers
 
   implementation(libs.androidx.core.ktx)
 
@@ -34,6 +40,7 @@ dependencies {
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
+  testImplementation(libs.robolectric)
 
   // Room
   implementation(libs.androidx.room.runtime)
