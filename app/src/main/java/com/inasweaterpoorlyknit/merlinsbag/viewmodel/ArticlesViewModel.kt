@@ -3,9 +3,11 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.timestampFileName
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,13 +49,21 @@ class ArticlesViewModel @Inject constructor(
   }
 
   fun onTakePicture(context: Context) {
-    val contentResolver = context.contentResolver
-    val contentValues = ContentValues().apply {
-      put(MediaStore.MediaColumns.DISPLAY_NAME, "${timestampFileName()}.jpg")
-      put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-      put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+    val pictureFilename = "${timestampFileName()}.jpg"
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      val contentResolver = context.contentResolver
+      val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, pictureFilename)
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM)
+      }
+      takePictureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+      takePictureUri?.let { launchCamera.value = Event(takePictureUri) }
+    } else {
+      val publicPicturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+      val publicPictureFile = File(publicPicturesDir, pictureFilename)
+      takePictureUri = publicPictureFile.toUri()
+      launchCamera.value = Event(takePictureUri)
     }
-    takePictureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-    takePictureUri?.let { launchCamera.value = Event(takePictureUri) }
   }
 }

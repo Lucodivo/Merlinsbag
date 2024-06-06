@@ -87,7 +87,7 @@ class ArticleRepository(
       val exportFile = File(exportDir, articleFilename)
       try {
         articleFile.copyTo(exportFile, true)
-        MediaScannerConnection.scanFile(context, arrayOf(exportFile.toString()), null, null)
+        MediaScannerConnection.scanFile(context, arrayOf(exportFile.toString()), arrayOf("image/webp"), null)
         exportUri = Uri.fromFile(exportFile)
         success = true
       } catch(e: IOException){

@@ -118,11 +118,7 @@ fun ArticlesRoute(
       }
     },
     onClickAddPhotoAlbum = { photoAlbumLauncher.launch(arrayOf("image/*")) },
-    onClickAddPhotoCamera = {
-      cameraWithPermissionsCheckLauncher.launch(
-        REQUIRED_CAMERA_PERMISSIONS
-      )
-    },
+    onClickAddPhotoCamera = { cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS) },
     onClickEdit = {
       editMode = !editMode
       if(editMode) isItemSelected.clear()
