@@ -64,3 +64,4 @@ Aesthetic Questions:
         - Notification
             - the most annoying but less intrusive to the app's UI than either other option
             - If silent and no badge on app icon, it's considerably less annoying
+            - Can be turned off by the user

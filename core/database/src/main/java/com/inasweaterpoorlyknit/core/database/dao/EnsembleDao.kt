@@ -22,6 +22,7 @@ interface EnsembleDao {
     insertEnsembles(ensemble)
     insertArticleEnsemble(*articleIds.map{ EnsembleArticleEntity(ensemble.id, it) }.toTypedArray())
   }
+
   @Query("""DELETE FROM ensemble WHERE id = :ensembleId""") fun deleteEnsemble(ensembleId: String)
   @Query("""DELETE FROM ensemble""") fun deleteAllEnsembles()
 
@@ -49,7 +50,7 @@ interface EnsembleDao {
   @Transaction @Query(
     """ SELECT ensemble.id as ensemble_id, ensemble.title as ensemble_title FROM ensemble
          ORDER BY modified DESC """)
-  fun getAllEnsembleArticleImages(): Flow<List<EnsembleArticleThumbnails>>
+  fun getAllEnsembleArticleThumbnails(): Flow<List<EnsembleArticleThumbnails>>
 
   @Query(""" SELECT ensemble.id, ensemble.title FROM ensemble
              WHERE id = :ensembleId """)

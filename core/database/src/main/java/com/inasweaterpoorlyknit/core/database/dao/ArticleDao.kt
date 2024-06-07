@@ -16,14 +16,6 @@ import kotlinx.coroutines.flow.Flow
 interface ArticleDao {
   @Insert fun insertArticles(vararg articleEntity: ArticleEntity)
   @Insert fun insertArticleImages(vararg articleImageEntity: ArticleImageEntity)
-  @Update fun updateArticle(articleEntity: ArticleEntity)
-
-  @Query("""DELETE FROM article WHERE id IN (:articleIds)""")
-  fun deleteArticles(articleIds: List<String>)
-
-  @Query("""DELETE FROM article""")
-  fun deleteAllArticles()
-
   @Transaction
   fun insertArticle(filename: String, filenameThumb: String) {
     val article = ArticleEntity()
@@ -31,6 +23,14 @@ interface ArticleDao {
     insertArticles(article)
     insertArticleImages(articleImage)
   }
+
+  @Update fun updateArticle(articleEntity: ArticleEntity)
+
+  @Query("""DELETE FROM article WHERE id IN (:articleIds)""")
+  fun deleteArticles(articleIds: List<String>)
+
+  @Query("""DELETE FROM article""")
+  fun deleteAllArticles()
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article 
@@ -59,6 +59,6 @@ interface ArticleDao {
         WHERE article.id = :articleId""")
   fun getArticleFilenames(articleId: String): Flow<ArticleWithImages>
 
-  // NOTE: Only used for tests
-  @Query("""SELECT COUNT(id) FROM article""") fun getArticlesCount(): Flow<Int>
+  @Query("""SELECT COUNT(id) FROM article""")
+  fun getArticlesCount(): Flow<Int>
 }

@@ -108,6 +108,37 @@ with known good practices to produce a more cohesive codebase. "Convention"/"Pra
 As even the worst practice will become easy to reason about if used consistently. And a consistent pattern is 
 easier to refactor when discovering they are indeed a bad practice.
 
+#### Test Structure
+
+Tests are structured using the Arrange-Act-Assert pattern.
+1) *Arrange* the initial state, data, and measurements for the test.
+2) Perform the *Actions* that are under test.
+3) Measure and *Assert* the initial and expected results.
+
+**Desired Outcome**: Both assertions and setup can build up and harm the readable purpose of the test. Although a great test function
+name can go a long way, isolating the actions-under-test clearly demonstrates the intention of said test.
+**Note**: This convention perfectly demonstrates the difference between "convention" and "best practice". Why not assert initial state
+during the *Arrange* portion? Why take measurements in the *Assert* portion? For the first question, maybe it seems counterintuitive to 
+assert outside of the *Assert* portion? For the second question, maybe it's fair to say that the purity of the *Action* portion is the main
+appeal of the convention. However, the best answer to both of these questions is that it has simply been chosen to be convention. A consistent 
+codebase is of greater concern than any minor victory gained by slightly nudging this "best practice" one way or the other.
+
+Ex: 
+```
+@Test
+fun purgeDatabase() = runBlocking{
+  val entityCount = 10
+  articleDao.insertArticles(*createArticleEntity(entityCount))
+  val allArticlesBefore = articleDao.getArticlesCount().first()
+
+  purgeDao.purgeDatabase()
+
+  val allArticlesAfter = articleDao.getArticlesCount().first()
+  assertEquals(0, allArticlesAfter)
+  assertEquals(entityCount, allArticlesBefore)
+}
+```
+
 #### Compose Preview naming convention: Preview- prefix
 
 **Desired Outcome**: Function names that scream "I am a compose preview" for improved code completion and searchability. 

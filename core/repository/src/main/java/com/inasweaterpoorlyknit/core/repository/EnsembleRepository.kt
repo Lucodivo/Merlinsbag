@@ -17,7 +17,7 @@ class EnsembleRepository(
 ) {
   fun getAllEnsembleArticleThumbnails(): Flow<List<LazyEnsembleThumbnails>> {
     val directory = articleFilesDirStr(context)
-    return ensembleDao.getAllEnsembleArticleImages().listMap { ensembleArticleImages ->
+    return ensembleDao.getAllEnsembleArticleThumbnails().listMap { ensembleArticleImages ->
       LazyEnsembleThumbnails(
         ensembleArticleImages.ensembleId,
         ensembleArticleImages.ensembleTitle,
