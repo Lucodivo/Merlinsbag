@@ -1,7 +1,7 @@
-package com.inasweaterpoorlyknit.merlinsbag.di
+package com.inasweaterpoorlyknit.core.common.di
 
-import com.inasweaterpoorlyknit.merlinsbag.di.InjectDispatcher.Default
-import com.inasweaterpoorlyknit.merlinsbag.di.InjectDispatcher.IO
+import com.inasweaterpoorlyknit.core.common.di.InjectDispatcher.Default
+import com.inasweaterpoorlyknit.core.common.di.InjectDispatcher.IO
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

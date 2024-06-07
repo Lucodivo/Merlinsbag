@@ -14,7 +14,7 @@ import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.common.Event
+import com.inasweaterpoorlyknit.core.common.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted

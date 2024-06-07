@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.common
+package com.inasweaterpoorlyknit.merlinsbag.ui
 
 // Using these variables allows me to easily track things like accessibility content descriptions
 // by just searching for usages. Doing accessibility right will require research. Should the description

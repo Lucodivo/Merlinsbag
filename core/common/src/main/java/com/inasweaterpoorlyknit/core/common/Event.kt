@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.common
+package com.inasweaterpoorlyknit.core.common
 
 // Helps avoid events from being handled multiple times after reconfiguration
 open class Event<out T>(private val content: T?) {

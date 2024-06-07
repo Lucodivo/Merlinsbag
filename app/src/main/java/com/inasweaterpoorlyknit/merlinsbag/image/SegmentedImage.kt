@@ -9,7 +9,7 @@ import com.google.mlkit.vision.segmentation.subject.Subject
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
-import com.inasweaterpoorlyknit.merlinsbag.common.Timer
+import com.inasweaterpoorlyknit.core.common.Timer
 import java.nio.FloatBuffer
 import kotlin.math.max
 import kotlin.math.min

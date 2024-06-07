@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.common
+package com.inasweaterpoorlyknit.core.common
 
 import android.util.Log
 

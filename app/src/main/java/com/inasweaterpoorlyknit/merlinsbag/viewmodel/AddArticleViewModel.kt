@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
-import com.inasweaterpoorlyknit.merlinsbag.common.Event
+import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.merlinsbag.image.SegmentedImage
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
