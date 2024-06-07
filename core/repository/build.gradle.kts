@@ -27,6 +27,7 @@ dependencies {
   // Project Modules
   implementation(projects.core.database)
   implementation(projects.core.common)
+  implementation(projects.core.datastore)
 
   implementation(libs.androidx.core.ktx)
 

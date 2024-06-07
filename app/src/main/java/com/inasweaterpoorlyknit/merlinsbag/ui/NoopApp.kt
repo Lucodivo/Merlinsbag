@@ -5,16 +5,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,22 +22,21 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.APP_START_DESTINATION
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ONBOARDING_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 
 @Composable
@@ -127,7 +122,11 @@ class NoopAppState(
 
   init {
     navController.addOnDestinationChangedListener { controller, destination, arguments ->
-      if(destination.route?.startsWith(ADD_ARTICLES_BASE) == true) {
+      val route = destination.route
+      if(route != null && (
+          route.startsWith(ADD_ARTICLES_BASE) ||
+          route.startsWith(ONBOARDING_ROUTE)
+      )){
         showBottomNavBar.value = false
       } else if(!showBottomNavBar.value) {
         showBottomNavBar.value = true
@@ -151,7 +150,7 @@ fun rememberNoopAppState(
   }
 }
 
-fun NavHostController.navigateToTopLevelDestination(from: TopLevelDestination, to: TopLevelDestination) {
+fun NavController.navigateToTopLevelDestination(from: TopLevelDestination, to: TopLevelDestination) {
   val topLevelNavOptions = navOptions {
     popUpTo(route = TopLevelDestination.topLevelDestinationToRoute(from)) {
       inclusive = true

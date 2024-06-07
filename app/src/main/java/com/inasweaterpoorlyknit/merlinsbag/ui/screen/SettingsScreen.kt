@@ -35,11 +35,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.navigation.APP_START_DESTINATION
+import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
+import com.inasweaterpoorlyknit.merlinsbag.ui.navigateToTopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.ui.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 
 const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
@@ -68,7 +73,16 @@ fun SettingsRoute(
 
   LaunchedEffect(settingsViewModel.allDataDeletedTrigger) {
     settingsViewModel.allDataDeletedTrigger.collect {
-      snackbarHostState.showSnackbar(message = context.getString(R.string.all_data_deleted), withDismissAction = true)
+      context.toast(msg = context.getString(R.string.all_data_deleted))
+      val navOptions = navOptions {
+        popUpTo(route = APP_START_DESTINATION) {
+          inclusive = true
+          saveState = false
+        }
+        launchSingleTop = true
+        restoreState = false
+      }
+      navController.navigate(route = APP_START_DESTINATION, navOptions = navOptions)
     }
   }
 

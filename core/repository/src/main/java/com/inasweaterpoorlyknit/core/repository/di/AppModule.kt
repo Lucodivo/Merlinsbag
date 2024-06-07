@@ -3,10 +3,13 @@ package com.inasweaterpoorlyknit.core.repository.di
 import android.content.Context
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import com.inasweaterpoorlyknit.core.database.dao.PurgeDao
+import com.inasweaterpoorlyknit.core.database.dao.PurgeDatabaseDao
+import com.inasweaterpoorlyknit.core.datastore.dao.PurgeDataStoreDao
+import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
 import com.inasweaterpoorlyknit.core.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.repository.PurgeRepository
+import com.inasweaterpoorlyknit.core.repository.UserPreferencesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,5 +31,9 @@ object AppModule {
 
   @Provides
   @Singleton
-  fun providesPurgeRepository(@ApplicationContext context: Context, purgeDao: PurgeDao): PurgeRepository = PurgeRepository(context, purgeDao)
+  fun providesPurgeRepository(@ApplicationContext context: Context, purgeDatabaseDao: PurgeDatabaseDao, purgeDataStoreDao: PurgeDataStoreDao): PurgeRepository = PurgeRepository(context, purgeDatabaseDao, purgeDataStoreDao)
+
+  @Provides
+  @Singleton
+  fun providesUserPreferencesRepository(userPreferencesDao: UserPreferencesDao): UserPreferencesRepository = UserPreferencesRepository(userPreferencesDao)
 }

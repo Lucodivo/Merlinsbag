@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class PurgeDaoTests: DatabaseTests() {
+class PurgeDatabaseDaoTests: DatabaseTests() {
   @Test
   fun purgeDatabase() = runBlocking{
     val entityCount = 10
@@ -14,7 +14,7 @@ class PurgeDaoTests: DatabaseTests() {
     val allArticlesBefore = articleDao.getArticlesCount().first()
     val allEnsemblesBefore = ensembleDao.getEnsemblesCount().first()
 
-    purgeDao.purgeDatabase()
+    purgeDatabaseDao.purgeDatabase()
 
     val allArticlesAfter = articleDao.getArticlesCount().first()
     val allEnsemblesAfter = ensembleDao.getEnsemblesCount().first()

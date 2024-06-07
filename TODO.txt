@@ -61,7 +61,14 @@ Aesthetic Questions:
             - pretty but the most intrusive
                 - Ex: Can often hide floating action or other buttons
                     - Buttons could surely respond to the Snackbar visibility, but moving buttons around one of the greatest sins in good UI
+            - at least in some case, delays screen transitions
         - Notification
             - the most annoying but less intrusive to the app's UI than either other option
             - If silent and no badge on app icon, it's considerably less annoying
             - Can be turned off by the user
+
+
+Onboarding:
+    - Fix the immediate onboarding experience. It shows ArticlesScreen for a split second.
+    - Ensure that the backstack never gets popped multiple times on the OnboardingScreen after pressing "skip"
+    - Actually implement onboarding UI

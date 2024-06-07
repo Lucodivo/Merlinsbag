@@ -118,9 +118,4 @@ dependencies {
     ksp(libs.hilt.compiler)
     kspTest(libs.hilt.compiler)
     kspAndroidTest(libs.hilt.compiler)
-
-    // Proto DataStore
-//    implementation("libs.androidx.datastore")
-// Starting from Protobuf 3.8.0, use the lite runtime library
-//    implementation("libs.protobuf.kotlin.lite")
 }

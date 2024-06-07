@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +69,8 @@ fun ArticlesRoute(
   var showPermissionsAlert by remember { mutableStateOf(false) }
   var editMode by remember { mutableStateOf(false) }
   val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+  val showOnboarding by articlesViewModel.showOnboarding.collectAsState(initial = false)
+  if(showOnboarding) { navController.navigateToOnboarding() }
 
   val appSettingsLauncher = rememberSettingsLauncher()
   val photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments() {

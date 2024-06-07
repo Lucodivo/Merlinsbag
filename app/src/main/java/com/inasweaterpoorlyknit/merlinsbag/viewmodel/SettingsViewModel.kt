@@ -20,7 +20,6 @@ class SettingsViewModel @Inject constructor(
   private val _allDataDeletedTrigger = MutableSharedFlow<Unit>()
   val allDataDeletedTrigger: SharedFlow<Unit> = _allDataDeletedTrigger
 
-
   fun clearCache() = viewModelScope.launch(Dispatchers.IO) {
     purgeRepository.purgeCache()
     _cacheClearedTrigger.emit(Unit)
