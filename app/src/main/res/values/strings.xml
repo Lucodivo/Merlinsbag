@@ -43,4 +43,5 @@
     <string name="camera_permission_required">Camera permissions required</string>
     <string name="storage_permissions_required">Storage permissions required</string>
     <string name="skip">Skip</string>
+    <string name="get_started">Get Started</string>
 </resources>
