@@ -1,11 +1,11 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -13,7 +13,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -34,15 +33,19 @@ import com.inasweaterpoorlyknit.merlinsbag.navigation.APP_START_DESTINATION
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ONBOARDING_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityUiState
+
 
 @Composable
 fun NoopApp(
     appState: NoopAppState,
     modifier: Modifier = Modifier,
+    showOnboarding: Boolean,
 ) {
   val currentTopLevelDestination = remember {
     mutableIntStateOf(
@@ -50,34 +53,45 @@ fun NoopApp(
     )
   }
   val topLevelDestinations = remember { appState.topLevelDestinations }
-  NoopScaffold(
-    showBottomNavBar = appState.showBottomNavBar.value,
-    snackbarHostState = appState.snackbarHostState,
-    bottomNavBarDataItems = topLevelDestinations,
-    selectedNavBarIndex = currentTopLevelDestination.intValue,
-    onSelectedNavBarItem = { selectedIndex ->
-      val previousIndex = currentTopLevelDestination.intValue
-      currentTopLevelDestination.intValue = selectedIndex
-      appState.navController.navigateToTopLevelDestination(
-        TopLevelDestination.entries[previousIndex],
-        TopLevelDestination.entries[selectedIndex]
-      )
-    },
-    modifier = modifier,
-  ) { padding ->
-    Surface(
-      modifier = modifier
-          .fillMaxSize()
-          .padding(padding),
-    ) {
-      CompositionLocalProvider(LocalAbsoluteTonalElevation provides 0.dp) {
+  Box {
+    NoopScaffold(
+      showBottomNavBar = appState.showBottomNavBar.value,
+      snackbarHostState = appState.snackbarHostState,
+      bottomNavBarDataItems = topLevelDestinations,
+      selectedNavBarIndex = currentTopLevelDestination.intValue,
+      onSelectedNavBarItem = { selectedIndex ->
+        val previousIndex = currentTopLevelDestination.intValue
+        currentTopLevelDestination.intValue = selectedIndex
+        appState.navController.navigateToTopLevelDestination(
+          TopLevelDestination.entries[previousIndex],
+          TopLevelDestination.entries[selectedIndex]
+        )
+      },
+      modifier = modifier,
+    ) { padding ->
+      Surface(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(padding),
+      ) {
         NoopNavHost(
           appState = appState,
           modifier = modifier,
         )
       }
     }
+    if(showOnboarding) {
+      Onboarding()
+    }
   }
+}
+
+@Composable
+private fun showOnboarding(
+    uiState: MainActivityUiState,
+): Boolean = when (uiState) {
+  MainActivityUiState.Loading -> false
+  is MainActivityUiState.Success -> !uiState.userPreferences.hasCompletedOnboarding
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -125,7 +139,7 @@ class NoopAppState(
       val route = destination.route
       if(route != null && (
           route.startsWith(ADD_ARTICLES_BASE) ||
-          route.startsWith(ONBOARDING_ROUTE)
+          route.startsWith(SETTINGS_ROUTE)
       )){
         showBottomNavBar.value = false
       } else if(!showBottomNavBar.value) {
@@ -139,7 +153,8 @@ class NoopAppState(
 fun rememberNoopAppState(
     windowSizeClass: WindowSizeClass,
     navController: NavHostController = rememberNavController(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    loading: MutableState<Boolean> = remember{ mutableStateOf(true) }
 ): NoopAppState {
   return remember(navController, windowSizeClass) {
     NoopAppState(

@@ -10,6 +10,7 @@ kotlin = "2.0.0"
 ksp = "2.0.0-1.0.21"
 protobuf = "4.26.0"
 protobufPlugin = "0.9.4"
+androidxCoreSplashscreen = "1.0.1"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -37,6 +38,7 @@ material = "1.12.0"
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "androidxCoreSplashscreen" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 google-firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }

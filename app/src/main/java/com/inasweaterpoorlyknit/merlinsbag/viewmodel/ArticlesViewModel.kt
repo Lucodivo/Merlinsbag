@@ -11,14 +11,13 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.timestampFileName
-import com.inasweaterpoorlyknit.core.repository.ArticleRepository
-import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.data.ArticleRepository
+import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.common.Event
-import com.inasweaterpoorlyknit.core.repository.UserPreferencesRepository
+import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -30,8 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ArticlesViewModel @Inject constructor(
-  private val articleRepository: ArticleRepository,
-  userPreferencesRepository: UserPreferencesRepository,
+    private val articleRepository: ArticleRepository,
 ): ViewModel() {
 
   private lateinit var lazyArticleImages: LazyArticleThumbnails
@@ -44,8 +42,6 @@ class ArticlesViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(),
         initialValue = LazyUriStrings.Empty,
       )
-
-  val showOnboarding: Flow<Boolean> = userPreferencesRepository.hasCompletedOnboarding.map{ !it }
 
   val launchCamera = mutableStateOf(Event<Uri>(null))
 

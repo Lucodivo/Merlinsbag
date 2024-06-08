@@ -32,7 +32,7 @@ import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
-import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.merlinsbag.R
 
 

@@ -2,10 +2,12 @@ package com.inasweaterpoorlyknit.merlinsbag.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navOptions
 import com.inasweaterpoorlyknit.merlinsbag.ui.NoopAppState
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLES_ROUTE
@@ -20,13 +22,23 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLE_ID_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.IMAGE_URI_STRING_LIST_ARG
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ONBOARDING_ROUTE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.OnboardingRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringDecode
 
 const val APP_START_DESTINATION = ARTICLES_ROUTE
+
+fun NavController.navigateToAppStartDestination() {
+  val navOptions = navOptions {
+    popUpTo(route = APP_START_DESTINATION) {
+      inclusive = true
+      saveState = false
+    }
+    launchSingleTop = true
+    restoreState = false
+  }
+  navigate(APP_START_DESTINATION, navOptions)
+}
 
 @Composable
 fun NoopNavHost(
@@ -44,7 +56,6 @@ fun NoopNavHost(
     composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController) }
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController) }
     composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController, snackbarHostState = appState.snackbarHostState) }
-    composable(route = ONBOARDING_ROUTE) { OnboardingRoute(navController = navController) }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(

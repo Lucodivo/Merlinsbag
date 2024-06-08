@@ -40,7 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION

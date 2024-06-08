@@ -28,6 +28,7 @@ android {
 dependencies {
   // Project Modules
   implementation(projects.core.common)
+  implementation(projects.core.model)
 
   implementation(libs.androidx.core.ktx)
 

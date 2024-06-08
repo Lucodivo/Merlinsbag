@@ -3,10 +3,10 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.repository.ArticleRepository
-import com.inasweaterpoorlyknit.core.repository.EnsembleRepository
-import com.inasweaterpoorlyknit.core.repository.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.data.ArticleRepository
+import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
+import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

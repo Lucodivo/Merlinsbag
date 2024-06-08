@@ -56,9 +56,10 @@ android {
 dependencies {
 
     // Project Modules
-    implementation(projects.core.database)
-    implementation(projects.core.repository)
+    implementation(projects.core.data)
+    implementation(projects.core.database) // TODO: app module shouldn't rely on database but currently needed because models aren't exported
     implementation(projects.core.common)
+    implementation(projects.core.model)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -66,6 +67,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.tracing.ktx)
+    implementation(libs.androidx.core.splashscreen)
 
     // TODO: Move ML Kit code to their own module?
     implementation(libs.play.services.mlkit.subject.segmentation)

@@ -39,6 +39,7 @@ import androidx.navigation.navOptions
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.APP_START_DESTINATION
 import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
+import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.navigateToTopLevelDestination
@@ -74,15 +75,7 @@ fun SettingsRoute(
   LaunchedEffect(settingsViewModel.allDataDeletedTrigger) {
     settingsViewModel.allDataDeletedTrigger.collect {
       context.toast(msg = context.getString(R.string.all_data_deleted))
-      val navOptions = navOptions {
-        popUpTo(route = APP_START_DESTINATION) {
-          inclusive = true
-          saveState = false
-        }
-        launchSingleTop = true
-        restoreState = false
-      }
-      navController.navigate(route = APP_START_DESTINATION, navOptions = navOptions)
+      navController.navigateToAppStartDestination()
     }
   }
 

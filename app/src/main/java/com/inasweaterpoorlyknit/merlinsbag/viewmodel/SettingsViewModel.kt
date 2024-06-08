@@ -2,7 +2,7 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.repository.PurgeRepository
+import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -29,7 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
@@ -44,6 +45,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.ui.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
+import kotlinx.coroutines.flow.filter
 
 const val ARTICLES_ROUTE = "articles_route"
 
@@ -69,8 +71,6 @@ fun ArticlesRoute(
   var showPermissionsAlert by remember { mutableStateOf(false) }
   var editMode by remember { mutableStateOf(false) }
   val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
-  val showOnboarding by articlesViewModel.showOnboarding.collectAsState(initial = false)
-  if(showOnboarding) { navController.navigateToOnboarding() }
 
   val appSettingsLauncher = rememberSettingsLauncher()
   val photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments() {

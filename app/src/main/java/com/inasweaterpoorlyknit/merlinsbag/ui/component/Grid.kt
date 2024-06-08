@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.core.repository.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.LandscapePreview
 import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings

@@ -6,13 +6,12 @@ plugins {
 }
 
 android {
-  namespace = "com.inasweaterpoorlyknit.core.database"
+  namespace = "com.inasweaterpoorlyknit.core.data"
   compileSdk = 34
+
   defaultConfig {
     minSdk = 26
-    ksp {
-      arg("room.schemaLocation","$projectDir/schemas")
-    }
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -21,19 +20,15 @@ android {
   kotlinOptions {
     jvmTarget = "11"
   }
-  testOptions {
-    unitTests {
-      isIncludeAndroidResources = true
-    }
-  }
 }
 
 dependencies {
 
   // Project Modules
+  implementation(projects.core.database)
+  implementation(projects.core.common)
+  implementation(projects.core.datastore)
   implementation(projects.core.model)
-  androidTestImplementation(projects.core.common) // Test helpers
-  testImplementation(projects.core.common) // Test helpers
 
   implementation(libs.androidx.core.ktx)
 
@@ -41,15 +36,9 @@ dependencies {
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
-  testImplementation(libs.robolectric)
-
-  // Room
-  implementation(libs.androidx.room.runtime)
-  implementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
-  implementation(libs.androidx.room.paging) // Paging 3 Integration
-  testImplementation(libs.androidx.room.testing)
-  annotationProcessor(libs.androidx.room.compiler)
-  ksp(libs.androidx.room.compiler)
+  androidTestImplementation(libs.androidx.room.runtime)
+  androidTestImplementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
+  androidTestImplementation(libs.androidx.room.testing)
 
   // Hilt
   implementation(libs.hilt.android)

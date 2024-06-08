@@ -15,5 +15,5 @@ fun Toast(@StringRes msg: Int) = LocalContext.current.toast(msg)
 // Source: "Passing uri between compose screens causes: Security Exception: Permission Denial"
 // Answered by: Phil Dukhov
 // Link: https://stackoverflow.com/questions/72122868/passing-uri-between-compose-screens-causes-securityexception-permission-denial
-fun navigationSafeUriStringEncode(uri: Uri) = Uri.encode(uri.toString().replace("%", "|"))
+fun navigationSafeUriStringEncode(uri: Uri): String = Uri.encode(uri.toString().replace("%", "|"))
 fun navigationSafeUriStringDecode(uriString: String) = uriString.replace("|", "%")
