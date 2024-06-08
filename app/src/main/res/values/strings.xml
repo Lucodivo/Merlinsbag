@@ -40,4 +40,7 @@
     <string name="delete_article_alert_negative">Cancel</string>
     <string name="image_exported">Image exported!</string>
     <string name="open">Open</string>
+    <string name="camera_permission_required">Camera permissions required</string>
+    <string name="storage_permissions_required">Storage permissions required</string>
+    <string name="skip">Skip</string>
 </resources>

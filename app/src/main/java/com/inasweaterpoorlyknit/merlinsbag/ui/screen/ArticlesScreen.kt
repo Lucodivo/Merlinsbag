@@ -95,10 +95,9 @@ fun ArticlesRoute(
     })
   articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { takePictureLauncher.launch(it) }
 
-
   val cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
     onPermissionsGranted = { articlesViewModel.onTakePicture(context) },
-    onPermissionDenied = { navController.context.toast("Camera permissions required") },
+    onPermissionDenied = { navController.context.toast(R.string.camera_permission_required) },
     onNeverAskAgain = { showPermissionsAlert = true },
   )
 

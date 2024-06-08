@@ -88,7 +88,7 @@ fun ArticleDetailRoute(
   )
   val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
     onPermissionsGranted = { articleDetailViewModel.exportArticle(pagerState.currentPage) },
-    onPermissionDenied = { navController.context.toast("Storage permissions required") },
+    onPermissionDenied = { navController.context.toast(R.string.storage_permissions_required) },
     onNeverAskAgain = { showPermissionsAlertDialog.value = true },
   )
   LaunchedEffect(articleDetailViewModel.exportedImageUri) {
