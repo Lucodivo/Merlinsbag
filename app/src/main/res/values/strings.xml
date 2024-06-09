@@ -44,4 +44,12 @@
     <string name="storage_permissions_required">Storage permissions required</string>
     <string name="skip">Skip</string>
     <string name="get_started">Get Started</string>
+    <string name="welcome">Welcome!</string>
+    <string name="capture">Capture</string>
+    <string name="virtualize">Virtualize</string>
+    <string name="organize">Organize</string>
+    <string name="categorize_your_keepsakes">Categorize your keepsakes by type, outfit, color, or anyway you see fit!</string>
+    <string name="collect_photographs">Collect photographs of your favorite items.</string>
+    <string name="merlinsbag_is_an_app_for_cataloging">Merlinsbag is an app for cataloging and appreciating the things around you.</string>
+    <string name="merlinsbag_will_stencil_out">Merlinsbag will stencil out and store these articles in your own personal catalog.</string>
 </resources>

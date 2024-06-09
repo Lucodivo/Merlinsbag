@@ -3,12 +3,16 @@ package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.content.Context
 import android.content.pm.ActivityInfo
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -24,15 +28,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.HorizontalPageIndicator
 import androidx.wear.compose.material.PageIndicatorState
 import com.google.common.primitives.Floats.max
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.getActivity
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.OnboardingViewModel
@@ -46,11 +55,9 @@ fun Onboarding(
 ) {
   val context = LocalContext.current
   DisposableEffect(Unit) {
-    // Onboarding landscape layout will probably never be a priority
+    // Landscape layout for Onboarding will probably never be a priority
     setPortraitOrientationOnly(context)
-    onDispose {
-      enableScreenOrientation(context)
-    }
+    onDispose { enableScreenOrientation(context) }
   }
   val pagerState = rememberPagerState(
     initialPage = 0,
@@ -65,24 +72,91 @@ fun Onboarding(
 }
 
 @Composable
+private fun OnboardingSlide(
+    @DrawableRes imageId: Int = R.drawable.onboarding_photographs,
+    title: String,
+    text: String,
+){
+  val slidePadding = 32.dp
+  val slideTitleSize = 32.sp
+  val slideTextSize = 16.sp
+  val slideTitleLetterSpacing = 2.sp
+  val spacerImageTitleDividerHeight = 32.dp
+  val spacerTitleTextDividerHeight = 16.dp
+  val horizontalTextPadding = 32.dp
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(slidePadding)
+  ) {
+    Image(
+      painter = painterResource(imageId),
+      contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+      contentScale = ContentScale.FillWidth,
+      modifier = Modifier
+          .fillMaxWidth()
+    )
+    Spacer(modifier = Modifier.height(spacerImageTitleDividerHeight))
+    Text(
+      text = title,
+      fontSize = slideTitleSize,
+      letterSpacing = slideTitleLetterSpacing,
+      color = MaterialTheme.colorScheme.primary,
+    )
+    Spacer(modifier = Modifier.height(spacerTitleTextDividerHeight))
+    Text(
+      text = text,
+      fontSize = slideTextSize,
+      color = MaterialTheme.colorScheme.primary,
+      textAlign = TextAlign.Center,
+      modifier = Modifier.padding(horizontal = horizontalTextPadding)
+    )
+  }
+}
+
+@Composable
 private fun OnboardingSlideOne(){
-  Text(text = "Onboarding Slide 1")
+  OnboardingSlide(
+    imageId = R.drawable.ic_launcher_color_foreground,
+    title = stringResource(R.string.welcome),
+    text = stringResource(R.string.merlinsbag_is_an_app_for_cataloging)
+  )
 }
 
 @Composable
 private fun OnboardingSlideTwo(){
-  Text(text = "Onboarding Slide 2")
+  OnboardingSlide(
+    imageId = R.drawable.onboarding_photographs,
+    title = stringResource(R.string.capture),
+    text = stringResource(R.string.collect_photographs)
+  )
 }
 
 @Composable
 private fun OnboardingSlideThree(){
-  Text(text = "Onboarding Slide 3")
+  OnboardingSlide(
+    imageId = R.drawable.onboarding_articles,
+    title = stringResource(R.string.virtualize),
+    text = stringResource(R.string.merlinsbag_will_stencil_out)
+  )
+}
+
+@Composable
+private fun OnboardingSlideFour(){
+  OnboardingSlide(
+    imageId = R.drawable.onboarding_ensembles,
+    title = stringResource(R.string.organize),
+    text = stringResource(R.string.categorize_your_keepsakes)
+  )
 }
 
 val slides: Array<@Composable () -> Unit> = arrayOf(
   { OnboardingSlideOne() },
   { OnboardingSlideTwo() },
   { OnboardingSlideThree() },
+  { OnboardingSlideFour() },
 )
 
 class HorizontalPagerIndicatorState(
@@ -210,6 +284,8 @@ fun PreviewUtilOnboarding(
 }
 
 @Preview @Composable fun PreviewOnboarding() = PreviewUtilOnboarding()
-@Preview @Composable fun PreviewOnboarding_LastSelectedMinus() = PreviewUtilOnboarding(selectedPage = slides.lastIndex, offsetFraction = -0.4f)
+@Preview @Composable fun PreviewOnboarding_Second() = PreviewUtilOnboarding(selectedPage = 1)
+@Preview @Composable fun PreviewOnboarding_Third() = PreviewUtilOnboarding(selectedPage = 2)
 @Preview @Composable fun PreviewOnboarding_LastSelected() = PreviewUtilOnboarding(selectedPage = slides.lastIndex)
+@Preview @Composable fun PreviewOnboarding_halfway() = PreviewUtilOnboarding(selectedPage = slides.lastIndex - 1, offsetFraction = 0.5f)
 //endregion

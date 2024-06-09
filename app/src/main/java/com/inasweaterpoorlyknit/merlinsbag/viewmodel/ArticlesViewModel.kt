@@ -68,4 +68,12 @@ class ArticlesViewModel @Inject constructor(
       launchCamera.value = Event(takePictureUri)
     }
   }
+
+  fun takePictureAbandoned(context: Context) {
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      val contentResolver = context.contentResolver
+      takePictureUri?.let { contentResolver.delete(it, null, null) }
+    }
+    takePictureUri = null
+  }
 }
