@@ -1,6 +1,12 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.component
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.PorterDuff
+import android.net.Uri
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,14 +23,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.request.ImageRequest
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -36,6 +49,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.pixelsToDp
 import com.inasweaterpoorlyknit.merlinsbag.ui.previewAssetBitmap
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import java.io.File
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -46,7 +60,7 @@ fun NoopImage(
     contentDescription: String?,
     modifier: Modifier = Modifier,
 ) {
-  var isLoading by remember { mutableStateOf(true) }
+  val context = LocalContext.current
   Box(
     contentAlignment = Alignment.Center,
     modifier = modifier
@@ -59,14 +73,31 @@ fun NoopImage(
       return
     }
 
-    if(isLoading) CircularProgressIndicator()
+    // Although images are all local to the device, Coil's AsyncImage is still useful as it pulls
+    // loading of images off the main thread but it also offers image caching and bitmap pooling
     AsyncImage(
-      model = uriString,
+      model = ImageRequest.Builder(LocalContext.current)
+          .data(uriString)
+          .crossfade(300)
+          .fallback(R.drawable.broken_image)
+          .error(R.drawable.broken_image)
+          .build(),
       contentDescription = contentDescription,
-      onState = { state ->
-        isLoading = state is AsyncImagePainter.State.Loading
-      },
     )
+  }
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+@Composable
+fun rememberImageBitmap(imageUriString: String): ImageBitmap? {
+  val context = LocalContext.current
+  val imageUri = Uri.parse(imageUriString)
+  return try {
+    val inputStream = File(imageUriString).inputStream()
+    BitmapFactory.decodeStream(inputStream)?.asImageBitmap()
+  } catch (e: Exception) {
+    Log.e("NoopImage", "Failed to load image", e)
+    null
   }
 }
 

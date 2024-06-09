@@ -120,8 +120,7 @@ name can go a long way, isolating the actions-under-test clearly demonstrates th
 **Note**: This convention perfectly demonstrates the difference between "convention" and "best practice". Why not assert initial state
 during the *Arrange* portion? Why take measurements in the *Assert* portion? For the first question, maybe it seems counterintuitive to 
 assert outside of the *Assert* portion? For the second question, maybe it's fair to say that the purity of the *Action* portion is the main
-appeal of the convention. However, the best answer to both of these questions is that it has simply been chosen to be convention. A consistent 
-codebase is of greater concern than any minor victory gained by slightly nudging this "best practice" one way or the other.
+appeal of the convention. However, the best answer to both of these questions is that it has simply been chosen to be convention.
 
 Ex: 
 ```

@@ -10,10 +10,6 @@ Database:
 Repository:
     - ArticleRepository and EnsembleRepository both return article images. Probably fine but separation may be desired.
         - ArticleRepository could be a member of EnsembleRepository? Delegate by?
-Camera:
-    - Delete unused external storage photos? Change to internal/cache storage directory that gets cleared?
-Settings Screen:
-    - Creator attribution
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
@@ -42,8 +38,6 @@ Accessibility:
 App-wide UI:
     - EdgeToEdge
     - Explicit to Screen animations
-Build time:
-    - Look into removing AsyncImage since images are local
 Tooling:
     - UI Catalog
 Bugs:
@@ -57,18 +51,21 @@ Settings Screen:
     - Export All Data
     - Dynamic color theme
     - Light / Dark / System theme
+
+// Unknowns
 Aesthetic Questions:
     - When to use Toasts vs. Snackbar vs. Notification?
         - Toasts
-            - ugly but simply and fairly non-intrusive
+            - ugliest but simplest and fairly non-intrusive
+            - Does *not* allow the user to perform an action in response (unlike Snackbar or Notification)
         - Snackbar
-            - pretty but the most intrusive
-                - Ex: Can often hide floating action or other buttons
+            - Prettiest but the most intrusive to the app's UI
+                - Can often hide floating action or other clickable UI items
                     - Buttons could surely respond to the Snackbar visibility, but moving buttons around one of the greatest sins in good UI
-            - at least in some case, delays screen transitions
+                - Can contain a "dismiss" button, which can reduce intrusive-ness
+            - in some cases, may even delay screen transitions (No thank you)
         - Notification
-            - the most annoying but less intrusive to the app's UI than either other option
-            - If silent and no badge on app icon, it's considerably less annoying
-            - Can be turned off by the user
-Onboarding:
-    - Actually implement onboarding UI
+            - the most annoying but least intrusive to the app's UI
+            - the most intrusive to the user's overall device experience
+            - Silent with no badge on app icon allows notifications to be a lot less annoying
+            - Can be turned off by the user (good and bad)
