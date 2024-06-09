@@ -75,49 +75,42 @@ fun AddArticleControls(
     onSave: () -> Unit,
 ) {
   val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
-  Box(
-    contentAlignment = Alignment.BottomEnd,
-    modifier = Modifier.fillMaxSize()
+  Column(
+    horizontalAlignment = Alignment.End,
+    verticalArrangement = if(landscape) Arrangement.Center else Arrangement.Bottom,
   ) {
-    Column(
-      horizontalAlignment = Alignment.End,
-      verticalArrangement = if(landscape) Arrangement.Center else Arrangement.Bottom,
-      modifier = Modifier
-          .fillMaxHeight()
-    ) {
-      val buttonModifier = Modifier.padding(3.dp)
-      if(landscape) {
-        Row(
-          horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
-        }
-        Row(
-          horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
-        }
-        Row(
-          horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-          Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onSave, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
-        }
-      } else { // portrait
-        val buttonRowModifier = if(compactWidth) Modifier.fillMaxWidth() else Modifier.wrapContentSize()
-        val portraitButtonModifier = if(compactWidth) buttonModifier.weight(1f) else buttonModifier
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
-          Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onDiscard, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
-        }
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
-          Button(onClick = onRotateCCW, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onSave, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
-          Button(onClick = onRotateCW, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
-        }
+    val buttonModifier = Modifier.padding(3.dp)
+    if(landscape) {
+      Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
+        Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
+      }
+      Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
+        Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
+      }
+      Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+      ) {
+        Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
+        Button(onClick = onSave, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
+      }
+    } else { // portrait
+      val buttonRowModifier = if(compactWidth) Modifier.fillMaxWidth() else Modifier.wrapContentSize()
+      val portraitButtonModifier = if(compactWidth) buttonModifier.weight(1f) else buttonModifier
+      Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
+        Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
+        Button(onClick = onDiscard, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
+        Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
+      }
+      Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
+        Button(onClick = onRotateCCW, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
+        Button(onClick = onSave, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
+        Button(onClick = onRotateCW, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
       }
     }
   }
@@ -137,21 +130,14 @@ fun AddArticleScreen(
     onSave: () -> Unit,
 ) {
   val landscape: Boolean = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-  Box(
-    contentAlignment = Alignment.BottomCenter,
-    modifier = Modifier.fillMaxSize()
-  ) {
+  val image: @Composable () -> Unit = {
     AddArticleImage(
-      modifier = Modifier
-          .padding(
-            top = 16.dp,
-            bottom = if(landscape) 16.dp else 80.dp,
-            start = 16.dp,
-            end = if(landscape) 150.dp else 16.dp
-          ),
+      modifier = Modifier.padding(16.dp),
       processedImage = processedImage,
       angle = imageRotation,
     )
+  }
+  val controls: @Composable () -> Unit = {
     AddArticleControls(
       windowSizeClass = windowSizeClass,
       landscape = landscape,
@@ -163,6 +149,17 @@ fun AddArticleScreen(
       onDiscard = onDiscard,
       onSave = onSave,
     )
+  }
+  if(landscape){
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Column(modifier = Modifier.weight(1f)) { image() }
+      Column { controls() }
+    }
+  } else {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Row(modifier = Modifier.weight(1f)) { image() }
+      Row { controls() }
+    }
   }
 }
 

@@ -13,7 +13,6 @@ Repository:
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
-    - stop the article from overlapping with the buttons
 Ensembles:
     - Search
     - Sort
