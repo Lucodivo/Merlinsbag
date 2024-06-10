@@ -30,7 +30,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.ui.LandscapePreview
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -41,36 +40,13 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 val articleGridColumnMinWidth = 90.dp
 val articleGridItemPadding = 8.dp
 
-val placeholderDrawables = arrayOf(
-  R.drawable.army_jacket,
-  R.drawable.boot,
-  R.drawable.shirt,
-  R.drawable.hat,
-  R.drawable.cat,
-  R.drawable.denim_jacket,
-  R.drawable.guitar,
-  R.drawable.guy,
-  R.drawable.kid,
-  R.drawable.pants,
-  R.drawable.phone,
-  R.drawable.wallet,
-  R.drawable.shoe,
-)
-val repeatedPlaceholderDrawables = arrayListOf(
-  *placeholderDrawables,
-  *placeholderDrawables,
-  *placeholderDrawables,
-  *placeholderDrawables,
-  *placeholderDrawables,
-)
-
 @Composable
 fun shimmerBrush(
     color: Color = Color.LightGray,
 ): Brush {
   val shimmerColors = listOf(
     color.copy(alpha = 0.6f),
-    color.copy(alpha = 0.55f),
+    color.copy(alpha = 0.52f),
     color.copy(alpha = 0.6f),
   )
 
