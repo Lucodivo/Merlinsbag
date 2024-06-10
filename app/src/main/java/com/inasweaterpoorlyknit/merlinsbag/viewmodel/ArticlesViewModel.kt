@@ -58,6 +58,7 @@ class ArticlesViewModel @Inject constructor(
         put(MediaStore.MediaColumns.DISPLAY_NAME, pictureFilename)
         put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
         put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM)
+        // TODO: Set as IS_PENDING before picture has been taken?
       }
       takePictureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
       takePictureUri?.let { launchCamera.value = Event(takePictureUri) }
@@ -69,8 +70,8 @@ class ArticlesViewModel @Inject constructor(
     }
   }
 
-  fun takePictureAbandoned(context: Context) {
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+  fun pictureTaken(taken: Boolean, context: Context) {
+    if(!taken && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       val contentResolver = context.contentResolver
       takePictureUri?.let { contentResolver.delete(it, null, null) }
     }

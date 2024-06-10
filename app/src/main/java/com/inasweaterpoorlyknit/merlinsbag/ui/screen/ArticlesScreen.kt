@@ -35,6 +35,7 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.merlinsbag.ui.component.PlaceholderArticleThumbnailGrid
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableArticleThumbnailGrid
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextButtonData
 import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
@@ -91,9 +92,8 @@ fun ArticlesRoute(
         val cameraPictureUri = articlesViewModel.takePictureUri
         if(cameraPictureUri != null) navController.navigateToAddArticle(listOf(navigationSafeUriStringEncode(cameraPictureUri)))
         else Log.e("GetContent ActivityResultContract", "Camera picture URI was null")
-      } else {
-        articlesViewModel.takePictureAbandoned(context)
       }
+      articlesViewModel.pictureTaken(success, context)
     })
   articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { takePictureLauncher.launch(it) }
 
@@ -202,14 +202,18 @@ fun ArticlesScreen(
   }
 
   Box(modifier = Modifier.fillMaxSize()) {
-    SelectableArticleThumbnailGrid(
-      selectable = editMode,
-      onSelected = { index ->
-        onClickArticle(index)
-      },
-      thumbnailUris = thumbnailUris,
-      selectedThumbnails = selectedThumbnails,
-    )
+    if(thumbnailUris.isNotEmpty()){
+      SelectableArticleThumbnailGrid(
+        selectable = editMode,
+        onSelected = { index ->
+          onClickArticle(index)
+        },
+        thumbnailUris = thumbnailUris,
+        selectedThumbnails = selectedThumbnails,
+      )
+    } else {
+      PlaceholderArticleThumbnailGrid()
+    }
     val articlesAreSelected = selectedThumbnails.isNotEmpty()
     NoopExpandingFloatingActionButton(
       expanded = editMode,

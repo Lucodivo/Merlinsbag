@@ -18,8 +18,6 @@ Ensembles:
     - Sort
     - when there are no ensembles, fill ensembles list with mock silhouettes
 Article Detail:
-    - Export article image
-    - delete article
     - edit article title
 Features:
     - Collage
@@ -28,6 +26,7 @@ Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - Navigation Drawer / Navigation Rail
 Articles:
+    - Hold thumbnail for select
     - thumbnails with random "shimmer"/"rotation"
     - when there are no articles, fill articles with mock silhouettes
 Accessibility:
@@ -39,6 +38,8 @@ App-wide UI:
     - Explicit to Screen animations
 Tooling:
     - UI Catalog
+Export:
+    - Export as PNG instead of WEBP. Easier for user to share.
 Bugs:
     - Out of Memory (OOM) crash when processing an image in AddArticleScreen
         - stems from java.nio.HeapFloatBuffer when called in com.google.mlkit.vision.segmentation.subject.internal
