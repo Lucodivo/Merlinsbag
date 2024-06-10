@@ -28,9 +28,7 @@ fun NoopBottomNavBar(
     selectedIndex: Int,
     modifier: Modifier = Modifier,
 ) {
-  NoopNavBar(
-    modifier = modifier
-  ) {
+  NoopNavBar(modifier = modifier) {
     bottomNavBarDataItems.forEachIndexed { index, item ->
       NoopNavigationBarItem(
         selected = selectedIndex == index,

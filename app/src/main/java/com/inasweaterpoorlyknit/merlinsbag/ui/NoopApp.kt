@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -117,7 +118,7 @@ fun NoopScaffold(
         bottomNavBarDataItems = bottomNavBarDataItems,
         onClick = onSelectedNavBarItem,
         selectedIndex = selectedNavBarIndex,
-        modifier = Modifier.testTag("NoopBottomBar"),
+        modifier = Modifier.testTag("NoopBottomBar")
       )
     }
   },
