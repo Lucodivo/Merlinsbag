@@ -13,8 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -35,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -68,6 +73,8 @@ fun SettingsRoute(
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
   val showDeleteAllDataAlertDialog = remember{ mutableStateOf(false) }
+  var expandedDarkModeMenu by remember { mutableStateOf(false) }
+  var clearCacheEnabled by remember { mutableStateOf(true) }
   val userPreferences by settingsViewModel.userPreferences.collectAsState()
 
   LaunchedEffect(settingsViewModel.cacheClearedTrigger) {
@@ -85,10 +92,13 @@ fun SettingsRoute(
 
   SettingsScreen(
     showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog.value,
+    expandDarkModeDropdownMenu = expandedDarkModeMenu,
+    clearCacheEnabled = clearCacheEnabled,
     darkMode = userPreferences.darkMode,
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickClearCache = {
+      clearCacheEnabled = false
       settingsViewModel.clearCache()
     },
     onClickDeleteAllData = { showDeleteAllDataAlertDialog.value = true },
@@ -97,15 +107,116 @@ fun SettingsRoute(
       showDeleteAllDataAlertDialog.value = false
       settingsViewModel.deleteAllData()
     },
-    onClickDarkMode = { darkMode ->
+    onSelectDarkMode = { darkMode ->
       settingsViewModel.setDarkMode(darkMode)
+      expandedDarkModeMenu = false
+    },
+    onClickDarkMode = { expandedDarkModeMenu = !expandedDarkModeMenu },
+    onDismissDarkMode = { expandedDarkModeMenu = false },
+  )
+}
+
+val headerModifier = Modifier.padding(vertical = 4.dp, horizontal = 32.dp).fillMaxWidth()
+val itemHorizontalPadding = 8.dp
+val itemModifier = Modifier.padding(vertical = 4.dp, horizontal = itemHorizontalPadding)
+val dividerHorizontalPadding = 16.dp
+val dividerModifier = Modifier.padding(horizontal = dividerHorizontalPadding, vertical = 16.dp)
+
+@Composable
+fun AuthorRow(onClick: () -> Unit) = SettingsTextIconButton(
+  text = stringResource(R.string.author),
+  iconData = IconData(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION),
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun SourceRow(onClick: () -> Unit) = SettingsTextIconButton(
+  text = stringResource(R.string.source),
+  iconData = IconData(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION),
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun DarkModeRow(
+    selectedDarkMode: DarkMode,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectDarkMode: (DarkMode) -> Unit,
+    onDismiss: () -> Unit)
+{
+  Column(
+    horizontalAlignment = Alignment.End,
+    modifier = itemModifier.fillMaxWidth(),
+  ){
+    val systemIconData = IconData(NoopIcons.SystemMode(), TODO_ICON_CONTENT_DESCRIPTION)
+    val lightIconData = IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)
+    val darkIconData = IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION)
+    val iconData = when(selectedDarkMode){
+      DarkMode.SYSTEM -> systemIconData
+      DarkMode.LIGHT -> lightIconData
+      DarkMode.DARK -> darkIconData
     }
+    SettingsTextIconButton(
+      text = stringResource(R.string.dark_mode),
+      iconData = iconData,
+      onClick = onClick,
+    )
+    Box {
+      DropdownMenu(
+        expanded = expandedMenu,
+        onDismissRequest = onDismiss,
+      ){
+        DropdownMenuItem(
+          text = { Text(text = stringResource(R.string.system)) },
+          trailingIcon = { Icon(imageVector = systemIconData.icon, contentDescription = systemIconData.contentDescription) },
+          onClick = { onSelectDarkMode(DarkMode.SYSTEM) },
+        )
+        DropdownMenuItem(
+          text = { Text(text = stringResource(R.string.light)) },
+          trailingIcon = { Icon(imageVector = lightIconData.icon, contentDescription = lightIconData.contentDescription) },
+          onClick = { onSelectDarkMode(DarkMode.LIGHT) },
+        )
+        DropdownMenuItem(
+          text = { Text(text = stringResource(R.string.dark)) },
+          trailingIcon = { Icon(imageVector = darkIconData.icon, contentDescription = darkIconData.contentDescription) },
+          onClick = { onSelectDarkMode(DarkMode.DARK) },
+        )
+      }
+    }
+  }
+}
+
+@Composable
+fun ClearCacheRow(
+    enabled: Boolean,
+    onClick: () -> Unit
+) = SettingsTextIconButton(
+    enabled = enabled,
+    text = stringResource(R.string.clear_cache),
+    iconData = IconData(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION),
+    onClick = onClick,
+    modifier = itemModifier,
+  )
+
+@Composable
+fun DeleteAllDataRow(onClick: () -> Unit) {
+  SettingsTextIconButton(
+    text = stringResource(R.string.delete_all_data),
+    iconData = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
+    onClick = onClick,
+    modifier = itemModifier,
+    containerColor = MaterialTheme.colorScheme.error,
+    contentColor = MaterialTheme.colorScheme.onError,
   )
 }
 
 @Composable
 fun SettingsScreen(
     showDeleteAllDataAlertDialog: Boolean,
+    expandDarkModeDropdownMenu: Boolean,
+    clearCacheEnabled: Boolean,
     darkMode: DarkMode,
     onClickAuthor: () -> Unit,
     onClickSource: () -> Unit,
@@ -113,125 +224,35 @@ fun SettingsScreen(
     onClickDeleteAllData: () -> Unit,
     onClickDismissDeleteAllDataAlertDialog: () -> Unit,
     onClickConfirmDeleteAllDataAlertDialog: () -> Unit,
-    onClickDarkMode: (DarkMode) -> Unit,
+    onClickDarkMode: () -> Unit,
+    onDismissDarkMode: () -> Unit,
+    onSelectDarkMode: (DarkMode) -> Unit,
 ) {
-  val headerModifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-  val itemHorizontalPadding = 8.dp
-  val itemModifier = Modifier.padding(vertical = 4.dp, horizontal = itemHorizontalPadding)
+  val dividerThickness = 2.dp
   LazyColumn(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Top,
     modifier = Modifier.fillMaxSize(),
   ){
+    item { Spacer(modifier = Modifier.height(16.dp)) }
+    item { SettingsTitle(stringResource(R.string.info)) }
+    item { AuthorRow(onClickAuthor) }
+    item { SourceRow(onClickSource) }
+    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+    item { SettingsTitle(stringResource(R.string.theme)) }
     item {
-      Text(
-        text = stringResource(R.string.info),
-        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-        modifier = headerModifier,
+      DarkModeRow(
+        selectedDarkMode = darkMode,
+        expandedMenu = expandDarkModeDropdownMenu,
+        onClick = onClickDarkMode,
+        onSelectDarkMode = onSelectDarkMode,
+        onDismiss = onDismissDarkMode,
       )
     }
-    item {
-      SettingsTextIconButton(
-        text = stringResource(R.string.author),
-        iconData = IconData(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION),
-        onClick = onClickAuthor,
-        modifier = itemModifier,
-      )
-    }
-    item {
-      SettingsTextIconButton(
-        text = stringResource(R.string.source),
-        iconData = IconData(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION),
-        onClick = onClickSource,
-        modifier = itemModifier,
-      )
-    }
-    item {
-      Text(
-        text = stringResource(R.string.theme),
-        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-        modifier = headerModifier,
-      )
-    }
-    item {
-      var expandedDarkModeMenu by remember { mutableStateOf(false) }
-      Row(
-        horizontalArrangement = Arrangement.End,
-      ){
-        val systemIconData = IconData(NoopIcons.SystemMode(), TODO_ICON_CONTENT_DESCRIPTION)
-        val darkIconData = IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)
-        val lightIconData = IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION)
-        val iconData = when(darkMode){
-          DarkMode.SYSTEM -> systemIconData
-          DarkMode.LIGHT -> darkIconData
-          DarkMode.DARK -> lightIconData
-        }
-        SettingsTextIconButton(
-          text = stringResource(R.string.dark_mode),
-          iconData = iconData,
-          onClick = { expandedDarkModeMenu = !expandedDarkModeMenu },
-          modifier = itemModifier,
-        )
-        DropdownMenu(
-          expanded = expandedDarkModeMenu,
-          onDismissRequest = { expandedDarkModeMenu = false },
-          offset = DpOffset(itemHorizontalPadding, 0.dp),
-        ){
-          DropdownMenuItem(
-            text = { Text(text = stringResource(R.string.system)) },
-            trailingIcon = { Icon(imageVector = systemIconData.icon, contentDescription = systemIconData.contentDescription) },
-            onClick = {
-              onClickDarkMode(DarkMode.SYSTEM)
-              expandedDarkModeMenu = false
-            },
-            modifier = itemModifier,
-          )
-          DropdownMenuItem(
-            text = { Text(text = stringResource(R.string.light)) },
-            trailingIcon = { Icon(imageVector = lightIconData.icon, contentDescription = lightIconData.contentDescription) },
-            onClick = {
-              onClickDarkMode(DarkMode.LIGHT)
-              expandedDarkModeMenu = false
-            },
-            modifier = itemModifier,
-          )
-          DropdownMenuItem(
-            text = { Text(text = stringResource(R.string.dark)) },
-            trailingIcon = { Icon(imageVector = darkIconData.icon, contentDescription = darkIconData.contentDescription) },
-            onClick = {
-              onClickDarkMode(DarkMode.DARK)
-              expandedDarkModeMenu = false
-            },
-            modifier = itemModifier,
-          )
-        }
-      }
-    }
-    item {
-      Text(
-        text = stringResource(R.string.data),
-        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-        modifier = headerModifier,
-      )
-    }
-    item {
-      SettingsTextIconButton(
-        text = stringResource(R.string.clear_cache),
-        iconData = IconData(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION),
-        onClick = onClickClearCache,
-        modifier = itemModifier,
-      )
-    }
-    item {
-      SettingsTextIconButton(
-        text = stringResource(R.string.delete_all_data),
-        iconData = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
-        onClick = onClickDeleteAllData,
-        modifier = itemModifier,
-        backgroundColor = MaterialTheme.colorScheme.error,
-        textColor = MaterialTheme.colorScheme.onError,
-      )
-    }
+    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+    item { SettingsTitle(stringResource(R.string.data)) }
+    item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
+    item { DeleteAllDataRow(onClickDeleteAllData) }
   }
   if(showDeleteAllDataAlertDialog) {
     DeleteAllDataAlertDialog(
@@ -243,37 +264,51 @@ fun SettingsScreen(
 }
 
 @Composable
+fun SettingsTitle(text: String) {
+  Text(
+    text = text,
+    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+    textAlign = TextAlign.Center,
+    modifier = headerModifier,
+  )
+}
+
+@Composable
 fun SettingsTextIconButton(
     text: String,
     iconData: IconData,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    enabled: Boolean = true,
+    containerColor: Color? = null,
+    contentColor: Color? = null,
 ){
-  Surface(
-    tonalElevation = 1.dp,
-    shadowElevation = 1.dp,
+  val buttonDefaultColors = ButtonDefaults.elevatedButtonColors()
+  val buttonColors = buttonDefaultColors.copy(
+    containerColor = containerColor ?: buttonDefaultColors.containerColor,
+    contentColor = contentColor ?: buttonDefaultColors.contentColor
+  )
+  ElevatedButton(
+    onClick = onClick,
+    enabled = enabled,
     shape = MaterialTheme.shapes.large,
-    color = backgroundColor,
-    modifier = modifier
-        .fillMaxWidth()
-        .clickable(onClick = onClick)
-  ) {
+    colors = buttonColors,
+    modifier = modifier.fillMaxWidth()
+  ){
     Row(
       horizontalArrangement = Arrangement.SpaceBetween,
-      modifier = Modifier.padding(vertical = 8.dp, horizontal = 32.dp)
+      modifier = Modifier
+          .padding(vertical = 8.dp)
+          .fillMaxWidth(),
     ){
       Text(
         text = text,
         fontSize = MaterialTheme.typography.titleLarge.fontSize,
-        color = textColor,
       )
       Spacer(modifier = Modifier.width(4.dp))
       Icon(
         imageVector = iconData.icon,
         contentDescription = iconData.contentDescription,
-        tint = textColor,
       )
     }
   }
@@ -337,26 +372,29 @@ fun DeleteAllDataAlertDialog(
 @Composable
 fun PreviewUtilSettingsScreen(
     showDeleteAllDataAlertDialog: Boolean = false,
+    expandDarkModeDropdownMenu: Boolean = false,
+    clearCacheEnabled: Boolean = true,
     darkMode: DarkMode = DarkMode.SYSTEM,
-) = NoopTheme {
+) = NoopTheme(darkTheme = darkMode) {
+  Surface {
     SettingsScreen(
-      showDeleteAllDataAlertDialog = false,
+      showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
+      expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
+      clearCacheEnabled = clearCacheEnabled,
       darkMode = darkMode,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
       onClickConfirmDeleteAllDataAlertDialog = {},
       onClickDismissDeleteAllDataAlertDialog = {},
-      onClickDarkMode = {},
+      onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
     )
   }
+}
 
-@Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen()
+@Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
+@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT
+)
 
-
-@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
-
-@Preview
-@Composable
-fun PreviewDeleteAllDataAlertDialog() = NoopTheme {
+@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkTheme = DarkMode.DARK) {
   DeleteAllDataAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
 }
 //endregion
