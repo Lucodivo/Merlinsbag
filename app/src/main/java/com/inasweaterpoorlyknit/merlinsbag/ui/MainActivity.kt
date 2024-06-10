@@ -33,21 +33,14 @@ class MainActivity: ComponentActivity() {
         windowSizeClass = calculateWindowSizeClass(this)
       )
       val uiState by mainActivityViewModel.uiState.collectAsStateWithLifecycle()
+      val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
       if(loading && uiState !is MainActivityUiState.Loading) loading = false
-      NoopTheme {
+      NoopTheme(userPreferences.darkMode) {
         NoopApp(
           appState = appState,
-          showOnboarding = shouldShowOnboarding(uiState),
+          showOnboarding = !userPreferences.hasCompletedOnboarding,
         )
       }
     }
-  }
-
-  @Composable
-  private fun shouldShowOnboarding(
-      uiState: MainActivityUiState,
-  ): Boolean = when (uiState) {
-    MainActivityUiState.Loading -> false
-    is MainActivityUiState.Success -> !uiState.userPreferences.hasCompletedOnboarding
   }
 }

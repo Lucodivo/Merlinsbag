@@ -10,10 +10,12 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Remove
@@ -30,6 +32,10 @@ import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
 import androidx.compose.material.icons.outlined.Rotate90DegreesCw
 import androidx.compose.material.icons.outlined.ZoomInMap
 import androidx.compose.material.icons.outlined.ZoomOutMap
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.inasweaterpoorlyknit.merlinsbag.R
 
 object NoopIcons {
   val Close = Icons.Filled.Close
@@ -61,4 +67,7 @@ object NoopIcons {
   val Key = Icons.Filled.Key
   val Lock = Icons.Filled.Lock
   val Download = Icons.Filled.Download
+  val DarkMode = Icons.Filled.DarkMode
+  val LightMode = Icons.Filled.LightMode
+  @Composable fun SystemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)
 }

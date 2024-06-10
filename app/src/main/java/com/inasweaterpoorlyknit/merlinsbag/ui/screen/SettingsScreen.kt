@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -22,8 +24,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,18 +36,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.navigation.navOptions
+import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.navigation.APP_START_DESTINATION
-import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
-import com.inasweaterpoorlyknit.merlinsbag.ui.navigateToTopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.ui.toast
@@ -65,6 +68,7 @@ fun SettingsRoute(
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
   val showDeleteAllDataAlertDialog = remember{ mutableStateOf(false) }
+  val userPreferences by settingsViewModel.userPreferences.collectAsState()
 
   LaunchedEffect(settingsViewModel.cacheClearedTrigger) {
     settingsViewModel.cacheClearedTrigger.collect {
@@ -81,6 +85,7 @@ fun SettingsRoute(
 
   SettingsScreen(
     showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog.value,
+    darkMode = userPreferences.darkMode,
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickClearCache = {
@@ -92,21 +97,27 @@ fun SettingsRoute(
       showDeleteAllDataAlertDialog.value = false
       settingsViewModel.deleteAllData()
     },
+    onClickDarkMode = { darkMode ->
+      settingsViewModel.setDarkMode(darkMode)
+    }
   )
 }
 
 @Composable
 fun SettingsScreen(
     showDeleteAllDataAlertDialog: Boolean,
+    darkMode: DarkMode,
     onClickAuthor: () -> Unit,
     onClickSource: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
     onClickDismissDeleteAllDataAlertDialog: () -> Unit,
     onClickConfirmDeleteAllDataAlertDialog: () -> Unit,
+    onClickDarkMode: (DarkMode) -> Unit,
 ) {
   val headerModifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-  val itemModifier = Modifier.padding(top = 4.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)
+  val itemHorizontalPadding = 8.dp
+  val itemModifier = Modifier.padding(vertical = 4.dp, horizontal = itemHorizontalPadding)
   LazyColumn(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Top,
@@ -137,7 +148,68 @@ fun SettingsScreen(
     }
     item {
       Text(
-        text = stringResource(R.string.settings),
+        text = stringResource(R.string.theme),
+        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+        modifier = headerModifier,
+      )
+    }
+    item {
+      var expandedDarkModeMenu by remember { mutableStateOf(false) }
+      Row(
+        horizontalArrangement = Arrangement.End,
+      ){
+        val systemIconData = IconData(NoopIcons.SystemMode(), TODO_ICON_CONTENT_DESCRIPTION)
+        val darkIconData = IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)
+        val lightIconData = IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION)
+        val iconData = when(darkMode){
+          DarkMode.SYSTEM -> systemIconData
+          DarkMode.LIGHT -> darkIconData
+          DarkMode.DARK -> lightIconData
+        }
+        SettingsTextIconButton(
+          text = stringResource(R.string.dark_mode),
+          iconData = iconData,
+          onClick = { expandedDarkModeMenu = !expandedDarkModeMenu },
+          modifier = itemModifier,
+        )
+        DropdownMenu(
+          expanded = expandedDarkModeMenu,
+          onDismissRequest = { expandedDarkModeMenu = false },
+          offset = DpOffset(itemHorizontalPadding, 0.dp),
+        ){
+          DropdownMenuItem(
+            text = { Text(text = stringResource(R.string.system)) },
+            trailingIcon = { Icon(imageVector = systemIconData.icon, contentDescription = systemIconData.contentDescription) },
+            onClick = {
+              onClickDarkMode(DarkMode.SYSTEM)
+              expandedDarkModeMenu = false
+            },
+            modifier = itemModifier,
+          )
+          DropdownMenuItem(
+            text = { Text(text = stringResource(R.string.light)) },
+            trailingIcon = { Icon(imageVector = lightIconData.icon, contentDescription = lightIconData.contentDescription) },
+            onClick = {
+              onClickDarkMode(DarkMode.LIGHT)
+              expandedDarkModeMenu = false
+            },
+            modifier = itemModifier,
+          )
+          DropdownMenuItem(
+            text = { Text(text = stringResource(R.string.dark)) },
+            trailingIcon = { Icon(imageVector = darkIconData.icon, contentDescription = darkIconData.contentDescription) },
+            onClick = {
+              onClickDarkMode(DarkMode.DARK)
+              expandedDarkModeMenu = false
+            },
+            modifier = itemModifier,
+          )
+        }
+      }
+    }
+    item {
+      Text(
+        text = stringResource(R.string.data),
         fontSize = MaterialTheme.typography.titleLarge.fontSize,
         modifier = headerModifier,
       )
@@ -189,8 +261,8 @@ fun SettingsTextIconButton(
         .clickable(onClick = onClick)
   ) {
     Row(
-      horizontalArrangement = Arrangement.Center,
-      modifier = Modifier.padding(8.dp)
+      horizontalArrangement = Arrangement.SpaceBetween,
+      modifier = Modifier.padding(vertical = 8.dp, horizontal = 32.dp)
     ){
       Text(
         text = text,
@@ -262,23 +334,25 @@ fun DeleteAllDataAlertDialog(
 }
 
 //region COMPOSABLE PREVIEWS
-@Preview
 @Composable
-fun PreviewSettingsScreen() = NoopTheme {
-  SettingsScreen(
-    showDeleteAllDataAlertDialog = false, onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
-    onClickConfirmDeleteAllDataAlertDialog = {}, onClickDismissDeleteAllDataAlertDialog = {},
-  )
-}
+fun PreviewUtilSettingsScreen(
+    showDeleteAllDataAlertDialog: Boolean = false,
+    darkMode: DarkMode = DarkMode.SYSTEM,
+) = NoopTheme {
+    SettingsScreen(
+      showDeleteAllDataAlertDialog = false,
+      darkMode = darkMode,
+      onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
+      onClickConfirmDeleteAllDataAlertDialog = {},
+      onClickDismissDeleteAllDataAlertDialog = {},
+      onClickDarkMode = {},
+    )
+  }
 
-@Preview
-@Composable
-fun PreviewSettingsScreen_AlertDialog() = NoopTheme {
-  SettingsScreen(
-    showDeleteAllDataAlertDialog = true, onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
-    onClickConfirmDeleteAllDataAlertDialog = {}, onClickDismissDeleteAllDataAlertDialog = {},
-  )
-}
+@Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen()
+
+
+@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
 
 @Preview
 @Composable

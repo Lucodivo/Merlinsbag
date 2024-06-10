@@ -87,14 +87,6 @@ fun NoopApp(
   }
 }
 
-@Composable
-private fun showOnboarding(
-    uiState: MainActivityUiState,
-): Boolean = when (uiState) {
-  MainActivityUiState.Loading -> false
-  is MainActivityUiState.Success -> !uiState.userPreferences.hasCompletedOnboarding
-}
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun NoopScaffold(

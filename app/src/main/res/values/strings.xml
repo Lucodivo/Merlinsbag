@@ -61,4 +61,10 @@
     <string name="Rain_Steam_And_Speed">Rain, Steam and Speed</string>
     <string name="Chrome_Country">Chrome Country</string>
     <string name="Joseph_Mallord_William_Turner">Joseph Mallord William Turner</string>
+    <string name="theme">Theme</string>
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
+    <string name="system">System</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="data">Data</string>
 </resources>

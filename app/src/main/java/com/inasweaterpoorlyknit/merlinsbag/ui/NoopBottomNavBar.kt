@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 
@@ -86,9 +87,10 @@ private fun RowScope.NoopNavigationBarItem(
   )
 }
 
+//region PREVIEW COMPOSABLES
 @Preview
 @Composable
-fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkTheme = false) {
+fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkTheme = DarkMode.LIGHT) {
   NoopBottomNavBar(
     bottomNavBarDataItems = TopLevelDestination.entries,
     onClick = { _ -> },
@@ -98,10 +100,11 @@ fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkTheme = false) {
 
 @Preview
 @Composable
-fun PreviewNoopBottomNavBarDark() = NoopTheme(darkTheme = true) {
+fun PreviewNoopBottomNavBarDark() = NoopTheme(darkTheme = DarkMode.DARK) {
   NoopBottomNavBar(
     bottomNavBarDataItems = TopLevelDestination.entries,
     onClick = { _ -> },
     selectedIndex = TopLevelDestination.entries.lastIndex,
   )
 }
+//endregion

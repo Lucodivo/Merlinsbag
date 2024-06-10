@@ -16,7 +16,6 @@ Add Article:
 Ensembles:
     - Search
     - Sort
-    - when there are no ensembles, fill ensembles list with mock silhouettes
 Article Detail:
     - edit article title
 Features:
@@ -28,7 +27,6 @@ Multiple Form Factor Support:
 Articles:
     - Hold thumbnail for select
     - thumbnails with random "shimmer"/"rotation"
-    - when there are no articles, fill articles with mock silhouettes
 Accessibility:
     - Icon content description
         - Research what kind of descriptions are desired for accessibility services? Describe the form only or function as well?
@@ -50,7 +48,6 @@ Bugs:
 Settings Screen:
     - Export All Data
     - Dynamic color theme
-    - Light / Dark / System theme
 
 // Unknowns
 Aesthetic Questions:
