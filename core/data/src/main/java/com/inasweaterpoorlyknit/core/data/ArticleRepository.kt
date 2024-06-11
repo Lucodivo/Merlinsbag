@@ -3,6 +3,7 @@ package com.inasweaterpoorlyknit.core.data
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -27,13 +28,13 @@ import kotlin.math.exp
 
 
 val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
+val exportFormat = Bitmap.CompressFormat.PNG
 
 class ArticleRepository(
   private val context: Context,
   private val articleDao: ArticleDao,
   private val ensembleDao: EnsembleDao,
 ) {
-  fun insertArticle(imageUri: String, thumbnailUri: String) = articleDao.insertArticle(imageUri, thumbnailUri)
   fun insertArticle(bitmap: Bitmap) {
     val articleFilesDir = articleFilesDir(context).apply { mkdirs() }
     val thumbnailBitmapToSave = bitmap.toThumbnail()
@@ -64,19 +65,23 @@ class ArticleRepository(
     val articleFilesDir = articleFilesDir(context)
     val articleFile = File(articleFilesDir, articleFilename)
 
+    val bitmapToExport = BitmapFactory.decodeFile(articleFile.path)
+    val exportFilname = articleFilename.replace(".webp", ".png")
+
     var exportUri: Uri? = null
     val exportFolderName = "Merlinsbag"
     var success = false
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       val resolver = context.contentResolver
       val contentValues = ContentValues()
-      contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, articleFilename)
-      contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/webp")
+      contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, exportFilname)
+      contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
       contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures${File.separator}$exportFolderName")
+      // TODO: MediaStore.MediaColumns.IN_PROGRESS
       exportUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
       exportUri?.let { uri ->
         resolver.openOutputStream(uri)?.let { fileOutputStream ->
-          fileOutputStream.write(articleFile.readBytes())
+          bitmapToExport.compress(exportFormat, 100, fileOutputStream)
           fileOutputStream.flush()
           fileOutputStream.close()
           success = true
@@ -84,10 +89,14 @@ class ArticleRepository(
       }
     } else {
       val exportDir = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)}${File.separator}$exportFolderName"
-      val exportFile = File(exportDir, articleFilename)
+      val exportFile = File(exportDir, exportFilname)
       try {
-        articleFile.copyTo(exportFile, true)
-        MediaScannerConnection.scanFile(context, arrayOf(exportFile.toString()), arrayOf("image/webp"), null)
+        FileOutputStream(exportFile).let { fileOutputStream ->
+          bitmapToExport.compress(exportFormat, 100, fileOutputStream)
+          fileOutputStream.flush()
+          fileOutputStream.close()
+        }
+        MediaScannerConnection.scanFile(context, arrayOf(exportFile.toString()), arrayOf("image/png"), null)
         exportUri = Uri.fromFile(exportFile)
         success = true
       } catch(e: IOException){
