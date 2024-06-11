@@ -4,28 +4,25 @@
 Steps:
 1) Generate a color scheme
     - https://m3.material.io/theme-builder
-2) Powershell command to fuse files:
-    - Get-Content .\Color.kt, .\Theme.kt | Set-Content XxxColorPaletteScheme.kt
-3) Remove unneeded code
-4) Wrap variables in new object XxxxColorPaletteScheme: ColorPaletteScheme
-5) Auto complete missing interface overrides
-6) Patchwork file with the help of the Macros below
-7) Add ColorPaletteScheme to NoopColorSchemes
-8) Add enum to UserPreferences and user_preferences.proto
+2) Locate material-theme/ui/theme/Color.kt in the generated zip
+3) Create a new XxxColorSchemePalette.kt file
+3) Copy & Paste ColorSchemePalette skeleton below
+4) Paste Color.Kt values in skeleton
+5) Run macro above values to override values
+6) Add ColorPaletteScheme to NoopColorSchemes
+7) Add enum to UserPreferences and user_preferences.proto
 
-*** Helpful Vim Macros ***
+``` ColorSchemePalette Skeleton START
+package com.inasweaterpoorlyknit.merlinsbag.ui.theme.scheme
 
-// set all vals to private
-:%s/val /private val /gg
+import androidx.compose.ui.graphics.Color
+import com.inasweaterpoorlyknit.merlinsbag.R
 
-// remove TODOs
-:%s/{\n.*TODO("Not yet implemented")\n.*}/=/gg
+object XxxColorSchemePalette : ColorPaletteScheme {
 
-// isolate schemes
-:%s/.*Scheme = //gg
+  override val nameStrRes: Int = R.string.sky
 
-// remove packages
-:g/package/d
-
-// remove imports
-:g/import/d
+%s/val/override val/gg
+  // TODO: paste all values in Colors.kt here
+}
+``` ColorSchemePalette Skeleton END

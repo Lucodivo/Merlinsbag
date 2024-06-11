@@ -230,7 +230,7 @@ fun ColorPaletteRow(
 {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = NoopColorSchemes.colorPaletteSchemes.map { scheme ->
-      Pair(stringResource(scheme.nameStrRes()), null)
+      Pair(stringResource(scheme.nameStrRes), null)
   }
   DropdownSettingsRow(
     title = stringResource(R.string.color_palette),
