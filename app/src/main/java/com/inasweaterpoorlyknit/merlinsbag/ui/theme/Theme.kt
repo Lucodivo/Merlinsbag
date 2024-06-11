@@ -12,12 +12,14 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 
 @Composable
 fun NoopTheme(
     darkTheme: DarkMode = DarkMode.SYSTEM,
-    content: @Composable() () -> Unit,
+    colorPalette: ColorPalette = ColorPalette.DEFAULT,
+    content: @Composable () -> Unit,
 ) {
   val context = LocalContext.current
   val darkMode = when(darkTheme){
@@ -27,7 +29,7 @@ fun NoopTheme(
   }
   val colorScheme = when {
     // TODO: Samsung's One UI seems to not respect this whatsoever. Always a shade of blue...
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+    colorPalette == ColorPalette.SYSTEM_DYNAMIC && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
       if(darkMode) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     }
     darkMode -> darkScheme

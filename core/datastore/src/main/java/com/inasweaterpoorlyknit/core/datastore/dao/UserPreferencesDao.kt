@@ -1,34 +1,26 @@
 package com.inasweaterpoorlyknit.core.datastore.dao
 
 import androidx.datastore.core.DataStore
+import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.UserPreferences
-import com.inasweaterpoorlyknit.merlinsbag.UserPreferences as UserPreferencesDataStore
-import com.inasweaterpoorlyknit.merlinsbag.DarkMode as DarkModeDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import com.inasweaterpoorlyknit.merlinsbag.ColorPalette as ColorPaletteDataStore
+import com.inasweaterpoorlyknit.merlinsbag.DarkMode as DarkModeDataStore
+import com.inasweaterpoorlyknit.merlinsbag.UserPreferences as UserPreferencesDataStore
 
 class UserPreferencesDao(
     private val preferencesDataStore: DataStore<UserPreferencesDataStore>
 ) {
-  private fun DarkMode.toDataStore(): DarkModeDataStore = when(this) {
-      DarkMode.SYSTEM -> DarkModeDataStore.System
-      DarkMode.LIGHT -> DarkModeDataStore.Light
-      DarkMode.DARK -> DarkModeDataStore.Dark
-    }
-
-  private fun DarkModeDataStore.fromDataStore(): DarkMode = when(this) {
-    DarkModeDataStore.System -> DarkMode.SYSTEM
-    DarkModeDataStore.Light -> DarkMode.LIGHT
-    DarkModeDataStore.Dark -> DarkMode.DARK
-    DarkModeDataStore.UNRECOGNIZED -> DarkMode.SYSTEM
-  }
-
+  private fun DarkModeDataStore.fromDataStore() = DarkMode.entries[ordinal]
+  private fun ColorPaletteDataStore.fromDataStore() = ColorPalette.entries[ordinal]
 
   val userPreferences: Flow<UserPreferences> = preferencesDataStore.data.map {
     UserPreferences(
       hasCompletedOnboarding = it.hasCompletedOnboarding,
-      darkMode = it.darkMode.fromDataStore()
+      darkMode = it.darkMode.fromDataStore(),
+      colorPalette = it.colorPalette.fromDataStore(),
     )
   }
 
@@ -43,7 +35,15 @@ class UserPreferencesDao(
   suspend fun setDarkMode(darkMode: DarkMode) {
     preferencesDataStore.updateData { currentPreferences ->
       currentPreferences.toBuilder()
-          .setDarkMode(darkMode.toDataStore())
+          .setDarkModeValue(darkMode.ordinal)
+          .build()
+    }
+  }
+
+  suspend fun setColorPalette(colorPalette: ColorPalette) {
+    preferencesDataStore.updateData { currentPreferences ->
+      currentPreferences.toBuilder()
+          .setColorPaletteValue(colorPalette.ordinal)
           .build()
     }
   }

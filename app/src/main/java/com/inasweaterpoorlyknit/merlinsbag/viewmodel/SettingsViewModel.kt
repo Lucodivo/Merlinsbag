@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
+import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,5 +46,9 @@ class SettingsViewModel @Inject constructor(
 
   fun setDarkMode(darkMode: DarkMode) = viewModelScope.launch(Dispatchers.IO){
     userPreferencesRepository.setDarkMode(darkMode)
+  }
+
+  fun setColorPalette(colorPalette: ColorPalette) = viewModelScope.launch(Dispatchers.IO){
+    userPreferencesRepository.setColorPalette(colorPalette)
   }
 }

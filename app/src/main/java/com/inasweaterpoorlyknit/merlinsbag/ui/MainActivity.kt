@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,7 +34,10 @@ class MainActivity: ComponentActivity() {
       val uiState by mainActivityViewModel.uiState.collectAsStateWithLifecycle()
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
       if(loading && uiState !is MainActivityUiState.Loading) loading = false
-      NoopTheme(userPreferences.darkMode) {
+      NoopTheme(
+        darkTheme = userPreferences.darkMode,
+        colorPalette = userPreferences.colorPalette,
+      ) {
         NoopApp(
           appState = appState,
           showOnboarding = !userPreferences.hasCompletedOnboarding,

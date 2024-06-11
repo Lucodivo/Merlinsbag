@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.core.data.repository
 
 import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
+import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
@@ -16,5 +17,9 @@ class UserPreferencesRepository(
 
   suspend fun setDarkMode(darkMode: DarkMode){
     preferencesDao.setDarkMode(darkMode)
+  }
+
+  suspend fun setColorPalette(colorPalette: ColorPalette) {
+    preferencesDao.setColorPalette(colorPalette)
   }
 }

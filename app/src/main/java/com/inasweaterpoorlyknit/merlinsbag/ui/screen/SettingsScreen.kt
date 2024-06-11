@@ -1,11 +1,11 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -41,11 +40,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
@@ -72,8 +71,9 @@ fun SettingsRoute(
 ) {
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
-  val showDeleteAllDataAlertDialog = remember{ mutableStateOf(false) }
+  var showDeleteAllDataAlertDialog by remember{ mutableStateOf(false) }
   var expandedDarkModeMenu by remember { mutableStateOf(false) }
+  var expandedColorPaletteMenu by remember { mutableStateOf(false) }
   var clearCacheEnabled by remember { mutableStateOf(true) }
   val userPreferences by settingsViewModel.userPreferences.collectAsState()
 
@@ -91,20 +91,22 @@ fun SettingsRoute(
   }
 
   SettingsScreen(
-    showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog.value,
+    showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
     expandDarkModeDropdownMenu = expandedDarkModeMenu,
+    expandColorPaletteDropdownMenu = expandedColorPaletteMenu,
     clearCacheEnabled = clearCacheEnabled,
     darkMode = userPreferences.darkMode,
+    colorPalette = userPreferences.colorPalette,
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickClearCache = {
       clearCacheEnabled = false
       settingsViewModel.clearCache()
     },
-    onClickDeleteAllData = { showDeleteAllDataAlertDialog.value = true },
-    onClickDismissDeleteAllDataAlertDialog = { showDeleteAllDataAlertDialog.value = false },
+    onClickDeleteAllData = { showDeleteAllDataAlertDialog = true },
+    onClickDismissDeleteAllDataAlertDialog = { showDeleteAllDataAlertDialog = false },
     onClickConfirmDeleteAllDataAlertDialog = {
-      showDeleteAllDataAlertDialog.value = false
+      showDeleteAllDataAlertDialog = false
       settingsViewModel.deleteAllData()
     },
     onSelectDarkMode = { darkMode ->
@@ -113,6 +115,12 @@ fun SettingsRoute(
     },
     onClickDarkMode = { expandedDarkModeMenu = !expandedDarkModeMenu },
     onDismissDarkMode = { expandedDarkModeMenu = false },
+    onSelectColorPalette = {
+      settingsViewModel.setColorPalette(it)
+      expandedColorPaletteMenu = false
+    },
+    onClickColorPalette = { expandedColorPaletteMenu = true },
+    onDismissColorPalette = { expandedColorPaletteMenu = false },
   )
 }
 
@@ -125,7 +133,7 @@ val dividerModifier = Modifier.padding(horizontal = dividerHorizontalPadding, ve
 @Composable
 fun AuthorRow(onClick: () -> Unit) = SettingsTextIconButton(
   text = stringResource(R.string.author),
-  iconData = IconData(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION),
+  indicator = IconData(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -133,10 +141,46 @@ fun AuthorRow(onClick: () -> Unit) = SettingsTextIconButton(
 @Composable
 fun SourceRow(onClick: () -> Unit) = SettingsTextIconButton(
   text = stringResource(R.string.source),
-  iconData = IconData(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION),
+  indicator = IconData(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
   onClick = onClick,
   modifier = itemModifier,
 )
+
+@Composable
+fun DropdownSettingsRow(
+    title: String,
+    indicator: @Composable (() -> Unit),
+    expanded: Boolean,
+    onClick: () -> Unit,
+    onSelect: (Int) -> Unit,
+    onDismiss: () -> Unit,
+    items: List<Pair<String, IconData?>>,
+) {
+  Column(
+    horizontalAlignment = Alignment.End,
+    modifier = itemModifier.fillMaxWidth(),
+  ) {
+    SettingsTextIconButton(
+      text = title,
+      indicator = indicator,
+      onClick = onClick,
+    )
+    Box {
+      DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+      ) {
+        items.forEachIndexed { index, item ->
+          DropdownMenuItem(
+            text = { Text(text = item.first) },
+            trailingIcon = item.second?.asComposable,
+            onClick = { onSelect(index) },
+          )
+        }
+      }
+    }
+  }
+}
 
 @Composable
 fun DarkModeRow(
@@ -146,46 +190,55 @@ fun DarkModeRow(
     onSelectDarkMode: (DarkMode) -> Unit,
     onDismiss: () -> Unit)
 {
-  Column(
-    horizontalAlignment = Alignment.End,
-    modifier = itemModifier.fillMaxWidth(),
-  ){
-    val systemIconData = IconData(NoopIcons.SystemMode(), TODO_ICON_CONTENT_DESCRIPTION)
-    val lightIconData = IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)
-    val darkIconData = IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION)
-    val iconData = when(selectedDarkMode){
-      DarkMode.SYSTEM -> systemIconData
-      DarkMode.LIGHT -> lightIconData
-      DarkMode.DARK -> darkIconData
-    }
-    SettingsTextIconButton(
-      text = stringResource(R.string.dark_mode),
-      iconData = iconData,
-      onClick = onClick,
-    )
-    Box {
-      DropdownMenu(
-        expanded = expandedMenu,
-        onDismissRequest = onDismiss,
-      ){
-        DropdownMenuItem(
-          text = { Text(text = stringResource(R.string.system)) },
-          trailingIcon = { Icon(imageVector = systemIconData.icon, contentDescription = systemIconData.contentDescription) },
-          onClick = { onSelectDarkMode(DarkMode.SYSTEM) },
-        )
-        DropdownMenuItem(
-          text = { Text(text = stringResource(R.string.light)) },
-          trailingIcon = { Icon(imageVector = lightIconData.icon, contentDescription = lightIconData.contentDescription) },
-          onClick = { onSelectDarkMode(DarkMode.LIGHT) },
-        )
-        DropdownMenuItem(
-          text = { Text(text = stringResource(R.string.dark)) },
-          trailingIcon = { Icon(imageVector = darkIconData.icon, contentDescription = darkIconData.contentDescription) },
-          onClick = { onSelectDarkMode(DarkMode.DARK) },
+  // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
+  val dropdownData = listOf(
+    Pair(stringResource(R.string.system), IconData(NoopIcons.SystemMode(), TODO_ICON_CONTENT_DESCRIPTION)),
+    Pair(stringResource(R.string.light), IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)),
+    Pair(stringResource(R.string.dark), IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION))
+  )
+  DropdownSettingsRow(
+    title = stringResource(R.string.dark_mode),
+    indicator = dropdownData[selectedDarkMode.ordinal].second.asComposable,
+    expanded = expandedMenu,
+    items = dropdownData,
+    onClick = onClick,
+    onSelect = { index -> onSelectDarkMode(DarkMode.entries[index]) },
+    onDismiss = onDismiss,
+  )
+}
+
+@Composable
+fun ColorPaletteRow(
+    selectedColorPalette: ColorPalette,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectColorPalette: (ColorPalette) -> Unit,
+    onDismiss: () -> Unit)
+{
+  // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
+  val dropdownData = listOf(
+    Pair(stringResource(R.string.default_), null),
+    Pair(stringResource(R.string.system_dynamic), null),
+  )
+  DropdownSettingsRow(
+    title = stringResource(R.string.color_palette),
+    indicator = {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxHeight()
+      ) {
+        Text(
+          text = dropdownData[selectedColorPalette.ordinal].first,
+          modifier = Modifier.fillMaxHeight()
         )
       }
-    }
-  }
+    },
+    expanded = expandedMenu,
+    items = dropdownData,
+    onClick = onClick,
+    onSelect = { index -> onSelectColorPalette(ColorPalette.entries[index]) },
+    onDismiss = onDismiss,
+  )
 }
 
 @Composable
@@ -195,7 +248,7 @@ fun ClearCacheRow(
 ) = SettingsTextIconButton(
     enabled = enabled,
     text = stringResource(R.string.clear_cache),
-    iconData = IconData(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION),
+    indicator = IconData(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
     onClick = onClick,
     modifier = itemModifier,
   )
@@ -204,7 +257,7 @@ fun ClearCacheRow(
 fun DeleteAllDataRow(onClick: () -> Unit) {
   SettingsTextIconButton(
     text = stringResource(R.string.delete_all_data),
-    iconData = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
+    indicator = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
     onClick = onClick,
     modifier = itemModifier,
     containerColor = MaterialTheme.colorScheme.error,
@@ -216,6 +269,7 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 fun SettingsScreen(
     showDeleteAllDataAlertDialog: Boolean,
     expandDarkModeDropdownMenu: Boolean,
+    expandColorPaletteDropdownMenu: Boolean,
     clearCacheEnabled: Boolean,
     darkMode: DarkMode,
     onClickAuthor: () -> Unit,
@@ -227,6 +281,10 @@ fun SettingsScreen(
     onClickDarkMode: () -> Unit,
     onDismissDarkMode: () -> Unit,
     onSelectDarkMode: (DarkMode) -> Unit,
+    colorPalette: ColorPalette,
+    onClickColorPalette: () -> Unit,
+    onSelectColorPalette: (ColorPalette) -> Unit,
+    onDismissColorPalette: () -> Unit,
 ) {
   val dividerThickness = 2.dp
   LazyColumn(
@@ -240,6 +298,15 @@ fun SettingsScreen(
     item { SourceRow(onClickSource) }
     item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
     item { SettingsTitle(stringResource(R.string.theme)) }
+    item {
+      ColorPaletteRow(
+        selectedColorPalette = colorPalette,
+        expandedMenu = expandColorPaletteDropdownMenu,
+        onClick = onClickColorPalette,
+        onSelectColorPalette = onSelectColorPalette,
+        onDismiss = onDismissColorPalette,
+      )
+    }
     item {
       DarkModeRow(
         selectedDarkMode = darkMode,
@@ -276,9 +343,9 @@ fun SettingsTitle(text: String) {
 @Composable
 fun SettingsTextIconButton(
     text: String,
-    iconData: IconData,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    indicator: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
     containerColor: Color? = null,
     contentColor: Color? = null,
@@ -296,6 +363,7 @@ fun SettingsTextIconButton(
     modifier = modifier.fillMaxWidth()
   ){
     Row(
+      verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween,
       modifier = Modifier
           .padding(vertical = 8.dp)
@@ -305,11 +373,7 @@ fun SettingsTextIconButton(
         text = text,
         fontSize = MaterialTheme.typography.titleLarge.fontSize,
       )
-      Spacer(modifier = Modifier.width(4.dp))
-      Icon(
-        imageVector = iconData.icon,
-        contentDescription = iconData.contentDescription,
-      )
+      indicator?.invoke()
     }
   }
 }
@@ -373,27 +437,30 @@ fun DeleteAllDataAlertDialog(
 fun PreviewUtilSettingsScreen(
     showDeleteAllDataAlertDialog: Boolean = false,
     expandDarkModeDropdownMenu: Boolean = false,
+    expandColorPaletteDropdownMenu: Boolean = false,
     clearCacheEnabled: Boolean = true,
     darkMode: DarkMode = DarkMode.SYSTEM,
+    colorPalette: ColorPalette = ColorPalette.DEFAULT,
 ) = NoopTheme(darkTheme = darkMode) {
   Surface {
     SettingsScreen(
       showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
       expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
+      expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,
       clearCacheEnabled = clearCacheEnabled,
       darkMode = darkMode,
+      colorPalette = colorPalette,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
       onClickConfirmDeleteAllDataAlertDialog = {},
       onClickDismissDeleteAllDataAlertDialog = {},
       onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
+      onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},
     )
   }
 }
 
 @Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
-@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT
-)
-
+@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
 @Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkTheme = DarkMode.DARK) {
   DeleteAllDataAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
 }

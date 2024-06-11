@@ -4,12 +4,18 @@ option java_package = "com.inasweaterpoorlyknit.merlinsbag";
 option java_multiple_files = true;
 
 enum DarkMode {
-  System = 0;
-  Light = 1;
-  Dark = 2;
+  DarkMode_System = 0;
+  DarkMode_Light = 1;
+  DarkMode_Dark = 2;
+}
+
+enum ColorPalette {
+  ColorPalette_Default = 0;
+  ColorPalette_SystemDynamic = 1;
 }
 
 message UserPreferences {
   bool has_completed_onboarding = 1;
   DarkMode dark_mode = 2;
+  ColorPalette color_palette = 3;
 }
