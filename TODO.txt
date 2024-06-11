@@ -48,7 +48,6 @@ Bugs:
     - Samsung's One UI doesn't seem to respect dynamic theming. Work around? UI is a blue-ish color for these devices.
 Settings Screen:
     - Export All Data
-    - Dynamic color theme
 
 // Unknowns
 Aesthetic Questions:

@@ -11,13 +11,9 @@ import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
 
+
 class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferencesDataStore> {
-  override val defaultValue: UserPreferencesDataStore = UserPreferencesDataStore.newBuilder()
-      .setHasCompletedOnboarding(false)
-      .setDarkMode(DarkModeDataStore.DarkMode_System)
-      .setColorPalette(ColorPaletteDataStore.ColorPalette_RoadWarrior)
-      .setHighContrast(HighContrastDataStore.HighContrast_Off)
-      .build()
+  override val defaultValue: UserPreferencesDataStore = defaultUserPreferences
 
   override suspend fun readFrom(input: InputStream): UserPreferencesDataStore {
     try {
@@ -31,4 +27,14 @@ class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferenc
       t: UserPreferencesDataStore,
       output: OutputStream
   ) = t.writeTo(output)
+
+  companion object {
+    val defaultUserPreferences: UserPreferencesDataStore = UserPreferencesDataStore.newBuilder()
+        .setHasCompletedOnboarding(false)
+        .setDarkMode(DarkModeDataStore.DarkMode_System)
+        .setColorPalette(ColorPaletteDataStore.ColorPalette_RoadWarrior)
+        .setHighContrast(HighContrastDataStore.HighContrast_Off)
+        .build()
+
+  }
 }
