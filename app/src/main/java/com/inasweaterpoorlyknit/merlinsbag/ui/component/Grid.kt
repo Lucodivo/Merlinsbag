@@ -70,7 +70,7 @@ fun shimmerBrush(
 }
 
 @Composable
-fun PlaceholderArticleThumbnailGrid(){
+fun PlaceholderArticleThumbnailGrid(modifier: Modifier = Modifier){
   val articlesGridState = rememberLazyStaggeredGridState()
   val shimmerBrush = shimmerBrush(color = MaterialTheme.colorScheme.onSurface)
   LazyVerticalStaggeredGrid(
@@ -97,7 +97,7 @@ fun PlaceholderArticleThumbnailGrid(){
         }
       }
     },
-    modifier = Modifier.fillMaxSize(),
+    modifier = modifier.fillMaxSize(),
     state = articlesGridState,
   )
   // disable interactions with grid by placing a transparent interactable scrim on top

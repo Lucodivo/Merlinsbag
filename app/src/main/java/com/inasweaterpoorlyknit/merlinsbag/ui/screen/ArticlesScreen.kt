@@ -8,6 +8,8 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
@@ -15,14 +17,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,7 +47,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.ui.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
-import kotlinx.coroutines.flow.filter
 
 const val ARTICLES_ROUTE = "articles_route"
 
@@ -202,7 +202,12 @@ fun ArticlesScreen(
   }
 
   Box(modifier = Modifier.fillMaxSize()) {
-    if(thumbnailUris.isNotEmpty()){
+    val placeholderVisibilityAnimatedFloat by animateFloatAsState(
+      targetValue = if(thumbnailUris.isEmpty()) 1.0f else 0.0f,
+      animationSpec = tween(durationMillis = 1000),
+      label = "placeholder article grid visibility"
+    )
+    if(placeholderVisibilityAnimatedFloat == 0.0f){
       SelectableArticleThumbnailGrid(
         selectable = editMode,
         onSelected = { index ->
@@ -212,7 +217,9 @@ fun ArticlesScreen(
         selectedThumbnails = selectedThumbnails,
       )
     } else {
-      PlaceholderArticleThumbnailGrid()
+      PlaceholderArticleThumbnailGrid(
+        modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
+      )
     }
     val articlesAreSelected = selectedThumbnails.isNotEmpty()
     NoopExpandingFloatingActionButton(

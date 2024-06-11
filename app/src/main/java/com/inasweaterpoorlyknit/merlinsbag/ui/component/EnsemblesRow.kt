@@ -161,14 +161,16 @@ fun EnsemblePlaceholderRow(
 }
 
 @Composable
-fun EnsemblesPlaceholderColumn(){
+fun EnsemblesPlaceholderColumn(
+    modifier: Modifier = Modifier,
+){
   val sidePadding = 10.dp
   val ensembleSpacing = 3.dp
   LazyColumn(
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally,
     contentPadding = PaddingValues(horizontal = sidePadding),
-    modifier = Modifier.fillMaxSize()
+    modifier = modifier.fillMaxSize()
   ) {
     items(previewEnsemblesPlaceholders.size) { index ->
       val topPadding = if(index == 0) sidePadding else ensembleSpacing
@@ -223,13 +225,13 @@ val previewEnsemblesPlaceholders: List<Pair<Int, List<Int>>> =
     repeatedPlaceholderDrawables.let { thumbnails ->
       listOf(
         Pair(R.string.Goth_2_Boss, thumbnails.slice(0..5)),
-        Pair(R.string.Sporty_Spice, thumbnails.slice(6..12)),
-        Pair(R.string.Derelicte, thumbnails.slice(1..10)),
-        Pair(R.string.Bowie_Nite, thumbnails.slice(3..5)),
-        Pair(R.string.Road_Warrior, thumbnails.slice(5..11)),
-        Pair(R.string.Chrome_Country, thumbnails.slice(7..11)),
-        Pair(R.string.Rain_Steam_And_Speed, thumbnails.slice(12..17)),
-        Pair(R.string.Joseph_Mallord_William_Turner, thumbnails.slice(11..15)),
+        Pair(R.string.sporty_spice, thumbnails.slice(6..12)),
+        Pair(R.string.derelicte, thumbnails.slice(1..10)),
+        Pair(R.string.bowie_nite, thumbnails.slice(3..5)),
+        Pair(R.string.road_warrior, thumbnails.slice(5..11)),
+        Pair(R.string.chrome_country, thumbnails.slice(7..11)),
+        Pair(R.string.rain_steam_and_speed, thumbnails.slice(12..17)),
+        Pair(R.string.joseph_mallord_william_turner, thumbnails.slice(11..15)),
       )
     }
 
