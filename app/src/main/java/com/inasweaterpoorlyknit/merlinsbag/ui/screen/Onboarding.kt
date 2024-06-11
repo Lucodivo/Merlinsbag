@@ -19,6 +19,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -208,7 +209,7 @@ private fun OnboardingInternal(
           indicatorSize = pagerIndicatorSize,
           modifier = Modifier.sizeIn(maxHeight = pagerIndicatorSize)
         )
-        Button(
+        ElevatedButton (
           onClick = if(getStartedAlpha > 0.0f) onClickGetStarted else { {} },
           modifier = Modifier
               .alpha(getStartedAlpha)

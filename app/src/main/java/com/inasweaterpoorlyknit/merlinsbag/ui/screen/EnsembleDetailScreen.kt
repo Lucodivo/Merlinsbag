@@ -283,7 +283,7 @@ fun EnsembleDetailScreen(
             placeholder = { Text(text = title.ifEmpty { "Goth 2 Boss" }) },
             onValueChange = setEditTitle,
             singleLine = true,
-            label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
+            label = { Text(text = stringResource(id = R.string.ensemble_title)) },
             keyboardActions = KeyboardActions(onDone = { onTitleChanged(editTitle) }),
             modifier = titleModifier
                 .padding(start = 20.dp, end = 20.dp)
@@ -359,8 +359,8 @@ fun AddArticlesDialog(
   val addArticlesAvailable = articleThumbnailUris.isNotEmpty()
   NoopAddEnsembleDialog(
     visible = visible,
-    title = stringResource(id = R.string.Add_article),
-    positiveButtonLabel = if(addArticlesAvailable) stringResource(id = R.string.Save) else "",
+    title = stringResource(id = R.string.add_article),
+    positiveButtonLabel = if(addArticlesAvailable) stringResource(id = R.string.save) else "",
     onClose = onClose,
     onPositive = onConfirm,
   ) {

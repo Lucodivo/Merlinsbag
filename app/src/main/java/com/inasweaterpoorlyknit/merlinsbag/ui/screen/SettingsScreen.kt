@@ -143,7 +143,7 @@ val dividerModifier = Modifier.padding(horizontal = dividerHorizontalPadding, ve
 
 @Composable
 fun AuthorRow(onClick: () -> Unit) = SettingsTextIconButton(
-  text = stringResource(R.string.author),
+  text = stringResource(R.string.developer),
   indicator = IconData(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
   onClick = onClick,
   modifier = itemModifier,
@@ -470,6 +470,7 @@ fun DeleteAllDataAlertDialog(
           label = label,
           placeholder = {Text("1234")},
           onValueChange = { enteredText.value = it },
+          singleLine = true,
         )
       }
     },

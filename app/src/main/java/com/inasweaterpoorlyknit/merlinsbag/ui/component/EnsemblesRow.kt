@@ -224,7 +224,7 @@ val previewEnsembles: List<LazyEnsembleThumbnails> =
 val previewEnsemblesPlaceholders: List<Pair<Int, List<Int>>> =
     repeatedPlaceholderDrawables.let { thumbnails ->
       listOf(
-        Pair(R.string.Goth_2_Boss, thumbnails.slice(0..5)),
+        Pair(R.string.goth_2_boss, thumbnails.slice(0..5)),
         Pair(R.string.sporty_spice, thumbnails.slice(6..12)),
         Pair(R.string.derelicte, thumbnails.slice(1..10)),
         Pair(R.string.bowie_nite, thumbnails.slice(3..5)),

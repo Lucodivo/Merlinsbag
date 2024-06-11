@@ -6,13 +6,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +38,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.EnsemblesColumn
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.EnsemblesPlaceholderColumn
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.EnsemblesRow
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopAddEnsembleDialog
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopFloatingActionButton
@@ -128,8 +124,8 @@ fun AddEnsembleDialog(
   val selectedArticleIndices = if(isComposePreview) remember { mutableSetOf(0, 1) } else remember { mutableSetOf() }
   NoopAddEnsembleDialog(
     visible = visible,
-    title = stringResource(id = R.string.Add_ensemble),
-    positiveButtonLabel = stringResource(id = R.string.Save),
+    title = stringResource(id = R.string.add_ensemble),
+    positiveButtonLabel = stringResource(id = R.string.save),
     onClose = onClickClose,
     onPositive = {
       onClickSave(
@@ -145,19 +141,19 @@ fun AddEnsembleDialog(
     Row {
       OutlinedTextField(
         value = userInputTitle,
-        placeholder = { Text(text = stringResource(id = R.string.Goth_2_Boss)) },
+        placeholder = { Text(text = stringResource(id = R.string.goth_2_boss)) },
         onValueChange = { updatedTitle ->
           if(updatedTitle.length <= MAX_ENSEMBLE_TITLE_LENGTH) {
             setUserInputTitle(updatedTitle)
           }
         },
-        label = { Text(text = stringResource(id = R.string.Ensemble_title)) },
+        label = { Text(text = stringResource(id = R.string.ensemble_title)) },
         singleLine = true,
       )
     }
     if(articleThumbnails.isNotEmpty()){
       Text(
-        text = stringResource(id = R.string.Articles),
+        text = stringResource(id = R.string.articles),
         modifier = Modifier.padding(10.dp)
       )
       LazyRow(
