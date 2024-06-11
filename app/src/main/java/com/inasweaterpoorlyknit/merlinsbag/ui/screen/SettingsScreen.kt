@@ -53,6 +53,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.ui.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 
@@ -228,10 +229,9 @@ fun ColorPaletteRow(
     onDismiss: () -> Unit)
 {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
-  val dropdownData = listOf(
-    Pair(stringResource(R.string.Road_Warrior), null),
-    Pair(stringResource(R.string.system_dynamic), null),
-  )
+  val dropdownData = NoopColorSchemes.colorPaletteSchemes.map { scheme ->
+      Pair(stringResource(scheme.nameStrRes()), null)
+  }
   DropdownSettingsRow(
     title = stringResource(R.string.color_palette),
     indicator = {

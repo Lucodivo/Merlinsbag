@@ -10,8 +10,13 @@ import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.HighContrast
 
 object NoopColorSchemes {
-  private val colorPaletteSchemes = arrayOf(
-    DefaultColorScheme
+  val colorPaletteSchemes = arrayOf(
+    DefaultColorPaletteScheme, // Should never be hit but important. Allows ordinal of enums to line up.
+    RoadWarriorColorPaletteScheme,
+    RetroColorPaletteScheme,
+    SkyColorSchemePalette,
+    CrimsonColorPaletteScheme,
+    NinetyFiveColorPaletteScheme,
   )
 
   @Composable
@@ -28,15 +33,15 @@ object NoopColorSchemes {
       val colorPaletteSchema = colorPaletteSchemes[colorPalette.ordinal]
       if(darkMode) {
         when(highContrast) {
-          HighContrast.OFF -> colorPaletteSchema.dark
-          HighContrast.MEDIUM -> colorPaletteSchema.mediumContrastDark
-          HighContrast.HIGH -> colorPaletteSchema.highContrastDark
+          HighContrast.OFF -> colorPaletteSchema.dark()
+          HighContrast.MEDIUM -> colorPaletteSchema.mediumContrastDark()
+          HighContrast.HIGH -> colorPaletteSchema.highContrastDark()
         }
       } else {
         when(highContrast) {
-          HighContrast.OFF -> colorPaletteSchema.light
-          HighContrast.MEDIUM -> colorPaletteSchema.mediumContrastLight
-          HighContrast.HIGH -> colorPaletteSchema.highContrastLight
+          HighContrast.OFF -> colorPaletteSchema.light()
+          HighContrast.MEDIUM -> colorPaletteSchema.mediumContrastLight()
+          HighContrast.HIGH -> colorPaletteSchema.highContrastLight()
         }
       }
     }

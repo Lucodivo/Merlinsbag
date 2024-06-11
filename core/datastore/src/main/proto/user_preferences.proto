@@ -10,8 +10,12 @@ enum DarkMode {
 }
 
 enum ColorPalette {
-  ColorPalette_RoadWarrior = 0;
-  ColorPalette_SystemDynamic = 1;
+  ColorPalette_SystemDynamic = 0;
+  ColorPalette_RoadWarrior = 1;
+  ColorPalette_Retro = 2;
+  ColorPalette_Sky = 3;
+  ColorPalette_Crimson = 4;
+  ColorPalette_NinetyFive = 5;
 }
 
 enum HighContrast {

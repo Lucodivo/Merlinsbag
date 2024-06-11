@@ -74,4 +74,8 @@
     <string name="medium">Medium</string>
     <string name="high">High</string>
     <string name="high_contrast">High Contrast</string>
+    <string name="retro">Retro</string>
+    <string name="sky">Sky</string>
+    <string name="crimson">Crimson</string>
+    <string name="ninety_five">Ninety-Five</string>
 </resources>

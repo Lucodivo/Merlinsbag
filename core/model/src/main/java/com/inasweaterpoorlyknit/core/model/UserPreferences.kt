@@ -10,8 +10,12 @@ enum class DarkMode {
 }
 
 enum class ColorPalette {
-  ROAD_WARRIOR,
   SYSTEM_DYNAMIC,
+  ROAD_WARRIOR,
+  RETRO,
+  SKY,
+  CRIMSON,
+  NINETY_FIVE,
 }
 
 enum class HighContrast {
