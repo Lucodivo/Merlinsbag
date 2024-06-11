@@ -35,12 +35,12 @@ class ArticlesViewModel @Inject constructor(
   private lateinit var lazyArticleImages: LazyArticleThumbnails
   var takePictureUri: Uri? = null
 
-  val articleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
+  val articleThumbnails: StateFlow<LazyUriStrings?> = articleRepository.getAllArticlesWithThumbnails()
       .onEach { lazyArticleImages = it }
       .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
-        initialValue = LazyUriStrings.Empty,
+        initialValue = null,
       )
 
   val launchCamera = mutableStateOf(Event<Uri>(null))

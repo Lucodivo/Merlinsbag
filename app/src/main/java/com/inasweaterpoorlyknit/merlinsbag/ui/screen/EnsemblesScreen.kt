@@ -80,7 +80,7 @@ fun EnsemblesRoute(
 
 @Composable
 fun EnsemblesScreen(
-    lazyEnsembleThumbnails: List<LazyEnsembleThumbnails>,
+    lazyEnsembleThumbnails: List<LazyEnsembleThumbnails>?,
     showAddEnsembleDialog: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
     onClickEnsemble: (id: String) -> Unit,
@@ -92,11 +92,11 @@ fun EnsemblesScreen(
     modifier = Modifier.fillMaxSize(),
   ) {
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
-      targetValue = if(lazyEnsembleThumbnails.isEmpty()) 1.0f else 0.0f,
+      targetValue = if(lazyEnsembleThumbnails?.isEmpty() == true) 1.0f else 0.0f,
       animationSpec = tween(durationMillis = 1000),
       label = "placeholder ensemble grid visibility"
     )
-    if(placeholderVisibilityAnimatedFloat == 0.0f){
+    if(placeholderVisibilityAnimatedFloat == 0.0f && lazyEnsembleThumbnails != null){
       EnsemblesColumn(lazyEnsembleThumbnails, onClickEnsemble)
     } else {
       EnsemblesPlaceholderColumn(

@@ -168,7 +168,7 @@ fun DeleteArticlesAlertDialog(onClickOutside: () -> Unit, onClickNegative: () ->
 
 @Composable
 fun ArticlesScreen(
-    thumbnailUris: LazyUriStrings,
+    thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
     editMode: Boolean,
     showPermissionsAlert: Boolean,
@@ -203,11 +203,11 @@ fun ArticlesScreen(
 
   Box(modifier = Modifier.fillMaxSize()) {
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
-      targetValue = if(thumbnailUris.isEmpty()) 1.0f else 0.0f,
+      targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
       animationSpec = tween(durationMillis = 1000),
       label = "placeholder article grid visibility"
     )
-    if(placeholderVisibilityAnimatedFloat == 0.0f){
+    if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null){
       SelectableArticleThumbnailGrid(
         selectable = editMode,
         onSelected = { index ->

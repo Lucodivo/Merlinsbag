@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class EnsemblesUiState(
-    val ensembles: List<LazyEnsembleThumbnails>,
+    val ensembles: List<LazyEnsembleThumbnails>?,
     val showAddEnsembleDialog: Boolean,
     val articleImages: LazyUriStrings,
 )
@@ -52,7 +52,7 @@ class EnsemblesViewModel @Inject constructor(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = EnsemblesUiState(
-          ensembles = emptyList(),
+          ensembles = null,
           showAddEnsembleDialog = false,
           articleImages = LazyUriStrings.Empty,
         ),
