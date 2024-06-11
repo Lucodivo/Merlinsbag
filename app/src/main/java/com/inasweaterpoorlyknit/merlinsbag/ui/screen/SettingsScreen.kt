@@ -46,6 +46,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
+import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
 import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
@@ -74,6 +75,7 @@ fun SettingsRoute(
   var showDeleteAllDataAlertDialog by remember{ mutableStateOf(false) }
   var expandedDarkModeMenu by remember { mutableStateOf(false) }
   var expandedColorPaletteMenu by remember { mutableStateOf(false) }
+  var expandedHighContrastMenu by remember { mutableStateOf(false) }
   var clearCacheEnabled by remember { mutableStateOf(true) }
   val userPreferences by settingsViewModel.userPreferences.collectAsState()
 
@@ -94,9 +96,11 @@ fun SettingsRoute(
     showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
     expandDarkModeDropdownMenu = expandedDarkModeMenu,
     expandColorPaletteDropdownMenu = expandedColorPaletteMenu,
+    expandHighContrastDropdownMenu = expandedHighContrastMenu,
     clearCacheEnabled = clearCacheEnabled,
     darkMode = userPreferences.darkMode,
     colorPalette = userPreferences.colorPalette,
+    highContrast = userPreferences.highContrast,
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickClearCache = {
@@ -119,8 +123,14 @@ fun SettingsRoute(
       settingsViewModel.setColorPalette(it)
       expandedColorPaletteMenu = false
     },
-    onClickColorPalette = { expandedColorPaletteMenu = true },
+    onClickColorPalette = { expandedColorPaletteMenu = !expandedColorPaletteMenu },
     onDismissColorPalette = { expandedColorPaletteMenu = false },
+    onSelectHighContrast = {
+      settingsViewModel.setHighContrast(it)
+      expandedHighContrastMenu = false
+    },
+    onDismissHighContrast = { expandedHighContrastMenu = false },
+    onClickHighContrast = { expandedHighContrastMenu = !expandedHighContrastMenu },
   )
 }
 
@@ -155,12 +165,14 @@ fun DropdownSettingsRow(
     onSelect: (Int) -> Unit,
     onDismiss: () -> Unit,
     items: List<Pair<String, IconData?>>,
+    enabled: Boolean = true,
 ) {
   Column(
     horizontalAlignment = Alignment.End,
     modifier = itemModifier.fillMaxWidth(),
   ) {
     SettingsTextIconButton(
+      enabled = enabled,
       text = title,
       indicator = indicator,
       onClick = onClick,
@@ -217,7 +229,7 @@ fun ColorPaletteRow(
 {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
-    Pair(stringResource(R.string.default_), null),
+    Pair(stringResource(R.string.Road_Warrior), null),
     Pair(stringResource(R.string.system_dynamic), null),
   )
   DropdownSettingsRow(
@@ -238,6 +250,43 @@ fun ColorPaletteRow(
     onClick = onClick,
     onSelect = { index -> onSelectColorPalette(ColorPalette.entries[index]) },
     onDismiss = onDismiss,
+  )
+}
+
+@Composable
+fun HighContrastRow(
+    enabled: Boolean,
+    selectedHighContrast: HighContrast,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectHighContrast: (HighContrast) -> Unit,
+    onDismiss: () -> Unit)
+{
+  // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
+  val dropdownData = listOf(
+    Pair(stringResource(R.string.off), null),
+    Pair(stringResource(R.string.medium), null),
+    Pair(stringResource(R.string.high), null),
+  )
+  DropdownSettingsRow(
+    title = stringResource(R.string.high_contrast),
+    indicator = {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxHeight()
+      ) {
+        Text(
+          text = dropdownData[selectedHighContrast.ordinal].first,
+          modifier = Modifier.fillMaxHeight()
+        )
+      }
+    },
+    expanded = expandedMenu,
+    items = dropdownData,
+    onClick = onClick,
+    onSelect = { index -> onSelectHighContrast(HighContrast.entries[index]) },
+    onDismiss = onDismiss,
+    enabled = enabled,
   )
 }
 
@@ -270,8 +319,11 @@ fun SettingsScreen(
     showDeleteAllDataAlertDialog: Boolean,
     expandDarkModeDropdownMenu: Boolean,
     expandColorPaletteDropdownMenu: Boolean,
+    expandHighContrastDropdownMenu: Boolean,
     clearCacheEnabled: Boolean,
     darkMode: DarkMode,
+    colorPalette: ColorPalette,
+    highContrast: HighContrast,
     onClickAuthor: () -> Unit,
     onClickSource: () -> Unit,
     onClickClearCache: () -> Unit,
@@ -281,10 +333,12 @@ fun SettingsScreen(
     onClickDarkMode: () -> Unit,
     onDismissDarkMode: () -> Unit,
     onSelectDarkMode: (DarkMode) -> Unit,
-    colorPalette: ColorPalette,
     onClickColorPalette: () -> Unit,
     onSelectColorPalette: (ColorPalette) -> Unit,
     onDismissColorPalette: () -> Unit,
+    onClickHighContrast: () -> Unit,
+    onSelectHighContrast: (HighContrast) -> Unit,
+    onDismissHighContrast: () -> Unit,
 ) {
   val dividerThickness = 2.dp
   LazyColumn(
@@ -314,6 +368,17 @@ fun SettingsScreen(
         onClick = onClickDarkMode,
         onSelectDarkMode = onSelectDarkMode,
         onDismiss = onDismissDarkMode,
+      )
+    }
+    item {
+      val systemDynamic = colorPalette == ColorPalette.SYSTEM_DYNAMIC
+      HighContrastRow(
+        enabled = !systemDynamic, // System dynamic color schemes do not currently support high contrast
+        selectedHighContrast = if(systemDynamic) HighContrast.OFF else highContrast,
+        expandedMenu = expandHighContrastDropdownMenu,
+        onClick = onClickHighContrast,
+        onSelectHighContrast = onSelectHighContrast,
+        onDismiss = onDismissHighContrast,
       )
     }
     item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
@@ -438,30 +503,35 @@ fun PreviewUtilSettingsScreen(
     showDeleteAllDataAlertDialog: Boolean = false,
     expandDarkModeDropdownMenu: Boolean = false,
     expandColorPaletteDropdownMenu: Boolean = false,
+    expandHighContrastDropdownMenu: Boolean = false,
     clearCacheEnabled: Boolean = true,
     darkMode: DarkMode = DarkMode.SYSTEM,
-    colorPalette: ColorPalette = ColorPalette.DEFAULT,
-) = NoopTheme(darkTheme = darkMode) {
+    colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
+    highContrast: HighContrast = HighContrast.OFF,
+) = NoopTheme(darkMode = darkMode) {
   Surface {
     SettingsScreen(
       showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
       expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
       expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,
+      expandHighContrastDropdownMenu = expandHighContrastDropdownMenu,
       clearCacheEnabled = clearCacheEnabled,
       darkMode = darkMode,
       colorPalette = colorPalette,
+      highContrast = highContrast,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
       onClickConfirmDeleteAllDataAlertDialog = {},
       onClickDismissDeleteAllDataAlertDialog = {},
       onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
       onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},
+      onClickHighContrast = {}, onSelectHighContrast = {}, onDismissHighContrast = {},
     )
   }
 }
 
 @Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
-@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkTheme = DarkMode.DARK) {
+@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) {
   DeleteAllDataAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
 }
 //endregion

@@ -10,12 +10,19 @@ enum DarkMode {
 }
 
 enum ColorPalette {
-  ColorPalette_Default = 0;
+  ColorPalette_RoadWarrior = 0;
   ColorPalette_SystemDynamic = 1;
+}
+
+enum HighContrast {
+  HighContrast_Off = 0;
+  HighContrast_Medium = 1;
+  HighContrast_High = 2;
 }
 
 message UserPreferences {
   bool has_completed_onboarding = 1;
   DarkMode dark_mode = 2;
   ColorPalette color_palette = 3;
+  HighContrast high_contrast = 4;
 }

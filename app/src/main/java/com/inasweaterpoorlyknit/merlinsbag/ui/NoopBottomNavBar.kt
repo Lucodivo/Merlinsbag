@@ -90,7 +90,7 @@ private fun RowScope.NoopNavigationBarItem(
 //region PREVIEW COMPOSABLES
 @Preview
 @Composable
-fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkTheme = DarkMode.LIGHT) {
+fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkMode = DarkMode.LIGHT) {
   NoopBottomNavBar(
     bottomNavBarDataItems = TopLevelDestination.entries,
     onClick = { _ -> },
@@ -100,7 +100,7 @@ fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkTheme = DarkMode.LIGHT
 
 @Preview
 @Composable
-fun PreviewNoopBottomNavBarDark() = NoopTheme(darkTheme = DarkMode.DARK) {
+fun PreviewNoopBottomNavBarDark() = NoopTheme(darkMode = DarkMode.DARK) {
   NoopBottomNavBar(
     bottomNavBarDataItems = TopLevelDestination.entries,
     onClick = { _ -> },

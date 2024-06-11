@@ -35,8 +35,9 @@ class MainActivity: ComponentActivity() {
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
       if(loading && uiState !is MainActivityUiState.Loading) loading = false
       NoopTheme(
-        darkTheme = userPreferences.darkMode,
+        darkMode = userPreferences.darkMode,
         colorPalette = userPreferences.colorPalette,
+        highContrast = userPreferences.highContrast,
       ) {
         NoopApp(
           appState = appState,

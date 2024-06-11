@@ -7,6 +7,7 @@ import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
+import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -50,5 +51,9 @@ class SettingsViewModel @Inject constructor(
 
   fun setColorPalette(colorPalette: ColorPalette) = viewModelScope.launch(Dispatchers.IO){
     userPreferencesRepository.setColorPalette(colorPalette)
+  }
+
+  fun setHighContrast(highContrast: HighContrast) = viewModelScope.launch(Dispatchers.IO){
+    userPreferencesRepository.setHighContrast(highContrast)
   }
 }

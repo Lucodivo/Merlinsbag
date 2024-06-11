@@ -3,6 +3,7 @@ package com.inasweaterpoorlyknit.core.data.repository
 import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
+import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
@@ -21,5 +22,9 @@ class UserPreferencesRepository(
 
   suspend fun setColorPalette(colorPalette: ColorPalette) {
     preferencesDao.setColorPalette(colorPalette)
+  }
+
+  suspend fun setHighContrast(highContrast: HighContrast) {
+    preferencesDao.setHighContrast(highContrast)
   }
 }
