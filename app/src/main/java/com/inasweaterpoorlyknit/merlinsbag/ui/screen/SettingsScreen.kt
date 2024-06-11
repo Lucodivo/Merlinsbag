@@ -385,6 +385,7 @@ fun SettingsScreen(
     item { SettingsTitle(stringResource(R.string.data)) }
     item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
     item { DeleteAllDataRow(onClickDeleteAllData) }
+    item { Spacer(modifier = Modifier.height(16.dp)) }
   }
   if(showDeleteAllDataAlertDialog) {
     DeleteAllDataAlertDialog(

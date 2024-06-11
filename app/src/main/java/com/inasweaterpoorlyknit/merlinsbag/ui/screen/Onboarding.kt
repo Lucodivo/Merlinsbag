@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -73,46 +74,47 @@ fun Onboarding(
 
 @Composable
 private fun OnboardingSlide(
-    @DrawableRes imageId: Int = R.drawable.onboarding_photographs,
     title: String,
     text: String,
+    @DrawableRes imageId: Int = R.drawable.onboarding_photographs,
 ){
-  val slidePadding = 32.dp
+  val slideHorizontalPadding = 32.dp
   val slideTitleSize = 32.sp
   val slideTextSize = 16.sp
   val slideTitleLetterSpacing = 2.sp
-  val spacerImageTitleDividerHeight = 32.dp
   val spacerTitleTextDividerHeight = 16.dp
-  val horizontalTextPadding = 32.dp
+  val horizontalTextPadding = 16.dp
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center,
-    modifier = Modifier
-        .fillMaxSize()
-        .padding(slidePadding)
+    modifier = Modifier.padding(horizontal = slideHorizontalPadding)
   ) {
     Image(
       painter = painterResource(imageId),
       contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
       contentScale = ContentScale.FillWidth,
-      modifier = Modifier
-          .fillMaxWidth()
-    )
-    Spacer(modifier = Modifier.height(spacerImageTitleDividerHeight))
-    Text(
-      text = title,
-      fontSize = slideTitleSize,
-      letterSpacing = slideTitleLetterSpacing,
-      color = MaterialTheme.colorScheme.primary,
+      modifier = Modifier.fillMaxWidth()
     )
     Spacer(modifier = Modifier.height(spacerTitleTextDividerHeight))
-    Text(
-      text = text,
-      fontSize = slideTextSize,
-      color = MaterialTheme.colorScheme.primary,
-      textAlign = TextAlign.Center,
-      modifier = Modifier.padding(horizontal = horizontalTextPadding)
-    )
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Bottom,
+    ){
+      Text(
+        text = title,
+        fontSize = slideTitleSize,
+        letterSpacing = slideTitleLetterSpacing,
+        color = MaterialTheme.colorScheme.primary,
+      )
+      Spacer(modifier = Modifier.height(spacerTitleTextDividerHeight))
+      Text(
+        text = text,
+        fontSize = slideTextSize,
+        color = MaterialTheme.colorScheme.primary,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(horizontal = horizontalTextPadding)
+      )
+    }
   }
 }
 
@@ -121,7 +123,7 @@ private fun OnboardingSlideOne(){
   OnboardingSlide(
     imageId = R.drawable.ic_launcher_color_foreground,
     title = stringResource(R.string.welcome),
-    text = stringResource(R.string.merlinsbag_is_an_app_for_cataloging)
+    text = stringResource(R.string.merlinsbag_is_an_app_for_cataloging),
   )
 }
 
@@ -130,7 +132,7 @@ private fun OnboardingSlideTwo(){
   OnboardingSlide(
     imageId = R.drawable.onboarding_photographs,
     title = stringResource(R.string.capture),
-    text = stringResource(R.string.collect_photographs)
+    text = stringResource(R.string.collect_photographs),
   )
 }
 
@@ -139,7 +141,7 @@ private fun OnboardingSlideThree(){
   OnboardingSlide(
     imageId = R.drawable.onboarding_articles,
     title = stringResource(R.string.virtualize),
-    text = stringResource(R.string.merlinsbag_will_stencil_out)
+    text = stringResource(R.string.merlinsbag_will_stencil_out),
   )
 }
 
@@ -148,7 +150,7 @@ private fun OnboardingSlideFour(){
   OnboardingSlide(
     imageId = R.drawable.onboarding_ensembles,
     title = stringResource(R.string.organize),
-    text = stringResource(R.string.categorize_your_keepsakes)
+    text = stringResource(R.string.categorize_your_keepsakes),
   )
 }
 
@@ -175,80 +177,65 @@ private fun OnboardingInternal(
 ) {
   val pagerIndicatorSpacing = 8.dp
   val pagerIndicatorSize = 8.dp
-  val pagerIndicatorPadding = 30.dp
   val skipButtonPadding = 10.dp
-  val getStartedButtonVerticalPadding = pagerIndicatorPadding + 30.dp
   val getStartedButtonHorizontalPadding = 30.dp
   val pagerIndicatorState = remember { HorizontalPagerIndicatorState(pagerState) }
+  val getStartedAlpha = max(0.0f, (pagerState.currentPage + pagerState.currentPageOffsetFraction) - (pagerState.pageCount - 2))
   Surface(
     modifier = Modifier.fillMaxSize(),
   ) {
-    Box(
-      contentAlignment = Alignment.Center,
+    Column (
+      verticalArrangement = Arrangement.Bottom,
+      horizontalAlignment = Alignment.CenterHorizontally,
       modifier = Modifier.fillMaxSize(),
     ) {
       HorizontalPager(
-        state = pagerState
+        state = pagerState,
+        modifier = Modifier.weight(1.0f)
       ) { page ->
-        Box(
-          contentAlignment = Alignment.Center,
-          modifier = Modifier.fillMaxSize()) {
-          slides[page]()
-        }
+        slides[page]()
       }
-      HorizontalPageIndicator(
-        pageIndicatorState = pagerIndicatorState,
-        selectedColor = MaterialTheme.colorScheme.onBackground,
-        spacing = pagerIndicatorSpacing,
-        indicatorSize = pagerIndicatorSize,
-        modifier = Modifier.padding(pagerIndicatorPadding)
-      )
-
-      // Continue to App button
-      val getStartedAlpha = max(0.0f, (pagerState.currentPage + pagerState.currentPageOffsetFraction) - (pagerState.pageCount - 2))
-      if(getStartedAlpha > 0.0f){
-        Box(
-          contentAlignment = Alignment.BottomCenter,
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+      ){
+        HorizontalPageIndicator(
+          pageIndicatorState = pagerIndicatorState,
+          selectedColor = MaterialTheme.colorScheme.onSurface,
+          spacing = pagerIndicatorSpacing,
+          indicatorSize = pagerIndicatorSize,
+          modifier = Modifier.sizeIn(maxHeight = pagerIndicatorSize)
+        )
+        Button(
+          onClick = if(getStartedAlpha > 0.0f) onClickGetStarted else { {} },
           modifier = Modifier
-              .fillMaxSize()
-        ) {
-          Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom,
-          ) {
-            Button(
-              onClick = onClickGetStarted,
-              modifier = Modifier
-                  .alpha(getStartedAlpha)
-                  .fillMaxWidth()
-                  .padding(
-                    vertical = getStartedButtonVerticalPadding,
-                    horizontal = getStartedButtonHorizontalPadding,
-                  ),
-            ){
-              Text(text = stringResource(R.string.get_started))
-            }
-          }
-        }
-      }
-
-      // skip button
-      if(getStartedAlpha < 1.0f){
-        Box(
-          contentAlignment = Alignment.BottomEnd,
-          modifier = Modifier
-              .fillMaxSize()
-              .padding(skipButtonPadding)
+              .alpha(getStartedAlpha)
+              .fillMaxWidth()
+              .padding(horizontal = getStartedButtonHorizontalPadding),
         ){
-          TextButton(
-            onClick = onClickSkip,
-            modifier = Modifier.alpha(1.0f - getStartedAlpha)
-          ) {
-            Text(
-              text = stringResource(R.string.skip),
-              color = MaterialTheme.colorScheme.primary
-            )
-          }
+          Text(text = stringResource(R.string.get_started))
+        }
+      }
+    }
+
+    // skip button
+    if(getStartedAlpha < 1.0f){
+      Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(skipButtonPadding)
+      ){
+        TextButton(
+          onClick = onClickSkip,
+          modifier = Modifier.alpha(1.0f - getStartedAlpha)
+        ) {
+          Text(
+            text = stringResource(R.string.skip),
+            color = MaterialTheme.colorScheme.primary
+          )
         }
       }
     }
