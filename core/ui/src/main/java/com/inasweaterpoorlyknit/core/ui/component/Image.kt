@@ -1,5 +1,6 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.component
+package com.inasweaterpoorlyknit.core.ui.component
 
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -30,16 +31,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.COMPOSE_PREVIEW_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.R
 import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
-import com.inasweaterpoorlyknit.merlinsbag.ui.degToRad
 import com.inasweaterpoorlyknit.core.ui.isComposePreview
-import com.inasweaterpoorlyknit.merlinsbag.ui.pixelsToDp
 import com.inasweaterpoorlyknit.core.ui.previewAssetBitmap
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -48,6 +48,10 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+
+fun pixelsToDp(pixels: Int) = (pixels / Resources.getSystem().displayMetrics.density).dp
+fun Float.degToRad() = this * Math.PI / 180.0
+fun Float.radToDeg() = this * 180.0 / Math.PI
 
 @Composable
 fun NoopImage(

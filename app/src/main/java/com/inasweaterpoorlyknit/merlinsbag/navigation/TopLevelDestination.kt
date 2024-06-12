@@ -1,16 +1,11 @@
 package com.inasweaterpoorlyknit.merlinsbag.navigation
 
-import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.BottomNavBarData
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLES_ROUTE
-import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 
-sealed class TopLevelDestination(selectedIcon: ImageVector, unselectedIcon: ImageVector, @StringRes iconTextId: Int): BottomNavBarData(selectedIcon = selectedIcon, unselectedIcon = unselectedIcon, iconTextId = iconTextId) {
-  data object ARTICLES: TopLevelDestination(NoopIcons.ItemsSelected, NoopIcons.Items, R.string.articles)
-  data object ENSEMBLES: TopLevelDestination(NoopIcons.EnsemblesSelected, NoopIcons.Ensembles, R.string.ensembles)
+sealed class TopLevelDestination {
+  data object ARTICLES: TopLevelDestination()
+  data object ENSEMBLES: TopLevelDestination()
 
   companion object {
     val entries = listOf(ARTICLES, ENSEMBLES)

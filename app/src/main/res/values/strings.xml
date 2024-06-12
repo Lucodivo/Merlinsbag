@@ -53,30 +53,15 @@
     <string name="merlinsbag_is_an_app_for_cataloging">Merlinsbag is an app for cataloging and appreciating the things around you.</string>
     <string name="merlinsbag_will_stencil_out">Merlinsbag will stencil out and store these articles in your own personal catalog.</string>
     <string name="no_articles_available">No Articles Available</string>
-    <string name="sporty_spice">Sporty Spice</string>
-    <string name="derelicte">Derelicte</string>
-    <string name="bowie_nite">Bowie Nite</string>
-    <string name="road_warrior">Road Warrior</string>
-    <string name="hyperpop">Hyperpop</string>
-    <string name="rain_steam_and_speed">Rain, Steam and Speed</string>
-    <string name="chrome_country">Chrome Country</string>
-    <string name="joseph_mallord_william_turner">Joseph Mallord William Turner</string>
     <string name="theme">Theme</string>
     <string name="dark">Dark</string>
     <string name="light">Light</string>
     <string name="system">System</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="data">Data</string>
-    <!-- TODO: Remove below -->
-    <string name="system_dynamic">System Dynamic</string>
-    <string name="default_">Default</string>
     <string name="color_palette">Color Palette</string>
     <string name="off">Off</string>
     <string name="medium">Medium</string>
     <string name="high">High</string>
     <string name="high_contrast">High Contrast</string>
-    <string name="retro">Retro</string>
-    <string name="sky">Sky</string>
-    <string name="crimson">Crimson</string>
-    <string name="ninety_five">Ninety-Five</string>
 </resources>

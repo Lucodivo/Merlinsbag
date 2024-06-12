@@ -30,22 +30,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.EnsemblesColumn
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.EnsemblesPlaceholderColumn
 import com.inasweaterpoorlyknit.core.ui.component.IconData
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopAddEnsembleDialog
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopFloatingActionButton
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableNoopImage
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.previewEnsembles
 import com.inasweaterpoorlyknit.core.ui.isComposePreview
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.core.ui.component.NoopOverlappingImageRowColumn
+import com.inasweaterpoorlyknit.core.ui.component.NoopOverlappingPlaceholderRowColumn
+import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
+import com.inasweaterpoorlyknit.core.ui.component.previewEnsembles
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SaveEnsembleData
@@ -64,9 +63,7 @@ fun EnsemblesRoute(
     lazyEnsembleThumbnails = ensemblesUiState.ensembles,
     showAddEnsembleDialog = ensemblesUiState.showAddEnsembleDialog,
     addEnsembleDialogArticles = ensemblesUiState.articleImages,
-    onClickEnsemble = { id ->
-      navController.navigateToEnsembleDetail(ensembleId = id)
-    },
+    onClickEnsemble = { navController.navigateToEnsembleDetail(ensemblesViewModel.onClickEnsemble(it)) },
     onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
     onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
     onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog,
@@ -75,10 +72,10 @@ fun EnsemblesRoute(
 
 @Composable
 fun EnsemblesScreen(
-    lazyEnsembleThumbnails: List<Pair<Ensemble, LazyUriStrings>>?,
+    lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>?,
     showAddEnsembleDialog: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
-    onClickEnsemble: (id: String) -> Unit,
+    onClickEnsemble: (index: Int) -> Unit,
     onClickAddEnsemble: () -> Unit,
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
@@ -92,9 +89,9 @@ fun EnsemblesScreen(
       label = "placeholder ensemble grid visibility"
     )
     if(placeholderVisibilityAnimatedFloat == 0.0f && lazyEnsembleThumbnails != null){
-      EnsemblesColumn(lazyEnsembleThumbnails, onClickEnsemble)
+      NoopOverlappingImageRowColumn(lazyEnsembleThumbnails, onClickEnsemble)
     } else {
-      EnsemblesPlaceholderColumn(
+      NoopOverlappingPlaceholderRowColumn(
         modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
       )
     }
@@ -121,7 +118,7 @@ fun AddEnsembleDialog(
   BackHandler(enabled = visible) { onClickClose() }
   val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
   val selectedArticleIndices = if(isComposePreview) remember { mutableSetOf(0, 1) } else remember { mutableSetOf() }
-  NoopAddEnsembleDialog(
+  NoopBottomSheetDialog(
     visible = visible,
     title = stringResource(id = R.string.add_ensemble),
     positiveButtonLabel = stringResource(id = R.string.save),
@@ -206,7 +203,7 @@ fun AddEnsembleDialog(
 
 @Composable
 fun PreviewUtilEnsembleScreen(
-    ensembles: List<Pair<Ensemble, LazyUriStrings>>,
+    ensembles: List<Pair<String, LazyUriStrings>>,
     showAddEnsembleForm: Boolean,
 ) = NoopTheme {
   EnsemblesScreen(

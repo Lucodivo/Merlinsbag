@@ -6,7 +6,7 @@ import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.dao.PurgeDatabaseDao
 import com.inasweaterpoorlyknit.core.datastore.dao.PurgeDataStoreDao
 import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
-import com.inasweaterpoorlyknit.core.data.ArticleRepository
+import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository

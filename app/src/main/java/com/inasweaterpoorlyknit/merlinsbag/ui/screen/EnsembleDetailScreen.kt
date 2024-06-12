@@ -45,10 +45,10 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopAddEnsembleDialog
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableArticleThumbnailGrid
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableNoopImage
+import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
+import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.TextButtonData
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
@@ -300,7 +300,7 @@ fun EnsembleDetailScreen(
         }
       }
       Box(modifier = Modifier.fillMaxSize()) {
-        SelectableArticleThumbnailGrid(
+        SelectableStaggeredThumbnailGrid(
           selectable = editEnsemblesMode,
           onSelected = onSelectedEditArticle,
           thumbnailUris = ensembleArticleThumbnailUris,
@@ -357,7 +357,7 @@ fun AddArticlesDialog(
     onConfirm: () -> Unit,
 ) {
   val addArticlesAvailable = articleThumbnailUris.isNotEmpty()
-  NoopAddEnsembleDialog(
+  NoopBottomSheetDialog(
     visible = visible,
     title = stringResource(id = R.string.add_article),
     positiveButtonLabel = if(addArticlesAvailable) stringResource(id = R.string.save) else "",

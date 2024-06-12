@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.component
+package com.inasweaterpoorlyknit.core.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -43,7 +43,7 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
      https://m3.material.io/components/dialogs/specs
  */
 @Composable
-fun NoopAddEnsembleDialog(
+fun NoopBottomSheetDialog(
     visible: Boolean,
     title: String,
     positiveButtonLabel: String,
@@ -132,11 +132,12 @@ fun NoopAddEnsembleDialog(
   }
 }
 
+//region COMPOSABLE PREVIEWS
 @Preview
 @Composable
-fun PreviewNoopDialog() {
+fun PreviewBottomSheetNoopDialog() {
   NoopTheme {
-    NoopAddEnsembleDialog(
+    NoopBottomSheetDialog(
       visible = true,
       title = "Dialog title",
       positiveButtonLabel = "Save",
@@ -167,3 +168,4 @@ fun PreviewNoopDialog() {
     }
   }
 }
+//endregion

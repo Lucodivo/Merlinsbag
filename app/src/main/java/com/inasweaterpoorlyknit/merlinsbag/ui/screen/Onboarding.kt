@@ -43,7 +43,7 @@ import androidx.wear.compose.material.PageIndicatorState
 import com.google.common.primitives.Floats.max
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.getActivity
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.getActivity
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.OnboardingViewModel
 

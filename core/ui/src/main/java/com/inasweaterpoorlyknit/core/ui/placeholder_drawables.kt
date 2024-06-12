@@ -1,6 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.component
-
-import com.inasweaterpoorlyknit.merlinsbag.R
+package com.inasweaterpoorlyknit.core.ui
 
 val placeholderDrawables = arrayOf(
   R.drawable.army_jacket,

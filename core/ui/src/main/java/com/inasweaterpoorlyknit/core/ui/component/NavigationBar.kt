@@ -1,6 +1,5 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui
+package com.inasweaterpoorlyknit.core.ui.component
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -9,18 +8,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
+import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
 open class BottomNavBarData(
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
-    @StringRes val iconTextId: Int,
+    val title: String,
 )
 
 @Composable
@@ -47,7 +45,7 @@ fun NoopBottomNavBar(
             contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
           )
         },
-        label = { Text(stringResource(item.iconTextId)) },
+        label = { Text(item.title) },
         modifier = Modifier,
       )
     }
@@ -89,23 +87,27 @@ private fun RowScope.NoopNavigationBarItem(
 }
 
 //region PREVIEW COMPOSABLES
-@Preview
 @Composable
-fun PreviewNoopBottomNavBarPreviewLight() = NoopTheme(darkMode = DarkMode.LIGHT) {
+fun PreviewUtilNoopBottmNavbar(darkMode: DarkMode = DarkMode.LIGHT) = NoopTheme(darkMode = darkMode) {
+  val composePreviewNavBarData = listOf(
+    BottomNavBarData(
+      selectedIcon = NoopIcons.ItemsSelected,
+      unselectedIcon = NoopIcons.Items,
+      title = "Article"
+    ),
+    BottomNavBarData(
+      selectedIcon = NoopIcons.ItemsSelected,
+      unselectedIcon = NoopIcons.Items,
+      title = "Ensemble",
+    ),
+  )
   NoopBottomNavBar(
-    bottomNavBarDataItems = TopLevelDestination.entries,
-    onClick = { _ -> },
+    bottomNavBarDataItems = composePreviewNavBarData,
+    onClick = {},
     selectedIndex = 0,
   )
 }
 
-@Preview
-@Composable
-fun PreviewNoopBottomNavBarDark() = NoopTheme(darkMode = DarkMode.DARK) {
-  NoopBottomNavBar(
-    bottomNavBarDataItems = TopLevelDestination.entries,
-    onClick = { _ -> },
-    selectedIndex = TopLevelDestination.entries.lastIndex,
-  )
-}
+@Preview @Composable private fun PreviewNoopBottomNavBarLight() = PreviewUtilNoopBottmNavbar(DarkMode.LIGHT)
+@Preview @Composable private fun PreviewNoopBottomNavBarDark() = PreviewUtilNoopBottmNavbar(DarkMode.DARK)
 //endregion

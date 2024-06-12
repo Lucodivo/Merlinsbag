@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.component
+package com.inasweaterpoorlyknit.core.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,18 +27,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.merlinsbag.R
 
 @Composable
-fun EnsemblesRow(
+fun NoopOverlappingImageRow(
     title: String,
     lazyUriStrings: LazyUriStrings,
     modifier: Modifier = Modifier,
@@ -84,37 +82,37 @@ fun EnsemblesRow(
 }
 
 @Composable
-fun EnsemblesColumn(
-    lazyEnsembles: List<Pair<Ensemble, LazyUriStrings>>,
-    onClickEnsemble: (id: String) -> Unit,
+fun NoopOverlappingImageRowColumn(
+    lazyTitleAndUriStrings: List<Pair<String, LazyUriStrings>>,
+    onClick: (index: Int) -> Unit,
 ) {
   val sidePadding = 10.dp
-  val ensembleSpacing = 3.dp
+  val rowSpacing = 3.dp
   LazyColumn(
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally,
     contentPadding = PaddingValues(horizontal = sidePadding),
     modifier = Modifier.fillMaxWidth()
   ) {
-    items(lazyEnsembles.size) { index ->
-      val topPadding = if(index == 0) sidePadding else ensembleSpacing
-      val bottomPadding = if(index == lazyEnsembles.lastIndex) sidePadding else ensembleSpacing
-      val lazyEnsemble = lazyEnsembles[index]
-      EnsemblesRow(
-        lazyEnsemble.first.title,
-        lazyUriStrings = lazyEnsemble.second,
+    items(lazyTitleAndUriStrings.size) { index ->
+      val topPadding = if(index == 0) sidePadding else rowSpacing
+      val bottomPadding = if(index == lazyTitleAndUriStrings.lastIndex) sidePadding else rowSpacing
+      val (rowTitle, lazyStrings) = lazyTitleAndUriStrings[index]
+      NoopOverlappingImageRow(
+        title = rowTitle,
+        lazyUriStrings = lazyStrings,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = topPadding, bottom = bottomPadding)
-            .clickable { onClickEnsemble(lazyEnsemble.first.id) }
+            .clickable { onClick(index) }
       )
     }
   }
 }
 
 @Composable
-fun EnsemblePlaceholderRow(
-    ensembleDrawables: List<Int>,
+fun NoopOverlappingPlaceholderRow(
+    drawables: List<Int>,
     title: String,
     modifier: Modifier = Modifier,
 ) {
@@ -140,9 +138,9 @@ fun EnsemblePlaceholderRow(
             },
         overlapPercentage = overlapPercentage,
       ) {
-        repeat(ensembleDrawables.size) { index ->
+        repeat(drawables.size) { index ->
           Icon(
-            painter = painterResource(ensembleDrawables[index]),
+            painter = painterResource(drawables[index]),
             contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
             modifier = Modifier
                 .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
@@ -162,24 +160,38 @@ fun EnsemblePlaceholderRow(
   }
 }
 
+private val drawablePlaceholders: List<Pair<Int, List<Int>>> =
+    repeatedPlaceholderDrawables.let { thumbnails ->
+      listOf(
+        Pair(R.string.goth_2_boss, thumbnails.slice(0..5)),
+        Pair(R.string.sporty_spice, thumbnails.slice(6..12)),
+        Pair(R.string.derelicte, thumbnails.slice(1..10)),
+        Pair(R.string.bowie_nite, thumbnails.slice(3..5)),
+        Pair(R.string.road_warrior, thumbnails.slice(5..11)),
+        Pair(R.string.chrome_country, thumbnails.slice(7..11)),
+        Pair(R.string.rain_steam_and_speed, thumbnails.slice(12..17)),
+        Pair(R.string.joseph_mallord_william_turner, thumbnails.slice(11..15)),
+      )
+    }
+
 @Composable
-fun EnsemblesPlaceholderColumn(
+fun NoopOverlappingPlaceholderRowColumn(
     modifier: Modifier = Modifier,
 ){
   val sidePadding = 10.dp
-  val ensembleSpacing = 3.dp
+  val rowSpacing = 3.dp
   LazyColumn(
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally,
     contentPadding = PaddingValues(horizontal = sidePadding),
     modifier = modifier.fillMaxSize()
   ) {
-    items(previewEnsemblesPlaceholders.size) { index ->
-      val topPadding = if(index == 0) sidePadding else ensembleSpacing
-      val bottomPadding = if(index == previewEnsembles.lastIndex) sidePadding else ensembleSpacing
-      val ensembles = previewEnsemblesPlaceholders[index]
-      EnsemblePlaceholderRow(
-        ensembleDrawables = ensembles.second,
+    items(drawablePlaceholders.size) { index ->
+      val topPadding = if(index == 0) sidePadding else rowSpacing
+      val bottomPadding = if(index == previewEnsembles.lastIndex) sidePadding else rowSpacing
+      val ensembles = drawablePlaceholders[index]
+      NoopOverlappingPlaceholderRow(
+        drawables = ensembles.second,
         title = stringResource(ensembles.first),
         modifier = Modifier
             .fillMaxWidth()
@@ -197,7 +209,7 @@ fun EnsemblesPlaceholderColumn(
 }
 
 //region COMPOSABLE PREVIEWS
-val previewEnsembles: List<Pair<Ensemble, LazyUriStrings>> =
+val previewEnsembles: List<Pair<String, LazyUriStrings>> =
     repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
       listOf(
         thumbnails.slice(4..4),
@@ -212,44 +224,28 @@ val previewEnsembles: List<Pair<Ensemble, LazyUriStrings>> =
         thumbnails.slice(12..17),
       ).mapIndexed { index, thumbnailUriStrings ->
         Pair(
-          Ensemble(
-            index.toString(),
-            if(index == 3 || index == 4) "" else "Ensemble ${index + 1}"
-          ),
+          if(index == 3 || index == 4) "" else "Row ${index + 1}",
           object : LazyUriStrings {
             override val size: Int = thumbnailUriStrings.size
             private val articleThumbnailPaths: List<String> = thumbnailUriStrings
-            override fun getUriString(index: Int): String = thumbnailUriStrings[index]
+            override fun getUriString(index: Int): String = articleThumbnailPaths[index]
           }
         )
       }
     }
-val previewEnsemblesPlaceholders: List<Pair<Int, List<Int>>> =
-    repeatedPlaceholderDrawables.let { thumbnails ->
-      listOf(
-        Pair(R.string.goth_2_boss, thumbnails.slice(0..5)),
-        Pair(R.string.sporty_spice, thumbnails.slice(6..12)),
-        Pair(R.string.derelicte, thumbnails.slice(1..10)),
-        Pair(R.string.bowie_nite, thumbnails.slice(3..5)),
-        Pair(R.string.road_warrior, thumbnails.slice(5..11)),
-        Pair(R.string.chrome_country, thumbnails.slice(7..11)),
-        Pair(R.string.rain_steam_and_speed, thumbnails.slice(12..17)),
-        Pair(R.string.joseph_mallord_william_turner, thumbnails.slice(11..15)),
-      )
-    }
 
 @Preview
 @Composable
-fun PreviewEnsembleRows() = NoopTheme {
-  EnsemblesColumn(
-    lazyEnsembles = previewEnsembles,
-    onClickEnsemble = {}
+fun PreviewNoopOverlappingImageRowColumn() = NoopTheme {
+  NoopOverlappingImageRowColumn(
+    lazyTitleAndUriStrings = previewEnsembles,
+    onClick = {}
   )
 }
 
 @Preview
 @Composable
-fun PreviewEnsemblePlaceholder() = NoopTheme {
-  EnsemblesPlaceholderColumn()
+fun PreviewNoopOverlappingPlaceholderRowColumn() = NoopTheme {
+  NoopOverlappingPlaceholderRowColumn()
 }
 //endregion

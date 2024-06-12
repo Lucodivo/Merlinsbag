@@ -9,7 +9,6 @@ import com.google.mlkit.vision.segmentation.subject.Subject
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
-import com.inasweaterpoorlyknit.core.common.Timer
 import java.nio.FloatBuffer
 import kotlin.math.max
 import kotlin.math.min
@@ -84,12 +83,9 @@ class SegmentedImage {
     subjectSegmenter.close()
   }
 
-  val timer = Timer()
   fun process(context: Context, uri: Uri, successCallback: (Boolean) -> Unit) {
-    timer.reset()
     Log.d("SegmentedImage", "Processing image: $uri")
     val mlkitInputImage = InputImage.fromFilePath(context, uri)
-    timer.logMilestone("SegmentedImage", "Create Input Image")
     process(mlkitInputImage, successCallback)
   }
 
@@ -106,14 +102,12 @@ class SegmentedImage {
       rawImageColors = IntArray(bitmapSize)
     }
     bitmap.getPixels(rawImageColors, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-    timer.logMilestone("SegmentedImage", "copy bitmap from input image")
     rawImageWidth = bitmap.width
     rawImageHeight = bitmap.height
     subjectIndex = -1
     confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
     subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
       segmentationResult = result
-      timer.logMilestone("SegmentedImage", "image successfully processed")
       if(subjectCount > 0) {
         subjectIndex = 0
         prepareSubjectBitmap()
@@ -219,7 +213,6 @@ class SegmentedImage {
       }
     }
     this.subjectBoundingBox = subjectBoundingBox
-    timer.logMilestone("SubjectImage", "alpha mask applied to subject int array")
 
     // NOTE: this try/catch essentially used as an if/else.
     // Unfortunately, determining whether the new bitmap will fit is not simple or well-defined.
@@ -229,7 +222,5 @@ class SegmentedImage {
       subjectBitmap = Bitmap.createBitmap(subject.width, subject.height, Bitmap.Config.ARGB_8888, true)
     }
     subjectBitmap.setPixels(subjectColors, 0, subject.width, 0, 0, subject.width, subject.height)
-    timer.logMilestone("SubjectImage", "alpha masked subject int array converted to bitmap")
-    timer.logElapsed("SubjectImage", "entire processed time")
   }
 }

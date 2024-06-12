@@ -32,8 +32,8 @@ dependencies {
 
   // Project Modules
   implementation(projects.core.model)
-  androidTestImplementation(projects.core.common) // Test helpers
   testImplementation(projects.core.common) // Test helpers
+  androidTestImplementation(projects.core.common) // Test helpers
 
   implementation(libs.androidx.core.ktx)
 

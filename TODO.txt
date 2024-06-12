@@ -46,6 +46,7 @@ Bugs:
         - Seen when running application on an Motorola Z Play, 3GB RAM, API 26
         - settings android:largeHeap="true" in manifest has slightly alleviated the problem
         - could it be linked to the memory size of thumbnails on the articles screen?
+    - During screen transitions, the previous screen is still interactable?
 Settings Screen:
     - Export All Data
 Aesthetics:

@@ -37,7 +37,6 @@ const val COMPOSE_ID = "compose preview id"
 
 @Composable
 fun previewAssetBitmap(filename: String): Bitmap = BitmapFactory.decodeStream(LocalContext.current.assets.open(filename))
-fun previewAssetBitmap(filename: String, context: Context): Bitmap = BitmapFactory.decodeStream(context.assets.open(filename))
 
 @Composable
 fun resourceAsUriString(@RawRes resId: Int): String {

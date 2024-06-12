@@ -3,10 +3,10 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.listMap
-import com.inasweaterpoorlyknit.core.data.ArticleRepository
+import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
-import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class EnsemblesUiState(
-    val ensembles: List<Pair<Ensemble, LazyUriStrings>>?,
+    val ensembles: List<Pair<String, LazyUriStrings>>?,
     val showAddEnsembleDialog: Boolean,
     val articleImages: LazyUriStrings,
 )
@@ -37,10 +37,13 @@ class EnsemblesViewModel @Inject constructor(
 ): ViewModel() {
   val showAddEnsembleDialog = MutableStateFlow(false)
   private lateinit var articleImages: LazyArticleThumbnails
+  private lateinit var ensembles: List<LazyEnsembleThumbnails>
 
   val ensemblesUiState: StateFlow<EnsemblesUiState> =
       combine(
-        ensemblesRepository.getAllEnsembleArticleThumbnails().listMap { Pair(it.ensemble, it.thumbnails) },
+        ensemblesRepository.getAllEnsembleArticleThumbnails()
+            .onEach { ensembles = it }
+            .listMap { Pair(it.ensemble.title, it.thumbnails) },
         showAddEnsembleDialog,
         articleRepository.getAllArticlesWithThumbnails().onEach { articleImages = it },
       ) { ensembles, showDialog, articleImages ->
@@ -75,6 +78,7 @@ class EnsemblesViewModel @Inject constructor(
       }
     }
   }
+  fun onClickEnsemble(index: Int): String = ensembles[index].ensemble.id
 
   companion object {
     val MAX_ENSEMBLE_TITLE_LENGTH = 128

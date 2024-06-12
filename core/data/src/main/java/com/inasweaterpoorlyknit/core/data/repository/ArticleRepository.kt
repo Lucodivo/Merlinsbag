@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.core.data
+package com.inasweaterpoorlyknit.core.data.repository
 
 import android.content.ContentValues
 import android.content.Context
@@ -11,8 +11,6 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.core.graphics.scale
-import com.inasweaterpoorlyknit.core.common.articleFilesDir
-import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
@@ -24,7 +22,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-
 val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
 val exportFormat = Bitmap.CompressFormat.PNG
 
@@ -33,6 +30,7 @@ class ArticleRepository(
   private val articleDao: ArticleDao,
   private val ensembleDao: EnsembleDao,
 ) {
+  // TODO: Remove. Used in testing only.
   fun insertArticle(fullImageUri: String, thumbnailImageUri: String) = articleDao.insertArticle(fullImageUri, thumbnailImageUri)
 
   fun insertArticle(bitmap: Bitmap) {
@@ -69,14 +67,13 @@ class ArticleRepository(
     val exportFilname = articleFilename.replace(".webp", ".png")
 
     var exportUri: Uri? = null
-    val exportFolderName = "Merlinsbag"
     var success = false
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       val resolver = context.contentResolver
       val contentValues = ContentValues()
       contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, exportFilname)
       contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-      contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures${File.separator}$exportFolderName")
+      contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, exportDirGreaterEqualQ)
       // TODO: MediaStore.MediaColumns.IN_PROGRESS
       exportUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
       exportUri?.let { uri ->
@@ -88,8 +85,7 @@ class ArticleRepository(
         }
       }
     } else {
-      val exportDir = "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)}${File.separator}$exportFolderName"
-      val exportFile = File(exportDir, exportFilname)
+      val exportFile = File(exportDirLessThanQ, exportFilname)
       try {
         FileOutputStream(exportFile).let { fileOutputStream ->
           bitmapToExport.compress(exportFormat, 100, fileOutputStream)

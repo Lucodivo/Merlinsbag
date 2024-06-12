@@ -36,16 +36,16 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.PlaceholderArticleThumbnailGrid
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableArticleThumbnailGrid
+import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
+import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.TextButtonData
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.rememberLauncherForActivityResultPermissions
-import com.inasweaterpoorlyknit.merlinsbag.ui.rememberSettingsLauncher
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.rememberLauncherForActivityResultPermissions
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.rememberSettingsLauncher
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.merlinsbag.ui.toast
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
 
 const val ARTICLES_ROUTE = "articles_route"
@@ -208,7 +208,7 @@ fun ArticlesScreen(
       label = "placeholder article grid visibility"
     )
     if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null){
-      SelectableArticleThumbnailGrid(
+      SelectableStaggeredThumbnailGrid(
         selectable = editMode,
         onSelected = { index ->
           onClickArticle(index)
@@ -217,7 +217,7 @@ fun ArticlesScreen(
         selectedThumbnails = selectedThumbnails,
       )
     } else {
-      PlaceholderArticleThumbnailGrid(
+      PlaceholderThumbnailGrid(
         modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
       )
     }

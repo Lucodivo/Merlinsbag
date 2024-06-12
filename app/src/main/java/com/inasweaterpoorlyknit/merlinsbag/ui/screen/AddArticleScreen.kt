@@ -24,7 +24,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopRotatableImage
+import com.inasweaterpoorlyknit.core.ui.component.NoopRotatableImage
 import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.previewAssetBitmap

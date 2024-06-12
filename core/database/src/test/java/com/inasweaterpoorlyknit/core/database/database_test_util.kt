@@ -1,8 +1,8 @@
 package com.inasweaterpoorlyknit.core.database
 
-import com.inasweaterpoorlyknit.core.common.Counter
-import com.inasweaterpoorlyknit.core.common.createFakeUriString
-import com.inasweaterpoorlyknit.core.common.randUUIDString
+import com.inasweaterpoorlyknit.core.common.testing.Counter
+import com.inasweaterpoorlyknit.core.common.testing.createFakeUriString
+import com.inasweaterpoorlyknit.core.common.testing.randUUIDString
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity

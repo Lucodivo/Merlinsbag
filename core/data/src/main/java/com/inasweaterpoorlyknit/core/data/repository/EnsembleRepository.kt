@@ -1,7 +1,6 @@
 package com.inasweaterpoorlyknit.core.data.repository
 
 import android.content.Context
-import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity

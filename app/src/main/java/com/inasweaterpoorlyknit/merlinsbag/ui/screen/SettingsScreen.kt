@@ -54,7 +54,7 @@ import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
-import com.inasweaterpoorlyknit.merlinsbag.ui.toast
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 
 const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
