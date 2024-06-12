@@ -61,6 +61,7 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.model)
     implementation(projects.core.ui)
+    implementation(projects.core.ml)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -69,9 +70,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.tracing.ktx)
     implementation(libs.androidx.core.splashscreen)
-
-    // TODO: Move ML Kit code to their own module?
-    implementation(libs.play.services.mlkit.subject.segmentation)
 
     // Compose
     implementation(libs.androidx.activity.compose)

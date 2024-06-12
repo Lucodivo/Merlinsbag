@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.common.Event
-import com.inasweaterpoorlyknit.merlinsbag.image.SegmentedImage
+import com.inasweaterpoorlyknit.core.ml.image.SegmentedImage
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -47,7 +47,7 @@ class AddArticleViewModel @AssistedInject constructor(
   val finished = mutableStateOf(Event<Unit>(null))
   val noSubjectFound = mutableStateOf(Event<Unit>(null))
 
-  private val segmentedImage = SegmentedImage()
+  private val segmentedImage = com.inasweaterpoorlyknit.core.ml.image.SegmentedImage()
 
   init {
     processNextImage()

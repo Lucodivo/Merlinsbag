@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.image
+package com.inasweaterpoorlyknit.core.ml.image
 
 import android.content.Context
 import android.graphics.Bitmap

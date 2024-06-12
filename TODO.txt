@@ -7,6 +7,7 @@ Database:
                 https://github.com/android/nowinandroid/tree/afad1b9ac7e3d5efc798e786bd6548229a55735c/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/model
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
+    - remove app modules dependency on Database models?
 Repository:
     - ArticleRepository and EnsembleRepository both return article images. Probably fine but separation may be desired.
         - ArticleRepository could be a member of EnsembleRepository? Delegate by?
