@@ -33,6 +33,8 @@ googleServices = "4.4.2"
 firebaseCrashlytics = "3.0.1"
 appcompat = "1.7.0"
 material = "1.12.0"
+appcompatVersion = "1.7.0"
+materialVersion = "1.12.0"
 
 [libraries]
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
@@ -87,6 +89,8 @@ androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
+material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

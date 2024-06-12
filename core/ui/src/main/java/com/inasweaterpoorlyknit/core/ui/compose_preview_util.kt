@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui
+package com.inasweaterpoorlyknit.core.ui
 
 import android.content.ContentResolver
 import android.content.Context
@@ -28,12 +28,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
-import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
-import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
-import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 
 
 const val composePreviewArticleAsset = "compose_preview_article_full.webp"
@@ -88,24 +83,11 @@ val allTestThumbnailResourceIdsAsStrings = arrayOf(
 )
 val repeatedThumbnailResourceIdsAsStrings = arrayListOf(*allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings, *allTestThumbnailResourceIdsAsStrings)
 val lazyRepeatedThumbnailResourceIdsAsStrings =
-    LazyArticleThumbnails("",
-      articleThumbnailPaths = repeatedThumbnailResourceIdsAsStrings.mapIndexed { i, it ->
-        ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(filenameThumb = it)))
-      }
-    )
-val repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
-val repeatedArticleWithImages = repeatedFullResourceIdsAsStrings.zip(repeatedThumbnailResourceIdsAsStrings)
-    .mapIndexed { index, resourceId ->
-      ArticleWithImages(
-        articleId = index.toString(),
-        imagePaths = listOf(
-          ImageFilenames(
-            filename = resourceId.first,
-            filenameThumb = resourceId.second,
-          )
-        ),
-      )
+    object : LazyUriStrings {
+      override val size: Int = repeatedThumbnailResourceIdsAsStrings.size
+      override fun getUriString(index: Int): String = repeatedThumbnailResourceIdsAsStrings[index]
     }
+val repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
 
 /*
  Switching icons for app shouldn't always change previews

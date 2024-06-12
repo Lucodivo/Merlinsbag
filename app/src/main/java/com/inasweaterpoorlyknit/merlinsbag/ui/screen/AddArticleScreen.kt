@@ -2,11 +2,8 @@ package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -25,15 +22,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.DevicePreviews
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.DevicePreviews
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopRotatableImage
-import com.inasweaterpoorlyknit.merlinsbag.ui.composePreviewArticleAsset
-import com.inasweaterpoorlyknit.merlinsbag.ui.currentWindowAdaptiveInfo
-import com.inasweaterpoorlyknit.merlinsbag.ui.previewAssetBitmap
-import com.inasweaterpoorlyknit.merlinsbag.ui.state.animateClosestRotationAsState
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
+import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
+import com.inasweaterpoorlyknit.core.ui.previewAssetBitmap
+import com.inasweaterpoorlyknit.core.ui.state.animateClosestRotationAsState
+import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.AddArticleViewModel
 
 const val IMAGE_URI_STRING_LIST_ARG = "imageUriStringArray"

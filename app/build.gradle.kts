@@ -60,6 +60,7 @@ dependencies {
     implementation(projects.core.database) // TODO: app module shouldn't rely on database but currently needed because models aren't exported
     implementation(projects.core.common)
     implementation(projects.core.model)
+    implementation(projects.core.ui)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -75,6 +76,7 @@ dependencies {
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3.adaptive)
@@ -96,7 +98,6 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.compose.material)
     implementation(libs.androidx.ui.text.google.fonts)
     androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.androidx.navigation.compose)

@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.theme
+package com.inasweaterpoorlyknit.core.ui.theme
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -35,7 +35,7 @@ import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.core.ui.R
 
 object NoopIcons {
   val Close = Icons.Filled.Close

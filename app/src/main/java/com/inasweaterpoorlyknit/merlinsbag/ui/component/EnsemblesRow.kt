@@ -28,18 +28,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
-import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
 
 @Composable
 fun EnsemblesRow(
-    lazyEnsembleThumbnails: LazyEnsembleThumbnails,
+    title: String,
+    lazyUriStrings: LazyUriStrings,
     modifier: Modifier = Modifier,
 ) {
   val thumbnailsPadding = 10.dp
@@ -57,9 +58,9 @@ fun EnsemblesRow(
         modifier = Modifier.padding(horizontal = thumbnailsPadding),
         overlapPercentage = overlapPercentage,
       ) {
-        repeat(lazyEnsembleThumbnails.thumbnails.size) { index ->
+        repeat(lazyUriStrings.size) { index ->
           NoopImage(
-            uriString = lazyEnsembleThumbnails.thumbnails.getUriString(index),
+            uriString = lazyUriStrings.getUriString(index),
             contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
             modifier = Modifier
                 .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
@@ -67,14 +68,14 @@ fun EnsemblesRow(
           )
         }
       }
-      if(lazyEnsembleThumbnails.title.isNotEmpty()) {
+      if(title.isNotEmpty()) {
         Text(
-          text = lazyEnsembleThumbnails.title,
+          text = title,
           modifier = Modifier.padding(
             top = 0.dp,
             end = thumbnailsPadding,
             start = thumbnailsPadding,
-            bottom = if(lazyEnsembleThumbnails.thumbnails.isEmpty()) 0.dp else titleVerticalPadding
+            bottom = if(lazyUriStrings.isEmpty()) 0.dp else titleVerticalPadding
           )
         )
       }
@@ -84,7 +85,7 @@ fun EnsemblesRow(
 
 @Composable
 fun EnsemblesColumn(
-    lazyEnsembleThumbnails: List<LazyEnsembleThumbnails>,
+    lazyEnsembles: List<Pair<Ensemble, LazyUriStrings>>,
     onClickEnsemble: (id: String) -> Unit,
 ) {
   val sidePadding = 10.dp
@@ -95,16 +96,17 @@ fun EnsemblesColumn(
     contentPadding = PaddingValues(horizontal = sidePadding),
     modifier = Modifier.fillMaxWidth()
   ) {
-    items(lazyEnsembleThumbnails.size) { index ->
+    items(lazyEnsembles.size) { index ->
       val topPadding = if(index == 0) sidePadding else ensembleSpacing
-      val bottomPadding = if(index == lazyEnsembleThumbnails.lastIndex) sidePadding else ensembleSpacing
-      val ensembles = lazyEnsembleThumbnails[index]
+      val bottomPadding = if(index == lazyEnsembles.lastIndex) sidePadding else ensembleSpacing
+      val lazyEnsemble = lazyEnsembles[index]
       EnsemblesRow(
-        lazyEnsembleThumbnails = ensembles,
+        lazyEnsemble.first.title,
+        lazyUriStrings = lazyEnsemble.second,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = topPadding, bottom = bottomPadding)
-            .clickable { onClickEnsemble(ensembles.id) }
+            .clickable { onClickEnsemble(lazyEnsemble.first.id) }
       )
     }
   }
@@ -195,7 +197,7 @@ fun EnsemblesPlaceholderColumn(
 }
 
 //region COMPOSABLE PREVIEWS
-val previewEnsembles: List<LazyEnsembleThumbnails> =
+val previewEnsembles: List<Pair<Ensemble, LazyUriStrings>> =
     repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
       listOf(
         thumbnails.slice(4..4),
@@ -209,15 +211,16 @@ val previewEnsembles: List<LazyEnsembleThumbnails> =
         thumbnails.slice(7..11),
         thumbnails.slice(12..17),
       ).mapIndexed { index, thumbnailUriStrings ->
-        LazyEnsembleThumbnails(
-          id = index.toString(),
-          title = if(index == 3 || index == 4) "" else "Ensemble ${index + 1}",
-          thumbnails =
-          LazyArticleThumbnails("",
-            articleThumbnailPaths = thumbnailUriStrings.mapIndexed { i, it ->
-              ArticleWithThumbnails(articleId = i.toString(), thumbnailPaths = listOf(ThumbnailFilename(filenameThumb = it)))
-            }
-          )
+        Pair(
+          Ensemble(
+            index.toString(),
+            if(index == 3 || index == 4) "" else "Ensemble ${index + 1}"
+          ),
+          object : LazyUriStrings {
+            override val size: Int = thumbnailUriStrings.size
+            private val articleThumbnailPaths: List<String> = thumbnailUriStrings
+            override fun getUriString(index: Int): String = thumbnailUriStrings[index]
+          }
         )
       }
     }
@@ -239,7 +242,7 @@ val previewEnsemblesPlaceholders: List<Pair<Int, List<Int>>> =
 @Composable
 fun PreviewEnsembleRows() = NoopTheme {
   EnsemblesColumn(
-    lazyEnsembleThumbnails = previewEnsembles,
+    lazyEnsembles = previewEnsembles,
     onClickEnsemble = {}
   )
 }

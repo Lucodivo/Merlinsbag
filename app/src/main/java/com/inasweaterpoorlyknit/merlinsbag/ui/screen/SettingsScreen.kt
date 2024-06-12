@@ -49,11 +49,11 @@ import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.scheme.NoopColorSchemes
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.component.IconData
+import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.ui.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 

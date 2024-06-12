@@ -9,7 +9,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityUiState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint

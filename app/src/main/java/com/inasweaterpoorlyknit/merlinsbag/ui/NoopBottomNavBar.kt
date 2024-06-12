@@ -13,8 +13,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.model.DarkMode
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
 open class BottomNavBarData(
     val selectedIcon: ImageVector,

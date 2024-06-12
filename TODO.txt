@@ -48,6 +48,8 @@ Bugs:
         - could it be linked to the memory size of thumbnails on the articles screen?
 Settings Screen:
     - Export All Data
+Aesthetics:
+    - placeholder shimmer could use a little work
 
 // Unknowns
 Aesthetic Questions:

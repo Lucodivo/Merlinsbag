@@ -30,23 +30,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.database.model.Ensemble
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.EnsemblesColumn
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.EnsemblesPlaceholderColumn
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
+import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopAddEnsembleDialog
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopFloatingActionButton
+import com.inasweaterpoorlyknit.core.ui.component.NoopFloatingActionButton
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.previewEnsembles
-import com.inasweaterpoorlyknit.merlinsbag.ui.isComposePreview
-import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.isComposePreview
+import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SaveEnsembleData
@@ -76,7 +75,7 @@ fun EnsemblesRoute(
 
 @Composable
 fun EnsemblesScreen(
-    lazyEnsembleThumbnails: List<LazyEnsembleThumbnails>?,
+    lazyEnsembleThumbnails: List<Pair<Ensemble, LazyUriStrings>>?,
     showAddEnsembleDialog: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
     onClickEnsemble: (id: String) -> Unit,
@@ -207,7 +206,7 @@ fun AddEnsembleDialog(
 
 @Composable
 fun PreviewUtilEnsembleScreen(
-    ensembles: List<LazyEnsembleThumbnails>,
+    ensembles: List<Pair<Ensemble, LazyUriStrings>>,
     showAddEnsembleForm: Boolean,
 ) = NoopTheme {
   EnsemblesScreen(
@@ -248,7 +247,7 @@ fun PreviewAddEnsembleDialog() = NoopTheme {
 fun PreviewAddEnsembleDialog_NoArticles() = NoopTheme {
   AddEnsembleDialog(
     visible = true,
-    articleThumbnails = LazyArticleThumbnails(directory = "", articleThumbnailPaths = emptyList()),
+    articleThumbnails = LazyUriStrings.Companion.Empty,
     onClickSave = {},
     onClickClose = {},
   )

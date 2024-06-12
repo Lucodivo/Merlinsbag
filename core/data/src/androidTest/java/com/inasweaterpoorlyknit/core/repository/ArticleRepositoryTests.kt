@@ -9,7 +9,7 @@ import com.inasweaterpoorlyknit.core.common.createFakeUriStrings
 import com.inasweaterpoorlyknit.core.data.ArticleRepository
 import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After

@@ -2,7 +2,6 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.ColorPalette

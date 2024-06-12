@@ -1,7 +1,7 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.theme.scheme
+package com.inasweaterpoorlyknit.core.ui.theme.scheme
 
 import androidx.compose.ui.graphics.Color
-import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.core.ui.R
 
 object SkyColorSchemePalette : ColorPaletteScheme {
 

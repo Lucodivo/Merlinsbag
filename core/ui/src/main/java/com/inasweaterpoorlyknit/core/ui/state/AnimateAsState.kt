@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.state
+package com.inasweaterpoorlyknit.core.ui.state
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable

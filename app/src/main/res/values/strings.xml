@@ -67,6 +67,7 @@
     <string name="system">System</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="data">Data</string>
+    <!-- TODO: Remove below -->
     <string name="system_dynamic">System Dynamic</string>
     <string name="default_">Default</string>
     <string name="color_palette">Color Palette</string>

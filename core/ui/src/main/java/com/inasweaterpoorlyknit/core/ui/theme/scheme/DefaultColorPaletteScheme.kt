@@ -1,10 +1,10 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.theme.scheme
+package com.inasweaterpoorlyknit.core.ui.theme.scheme
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
-import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.core.ui.R
 
-object DefaultColorPaletteScheme: ColorPaletteScheme{
+object DefaultColorPaletteScheme: ColorPaletteScheme {
   override val nameStrRes: Int = R.string.system_dynamic
   private val defaultLightScheme = lightColorScheme()
   private val defaultDarkScheme = darkColorScheme()

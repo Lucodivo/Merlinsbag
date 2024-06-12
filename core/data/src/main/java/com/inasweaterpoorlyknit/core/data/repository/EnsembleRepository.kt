@@ -19,8 +19,10 @@ class EnsembleRepository(
     val directory = articleFilesDirStr(context)
     return ensembleDao.getAllEnsembleArticleThumbnails().listMap { ensembleArticleImages ->
       LazyEnsembleThumbnails(
-        ensembleArticleImages.ensembleId,
-        ensembleArticleImages.ensembleTitle,
+        Ensemble(
+          ensembleArticleImages.ensembleId,
+          ensembleArticleImages.ensembleTitle
+        ),
         LazyArticleThumbnails(directory, ensembleArticleImages.articles)
       )
     }

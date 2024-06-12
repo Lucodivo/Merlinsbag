@@ -2,11 +2,12 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.data.ArticleRepository
-import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
+import com.inasweaterpoorlyknit.core.database.model.Ensemble
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class EnsemblesUiState(
-    val ensembles: List<LazyEnsembleThumbnails>?,
+    val ensembles: List<Pair<Ensemble, LazyUriStrings>>?,
     val showAddEnsembleDialog: Boolean,
     val articleImages: LazyUriStrings,
 )
@@ -39,7 +40,7 @@ class EnsemblesViewModel @Inject constructor(
 
   val ensemblesUiState: StateFlow<EnsemblesUiState> =
       combine(
-        ensemblesRepository.getAllEnsembleArticleThumbnails(),
+        ensemblesRepository.getAllEnsembleArticleThumbnails().listMap { Pair(it.ensemble, it.thumbnails) },
         showAddEnsembleDialog,
         articleRepository.getAllArticlesWithThumbnails().onEach { articleImages = it },
       ) { ensembles, showDialog, articleImages ->

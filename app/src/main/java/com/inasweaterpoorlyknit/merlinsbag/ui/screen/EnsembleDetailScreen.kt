@@ -40,21 +40,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopAddEnsembleDialog
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableArticleThumbnailGrid
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.SelectableNoopImage
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextButtonData
-import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.component.TextButtonData
+import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
+import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel
 
 const val ENSEMBLE_ID_ARG = "ensembleId"

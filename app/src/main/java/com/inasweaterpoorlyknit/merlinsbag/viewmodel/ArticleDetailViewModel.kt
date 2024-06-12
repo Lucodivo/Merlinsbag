@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithFullImages
 import com.inasweaterpoorlyknit.core.data.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

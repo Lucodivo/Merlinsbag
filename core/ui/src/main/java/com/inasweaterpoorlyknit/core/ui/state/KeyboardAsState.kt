@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.state
+package com.inasweaterpoorlyknit.core.ui.state
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime

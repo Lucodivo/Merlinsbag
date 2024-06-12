@@ -29,13 +29,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.LandscapePreview
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.lazyRepeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.repeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.LandscapePreview
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
 val articleGridColumnMinWidth = 90.dp
 val articleGridItemPadding = 8.dp

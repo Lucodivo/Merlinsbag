@@ -38,7 +38,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityUiState
 
 

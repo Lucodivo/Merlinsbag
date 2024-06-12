@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.theme.scheme
+package com.inasweaterpoorlyknit.core.ui.theme.scheme
 
 import android.os.Build
 import androidx.compose.material3.ColorScheme

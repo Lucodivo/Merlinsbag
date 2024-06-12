@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.theme
+package com.inasweaterpoorlyknit.core.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -11,7 +11,7 @@ import androidx.core.view.WindowCompat
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.scheme.NoopColorSchemes
+import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 
 @Composable
 fun NoopTheme(
@@ -36,7 +36,6 @@ fun NoopTheme(
   }
   MaterialTheme(
     colorScheme = colorScheme,
-    typography = AppTypography,
     content = content
   )
 }

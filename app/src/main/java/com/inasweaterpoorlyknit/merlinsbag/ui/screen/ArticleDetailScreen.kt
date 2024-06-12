@@ -35,19 +35,21 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.data.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.COMPOSE_ID
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.IconData
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.COMPOSE_ID
+import com.inasweaterpoorlyknit.core.ui.component.IconData
+import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.merlinsbag.ui.component.NoopImage
-import com.inasweaterpoorlyknit.merlinsbag.ui.component.TextButtonData
+import com.inasweaterpoorlyknit.core.ui.component.TextButtonData
+import com.inasweaterpoorlyknit.core.ui.repeatedFullResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.rememberLauncherForActivityResultPermissions
 import com.inasweaterpoorlyknit.merlinsbag.ui.rememberSettingsLauncher
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopIcons
-import com.inasweaterpoorlyknit.merlinsbag.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.ui.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
 
@@ -248,7 +250,7 @@ fun PreviewUtilArticleDetailScreen(
             articleId = COMPOSE_ID,
             thumbnailPaths = listOf(
               ThumbnailFilename(
-                filenameThumb = R.raw.test_full_1.toString(),
+                filenameThumb = repeatedFullResourceIdsAsStrings[0],
               ),
             ),
           )

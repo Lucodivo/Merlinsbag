@@ -1,0 +1,14 @@
+<resources>
+<string name="system_dynamic">System Dynamic</string>
+<string name="default_">Default</string>
+<string name="color_palette">Color Palette</string>
+<string name="off">Off</string>
+<string name="medium">Medium</string>
+<string name="high">High</string>
+<string name="high_contrast">High Contrast</string>
+<string name="road_warrior">Road Warrior</string>
+<string name="retro">Retro</string>
+<string name="sky">Sky</string>
+<string name="crimson">Crimson</string>
+<string name="ninety_five">Ninety-Five</string>
+</resources>

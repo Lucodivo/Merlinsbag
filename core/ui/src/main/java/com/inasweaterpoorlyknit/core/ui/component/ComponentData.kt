@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.merlinsbag.ui.component
+package com.inasweaterpoorlyknit.core.ui.component
 
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
