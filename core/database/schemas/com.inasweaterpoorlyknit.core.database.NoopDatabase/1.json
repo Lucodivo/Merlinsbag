@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b43d6b0858ee3f0f49ea8e8201eb7f38",
+    "identityHash": "1d5e6b172e16c70242d9698f379d4566",
     "entities": [
       {
         "tableName": "article",
@@ -139,16 +139,21 @@
         "ftsOptions": {
           "tokenizer": "simple",
           "tokenizerArgs": [],
-          "contentTable": "",
+          "contentTable": "ensemble",
           "languageIdColumnName": "",
           "matchInfo": "FTS4",
           "notIndexedColumns": [],
           "prefixSizes": [],
           "preferredOrder": "ASC"
         },
-        "contentSyncTriggers": [],
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_ensemble_fts_BEFORE_UPDATE BEFORE UPDATE ON `ensemble` BEGIN DELETE FROM `ensemble_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_ensemble_fts_BEFORE_DELETE BEFORE DELETE ON `ensemble` BEGIN DELETE FROM `ensemble_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_ensemble_fts_AFTER_UPDATE AFTER UPDATE ON `ensemble` BEGIN INSERT INTO `ensemble_fts`(`docid`, `id`, `title`) VALUES (NEW.`rowid`, NEW.`id`, NEW.`title`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_ensemble_fts_AFTER_INSERT AFTER INSERT ON `ensemble` BEGIN INSERT INTO `ensemble_fts`(`docid`, `id`, `title`) VALUES (NEW.`rowid`, NEW.`id`, NEW.`title`); END"
+        ],
         "tableName": "ensemble_fts",
-        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`id` TEXT NOT NULL, `title` TEXT NOT NULL)",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`id` TEXT NOT NULL, `title` TEXT NOT NULL, content=`ensemble`)",
         "fields": [
           {
             "fieldPath": "ensembleId",
@@ -243,7 +248,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b43d6b0858ee3f0f49ea8e8201eb7f38')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d5e6b172e16c70242d9698f379d4566')"
     ]
   }
 }

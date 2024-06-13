@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.outlined.Cancel
@@ -69,5 +70,6 @@ object NoopIcons {
   val Download = Icons.Filled.Download
   val DarkMode = Icons.Filled.DarkMode
   val LightMode = Icons.Filled.LightMode
+  val Search = Icons.Filled.Search
   @Composable fun SystemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)
 }

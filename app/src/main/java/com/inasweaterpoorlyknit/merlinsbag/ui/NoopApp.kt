@@ -49,8 +49,8 @@ private val navBarData = listOf(
     title = "Article"
   ),
   BottomNavBarData(
-    selectedIcon = NoopIcons.ItemsSelected,
-    unselectedIcon = NoopIcons.Items,
+    selectedIcon = NoopIcons.EnsemblesSelected,
+    unselectedIcon = NoopIcons.Ensembles,
     title = "Ensemble",
   ),
 )

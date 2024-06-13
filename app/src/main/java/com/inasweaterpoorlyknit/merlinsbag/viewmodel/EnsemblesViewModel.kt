@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -10,20 +12,18 @@ import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class EnsemblesUiState(
-    val ensembles: List<Pair<String, LazyUriStrings>>?,
-    val showAddEnsembleDialog: Boolean,
-    val articleImages: LazyUriStrings,
-)
 
 data class SaveEnsembleData(
     val title: String,
@@ -35,36 +35,50 @@ class EnsemblesViewModel @Inject constructor(
     articleRepository: ArticleRepository,
     val ensemblesRepository: EnsembleRepository,
 ): ViewModel() {
-  val showAddEnsembleDialog = MutableStateFlow(false)
   private lateinit var articleImages: LazyArticleThumbnails
   private lateinit var ensembles: List<LazyEnsembleThumbnails>
+  private var searchEnsemblesQuery: MutableSharedFlow<String> = MutableStateFlow("")
 
-  val ensemblesUiState: StateFlow<EnsemblesUiState> =
+  private val _showAddEnsembleDialog = MutableStateFlow(false)
+  val showAddEnsembleDialog: StateFlow<Boolean> = _showAddEnsembleDialog
+  private val _showPlaceholder = MutableStateFlow(false)
+  val showPlaceholder: StateFlow<Boolean> = _showPlaceholder
+  val addArticleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
+      .onEach { articleImages = it }
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = LazyUriStrings.Empty
+      )
+
+  val lazyEnsembles: StateFlow<List<Pair<String, LazyUriStrings>>> =
       combine(
-        ensemblesRepository.getAllEnsembleArticleThumbnails()
-            .onEach { ensembles = it }
-            .listMap { Pair(it.ensemble.title, it.thumbnails) },
-        showAddEnsembleDialog,
-        articleRepository.getAllArticlesWithThumbnails().onEach { articleImages = it },
-      ) { ensembles, showDialog, articleImages ->
-        EnsemblesUiState(
-          ensembles = ensembles,
-          showAddEnsembleDialog = showDialog,
-          articleImages = articleImages,
-        )
+        ensemblesRepository.getAllEnsembleArticleThumbnails().onEach {
+          if(it.isEmpty() && !_showPlaceholder.value){
+            _showPlaceholder.value = true
+          } else if(_showPlaceholder.value) {
+            _showPlaceholder.value = false
+          }
+        },
+        searchEnsemblesQuery,
+        searchEnsemblesQuery.flatMapLatest { query ->
+          ensemblesRepository.searchEnsembleArticleThumbnails(query)
+        },
+      ) { allEnsembleArticleThumbnails, searchQuery, searchEnsembleArticleThumbnails ->
+        if(searchQuery.isEmpty()) allEnsembleArticleThumbnails else searchEnsembleArticleThumbnails
+      }.onEach {
+        ensembles = it
+      }.listMap {
+        Pair(it.ensemble.title, it.thumbnails)
       }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
-        initialValue = EnsemblesUiState(
-          ensembles = null,
-          showAddEnsembleDialog = false,
-          articleImages = LazyUriStrings.Empty,
-        ),
+        initialValue = emptyList()
       )
 
-  private fun closeDialog() { showAddEnsembleDialog.value = false }
+  private fun closeDialog() { _showAddEnsembleDialog.value = false }
 
-  fun onClickAddEnsemble() { showAddEnsembleDialog.value = true }
+  fun onClickAddEnsemble() { _showAddEnsembleDialog.value = true }
   fun onClickCloseAddEnsembleDialog() = closeDialog()
   fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
     closeDialog()
@@ -79,8 +93,9 @@ class EnsemblesViewModel @Inject constructor(
     }
   }
   fun onClickEnsemble(index: Int): String = ensembles[index].ensemble.id
+  fun searchQuery(query: String) = searchEnsemblesQuery.tryEmit(if(query.isEmpty()) "" else "$query*")
 
   companion object {
-    val MAX_ENSEMBLE_TITLE_LENGTH = 128
+    const val MAX_ENSEMBLE_TITLE_LENGTH = 128
   }
 }

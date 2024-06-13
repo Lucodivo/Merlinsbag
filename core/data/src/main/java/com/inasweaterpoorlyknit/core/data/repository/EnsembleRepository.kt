@@ -7,6 +7,7 @@ import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
+import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -14,18 +15,21 @@ class EnsembleRepository(
   private val context: Context,
   private val ensembleDao: EnsembleDao
 ) {
-  fun getAllEnsembleArticleThumbnails(): Flow<List<LazyEnsembleThumbnails>> {
-    val directory = articleFilesDirStr(context)
-    return ensembleDao.getAllEnsembleArticleThumbnails().listMap { ensembleArticleImages ->
-      LazyEnsembleThumbnails(
-        Ensemble(
-          ensembleArticleImages.ensembleId,
-          ensembleArticleImages.ensembleTitle
-        ),
-        LazyArticleThumbnails(directory, ensembleArticleImages.articles)
-      )
-    }
-  }
+  val directory = articleFilesDirStr(context)
+
+  private fun EnsembleArticleThumbnails.toLazyEnsembleThumbnails() =
+    LazyEnsembleThumbnails(
+      Ensemble(
+        ensembleId,
+        ensembleTitle
+      ),
+      LazyArticleThumbnails(directory, articles)
+    )
+
+  fun getAllEnsembleArticleThumbnails(): Flow<List<LazyEnsembleThumbnails>> =
+      ensembleDao.getAllEnsembleArticleThumbnails().listMap { it.toLazyEnsembleThumbnails() }
+  fun searchEnsembleArticleThumbnails(query: String): Flow<List<LazyEnsembleThumbnails>> =
+      ensembleDao.searchEnsembleArticleThumbnails(query).listMap { it.toLazyEnsembleThumbnails() }
   fun getEnsembleArticleThumbnails(ensembleId: String) = ensembleDao.getEnsembleArticleThumbnails(ensembleId).map{ LazyArticleThumbnails(articleFilesDirStr(context), it) }
   fun getEnsemble(ensembleId: String): Flow<Ensemble> = ensembleDao.getEnsemble(ensembleId)
   fun insertEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(title, articleIds)

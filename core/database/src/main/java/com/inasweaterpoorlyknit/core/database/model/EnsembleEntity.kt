@@ -16,12 +16,11 @@ data class EnsembleEntity(
 )
 
 @Entity(tableName = "ensemble_fts")
-@Fts4//(contentEntity = EnsembleEntity::class)
+@Fts4(contentEntity = EnsembleEntity::class)
 data class EnsembleFtsEntity(
     @ColumnInfo(name = "id") val ensembleId: String,
     @ColumnInfo(name = "title") val title: String,
 )
-fun EnsembleEntity.toFtsEntity() = EnsembleFtsEntity(ensembleId = id, title = title)
 
 // Ensemble & Article join table
 @Entity(

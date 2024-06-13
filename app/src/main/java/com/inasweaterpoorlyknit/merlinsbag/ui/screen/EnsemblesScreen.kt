@@ -6,8 +6,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,6 +46,7 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.component.NoopOverlappingImageRowColumn
 import com.inasweaterpoorlyknit.core.ui.component.NoopOverlappingPlaceholderRowColumn
+import com.inasweaterpoorlyknit.core.ui.component.SearchBox
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.previewEnsembles
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel
@@ -58,15 +62,29 @@ fun EnsemblesRoute(
     navController: NavController,
     ensemblesViewModel: EnsemblesViewModel = hiltViewModel(),
 ) {
-  val ensemblesUiState by ensemblesViewModel.ensemblesUiState.collectAsStateWithLifecycle()
+  val lazyEnsembleThumbnails by ensemblesViewModel.lazyEnsembles.collectAsStateWithLifecycle()
+  val showAddEnsembleDialog by ensemblesViewModel.showAddEnsembleDialog.collectAsStateWithLifecycle()
+  val showPlaceholder by ensemblesViewModel.showPlaceholder.collectAsStateWithLifecycle()
+  val addEnsembleDialogArticles by ensemblesViewModel.addArticleThumbnails.collectAsStateWithLifecycle()
+  var searchQuery by remember { mutableStateOf("") }
   EnsemblesScreen(
-    lazyEnsembleThumbnails = ensemblesUiState.ensembles,
-    showAddEnsembleDialog = ensemblesUiState.showAddEnsembleDialog,
-    addEnsembleDialogArticles = ensemblesUiState.articleImages,
+    lazyEnsembleThumbnails = lazyEnsembleThumbnails,
+    showAddEnsembleDialog = showAddEnsembleDialog,
+    showPlaceholder = showPlaceholder,
+    searchQuery = searchQuery,
+    addEnsembleDialogArticles = addEnsembleDialogArticles,
     onClickEnsemble = { navController.navigateToEnsembleDetail(ensemblesViewModel.onClickEnsemble(it)) },
     onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
     onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
     onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog,
+    onUpdateSearchQuery = { newSearchQuery ->
+      ensemblesViewModel.searchQuery(newSearchQuery)
+      searchQuery = newSearchQuery
+    },
+    onClearSearchQuery = {
+      ensemblesViewModel.searchQuery("")
+      searchQuery = ""
+    },
   )
 }
 
@@ -74,26 +92,43 @@ fun EnsemblesRoute(
 fun EnsemblesScreen(
     lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>?,
     showAddEnsembleDialog: Boolean,
+    showPlaceholder: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
+    searchQuery: String,
     onClickEnsemble: (index: Int) -> Unit,
     onClickAddEnsemble: () -> Unit,
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
+    onUpdateSearchQuery: (String) -> Unit,
+    onClearSearchQuery: () -> Unit,
 ) {
   Surface(
     modifier = Modifier.fillMaxSize(),
   ) {
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
-      targetValue = if(lazyEnsembleThumbnails?.isEmpty() == true) 1.0f else 0.0f,
+      targetValue = if(showPlaceholder) 1.0f else 0.0f,
       animationSpec = tween(durationMillis = 1000),
       label = "placeholder ensemble grid visibility"
     )
-    if(placeholderVisibilityAnimatedFloat == 0.0f && lazyEnsembleThumbnails != null){
-      NoopOverlappingImageRowColumn(lazyEnsembleThumbnails, onClickEnsemble)
+    if(placeholderVisibilityAnimatedFloat == 0.0f){
+      Column {
+        SearchBox(
+          query = searchQuery,
+          placeholder = stringResource(R.string.goth_2_boss),
+          onQueryChange = onUpdateSearchQuery,
+          onClearQuery = onClearSearchQuery,
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(top = 8.dp, start = 8.dp, end = 8.dp),
+        )
+        if(lazyEnsembleThumbnails != null ) {
+          NoopOverlappingImageRowColumn(lazyEnsembleThumbnails, onClickEnsemble)
+        }
+      }
     } else {
-      NoopOverlappingPlaceholderRowColumn(
-        modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
-      )
+        NoopOverlappingPlaceholderRowColumn(
+          modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
+        )
     }
     NoopFloatingActionButton(
       iconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
@@ -209,8 +244,11 @@ fun PreviewUtilEnsembleScreen(
   EnsemblesScreen(
     lazyEnsembleThumbnails = ensembles,
     showAddEnsembleDialog = showAddEnsembleForm,
+    showPlaceholder = false,
+    searchQuery = "Goth 2 Boss",
     addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
-    onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {}
+    onClickEnsemble = {}, onClickAddEnsemble = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {},
+    onUpdateSearchQuery = {}, onClearSearchQuery = {},
   )
 }
 
