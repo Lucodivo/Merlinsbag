@@ -10,8 +10,8 @@ data class Ensemble(
 )
 
 data class ImageFilenames(
-    @ColumnInfo("filename") val filename: String,
-    @ColumnInfo("filename_thumb") val filenameThumb: String,
+  @ColumnInfo("filename") val filename: String,
+  @ColumnInfo("filename_thumb") val filenameThumb: String,
 )
 
 data class FullImageFilename(

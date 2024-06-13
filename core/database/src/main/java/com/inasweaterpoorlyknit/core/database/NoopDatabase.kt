@@ -8,11 +8,13 @@ import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
+import com.inasweaterpoorlyknit.core.database.model.EnsembleFtsEntity
 
 @Database(entities = [
   ArticleEntity::class,
   ArticleImageEntity::class,
   EnsembleEntity::class,
+  EnsembleFtsEntity::class,
   EnsembleArticleEntity::class,],
   version = 1)
 abstract class NoopDatabase : RoomDatabase() {

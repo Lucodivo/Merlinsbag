@@ -7,12 +7,11 @@ import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.dao.PurgeDatabaseDao
 import org.junit.After
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [26])
 open class DatabaseTests {
   lateinit var db: NoopDatabase
   lateinit var articleDao: ArticleDao

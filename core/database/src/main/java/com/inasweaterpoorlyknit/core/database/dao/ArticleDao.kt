@@ -18,8 +18,9 @@ interface ArticleDao {
   @Insert fun insertArticleImages(vararg articleImageEntity: ArticleImageEntity)
   @Transaction
   fun insertArticle(filename: String, filenameThumb: String) {
-    val article = ArticleEntity()
-    val articleImage = ArticleImageEntity(articleId = article.id, filename = filename, filenameThumb = filenameThumb)
+    val created = generateTime()
+    val article = ArticleEntity(id = generateId(), created = created, modified = created)
+    val articleImage = ArticleImageEntity(id = generateId(), articleId = article.id, filename = filename, filenameThumb = filenameThumb)
     insertArticles(article)
     insertArticleImages(articleImage)
   }

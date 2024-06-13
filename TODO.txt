@@ -50,6 +50,7 @@ Bugs:
     - During screen transitions, the previous screen is still interactable?
 Settings Screen:
     - Export All Data
+    - Let user choose their preferred font
 Aesthetics:
     - placeholder shimmer could use a little work
 

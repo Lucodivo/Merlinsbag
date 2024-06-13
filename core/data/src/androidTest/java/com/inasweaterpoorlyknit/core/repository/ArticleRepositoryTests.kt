@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.inasweaterpoorlyknit.core.common.articleFilesDirStr
-import com.inasweaterpoorlyknit.core.common.createFakeUriStrings
-import com.inasweaterpoorlyknit.core.data.ArticleRepository
+import com.inasweaterpoorlyknit.core.common.testing.createFakeUriStrings
 import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
+import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.data.repository.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

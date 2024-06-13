@@ -17,7 +17,8 @@ import java.util.UUID
     )]
 )
 data class ArticleImageEntity(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    @PrimaryKey
+    @ColumnInfo("id") val id: String,
     @ColumnInfo("article_id", index = true) val articleId: String,
     @ColumnInfo("filename") val filename: String,
     @ColumnInfo("filename_thumb") val filenameThumb: String,

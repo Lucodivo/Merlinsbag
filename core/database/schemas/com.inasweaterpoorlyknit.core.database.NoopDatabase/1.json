@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4a059452ab09a4b915dd1b26eb75a39e",
+    "identityHash": "b43d6b0858ee3f0f49ea8e8201eb7f38",
     "entities": [
       {
         "tableName": "article",
@@ -15,13 +15,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "createdEpoch",
+            "fieldPath": "created",
             "columnName": "created",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "modifiedEpoch",
+            "fieldPath": "modified",
             "columnName": "modified",
             "affinity": "INTEGER",
             "notNull": true
@@ -113,13 +113,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "createdEpoch",
+            "fieldPath": "created",
             "columnName": "created",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "modifiedEpoch",
+            "fieldPath": "modified",
             "columnName": "modified",
             "affinity": "INTEGER",
             "notNull": true
@@ -130,6 +130,42 @@
           "columnNames": [
             "id"
           ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [],
+        "tableName": "ensemble_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`id` TEXT NOT NULL, `title` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "ensembleId",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
         },
         "indices": [],
         "foreignKeys": []
@@ -207,7 +243,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4a059452ab09a4b915dd1b26eb75a39e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b43d6b0858ee3f0f49ea8e8201eb7f38')"
     ]
   }
 }

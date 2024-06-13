@@ -57,7 +57,7 @@ dependencies {
 
     // Project Modules
     implementation(projects.core.data)
-    implementation(projects.core.database) // TODO: app module shouldn't rely on database but currently needed because models aren't exported
+    implementation(projects.core.database) // TODO: app module shouldn't rely on database but mapping every database query seems wasteful 🤷‍♀️
     implementation(projects.core.common)
     implementation(projects.core.model)
     implementation(projects.core.ui)
@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.tracing.ktx)
+
     implementation(libs.androidx.core.splashscreen)
 
     // Compose

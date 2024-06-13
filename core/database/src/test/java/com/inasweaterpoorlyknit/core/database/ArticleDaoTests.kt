@@ -5,7 +5,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [26])
 class ArticleDaoTests: DatabaseTests() {
   @Test
   fun getAllArticlesWithThumbnails() = runBlocking(Dispatchers.IO) {

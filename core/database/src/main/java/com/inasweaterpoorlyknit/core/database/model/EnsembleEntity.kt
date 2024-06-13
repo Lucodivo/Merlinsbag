@@ -3,20 +3,29 @@ package com.inasweaterpoorlyknit.core.database.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Fts4
 import androidx.room.PrimaryKey
-import java.util.Date
-import java.util.UUID
 
 @Entity(tableName = "ensemble")
 data class EnsembleEntity(
-  @PrimaryKey val id: String = UUID.randomUUID().toString(),
-  val title: String,
-  @ColumnInfo(name = "created") val createdEpoch: Long = Date().time,
-  @ColumnInfo(name = "modified") val modifiedEpoch: Long = createdEpoch,
+    @PrimaryKey
+    @ColumnInfo(name = "id") val id: String,
+    @ColumnInfo(name = "title") val title: String,
+    @ColumnInfo(name = "created") val created: Long,
+    @ColumnInfo(name = "modified") val modified: Long,
 )
 
+@Entity(tableName = "ensemble_fts")
+@Fts4//(contentEntity = EnsembleEntity::class)
+data class EnsembleFtsEntity(
+    @ColumnInfo(name = "id") val ensembleId: String,
+    @ColumnInfo(name = "title") val title: String,
+)
+fun EnsembleEntity.toFtsEntity() = EnsembleFtsEntity(ensembleId = id, title = title)
+
 // Ensemble & Article join table
-@Entity(tableName = "ensemble_article",
+@Entity(
+  tableName = "ensemble_article",
   primaryKeys = ["article_id", "ensemble_id"],
   foreignKeys = [
     ForeignKey(
@@ -36,6 +45,6 @@ data class EnsembleEntity(
   ]
 )
 data class EnsembleArticleEntity(
-  @ColumnInfo(name = "ensemble_id", index = true) val ensembleId: String = UUID.randomUUID().toString(),
-  @ColumnInfo(name = "article_id", index = true) val articleId: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "ensemble_id", index = true) val ensembleId: String,
+    @ColumnInfo(name = "article_id", index = true) val articleId: String,
 )

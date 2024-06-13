@@ -5,8 +5,8 @@ import java.util.UUID
 
 fun randUUIDString() = UUID.randomUUID().toString()
 object Counter{
-  private var count = 0
-  fun next(): Int = count++
+  private var count = 0L
+  fun next(): Long = count++
 }
 
 fun createFakeUriString() = "fakeimage${Counter.next()}"

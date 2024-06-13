@@ -1,12 +1,17 @@
 package com.inasweaterpoorlyknit.core.database
 
+import com.inasweaterpoorlyknit.core.database.model.EnsembleFtsEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [26])
 class EnsembleDaoTests: DatabaseTests() {
   @Test
   fun insertEnsembleWithArticles() = runBlocking(Dispatchers.IO) {
@@ -29,5 +34,39 @@ class EnsembleDaoTests: DatabaseTests() {
     assertEquals(ensembleArticles[2].size, actualEnsembleArticles[2].articles.size)
     assertEquals(ensembleArticles[3].size, actualEnsembleArticles[3].articles.size)
     assertEquals(ensembleArticles[4].size, actualEnsembleArticles[4].articles.size)
+  }
+
+  @Test
+  fun searchEnsembleWithArticles() = runBlocking(Dispatchers.IO) {
+    val ensembleTitles = arrayOf(
+      "Road Warrior",
+      "The Railway",
+      "The Shire",
+      "Fantastic Raddish Warlock",
+      "Secret Way of Fans"
+    ).apply { sort() }
+    val ensembleFtsEntities = ensembleTitles.map {
+      EnsembleFtsEntity(
+        ensembleId = createCounterString(),
+        title = it,
+      )
+    }.toTypedArray()
+    ensembleDao.insertEnsemblesFts(*ensembleFtsEntities)
+
+    val ensembleSearch_rStar = ensembleDao.searchEnsembleFtsSingle("r*") // Road Warrior, The Railway, Fantastic Raddish Warlock
+    val ensembleSearch_thStar = ensembleDao.searchEnsembleFtsSingle("th*") // The Railway, The Shire
+    val ensembleSearch_the = ensembleDao.searchEnsembleFtsSingle("THE") // The Road, The Shire
+    val ensembleSearch_fanStar = ensembleDao.searchEnsembleFtsSingle("fan*") // Fantastic Raddish Warlock, Secret Life of Fans
+    val ensembleSearch_waStar = ensembleDao.searchEnsembleFtsSingle("wa*") // Road Warrior, Fantastic Raddish Warlock, Secret Way of Fans
+    val ensembleSearch_fantastic = ensembleDao.searchEnsembleFtsSingle("fantastic*") // Fantastic Raddish Warlock
+    val ensembleSearch_zStar = ensembleDao.searchEnsembleFtsSingle("z*") // none
+
+    assertEquals(3, ensembleSearch_rStar.size)
+    assertEquals(2, ensembleSearch_thStar.size)
+    assertEquals(2, ensembleSearch_the.size)
+    assertEquals(2, ensembleSearch_fanStar.size)
+    assertEquals(3, ensembleSearch_waStar.size)
+    assertEquals(1, ensembleSearch_fantastic.size)
+    assertEquals(0, ensembleSearch_zStar.size)
   }
 }
