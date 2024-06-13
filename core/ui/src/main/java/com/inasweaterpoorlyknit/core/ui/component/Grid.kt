@@ -1,6 +1,10 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.inasweaterpoorlyknit.core.ui.component
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,7 +80,8 @@ fun PlaceholderThumbnailGrid(modifier: Modifier = Modifier){
 @Composable
 fun SelectableStaggeredThumbnailGrid(
     selectable: Boolean,
-    onSelected: (index: Int) -> Unit,
+    onSelect: (index: Int) -> Unit,
+    onLongSelect: (index: Int) -> Unit,
     thumbnailUris: LazyUriStrings,
     selectedThumbnails: Set<Int>,
 ) {
@@ -89,7 +94,10 @@ fun SelectableStaggeredThumbnailGrid(
         Box(
           contentAlignment = Alignment.Center,
           modifier = Modifier
-              .clickable { onSelected(thumbnailGridItemIndex) }
+              .combinedClickable(
+                onClick = { onSelect(thumbnailGridItemIndex) },
+                onLongClick = { onLongSelect(thumbnailGridItemIndex) }
+              )
               .padding(staggeredGridItemPadding)
         ) {
           val uriString = thumbnailUris.getUriString(thumbnailGridItemIndex)
@@ -113,9 +121,9 @@ fun SelectableStaggeredThumbnailGrid(
 fun PreviewUtilStaggeredThumbnailGrid(selectable: Boolean) = NoopTheme {
   SelectableStaggeredThumbnailGrid(
     selectable = selectable,
-    onSelected = {},
     thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
+    onSelect = {}, onLongSelect = {},
   )
 }
 

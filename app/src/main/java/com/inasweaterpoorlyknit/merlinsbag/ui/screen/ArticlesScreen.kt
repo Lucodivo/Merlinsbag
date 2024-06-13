@@ -40,12 +40,9 @@ import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.TextButtonData
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.rememberLauncherForActivityResultPermissions
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.rememberSettingsLauncher
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
 
 const val ARTICLES_ROUTE = "articles_route"
@@ -117,6 +114,14 @@ fun ArticlesRoute(
         navController.navigateToArticleDetail(index)
       }
     },
+    onLongPressArticle = { index ->
+      if(!editMode) {
+        editMode = true
+        isItemSelected.clear()
+      }
+      if(isItemSelected.contains(index)) isItemSelected.remove(index)
+      else isItemSelected[index] = Unit
+    },
     onClickAddPhotoAlbum = { photoAlbumLauncher.launch(arrayOf("image/*")) },
     onClickAddPhotoCamera = { cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS) },
     onClickEdit = {
@@ -174,6 +179,7 @@ fun ArticlesScreen(
     showPermissionsAlert: Boolean,
     showDeleteArticlesAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
+    onLongPressArticle: (index: Int) -> Unit,
     onClickAddPhotoAlbum: () -> Unit,
     onClickAddPhotoCamera: () -> Unit,
     onClickEdit: () -> Unit,
@@ -210,9 +216,8 @@ fun ArticlesScreen(
     if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null){
       SelectableStaggeredThumbnailGrid(
         selectable = editMode,
-        onSelected = { index ->
-          onClickArticle(index)
-        },
+        onSelect = onClickArticle,
+        onLongSelect = onLongPressArticle,
         thumbnailUris = thumbnailUris,
         selectedThumbnails = selectedThumbnails,
       )
@@ -294,6 +299,7 @@ fun PreviewUtilArticleScreen(
     onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
     onPermissionsAlertPositive = {}, onDeleteArticlesAlertPositive = {}, onAlertNegative = {},
     onClickDelete = {}, onClickSelectionCancel = {}, onClickSettings = {}, onAlertOutside = {},
+    onLongPressArticle = {},
   )
 }
 

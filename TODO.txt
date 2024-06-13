@@ -15,8 +15,7 @@ Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
 Ensembles:
-    - Search
-    - Sort
+    - Hold to select
 Article Detail:
     - edit article title
 Features:

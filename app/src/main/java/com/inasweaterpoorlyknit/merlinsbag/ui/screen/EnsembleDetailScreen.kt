@@ -302,7 +302,8 @@ fun EnsembleDetailScreen(
       Box(modifier = Modifier.fillMaxSize()) {
         SelectableStaggeredThumbnailGrid(
           selectable = editEnsemblesMode,
-          onSelected = onSelectedEditArticle,
+          onSelect = onSelectedEditArticle,
+          onLongSelect = { /* TODO: Edit mode and select article */ },
           thumbnailUris = ensembleArticleThumbnailUris,
           selectedThumbnails = selectedEditArticleIndices,
         )
