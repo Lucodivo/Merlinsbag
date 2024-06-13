@@ -101,12 +101,16 @@ fun EnsembleDetailRoute(
       if(editMode) selectedEditArticleIndices.clear()
       editMode = !editMode
     },
-    onSelectedEditArticle = { index ->
+    onSelectArticle = { index ->
       if(editMode) {
         if(selectedEditArticleIndices.containsKey(index)) selectedEditArticleIndices.remove(index) else selectedEditArticleIndices[index] = Unit
       } else {
         navController.navigateToArticleDetail(index, ensembleId)
       }
+    },
+    onLongSelectArticle = { index ->
+      if(!editMode) editMode = true
+      if(selectedEditArticleIndices.containsKey(index)) selectedEditArticleIndices.remove(index) else selectedEditArticleIndices[index] = Unit
     },
     onSelectedAddArticle = { index ->
       if(selectedAddArticleIndices.containsKey(index)) selectedAddArticleIndices.remove(index) else selectedAddArticleIndices[index] = Unit
@@ -237,7 +241,8 @@ fun EnsembleDetailScreen(
     onTitleChanged: (String) -> Unit,
     onClickEdit: () -> Unit,
     onClickAddArticles: () -> Unit,
-    onSelectedEditArticle: (index: Int) -> Unit,
+    onSelectArticle: (index: Int) -> Unit,
+    onLongSelectArticle: (index: Int) -> Unit,
     onClickRemoveArticles: () -> Unit,
     onClickCancelSelection: () -> Unit,
     onClickDeleteEnsemble: () -> Unit,
@@ -302,8 +307,8 @@ fun EnsembleDetailScreen(
       Box(modifier = Modifier.fillMaxSize()) {
         SelectableStaggeredThumbnailGrid(
           selectable = editEnsemblesMode,
-          onSelect = onSelectedEditArticle,
-          onLongSelect = { /* TODO: Edit mode and select article */ },
+          onSelect = onSelectArticle,
+          onLongSelect = onLongSelectArticle,
           thumbnailUris = ensembleArticleThumbnailUris,
           selectedThumbnails = selectedEditArticleIndices,
         )
@@ -421,9 +426,9 @@ fun PreviewUtilEnsembleDetailScreen(
   addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   selectedAddArticleIndices = selectedAddArticleIndices,
   showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
-  onTitleClicked = {}, onTitleChanged = {}, onClickEdit = {}, onSelectedEditArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {}, onAbandonEditTitle = {},
+  onTitleClicked = {}, onTitleChanged = {}, onClickEdit = {}, onSelectArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {}, onAbandonEditTitle = {},
   onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {}, onClickAddArticles = {}, onClickDeleteEnsemble = {}, onClickOutsideDeleteEnsembleDialog = {},
-  onClickPositiveDeleteEnsembleDialog = {}, onClickNegativeDeleteEnsembleDialog = {},
+  onClickPositiveDeleteEnsembleDialog = {}, onClickNegativeDeleteEnsembleDialog = {}, onLongSelectArticle = {},
 )
 
 @Composable
