@@ -90,7 +90,7 @@ fun EnsemblesRoute(
 
 @Composable
 fun EnsemblesScreen(
-    lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>?,
+    lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
     showAddEnsembleDialog: Boolean,
     showPlaceholder: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
@@ -102,6 +102,8 @@ fun EnsemblesScreen(
     onUpdateSearchQuery: (String) -> Unit,
     onClearSearchQuery: () -> Unit,
 ) {
+  val sidePadding = 8.dp
+  val topPadding = 4.dp
   Surface(
     modifier = Modifier.fillMaxSize(),
   ) {
@@ -119,16 +121,12 @@ fun EnsemblesScreen(
           onClearQuery = onClearSearchQuery,
           modifier = Modifier
               .fillMaxWidth()
-              .padding(top = 8.dp, start = 8.dp, end = 8.dp),
+              .padding(vertical = topPadding, horizontal = sidePadding),
         )
-        if(lazyEnsembleThumbnails != null ) {
-          NoopOverlappingImageRowColumn(lazyEnsembleThumbnails, onClickEnsemble)
-        }
+        NoopOverlappingImageRowColumn(lazyEnsembleThumbnails, onClickEnsemble, modifier = Modifier.padding(horizontal = sidePadding))
       }
     } else {
-        NoopOverlappingPlaceholderRowColumn(
-          modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
-        )
+        NoopOverlappingPlaceholderRowColumn(modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat))
     }
     NoopFloatingActionButton(
       iconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),

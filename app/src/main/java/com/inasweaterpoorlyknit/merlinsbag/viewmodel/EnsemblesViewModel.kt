@@ -54,8 +54,8 @@ class EnsemblesViewModel @Inject constructor(
   val lazyEnsembles: StateFlow<List<Pair<String, LazyUriStrings>>> =
       combine(
         ensemblesRepository.getAllEnsembleArticleThumbnails().onEach {
-          if(it.isEmpty() && !_showPlaceholder.value){
-            _showPlaceholder.value = true
+          if(it.isEmpty()){
+            if(!_showPlaceholder.value) _showPlaceholder.value = true
           } else if(_showPlaceholder.value) {
             _showPlaceholder.value = false
           }

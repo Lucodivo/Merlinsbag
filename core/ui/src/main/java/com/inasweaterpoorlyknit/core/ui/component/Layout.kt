@@ -47,12 +47,14 @@ fun HorizontalOverlappingLayout(
           placeables.sumOf { (it.width * showingPercentage).toInt() } + (placeables.last().width * overlapPercentage).toInt() + iconPlaceable.width
         } else 0
       )
+      val overflowWidth = constraints.maxWidth - iconPlaceable.width
       layout(width = maxWidth, height = maxHeight) {
         var xPos = 0
         for(i in 0..placeables.lastIndex) {
           val placeable = placeables[i]
           val widthInc = (placeable.width * showingPercentage).toInt()
-          if((xPos + placeable.width) > (constraints.maxWidth - iconPlaceable.width)) {
+          val nextWidth = xPos + placeable.width
+          if(nextWidth > overflowWidth && (i != placeables.lastIndex && nextWidth < maxWidth)) {
             if(i > 0) {
               xPos += (placeables[i - 1].width * overlapPercentage).toInt()
               iconPlaceable.placeRelative(x = xPos, y = (maxHeight / 2) - (iconPlaceable.height / 2))
@@ -73,7 +75,7 @@ fun HorizontalOverlappingLayout(
 @Preview
 @Composable
 fun PreviewHorizontalOverlappingLayout() = NoopTheme {
-  val thumbnailUriStrings = repeatedThumbnailResourceIdsAsStrings.slice(6..16)
+  val thumbnailUriStrings = repeatedThumbnailResourceIdsAsStrings.slice(6..18)
   val padding = 10.dp
   Surface {
     HorizontalOverlappingLayout(

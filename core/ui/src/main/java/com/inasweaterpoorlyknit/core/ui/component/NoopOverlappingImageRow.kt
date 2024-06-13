@@ -5,9 +5,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -35,47 +36,49 @@ import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
+private val thumbnailsPadding = 10.dp
+private val maxThumbnailSize = 70.dp
+private val overlapPercentage = 0.4f
+private val minRowHeight = thumbnailsPadding * 4
+private val rowVerticalSpacing = 1.dp
+private val rowVerticalPadding = 8.dp
+private val rowStartPadding = 16.dp
+private val rowEndPadding = 4.dp
+private val overlapTitleSpacing = 4.dp
+
 @Composable
 fun NoopOverlappingImageRow(
     title: String,
     lazyUriStrings: LazyUriStrings,
     modifier: Modifier = Modifier,
 ) {
-  val thumbnailsPadding = 10.dp
-  val maxThumbnailSize = 80.dp
-  val titleVerticalPadding = 5.dp
-  val overlapPercentage = 0.4f
-  val minRowHeight = thumbnailsPadding * 4
-  Card(modifier = modifier) {
+  Card(
+    shape = MaterialTheme.shapes.medium,
+    modifier = modifier
+  ) {
     Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.Start,
-      modifier = Modifier.heightIn(min = minRowHeight),
+      modifier = Modifier
+          .heightIn(min = minRowHeight)
+          .padding(start = rowStartPadding, end = rowEndPadding, top = rowVerticalPadding, bottom = rowVerticalPadding),
     ) {
       HorizontalOverlappingLayout(
-        modifier = Modifier.padding(horizontal = thumbnailsPadding),
         overlapPercentage = overlapPercentage,
       ) {
         repeat(lazyUriStrings.size) { index ->
           NoopImage(
             uriString = lazyUriStrings.getUriString(index),
             contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-            modifier = Modifier
-                .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
-                .padding(vertical = thumbnailsPadding)
+            modifier = Modifier.sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
           )
         }
       }
       if(title.isNotEmpty()) {
-        Text(
-          text = title,
-          modifier = Modifier.padding(
-            top = 0.dp,
-            end = thumbnailsPadding,
-            start = thumbnailsPadding,
-            bottom = if(lazyUriStrings.isEmpty()) 0.dp else titleVerticalPadding
-          )
-        )
+        if(lazyUriStrings.isNotEmpty()){
+          Spacer(modifier = Modifier.height(overlapTitleSpacing))
+        }
+        Text(text = title)
       }
     }
   }
@@ -85,25 +88,24 @@ fun NoopOverlappingImageRow(
 fun NoopOverlappingImageRowColumn(
     lazyTitleAndUriStrings: List<Pair<String, LazyUriStrings>>,
     onClick: (index: Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-  val sidePadding = 10.dp
-  val rowSpacing = 3.dp
   LazyColumn(
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally,
-    contentPadding = PaddingValues(horizontal = sidePadding),
-    modifier = Modifier.fillMaxWidth()
+    modifier = modifier
   ) {
     items(lazyTitleAndUriStrings.size) { index ->
-      val topPadding = if(index == 0) sidePadding else rowSpacing
-      val bottomPadding = if(index == lazyTitleAndUriStrings.lastIndex) sidePadding else rowSpacing
       val (rowTitle, lazyStrings) = lazyTitleAndUriStrings[index]
       NoopOverlappingImageRow(
         title = rowTitle,
         lazyUriStrings = lazyStrings,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = topPadding, bottom = bottomPadding)
+            .padding(
+              top = if(index != 0) rowVerticalSpacing else 0.dp,
+              bottom = if(index != lazyTitleAndUriStrings.lastIndex) rowVerticalSpacing else 0.dp,
+            )
             .clickable { onClick(index) }
       )
     }
@@ -116,21 +118,17 @@ fun NoopOverlappingPlaceholderRow(
     title: String,
     modifier: Modifier = Modifier,
 ) {
-  val thumbnailsPadding = 10.dp
-  val maxThumbnailSize = 80.dp
-  val titleVerticalPadding = 5.dp
-  val overlapPercentage = 0.4f
-  val minRowHeight = thumbnailsPadding * 4
   val shimmerBrush = shimmerBrush(color = MaterialTheme.colorScheme.onSurface)
   Card(modifier = modifier) {
     Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.Start,
-      modifier = Modifier.heightIn(min = minRowHeight),
+      modifier = Modifier
+          .heightIn(min = minRowHeight)
+          .padding(start = rowStartPadding, end = rowEndPadding, top = rowVerticalPadding, bottom = rowVerticalPadding),
     ) {
       HorizontalOverlappingLayout(
         modifier = Modifier
-            .padding(horizontal = thumbnailsPadding)
             .alpha(0.8f)
             .drawWithContent {
               drawContent()
@@ -143,19 +141,12 @@ fun NoopOverlappingPlaceholderRow(
             painter = painterResource(drawables[index]),
             contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
             modifier = Modifier
-                .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
-                .padding(vertical = thumbnailsPadding)
+                .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize),
           )
         }
       }
-      Text(
-        text = title,
-        modifier = Modifier.padding(
-          end = thumbnailsPadding,
-          start = thumbnailsPadding,
-          bottom = titleVerticalPadding
-        )
-      )
+      Spacer(modifier = Modifier.height(overlapTitleSpacing))
+      Text(text = title)
     }
   }
 }
@@ -165,7 +156,7 @@ private val drawablePlaceholders: List<Pair<Int, List<Int>>> =
       listOf(
         Pair(R.string.goth_2_boss, thumbnails.slice(0..5)),
         Pair(R.string.sporty_spice, thumbnails.slice(6..12)),
-        Pair(R.string.derelicte, thumbnails.slice(1..10)),
+        Pair(R.string.derelicte, thumbnails.slice(1..13)),
         Pair(R.string.bowie_nite, thumbnails.slice(3..5)),
         Pair(R.string.road_warrior, thumbnails.slice(5..11)),
         Pair(R.string.chrome_country, thumbnails.slice(7..11)),
@@ -178,24 +169,22 @@ private val drawablePlaceholders: List<Pair<Int, List<Int>>> =
 fun NoopOverlappingPlaceholderRowColumn(
     modifier: Modifier = Modifier,
 ){
-  val sidePadding = 10.dp
-  val rowSpacing = 3.dp
   LazyColumn(
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally,
-    contentPadding = PaddingValues(horizontal = sidePadding),
-    modifier = modifier.fillMaxSize()
+    modifier = modifier
   ) {
     items(drawablePlaceholders.size) { index ->
-      val topPadding = if(index == 0) sidePadding else rowSpacing
-      val bottomPadding = if(index == previewEnsembles.lastIndex) sidePadding else rowSpacing
       val ensembles = drawablePlaceholders[index]
       NoopOverlappingPlaceholderRow(
         drawables = ensembles.second,
         title = stringResource(ensembles.first),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = topPadding, bottom = bottomPadding)
+            .padding(
+              top = if(index != 0) rowVerticalSpacing else 0.dp,
+              bottom = if(index != drawablePlaceholders.lastIndex) rowVerticalSpacing else 0.dp,
+            )
       )
     }
   }
@@ -214,7 +203,7 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
       listOf(
         thumbnails.slice(4..4),
         thumbnails.slice(0..5),
-        thumbnails.slice(6..16),
+        thumbnails.slice(6..18),
         thumbnails.slice(1..12),
         emptyList(),
         emptyList(),
@@ -233,6 +222,46 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
         )
       }
     }
+
+@Preview
+@Composable
+fun PreviewNoopOverlappingImageRow() = NoopTheme {
+  NoopOverlappingImageRow(
+    title = "Road Warrior",
+    lazyUriStrings = previewEnsembles[1].second,
+    modifier = Modifier.fillMaxWidth()
+  )
+}
+
+@Preview
+@Composable
+fun PreviewNoopOverlappingImageRowOverflow() = NoopTheme {
+  NoopOverlappingImageRow(
+    title = "Road Warrior",
+    lazyUriStrings = previewEnsembles[2].second,
+    modifier = Modifier.fillMaxWidth()
+  )
+}
+
+@Preview
+@Composable
+fun PreviewNoopOverlappingPlaceholderRow() = NoopTheme {
+  NoopOverlappingPlaceholderRow(
+    title = "Road Warrior",
+    drawables = drawablePlaceholders[1].second,
+    modifier = Modifier.fillMaxWidth()
+  )
+}
+
+@Preview
+@Composable
+fun PreviewNoopOverlappingPlaceholderRowOverflow() = NoopTheme {
+  NoopOverlappingPlaceholderRow(
+    title = "Road Warrior",
+    drawables = drawablePlaceholders[2].second,
+    modifier = Modifier.fillMaxWidth()
+  )
+}
 
 @Preview
 @Composable
