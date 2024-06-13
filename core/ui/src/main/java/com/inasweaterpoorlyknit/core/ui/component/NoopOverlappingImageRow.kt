@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
@@ -40,11 +42,26 @@ private val thumbnailsPadding = 10.dp
 private val maxThumbnailSize = 70.dp
 private val overlapPercentage = 0.4f
 private val minRowHeight = thumbnailsPadding * 4
-private val rowVerticalSpacing = 1.dp
+private val rowVerticalSpacing = 2.dp
 private val rowVerticalPadding = 8.dp
 private val rowStartPadding = 16.dp
 private val rowEndPadding = 4.dp
 private val overlapTitleSpacing = 4.dp
+
+@Composable
+private fun RowCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+  return ElevatedCard(
+    modifier = modifier,
+    shape = MaterialTheme.shapes.large,
+    content = content
+  )
+}
+
+@Composable
+private fun RowText(text: String) = Text(text = text, color = MaterialTheme.colorScheme.primary)
 
 @Composable
 fun NoopOverlappingImageRow(
@@ -52,10 +69,7 @@ fun NoopOverlappingImageRow(
     lazyUriStrings: LazyUriStrings,
     modifier: Modifier = Modifier,
 ) {
-  Card(
-    shape = MaterialTheme.shapes.medium,
-    modifier = modifier
-  ) {
+  RowCard(modifier = modifier) {
     Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.Start,
@@ -78,7 +92,7 @@ fun NoopOverlappingImageRow(
         if(lazyUriStrings.isNotEmpty()){
           Spacer(modifier = Modifier.height(overlapTitleSpacing))
         }
-        Text(text = title)
+        RowText(text = title)
       }
     }
   }
@@ -119,7 +133,7 @@ fun NoopOverlappingPlaceholderRow(
     modifier: Modifier = Modifier,
 ) {
   val shimmerBrush = shimmerBrush(color = MaterialTheme.colorScheme.onSurface)
-  Card(modifier = modifier) {
+  RowCard(modifier = modifier) {
     Column(
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.Start,
@@ -146,7 +160,7 @@ fun NoopOverlappingPlaceholderRow(
         }
       }
       Spacer(modifier = Modifier.height(overlapTitleSpacing))
-      Text(text = title)
+      RowText(text = title)
     }
   }
 }
@@ -225,7 +239,7 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
 
 @Preview
 @Composable
-fun PreviewNoopOverlappingImageRow() = NoopTheme {
+fun PreviewNoopOverlappingImageRow() = NoopTheme(darkMode = DarkMode.DARK) {
   NoopOverlappingImageRow(
     title = "Road Warrior",
     lazyUriStrings = previewEnsembles[1].second,
@@ -245,7 +259,7 @@ fun PreviewNoopOverlappingImageRowOverflow() = NoopTheme {
 
 @Preview
 @Composable
-fun PreviewNoopOverlappingPlaceholderRow() = NoopTheme {
+fun PreviewNoopOverlappingPlaceholderRow() = NoopTheme(darkMode = DarkMode.DARK) {
   NoopOverlappingPlaceholderRow(
     title = "Road Warrior",
     drawables = drawablePlaceholders[1].second,
@@ -265,7 +279,7 @@ fun PreviewNoopOverlappingPlaceholderRowOverflow() = NoopTheme {
 
 @Preview
 @Composable
-fun PreviewNoopOverlappingImageRowColumn() = NoopTheme {
+fun PreviewNoopOverlappingImageRowColumn() = NoopTheme(darkMode = DarkMode.DARK) {
   NoopOverlappingImageRowColumn(
     lazyTitleAndUriStrings = previewEnsembles,
     onClick = {}

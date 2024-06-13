@@ -8,8 +8,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
@@ -24,23 +28,25 @@ fun SearchBox(
     onClearQuery: () -> Unit,
     modifier: Modifier = Modifier,
 ){
+  val focusRequester = remember { FocusRequester() }
+  val focusManager = LocalFocusManager.current
+  val iconPadding = 4.dp
   TextField(
     value = query,
     placeholder = { Text(placeholder) },
     onValueChange = onQueryChange,
     singleLine = true,
-    leadingIcon = {
-      Icon(
-        imageVector = NoopIcons.Search,
-        contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
-        modifier = Modifier.padding(start = 4.dp)
-      ) },
+    leadingIcon = { Icon(
+          imageVector = NoopIcons.Search,
+          contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+          modifier = Modifier.padding(start = iconPadding)
+    )},
     shape = MaterialTheme.shapes.extraLarge,
     trailingIcon = {
       if(query.isNotEmpty()) {
         IconButton(
           onClick = onClearQuery,
-          modifier = Modifier.padding(end = 4.dp)
+          modifier = Modifier.padding(end = iconPadding)
         ){
           Icon(NoopIcons.Close, TODO_ICON_CONTENT_DESCRIPTION)
         }
@@ -51,7 +57,7 @@ fun SearchBox(
       disabledIndicatorColor = Color.Transparent,
       unfocusedIndicatorColor = Color.Transparent,
     ),
-    modifier = modifier
+    modifier = modifier.focusRequester(focusRequester)
   )
 }
 

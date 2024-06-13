@@ -16,16 +16,15 @@ Add Article:
     - Primary / Secondary color classifications?
 Ensembles:
     - Hold to select
-Article Detail:
-    - edit article title
+    - More efficient grid-type view?
 Features:
     - Collage
     - Tags
+        - Chips
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - Navigation Drawer / Navigation Rail
 Articles:
-    - Hold thumbnail for select
     - thumbnails with random "shimmer"/"rotation"
 Accessibility:
     - Icon content description

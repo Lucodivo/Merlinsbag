@@ -115,16 +115,12 @@ fun EnsembleDetailRoute(
     onSelectedAddArticle = { index ->
       if(selectedAddArticleIndices.containsKey(index)) selectedAddArticleIndices.remove(index) else selectedAddArticleIndices[index] = Unit
     },
-    onClickCancelSelection = {
-      selectedEditArticleIndices.clear()
-    },
+    onClickCancelSelection = { selectedEditArticleIndices.clear() },
     onClickRemoveArticles = {
       ensembleDetailViewModel.removeEnsembleArticles(selectedEditArticleIndices.keys.toList())
       selectedEditArticleIndices.clear()
     },
-    onClickDeleteEnsemble = {
-      showDeleteEnsembleDialog = true
-    },
+    onClickDeleteEnsemble = { showDeleteEnsembleDialog = true },
     onAbandonEditTitle = { editingTitle = false },
     showAddArticlesDialog = showAddArticlesDialog,
     onClickConfirmAddArticles = {
