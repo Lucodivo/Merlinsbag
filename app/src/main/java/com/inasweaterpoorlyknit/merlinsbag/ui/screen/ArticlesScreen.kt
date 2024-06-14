@@ -38,7 +38,8 @@ import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
-import com.inasweaterpoorlyknit.core.ui.component.TextButtonData
+import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndFloatingActionButtonContainer
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -226,53 +227,41 @@ fun ArticlesScreen(
         modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
       )
     }
-    val articlesAreSelected = selectedThumbnails.isNotEmpty()
+  }
+
+  val articlesAreSelected = selectedThumbnails.isNotEmpty()
+  NoopBottomEndFloatingActionButtonContainer {
     NoopExpandingFloatingActionButton(
       expanded = editMode,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
       verticalExpandedButtons = if(articlesAreSelected) {
         listOf(
-          TextButtonData(
-            icon = IconData(
-              icon = NoopIcons.Cancel,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-            ),
+          IconButtonData(
+            icon = IconData(icon = NoopIcons.Cancel, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
             onClick = onClickSelectionCancel
           ),
-          TextButtonData(
-            icon = IconData(
-              icon = NoopIcons.DeleteForever,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-            ),
+          IconButtonData(
+            icon = IconData(icon = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
             onClick = onClickDelete
           ),
         )
       } else {
         listOf(
-          TextButtonData(
-            icon = IconData(
-              icon = NoopIcons.AddPhotoAlbum,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-            ),
+          IconButtonData(
+            icon = IconData(icon = NoopIcons.AddPhotoAlbum, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
             onClick = onClickAddPhotoAlbum
           ),
-          TextButtonData(
-            icon = IconData(
-              icon = NoopIcons.AddPhotoCamera,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-            ),
+          IconButtonData(
+            icon = IconData(icon = NoopIcons.AddPhotoCamera, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
             onClick = onClickAddPhotoCamera
           ),
         )
       },
       horizontalExpandedButtons = if(!articlesAreSelected) {
         listOf(
-          TextButtonData(
-            icon = IconData(
-              icon = NoopIcons.Settings,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
-            ),
+          IconButtonData(
+            icon = IconData(icon = NoopIcons.Settings, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
             onClick = onClickSettings,
           ),
         )

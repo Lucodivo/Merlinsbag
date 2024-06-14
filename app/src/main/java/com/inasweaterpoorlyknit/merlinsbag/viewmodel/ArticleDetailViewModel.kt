@@ -20,10 +20,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class ArticleDetailUiState(
-    val articleFullImages: LazyUriStrings,
-)
-
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
     @Assisted("ensembleId") private val ensembleId: String?,
@@ -32,8 +28,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   lateinit var articlesWithFullImages: LazyArticleFullImages
 
-  private val _exportedImageUri = MutableSharedFlow<Uri>()
-  val exportedImageUri: SharedFlow<Uri> = _exportedImageUri
+  private val _exportedImageUri = MutableSharedFlow<Pair<Int,Uri>>()
+  val articleExported: SharedFlow<Pair<Int,Uri>> = _exportedImageUri
 
   fun deleteArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
     val articleId = articlesWithFullImages.getArticleId(index)
@@ -42,7 +38,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
     val exportedImageUri = articleRepository.exportArticle(articlesWithFullImages.getArticleId(index))
-    exportedImageUri?.let { _exportedImageUri.emit(it) }
+    exportedImageUri?.let { _exportedImageUri.emit(Pair(index, exportedImageUri)) }
   }
 
   @AssistedFactory
@@ -52,12 +48,11 @@ class ArticleDetailViewModel @AssistedInject constructor(
     ): ArticleDetailViewModel
   }
 
-  val articleDetailUiState: StateFlow<ArticleDetailUiState> = articleRepository.getArticlesWithFullImages(ensembleId)
+  val articleDetailUiState: StateFlow<LazyUriStrings> = articleRepository.getArticlesWithFullImages(ensembleId)
       .onEach{ articlesWithFullImages = it }
-      .map { ArticleDetailUiState(articleFullImages = it) }
       .stateIn(
         scope = viewModelScope,
-        initialValue = ArticleDetailUiState(articleFullImages = LazyUriStrings.Empty),
+        initialValue = LazyUriStrings.Empty,
         started = SharingStarted.WhileSubscribed()
       )
 }

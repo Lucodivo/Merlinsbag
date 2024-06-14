@@ -4,11 +4,14 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,102 +28,93 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
 @Composable
-fun NoopExpandingFloatingActionButton(
-    expanded: Boolean,
-    collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
-    expandedIcon: IconData = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-    onClick: () -> Unit,
-    verticalExpandedButtons: List<TextButtonData> = emptyList(),
-    horizontalExpandedButtons: List<TextButtonData> = emptyList(),
-) {
-  val columnPadding = 20.dp
-  val expandedButtonPadding = 4.dp
-  Box(
+fun NoopBottomEndFloatingActionButtonContainer(content: @Composable BoxScope.() -> Unit) = Box(
     contentAlignment = Alignment.BottomEnd,
-    modifier = Modifier.fillMaxSize()
-  ) {
-    Column(
-      horizontalAlignment = Alignment.End,
-      modifier = Modifier.padding(columnPadding)
-    ) {
-      val openAnimateFloat by animateFloatAsState(
-        targetValue = if(expanded) 1.0f else 0.0f,
-        animationSpec = tween(),
-        label = "floating action button size"
-      )
-      val animAlpha = (-(openAnimateFloat - 1.0f) * (openAnimateFloat - 1.0f)) + 1.0f // https://www.desmos.com/calculator/6ru1kya9ar
-      Column(
-        horizontalAlignment = Alignment.End,
-        modifier = Modifier.graphicsLayer {
-          scaleY = openAnimateFloat
-          scaleX = openAnimateFloat
-          alpha = animAlpha
-          transformOrigin = TransformOrigin(0.5f, 1.0f)
-        }) {
-        verticalExpandedButtons.forEach { button ->
-          FloatingActionButton(
-            onClick = button.onClick,
-            modifier = Modifier.padding(bottom = expandedButtonPadding)
-          ) {
-            Icon(button.icon.icon, button.icon.contentDescription)
-          }
-        }
-      }
-      Row(
-        horizontalArrangement = Arrangement.End,
-      ){
-        Row(
-          horizontalArrangement = Arrangement.End,
-          modifier = Modifier.graphicsLayer {
-            scaleY = openAnimateFloat
-            scaleX = openAnimateFloat
-            alpha = animAlpha
-            transformOrigin = TransformOrigin(1.0f, 0.5f)
-          }
-        ){
-          horizontalExpandedButtons.forEach { button ->
-            FloatingActionButton(
-              onClick = button.onClick,
-              modifier = Modifier.padding(end = expandedButtonPadding)
-            ) {
-              Icon(button.icon.icon, button.icon.contentDescription)
-            }
-          }
-        }
-        FloatingActionButton(onClick = onClick) {
-          val iconData = if(expanded) expandedIcon else collapsedIcon
-          Icon(iconData.icon, iconData.contentDescription)
-        }
-      }
-    }
-  }
-}
+    modifier = Modifier.fillMaxSize().padding(8.dp),
+    content = content,
+  )
 
 @Composable
 fun NoopFloatingActionButton(
     iconData: IconData,
+    enabled: Boolean = true,
     onClick: () -> Unit,
+) = FilledTonalButton (
+    onClick = onClick,
+    enabled = enabled,
+    modifier = Modifier
+        .padding(2.dp)
+        .sizeIn(maxHeight = ButtonDefaults.MinHeight),
 ) {
-  val buttonPadding = 20.dp
-  Box(
-    contentAlignment = Alignment.BottomEnd,
-    modifier = Modifier.fillMaxSize()
-  ) {
-    FloatingActionButton(
-      onClick = { onClick() },
-      modifier = Modifier.padding(buttonPadding)
+  Icon(
+    imageVector = iconData.icon,
+    contentDescription = iconData.contentDescription,
+  )
+}
+
+@Composable
+fun NoopExpandingFloatingActionButton(
+    expanded: Boolean,
+    enabled: Boolean = true,
+    collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
+    expandedIcon: IconData = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+    onClick: () -> Unit,
+    verticalExpandedButtons: List<IconButtonData> = emptyList(),
+    horizontalExpandedButtons: List<IconButtonData> = emptyList(),
+) {
+  Column(horizontalAlignment = Alignment.End) {
+    val openAnimateFloat by animateFloatAsState(
+      targetValue = if(expanded) 1.0f else 0.0f,
+      animationSpec = tween(),
+      label = "floating action button size"
+    )
+    val animAlpha = (-(openAnimateFloat - 1.0f) * (openAnimateFloat - 1.0f)) + 1.0f // https://www.desmos.com/calculator/6ru1kya9ar
+    Column(
+      horizontalAlignment = Alignment.End,
+      modifier = Modifier.graphicsLayer {
+        scaleY = openAnimateFloat
+        scaleX = openAnimateFloat
+        alpha = animAlpha
+        transformOrigin = TransformOrigin(0.5f, 1.0f)
+      }
     ) {
-      Icon(iconData.icon, iconData.contentDescription)
+      verticalExpandedButtons.forEach { button ->
+        NoopFloatingActionButton(
+          iconData = button.icon,
+          enabled = button.enabled,
+          onClick = button.onClick
+        )
+      }
+    }
+    Row(horizontalArrangement = Arrangement.End){
+      Row(
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier.graphicsLayer {
+          scaleY = openAnimateFloat
+          scaleX = openAnimateFloat
+          alpha = animAlpha
+          transformOrigin = TransformOrigin(1.0f, 0.5f)
+        }
+      ){
+        horizontalExpandedButtons.forEach { button ->
+          NoopFloatingActionButton(
+            iconData = button.icon,
+            enabled = button.enabled,
+            onClick = button.onClick
+          )
+        }
+      }
+      NoopFloatingActionButton(
+        iconData = if(expanded) expandedIcon else collapsedIcon,
+        enabled = enabled,
+        onClick = onClick
+      )
     }
   }
 }
 
 //region Previews
-// Allows previews to take up less space in the preview window
-@Preview(name = "NoopFloatingActionButtonPreview", device = "spec:shape=Normal,width=300,height=300,unit=dp,dpi=480")
-annotation class NoopFloatingActionButtonPreview
-
-@NoopFloatingActionButtonPreview
+@Preview
 @Composable
 fun PreviewNoopExpandingFloatingActionButtonCollapsed() = NoopTheme {
   NoopFloatingActionButton(
@@ -129,7 +123,7 @@ fun PreviewNoopExpandingFloatingActionButtonCollapsed() = NoopTheme {
   )
 }
 
-@NoopFloatingActionButtonPreview
+@Preview
 @Composable
 fun PreviewNoopExpandingFloatingActionButtonExpanded() = NoopTheme {
   NoopExpandingFloatingActionButton(
@@ -137,12 +131,12 @@ fun PreviewNoopExpandingFloatingActionButtonExpanded() = NoopTheme {
     collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
     expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
     verticalExpandedButtons = listOf(
-      TextButtonData(IconData(NoopComposePreviewIcons.AddPhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
-      TextButtonData(IconData(NoopComposePreviewIcons.AddPhotoCamera, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
+      IconButtonData(IconData(NoopComposePreviewIcons.AddPhotoAlbum, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
+      IconButtonData(IconData(NoopComposePreviewIcons.AddPhotoCamera, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
     ),
     horizontalExpandedButtons = listOf(
-      TextButtonData(IconData(NoopComposePreviewIcons.Save, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
-      TextButtonData(IconData(NoopComposePreviewIcons.Settings, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
+      IconButtonData(IconData(NoopComposePreviewIcons.Save, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
+      IconButtonData(IconData(NoopComposePreviewIcons.Settings, COMPOSE_PREVIEW_CONTENT_DESCRIPTION)) {},
     ),
     onClick = {}
   )

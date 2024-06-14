@@ -49,7 +49,8 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
-import com.inasweaterpoorlyknit.core.ui.component.TextButtonData
+import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndFloatingActionButtonContainer
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
@@ -81,9 +82,9 @@ fun EnsembleDetailRoute(
   var editingTitle by remember { mutableStateOf(false) }
   var editMode by remember { mutableStateOf(false) }
   var showDeleteEnsembleDialog by remember { mutableStateOf(false) }
-  val selectedEditArticleIndices = remember { mutableStateMapOf<Int, Unit>() }
+  val selectedEditArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   var showAddArticlesDialog by remember { mutableStateOf(false) }
-  val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() }
+  val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   EnsembleDetailScreen(
     title = ensembleTitle,
     editingTitle = editingTitle,
@@ -180,48 +181,50 @@ fun EnsembleDetailFloatingActionButtons(
     onClickRemoveArticles: () -> Unit,
     onClickDeleteEnsemble: () -> Unit,
 ) {
-  NoopExpandingFloatingActionButton(
-    expanded = editEnsemblesMode,
-    collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
-    expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
-    verticalExpandedButtons =
-    if(selectedEditArticleIndices.isNotEmpty()) {
-      listOf(
-        TextButtonData(
-          icon = IconData(
-            icon = NoopIcons.Cancel,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+  NoopBottomEndFloatingActionButtonContainer {
+    NoopExpandingFloatingActionButton(
+      expanded = editEnsemblesMode,
+      collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
+      expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+      verticalExpandedButtons =
+      if(selectedEditArticleIndices.isNotEmpty()) {
+        listOf(
+          IconButtonData(
+            icon = IconData(
+              icon = NoopIcons.Cancel,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+            ),
+            onClick = onClickCancelSelection
           ),
-          onClick = onClickCancelSelection
-        ),
-        TextButtonData(
-          icon = IconData(
-            icon = NoopIcons.Delete,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+          IconButtonData(
+            icon = IconData(
+              icon = NoopIcons.Delete,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+            ),
+            onClick = onClickRemoveArticles
           ),
-          onClick = onClickRemoveArticles
-        ),
-      )
-    } else {
-      listOf(
-        TextButtonData(
-          icon = IconData(
-            icon = NoopIcons.DeleteForever,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+        )
+      } else {
+        listOf(
+          IconButtonData(
+            icon = IconData(
+              icon = NoopIcons.DeleteForever,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+            ),
+            onClick = onClickDeleteEnsemble
           ),
-          onClick = onClickDeleteEnsemble
-        ),
-        TextButtonData(
-          icon = IconData(
-            icon = NoopIcons.Attachment,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+          IconButtonData(
+            icon = IconData(
+              icon = NoopIcons.Attachment,
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+            ),
+            onClick = onClickAddArticles
           ),
-          onClick = onClickAddArticles
-        ),
-      )
-    },
-    onClick = onClickEdit,
-  )
+        )
+      },
+      onClick = onClickEdit,
+    )
+  }
 }
 
 @Composable
