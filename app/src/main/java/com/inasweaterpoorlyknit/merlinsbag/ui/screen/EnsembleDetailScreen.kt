@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +48,7 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
+import com.inasweaterpoorlyknit.core.ui.component.NoopAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
@@ -137,37 +136,29 @@ fun EnsembleDetailRoute(
     },
     onClickAddArticles = { showAddArticlesDialog = true },
     showDeleteEnsembleAlertDialog = showDeleteEnsembleDialog,
-    onClickOutsideDeleteEnsembleDialog = { showDeleteEnsembleDialog = false },
+    onDismissDeleteEnsembleDialog = { showDeleteEnsembleDialog = false },
     onClickPositiveDeleteEnsembleDialog = {
       showDeleteEnsembleDialog = false
       ensembleDetailViewModel.deleteEnsemble()
       navController.popBackStack()
     },
-    onClickNegativeDeleteEnsembleDialog = { showDeleteEnsembleDialog = false },
     modifier = modifier,
   )
 }
 
 @Composable
 fun DeleteEnsembleAlertDialog(
-    onClickOutside: () -> Unit,
-    onClickNegative: () -> Unit,
+    onDismiss: () -> Unit,
     onClickPositive: () -> Unit,
 ) {
-  AlertDialog(
-    title = { Text(text = stringResource(id = R.string.delete_ensemble)) },
-    text = { Text(text = stringResource(id = R.string.are_you_sure)) },
-    onDismissRequest = onClickOutside,
-    confirmButton = {
-      TextButton(onClick = onClickPositive) {
-        Text(stringResource(id = R.string.delete_ensemble_alert_positive))
-      }
-    },
-    dismissButton = {
-      TextButton(onClick = onClickNegative) {
-        Text(stringResource(id = R.string.delete_ensemble_alert_negative))
-      }
-    }
+  NoopAlertDialog(
+    title = stringResource(id = R.string.delete_ensemble),
+    text = stringResource(id = R.string.are_you_sure),
+    confirmText = stringResource(id = R.string.delete),
+    dismissText = stringResource(id = R.string.cancel),
+    headerIcon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
+    onDismiss = onDismiss,
+    onConfirm = onClickPositive,
   )
 }
 
@@ -251,8 +242,7 @@ fun EnsembleDetailScreen(
     onClickConfirmAddArticles: () -> Unit,
     onCloseAddArticlesDialog: () -> Unit,
     showDeleteEnsembleAlertDialog: Boolean,
-    onClickOutsideDeleteEnsembleDialog: () -> Unit,
-    onClickNegativeDeleteEnsembleDialog: () -> Unit,
+    onDismissDeleteEnsembleDialog: () -> Unit,
     onClickPositiveDeleteEnsembleDialog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -345,8 +335,7 @@ fun EnsembleDetailScreen(
   )
   if(showDeleteEnsembleAlertDialog) {
     DeleteEnsembleAlertDialog(
-      onClickOutside = onClickOutsideDeleteEnsembleDialog,
-      onClickNegative = onClickNegativeDeleteEnsembleDialog,
+      onDismiss = onDismissDeleteEnsembleDialog,
       onClickPositive = onClickPositiveDeleteEnsembleDialog,
     )
   }
@@ -365,7 +354,7 @@ fun AddArticlesDialog(
   NoopBottomSheetDialog(
     visible = visible,
     title = stringResource(id = R.string.add_article),
-    positiveButtonLabel = if(addArticlesAvailable) stringResource(id = R.string.save) else "",
+    positiveButtonText = if(addArticlesAvailable) stringResource(id = R.string.save) else "",
     onClose = onClose,
     onPositive = onConfirm,
   ) {
@@ -426,8 +415,8 @@ fun PreviewUtilEnsembleDetailScreen(
   selectedAddArticleIndices = selectedAddArticleIndices,
   showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
   onTitleClicked = {}, onTitleChanged = {}, onClickEdit = {}, onSelectArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {}, onAbandonEditTitle = {},
-  onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {}, onClickAddArticles = {}, onClickDeleteEnsemble = {}, onClickOutsideDeleteEnsembleDialog = {},
-  onClickPositiveDeleteEnsembleDialog = {}, onClickNegativeDeleteEnsembleDialog = {}, onLongSelectArticle = {},
+  onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {}, onClickAddArticles = {}, onClickDeleteEnsemble = {}, onDismissDeleteEnsembleDialog = {},
+  onClickPositiveDeleteEnsembleDialog = {}, onLongSelectArticle = {},
 )
 
 @Composable
@@ -506,7 +495,5 @@ fun PreviewAddArticlesDialog_noAddArticles() = NoopTheme {
 
 @Preview
 @Composable
-fun PreviewDeleteEnsembleAlertDialog() = NoopTheme {
-  DeleteEnsembleAlertDialog(onClickOutside = {}, onClickNegative = {}, onClickPositive = {})
-}
+fun PreviewDeleteEnsembleAlertDialog() = NoopTheme { DeleteEnsembleAlertDialog(onDismiss = {}, onClickPositive = {}) }
 //endregion

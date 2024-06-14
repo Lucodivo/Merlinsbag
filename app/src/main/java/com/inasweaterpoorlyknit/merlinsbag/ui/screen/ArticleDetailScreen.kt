@@ -232,8 +232,8 @@ fun DeleteArticleAlertDialog(onClickOutside: () -> Unit, onClickNegative: () -> 
     text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
     icon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
     onDismissRequest = onClickOutside,
-    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.delete_article_alert_positive)) } },
-    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.delete_article_alert_negative)) } }
+    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.delete)) } },
+    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.cancel)) } }
   )
 }
 

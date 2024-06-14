@@ -478,7 +478,7 @@ fun DeleteAllDataAlertDialog(
     confirmButton = {
       if(enteredText.value == DELETE_ALL_CAPTCHA) {
         TextButton(onClick = onClickPositive) {
-          Text(stringResource(id = R.string.delete_all_data_positive))
+          Text(stringResource(id = R.string.delete))
         }
       } else {
         Box(contentAlignment = Alignment.Center) {
@@ -493,7 +493,7 @@ fun DeleteAllDataAlertDialog(
     },
     dismissButton = {
       TextButton(onClick = onClickNegative) {
-        Text(stringResource(id = R.string.delete_all_data_negative))
+        Text(stringResource(id = R.string.cancel))
       }
     }
   )

@@ -19,12 +19,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -46,10 +48,11 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 fun NoopBottomSheetDialog(
     visible: Boolean,
     title: String,
-    positiveButtonLabel: String,
+    positiveButtonText: String,
     modifier: Modifier = Modifier,
     onPositive: () -> Unit,
     onClose: () -> Unit,
+    positiveButtonEnabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
   val headerHeight = 56.dp
@@ -113,16 +116,18 @@ fun NoopBottomSheetDialog(
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
               )
             }
-            Text(
-              text = positiveButtonLabel,
-              color = MaterialTheme.colorScheme.primary,
-              fontSize = MaterialTheme.typography.labelLarge.fontSize,
-              textAlign = TextAlign.End,
-              modifier = Modifier
-                  .height(headerHeight)
-                  .padding(padding)
-                  .clickable { onPositive() }
-            )
+            if(positiveButtonEnabled) {
+              Text(
+                text = positiveButtonText,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .height(headerHeight)
+                    .padding(padding)
+                    .clickable { onPositive() }
+              )
+            }
           }
           content()
           Spacer(modifier = Modifier.height(padding))
@@ -132,15 +137,48 @@ fun NoopBottomSheetDialog(
   }
 }
 
+@Composable
+fun NoopAlertDialog(
+    title: String,
+    text: String,
+    confirmText: String,
+    dismissText: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    headerIcon: IconData? = null,
+) {
+  AlertDialog(
+    title = { Text(title) },
+    text = { Text(text) },
+    icon = headerIcon?.asComposable,
+    onDismissRequest = onDismiss,
+    confirmButton = { TextButton(onClick = onConfirm) { Text(confirmText) } },
+    dismissButton = { TextButton(onClick = onDismiss) { Text(dismissText) } }
+  )
+}
+
 //region COMPOSABLE PREVIEWS
 @Preview
 @Composable
-fun PreviewBottomSheetNoopDialog() {
-  NoopTheme {
+fun PreviewNoopAlertDialog() = NoopTheme {
+  NoopAlertDialog (
+    title = "Delete All Data",
+    text = "Are you sure you want to delete all data?",
+    confirmText = "Delete",
+    dismissText = "Cancel",
+    onDismiss = {},
+    onConfirm = {},
+  )
+}
+
+
+@Preview
+@Composable
+fun PreviewNoopBottomSheetNoopDialog() = NoopTheme {
     NoopBottomSheetDialog(
       visible = true,
       title = "Dialog title",
-      positiveButtonLabel = "Save",
+      positiveButtonText = "Save",
       onPositive = {},
       onClose = {}
     ) {
@@ -167,5 +205,4 @@ fun PreviewBottomSheetNoopDialog() {
       }
     }
   }
-}
 //endregion

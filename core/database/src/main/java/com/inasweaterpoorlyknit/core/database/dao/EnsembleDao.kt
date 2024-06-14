@@ -24,6 +24,7 @@ interface EnsembleDao {
   }
 
   @Query("""DELETE FROM ensemble WHERE id = :ensembleId""") fun deleteEnsemble(ensembleId: String)
+  @Query("""DELETE FROM ensemble WHERE id IN (:ensembleIds)""") fun deleteEnsembles(ensembleIds: List<String>)
   @Query("""DELETE FROM ensemble""") fun deleteAllEnsembles()
 
   @Query("""UPDATE ensemble

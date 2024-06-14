@@ -40,4 +40,5 @@ class EnsembleRepository(
     ensembleDao.insertArticleEnsemble(*ensembleArticles)
   }
   fun deleteEnsemble(ensembleId: String) = ensembleDao.deleteEnsemble(ensembleId)
+  fun deleteEnsembles(ensembleIds: List<String>) = ensembleDao.deleteEnsembles(ensembleIds)
 }

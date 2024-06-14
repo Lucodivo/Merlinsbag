@@ -44,9 +44,7 @@ fun NoopIconButton(
 ) = FilledTonalButton (
     onClick = onClick,
     enabled = enabled,
-    modifier = modifier
-        .padding(2.dp)
-        .sizeIn(maxHeight = ButtonDefaults.MinHeight),
+    modifier = modifier.sizeIn(maxHeight = ButtonDefaults.MinHeight),
 ) {
   Icon(
     imageVector = iconData.icon,
@@ -64,6 +62,7 @@ fun NoopExpandingIconButton(
     verticalExpandedButtons: List<IconButtonData> = emptyList(),
     horizontalExpandedButtons: List<IconButtonData> = emptyList(),
 ) {
+  val buttonModifier = Modifier.padding(2.dp)
   Column(horizontalAlignment = Alignment.End) {
     val openAnimateFloat by animateFloatAsState(
       targetValue = if(expanded) 1.0f else 0.0f,
@@ -84,7 +83,8 @@ fun NoopExpandingIconButton(
         NoopIconButton(
           iconData = button.icon,
           enabled = button.enabled,
-          onClick = button.onClick
+          onClick = button.onClick,
+          modifier = buttonModifier,
         )
       }
     }
@@ -102,14 +102,16 @@ fun NoopExpandingIconButton(
           NoopIconButton(
             iconData = button.icon,
             enabled = button.enabled,
-            onClick = button.onClick
+            onClick = button.onClick,
+            modifier = buttonModifier,
           )
         }
       }
       NoopIconButton(
         iconData = if(expanded) expandedIcon else collapsedIcon,
         enabled = enabled,
-        onClick = onClick
+        onClick = onClick,
+        modifier = buttonModifier,
       )
     }
   }
