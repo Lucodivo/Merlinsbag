@@ -37,9 +37,9 @@ import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
-import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndFloatingActionButtonContainer
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
-import com.inasweaterpoorlyknit.core.ui.component.NoopFloatingActionButton
+import com.inasweaterpoorlyknit.core.ui.component.NoopIconButton
 import com.inasweaterpoorlyknit.core.ui.isComposePreview
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -129,8 +129,8 @@ fun EnsemblesScreen(
     } else {
         NoopOverlappingPlaceholderRowColumn(modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat))
     }
-    NoopBottomEndFloatingActionButtonContainer {
-      NoopFloatingActionButton(
+    NoopBottomEndButtonContainer {
+      NoopIconButton(
         iconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
         onClick = onClickAddEnsemble,
       )

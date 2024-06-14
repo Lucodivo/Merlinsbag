@@ -46,11 +46,11 @@ import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
-import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
-import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndFloatingActionButtonContainer
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
@@ -181,8 +181,8 @@ fun EnsembleDetailFloatingActionButtons(
     onClickRemoveArticles: () -> Unit,
     onClickDeleteEnsemble: () -> Unit,
 ) {
-  NoopBottomEndFloatingActionButtonContainer {
-    NoopExpandingFloatingActionButton(
+  NoopBottomEndButtonContainer {
+    NoopExpandingIconButton(
       expanded = editEnsemblesMode,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),

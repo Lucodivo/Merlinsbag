@@ -28,21 +28,23 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
 @Composable
-fun NoopBottomEndFloatingActionButtonContainer(content: @Composable BoxScope.() -> Unit) = Box(
+fun NoopBottomEndButtonContainer(content: @Composable BoxScope.() -> Unit) = Box(
     contentAlignment = Alignment.BottomEnd,
     modifier = Modifier.fillMaxSize().padding(8.dp),
     content = content,
   )
 
+
 @Composable
-fun NoopFloatingActionButton(
+fun NoopIconButton(
     iconData: IconData,
+    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) = FilledTonalButton (
     onClick = onClick,
     enabled = enabled,
-    modifier = Modifier
+    modifier = modifier
         .padding(2.dp)
         .sizeIn(maxHeight = ButtonDefaults.MinHeight),
 ) {
@@ -53,7 +55,7 @@ fun NoopFloatingActionButton(
 }
 
 @Composable
-fun NoopExpandingFloatingActionButton(
+fun NoopExpandingIconButton(
     expanded: Boolean,
     enabled: Boolean = true,
     collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
@@ -79,7 +81,7 @@ fun NoopExpandingFloatingActionButton(
       }
     ) {
       verticalExpandedButtons.forEach { button ->
-        NoopFloatingActionButton(
+        NoopIconButton(
           iconData = button.icon,
           enabled = button.enabled,
           onClick = button.onClick
@@ -97,14 +99,14 @@ fun NoopExpandingFloatingActionButton(
         }
       ){
         horizontalExpandedButtons.forEach { button ->
-          NoopFloatingActionButton(
+          NoopIconButton(
             iconData = button.icon,
             enabled = button.enabled,
             onClick = button.onClick
           )
         }
       }
-      NoopFloatingActionButton(
+      NoopIconButton(
         iconData = if(expanded) expandedIcon else collapsedIcon,
         enabled = enabled,
         onClick = onClick
@@ -116,8 +118,8 @@ fun NoopExpandingFloatingActionButton(
 //region Previews
 @Preview
 @Composable
-fun PreviewNoopExpandingFloatingActionButtonCollapsed() = NoopTheme {
-  NoopFloatingActionButton(
+fun PreviewNoopExpandingIconButtonCollapsed() = NoopTheme {
+  NoopIconButton(
     iconData = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
     onClick = {}
   )
@@ -125,8 +127,8 @@ fun PreviewNoopExpandingFloatingActionButtonCollapsed() = NoopTheme {
 
 @Preview
 @Composable
-fun PreviewNoopExpandingFloatingActionButtonExpanded() = NoopTheme {
-  NoopExpandingFloatingActionButton(
+fun PreviewNoopExpandingIconButtonExpanded() = NoopTheme {
+  NoopExpandingIconButton(
     expanded = true,
     collapsedIcon = IconData(NoopComposePreviewIcons.Edit, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),
     expandedIcon = IconData(NoopComposePreviewIcons.Remove, COMPOSE_PREVIEW_CONTENT_DESCRIPTION),

@@ -21,9 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
+import com.inasweaterpoorlyknit.core.ui.component.IconData
+import com.inasweaterpoorlyknit.core.ui.component.NoopIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopRotatableImage
 import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
@@ -81,33 +84,33 @@ fun AddArticleControls(
       Row(
         horizontalArrangement = Arrangement.SpaceBetween,
       ) {
-        Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
-        Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
+        NoopIconButton(iconData = IconData(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION), onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION), onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier)
       }
       Row(
         horizontalArrangement = Arrangement.SpaceBetween,
       ) {
-        Button(onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
-        Button(onClick = onRotateCW, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
+        NoopIconButton(iconData = IconData(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION), onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION), onClick = onRotateCW, enabled = !processing, modifier = buttonModifier)
       }
       Row(
         horizontalArrangement = Arrangement.SpaceBetween,
       ) {
-        Button(onClick = onDiscard, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
-        Button(onClick = onSave, enabled = !processing, modifier = buttonModifier) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
+        NoopIconButton(iconData = IconData(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION), onClick = onDiscard, enabled = !processing, modifier = buttonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION), onClick = onSave, enabled = !processing, modifier = buttonModifier)
       }
     } else { // portrait
       val buttonRowModifier = if(compactWidth) Modifier.fillMaxWidth() else Modifier.wrapContentSize()
       val portraitButtonModifier = if(compactWidth) buttonModifier.weight(1f) else buttonModifier
       Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
-        Button(onClick = onNarrowFocusClick, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION) }
-        Button(onClick = onDiscard, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION) }
-        Button(onClick = onBroadenFocusClick, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION) }
+        NoopIconButton(iconData = IconData(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION), onClick = onNarrowFocusClick, enabled = !processing, modifier = portraitButtonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION), onClick = onDiscard, enabled = !processing, modifier = portraitButtonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION), onClick = onBroadenFocusClick, enabled = !processing, modifier = portraitButtonModifier)
       }
       Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
-        Button(onClick = onRotateCCW, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION) }
-        Button(onClick = onSave, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION) }
-        Button(onClick = onRotateCW, enabled = !processing, modifier = portraitButtonModifier) { Icon(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION) }
+        NoopIconButton(iconData = IconData(NoopIcons.RotateCCW, TODO_ICON_CONTENT_DESCRIPTION), onClick = onRotateCCW, enabled = !processing, modifier = portraitButtonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.Check, TODO_ICON_CONTENT_DESCRIPTION), onClick = onSave, enabled = !processing, modifier = portraitButtonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.RotateCW, TODO_ICON_CONTENT_DESCRIPTION), onClick = onRotateCW, enabled = !processing, modifier = portraitButtonModifier)
       }
     }
   }
@@ -196,7 +199,7 @@ fun AddArticleRoute(
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @DevicePreviews
 @Composable
-fun PreviewAddArticleScreen() = NoopTheme {
+fun PreviewAddArticleScreen() = NoopTheme(darkMode = DarkMode.DARK) {
   AddArticleScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
     processing = false,

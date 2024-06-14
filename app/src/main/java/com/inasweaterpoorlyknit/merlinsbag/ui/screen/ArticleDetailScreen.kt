@@ -43,8 +43,8 @@ import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
-import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndFloatingActionButtonContainer
-import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingFloatingActionButton
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
+import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.repeatedFullResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -203,8 +203,8 @@ fun FloatingActionButtonDetailScreen(
     onClickDelete: () -> Unit,
     onClickExport: () -> Unit,
 ) {
-  NoopBottomEndFloatingActionButtonContainer {
-    NoopExpandingFloatingActionButton(
+  NoopBottomEndButtonContainer {
+    NoopExpandingIconButton(
       expanded = expanded,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
