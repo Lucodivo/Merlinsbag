@@ -58,6 +58,7 @@ import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 
 const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
 const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
+const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
 const val DELETE_ALL_CAPTCHA = "1234"
 
 const val SETTINGS_ROUTE = "settings_route"
@@ -103,6 +104,7 @@ fun SettingsRoute(
     highContrast = userPreferences.highContrast,
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
+    onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
     onClickClearCache = {
       clearCacheEnabled = false
       settingsViewModel.clearCache()
@@ -152,6 +154,14 @@ fun AuthorRow(onClick: () -> Unit) = SettingsTextIconButton(
 fun SourceRow(onClick: () -> Unit) = SettingsTextIconButton(
   text = stringResource(R.string.source),
   indicator = IconData(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun EccohedraRow(onClick: () -> Unit) = SettingsTextIconButton(
+  text = stringResource(R.string.eccohedra),
+  indicator = IconData(NoopIcons.eccohedra(), TODO_ICON_CONTENT_DESCRIPTION).asComposable,
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -325,6 +335,7 @@ fun SettingsScreen(
     highContrast: HighContrast,
     onClickAuthor: () -> Unit,
     onClickSource: () -> Unit,
+    onClickEccohedra: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
     onClickDismissDeleteAllDataAlertDialog: () -> Unit,
@@ -346,10 +357,6 @@ fun SettingsScreen(
     modifier = Modifier.fillMaxSize(),
   ){
     item { Spacer(modifier = Modifier.height(16.dp)) }
-    item { SettingsTitle(stringResource(R.string.info)) }
-    item { AuthorRow(onClickAuthor) }
-    item { SourceRow(onClickSource) }
-    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
     item { SettingsTitle(stringResource(R.string.theme)) }
     item {
       ColorPaletteRow(
@@ -384,6 +391,11 @@ fun SettingsScreen(
     item { SettingsTitle(stringResource(R.string.data)) }
     item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
     item { DeleteAllDataRow(onClickDeleteAllData) }
+    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+    item { SettingsTitle(stringResource(R.string.about)) }
+    item { AuthorRow(onClickAuthor) }
+    item { SourceRow(onClickSource) }
+    item { EccohedraRow (onClickEccohedra) }
     item { Spacer(modifier = Modifier.height(16.dp)) }
   }
   if(showDeleteAllDataAlertDialog) {
@@ -521,7 +533,7 @@ fun PreviewUtilSettingsScreen(
       colorPalette = colorPalette,
       highContrast = highContrast,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
-      onClickConfirmDeleteAllDataAlertDialog = {},
+      onClickConfirmDeleteAllDataAlertDialog = {}, onClickEccohedra = {},
       onClickDismissDeleteAllDataAlertDialog = {},
       onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
       onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},

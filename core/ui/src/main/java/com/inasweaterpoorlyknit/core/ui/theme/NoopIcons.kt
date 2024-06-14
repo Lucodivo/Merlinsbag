@@ -31,7 +31,6 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
 import androidx.compose.material.icons.outlined.Rotate90DegreesCw
-import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.ZoomInMap
 import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.runtime.Composable
@@ -56,10 +55,6 @@ object NoopIcons {
   val Cancel = Icons.Outlined.Cancel
   val RotateCW = Icons.Outlined.Rotate90DegreesCw
   val Check = Icons.Outlined.Check
-  val Items = Icons.Outlined.Category
-  val ItemsSelected = Icons.Filled.Category
-  @Composable fun ensembles() = ImageVector.vectorResource(R.drawable.hashtag)
-  @Composable fun ensemblesSelected() = ImageVector.vectorResource(R.drawable.hashtag_heavy)
   val Label = Icons.AutoMirrored.Outlined.Label
   val LabelSelected = Icons.AutoMirrored.Filled.Label
   val SelectableIndicator = Icons.Outlined.Circle
@@ -74,5 +69,10 @@ object NoopIcons {
   val DarkMode = Icons.Filled.DarkMode
   val LightMode = Icons.Filled.LightMode
   val Search = Icons.Filled.Search
+  val Items = Icons.Outlined.Category
+  val ItemsSelected = Icons.Filled.Category
+  @Composable fun ensembles() = ImageVector.vectorResource(R.drawable.hashtag)
+  @Composable fun ensemblesSelected() = ImageVector.vectorResource(R.drawable.hashtag_heavy)
   @Composable fun systemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)
+  @Composable fun eccohedra() = ImageVector.vectorResource(R.drawable.eccohedra)
 }
