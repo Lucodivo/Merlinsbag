@@ -8,9 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.model.DarkMode
+import com.inasweaterpoorlyknit.core.ui.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
@@ -88,26 +90,29 @@ private fun RowScope.NoopNavigationBarItem(
 
 //region PREVIEW COMPOSABLES
 @Composable
-fun PreviewUtilNoopBottmNavbar(darkMode: DarkMode = DarkMode.LIGHT) = NoopTheme(darkMode = darkMode) {
+fun PreviewUtilNoopBottomNavbar(
+    darkMode: DarkMode = DarkMode.LIGHT,
+    selectedIndex: Int = 0,
+) = NoopTheme(darkMode = darkMode) {
   val composePreviewNavBarData = listOf(
     BottomNavBarData(
       selectedIcon = NoopIcons.ItemsSelected,
       unselectedIcon = NoopIcons.Items,
-      title = "Article"
+      title = "Articles",
     ),
     BottomNavBarData(
-      selectedIcon = NoopIcons.ItemsSelected,
-      unselectedIcon = NoopIcons.Items,
-      title = "Ensemble",
+      selectedIcon = ImageVector.vectorResource(R.drawable.hashtag_heavy),
+      unselectedIcon = ImageVector.vectorResource(R.drawable.hashtag),
+      title = "Ensembles",
     ),
   )
   NoopBottomNavBar(
     bottomNavBarDataItems = composePreviewNavBarData,
     onClick = {},
-    selectedIndex = 0,
+    selectedIndex = selectedIndex,
   )
 }
 
-@Preview @Composable private fun PreviewNoopBottomNavBarLight() = PreviewUtilNoopBottmNavbar(DarkMode.LIGHT)
-@Preview @Composable private fun PreviewNoopBottomNavBarDark() = PreviewUtilNoopBottmNavbar(DarkMode.DARK)
+@Preview @Composable private fun PreviewNoopBottomNavBarLight() = PreviewUtilNoopBottomNavbar(DarkMode.LIGHT)
+@Preview @Composable private fun PreviewNoopBottomNavBarDark() = PreviewUtilNoopBottomNavbar(DarkMode.DARK, 1)
 //endregion

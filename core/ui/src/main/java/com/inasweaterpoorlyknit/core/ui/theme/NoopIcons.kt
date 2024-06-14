@@ -1,6 +1,8 @@
 package com.inasweaterpoorlyknit.core.ui.theme
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddPhotoAlternate
@@ -13,7 +15,6 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
@@ -28,9 +29,9 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.FolderSpecial
 import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
 import androidx.compose.material.icons.outlined.Rotate90DegreesCw
+import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.outlined.ZoomInMap
 import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.runtime.Composable
@@ -57,8 +58,10 @@ object NoopIcons {
   val Check = Icons.Outlined.Check
   val Items = Icons.Outlined.Category
   val ItemsSelected = Icons.Filled.Category
-  val Ensembles = Icons.Outlined.FolderSpecial
-  val EnsemblesSelected = Icons.Filled.FolderSpecial
+  @Composable fun ensembles() = ImageVector.vectorResource(R.drawable.hashtag)
+  @Composable fun ensemblesSelected() = ImageVector.vectorResource(R.drawable.hashtag_heavy)
+  val Label = Icons.AutoMirrored.Outlined.Label
+  val LabelSelected = Icons.AutoMirrored.Filled.Label
   val SelectableIndicator = Icons.Outlined.Circle
   val SelectedIndicator = Icons.Filled.CheckCircle
   val Settings = Icons.Filled.Settings
@@ -71,5 +74,5 @@ object NoopIcons {
   val DarkMode = Icons.Filled.DarkMode
   val LightMode = Icons.Filled.LightMode
   val Search = Icons.Filled.Search
-  @Composable fun SystemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)
+  @Composable fun systemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)
 }

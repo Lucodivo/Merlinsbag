@@ -54,7 +54,6 @@ import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.toast
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 
 const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
@@ -205,7 +204,7 @@ fun DarkModeRow(
 {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
-    Pair(stringResource(R.string.system), IconData(NoopIcons.SystemMode(), TODO_ICON_CONTENT_DESCRIPTION)),
+    Pair(stringResource(R.string.system), IconData(NoopIcons.systemMode(), TODO_ICON_CONTENT_DESCRIPTION)),
     Pair(stringResource(R.string.light), IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)),
     Pair(stringResource(R.string.dark), IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION))
   )

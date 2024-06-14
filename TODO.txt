@@ -11,11 +11,14 @@ Database:
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
+Article Detail:
+    - Ensemble chips
 Ensembles:
     - More efficient grid-type view?
 Features:
     - Collage
     - Tags
+        - Are ensembles already tags?
         - Chips
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]

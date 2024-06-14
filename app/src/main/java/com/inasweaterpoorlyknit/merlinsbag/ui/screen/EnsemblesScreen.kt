@@ -191,7 +191,7 @@ fun EnsemblesScreen(
       Column {
         SearchBox(
           query = searchQuery,
-          placeholder = stringResource(R.string.goth_2_boss),
+          placeholder = stringResource(R.string.search_ensembles),
           onQueryChange = onUpdateSearchQuery,
           onClearQuery = onClearSearchQuery,
           modifier = Modifier

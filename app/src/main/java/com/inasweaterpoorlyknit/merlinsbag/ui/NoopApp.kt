@@ -22,6 +22,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +34,7 @@ import com.inasweaterpoorlyknit.core.ui.component.BottomNavBarData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomNavBar
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.APP_START_DESTINATION
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.navigation.TopLevelDestination
@@ -42,18 +44,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
 
-private val navBarData = listOf(
-  BottomNavBarData(
-    selectedIcon = NoopIcons.ItemsSelected,
-    unselectedIcon = NoopIcons.Items,
-    title = "Article"
-  ),
-  BottomNavBarData(
-    selectedIcon = NoopIcons.EnsemblesSelected,
-    unselectedIcon = NoopIcons.Ensembles,
-    title = "Ensemble",
-  ),
-)
 
 @Composable
 fun NoopApp(
@@ -66,6 +56,18 @@ fun NoopApp(
       TopLevelDestination.entries.indexOf(TopLevelDestination.routeToTopLevelDestination(APP_START_DESTINATION))
     )
   }
+  val navBarData = listOf(
+    BottomNavBarData(
+      selectedIcon = NoopIcons.ItemsSelected,
+      unselectedIcon = NoopIcons.Items,
+      title = stringResource(R.string.articles),
+    ),
+    BottomNavBarData(
+      selectedIcon = NoopIcons.ensemblesSelected(),
+      unselectedIcon = NoopIcons.ensembles(),
+      title = stringResource(R.string.ensembles),
+    ),
+  )
   Box {
     NoopScaffold(
       showBottomNavBar = appState.showBottomNavBar.value,
@@ -159,7 +161,6 @@ fun rememberNoopAppState(
     windowSizeClass: WindowSizeClass,
     navController: NavHostController = rememberNavController(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    loading: MutableState<Boolean> = remember{ mutableStateOf(true) }
 ): NoopAppState {
   return remember(navController, windowSizeClass) {
     NoopAppState(
@@ -192,6 +193,10 @@ fun PreviewUtilNoopScaffold(
     showBottomNavBar: Boolean,
     bottomNavBarSelectedIndex: Int,
 ) = NoopTheme {
+  val navBarData = listOf(
+    BottomNavBarData(selectedIcon = NoopIcons.ItemsSelected, unselectedIcon = NoopIcons.Items, title = stringResource(R.string.articles)),
+    BottomNavBarData(selectedIcon = NoopIcons.ensemblesSelected(), unselectedIcon = NoopIcons.ensembles(), title = stringResource(R.string.ensembles)),
+  )
   NoopScaffold(
     snackbarHostState = SnackbarHostState(),
     showBottomNavBar = showBottomNavBar,
