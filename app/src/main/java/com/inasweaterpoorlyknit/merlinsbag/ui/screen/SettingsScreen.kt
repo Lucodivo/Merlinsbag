@@ -47,6 +47,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
+import com.inasweaterpoorlyknit.core.ui.LargeFontSizePreview
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
@@ -56,10 +57,21 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 
-const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
-const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
-const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
-const val DELETE_ALL_CAPTCHA = "1234"
+private val headerModifier = Modifier.fillMaxWidth()
+private val itemHorizontalPadding = 8.dp
+private val itemModifier = Modifier.padding(horizontal = itemHorizontalPadding)
+private val dividerHorizontalPadding = itemHorizontalPadding * 2
+private val dividerModifier = Modifier.padding(horizontal = dividerHorizontalPadding, vertical = 8.dp)
+private val dividerThickness = 2.dp
+private val sectionSpacerHeight = 16.dp
+private val bookendSpacerModifier = Modifier.height(sectionSpacerHeight)
+@Composable private fun settingsFontSize() = MaterialTheme.typography.bodyLarge.fontSize
+@Composable private fun settingsTitleFontSize() = MaterialTheme.typography.titleMedium.fontSize
+
+private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
+private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
+private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
+private const val DELETE_ALL_CAPTCHA = "1234"
 
 const val SETTINGS_ROUTE = "settings_route"
 
@@ -136,32 +148,26 @@ fun SettingsRoute(
   )
 }
 
-val headerModifier = Modifier.padding(vertical = 4.dp, horizontal = 32.dp).fillMaxWidth()
-val itemHorizontalPadding = 8.dp
-val itemModifier = Modifier.padding(vertical = 4.dp, horizontal = itemHorizontalPadding)
-val dividerHorizontalPadding = 16.dp
-val dividerModifier = Modifier.padding(horizontal = dividerHorizontalPadding, vertical = 16.dp)
-
 @Composable
-fun AuthorRow(onClick: () -> Unit) = SettingsTextIconButton(
+fun AuthorRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.developer),
-  indicator = IconData(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
+  indicator = { Icon(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
 )
 
 @Composable
-fun SourceRow(onClick: () -> Unit) = SettingsTextIconButton(
+fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.source),
-  indicator = IconData(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
+  indicator = { Icon(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
 )
 
 @Composable
-fun EccohedraRow(onClick: () -> Unit) = SettingsTextIconButton(
+fun EccohedraRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.eccohedra),
-  indicator = IconData(NoopIcons.eccohedra(), TODO_ICON_CONTENT_DESCRIPTION).asComposable,
+  indicator = { Icon(NoopIcons.eccohedra(), TODO_ICON_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -181,7 +187,7 @@ fun DropdownSettingsRow(
     horizontalAlignment = Alignment.End,
     modifier = itemModifier.fillMaxWidth(),
   ) {
-    SettingsTextIconButton(
+    SettingsTextIndicatorButton(
       enabled = enabled,
       text = title,
       indicator = indicator,
@@ -193,9 +199,10 @@ fun DropdownSettingsRow(
         onDismissRequest = onDismiss,
       ) {
         items.forEachIndexed { index, item ->
+          val iconData = item.second
           DropdownMenuItem(
             text = { Text(text = item.first) },
-            trailingIcon = item.second?.asComposable,
+            trailingIcon = iconData?.run { { Icon(icon, contentDescription) } },
             onClick = { onSelect(index) },
           )
         }
@@ -218,9 +225,10 @@ fun DarkModeRow(
     Pair(stringResource(R.string.light), IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)),
     Pair(stringResource(R.string.dark), IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION))
   )
+  val selectedDarkModeIcon = dropdownData[selectedDarkMode.ordinal].second
   DropdownSettingsRow(
     title = stringResource(R.string.dark_mode),
-    indicator = dropdownData[selectedDarkMode.ordinal].second.asComposable,
+    indicator = { Icon(selectedDarkModeIcon.icon, selectedDarkModeIcon.contentDescription, modifier = Modifier.fillMaxHeight()) },
     expanded = expandedMenu,
     items = dropdownData,
     onClick = onClick,
@@ -244,15 +252,12 @@ fun ColorPaletteRow(
   DropdownSettingsRow(
     title = stringResource(R.string.color_palette),
     indicator = {
-      Box(
-        contentAlignment = Alignment.Center,
+      Text(
+        text = dropdownData[selectedColorPalette.ordinal].first,
+        fontSize = settingsFontSize(),
+        textAlign = TextAlign.Right,
         modifier = Modifier.fillMaxHeight()
-      ) {
-        Text(
-          text = dropdownData[selectedColorPalette.ordinal].first,
-          modifier = Modifier.fillMaxHeight()
-        )
-      }
+      )
     },
     expanded = expandedMenu,
     items = dropdownData,
@@ -280,15 +285,12 @@ fun HighContrastRow(
   DropdownSettingsRow(
     title = stringResource(R.string.high_contrast),
     indicator = {
-      Box(
-        contentAlignment = Alignment.Center,
+      Text(
+        text = dropdownData[selectedHighContrast.ordinal].first,
+        fontSize = settingsFontSize(),
+        textAlign = TextAlign.Right,
         modifier = Modifier.fillMaxHeight()
-      ) {
-        Text(
-          text = dropdownData[selectedHighContrast.ordinal].first,
-          modifier = Modifier.fillMaxHeight()
-        )
-      }
+      )
     },
     expanded = expandedMenu,
     items = dropdownData,
@@ -303,19 +305,19 @@ fun HighContrastRow(
 fun ClearCacheRow(
     enabled: Boolean,
     onClick: () -> Unit
-) = SettingsTextIconButton(
+) = SettingsTextIndicatorButton(
     enabled = enabled,
     text = stringResource(R.string.clear_cache),
-    indicator = IconData(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
+    indicator = { Icon(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION) },
     onClick = onClick,
     modifier = itemModifier,
   )
 
 @Composable
 fun DeleteAllDataRow(onClick: () -> Unit) {
-  SettingsTextIconButton(
+  SettingsTextIndicatorButton(
     text = stringResource(R.string.delete_all_data),
-    indicator = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION).asComposable,
+    indicator = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
     onClick = onClick,
     modifier = itemModifier,
     containerColor = MaterialTheme.colorScheme.error,
@@ -350,13 +352,12 @@ fun SettingsScreen(
     onSelectHighContrast: (HighContrast) -> Unit,
     onDismissHighContrast: () -> Unit,
 ) {
-  val dividerThickness = 2.dp
   LazyColumn(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Top,
     modifier = Modifier.fillMaxSize(),
   ){
-    item { Spacer(modifier = Modifier.height(16.dp)) }
+    item { Spacer(modifier = bookendSpacerModifier) }
     item { SettingsTitle(stringResource(R.string.theme)) }
     item {
       ColorPaletteRow(
@@ -396,7 +397,7 @@ fun SettingsScreen(
     item { AuthorRow(onClickAuthor) }
     item { SourceRow(onClickSource) }
     item { EccohedraRow (onClickEccohedra) }
-    item { Spacer(modifier = Modifier.height(16.dp)) }
+    item { Spacer(modifier = bookendSpacerModifier) }
   }
   if(showDeleteAllDataAlertDialog) {
     DeleteAllDataAlertDialog(
@@ -411,14 +412,14 @@ fun SettingsScreen(
 fun SettingsTitle(text: String) {
   Text(
     text = text,
-    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+    fontSize = settingsTitleFontSize(),
     textAlign = TextAlign.Center,
     modifier = headerModifier,
   )
 }
 
 @Composable
-fun SettingsTextIconButton(
+fun SettingsTextIndicatorButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -435,21 +436,20 @@ fun SettingsTextIconButton(
   ElevatedButton(
     onClick = onClick,
     enabled = enabled,
-    shape = MaterialTheme.shapes.large,
+    shape = MaterialTheme.shapes.medium,
     colors = buttonColors,
     modifier = modifier.fillMaxWidth()
   ){
     Row(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween,
-      modifier = Modifier
-          .padding(vertical = 8.dp)
-          .fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth(),
     ){
       Text(
         text = text,
-        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+        fontSize = settingsFontSize(),
       )
+      Spacer(modifier.width(itemHorizontalPadding))
       indicator?.invoke()
     }
   }
@@ -462,10 +462,11 @@ fun DeleteAllDataAlertDialog(
     onClickPositive: () -> Unit,
 ) {
   val enteredText = remember { mutableStateOf("") }
+  val spacerSize = 8.dp
   val label: @Composable () -> Unit = {
     Row{
       Icon(imageVector = NoopIcons.Key, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
-      Spacer(modifier = Modifier.width(8.dp))
+      Spacer(modifier = Modifier.width(spacerSize))
       Text(text = DELETE_ALL_CAPTCHA)
     }
   }
@@ -475,11 +476,11 @@ fun DeleteAllDataAlertDialog(
     text = {
       Column{
         Text(text = stringResource(id = R.string.deleted_all_data_unrecoverable))
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(spacerSize))
         OutlinedTextField(
           value = enteredText.value,
           label = label,
-          placeholder = {Text("1234")},
+          placeholder = {Text(DELETE_ALL_CAPTCHA)},
           onValueChange = { enteredText.value = it },
           singleLine = true,
         )
@@ -543,6 +544,7 @@ fun PreviewUtilSettingsScreen(
 }
 
 @Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
+@LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK, colorPalette = ColorPalette.SYSTEM_DYNAMIC)
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
 @Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) {
   DeleteAllDataAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})

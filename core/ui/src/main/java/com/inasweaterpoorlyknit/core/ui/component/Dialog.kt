@@ -150,7 +150,7 @@ fun NoopAlertDialog(
   AlertDialog(
     title = { Text(title) },
     text = { Text(text) },
-    icon = headerIcon?.asComposable,
+    icon = headerIcon?.let{ { Icon(it.icon, it.contentDescription) } },
     onDismissRequest = onDismiss,
     confirmButton = { TextButton(onClick = onConfirm) { Text(confirmText) } },
     dismissButton = { TextButton(onClick = onDismiss) { Text(dismissText) } }
@@ -164,6 +164,7 @@ fun PreviewNoopAlertDialog() = NoopTheme {
   NoopAlertDialog (
     title = "Delete All Data",
     text = "Are you sure you want to delete all data?",
+    headerIcon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
     confirmText = "Delete",
     dismissText = "Cancel",
     onDismiss = {},

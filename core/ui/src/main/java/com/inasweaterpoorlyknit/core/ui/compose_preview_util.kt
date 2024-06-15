@@ -58,6 +58,9 @@ annotation class DevicePreviews
 @Preview(name = "landscape", device = "spec:shape=Normal,width=640,height=360,unit=dp,dpi=480")
 annotation class LandscapePreview
 
+@Preview(name = "large_font_size", fontScale = 2.0f)
+annotation class LargeFontSizePreview
+
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun currentWindowAdaptiveInfo(): WindowSizeClass {
