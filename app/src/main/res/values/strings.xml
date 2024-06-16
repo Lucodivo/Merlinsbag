@@ -3,7 +3,7 @@
     <string name="permission_alert_title">Permissions Required</string>
     <string name="camera_permission_alert_justification">Camera permission required to use camera in app. Enable camera permission in settings to use camera feature.</string>
     <string name="camera_permission_alert_justification_additional">Camera and storage permission required to use camera in app. Enable camera permission in settings to use camera feature.</string>
-    <string name="export_permission_alert_justification">Export permission required to export images to public storage on device. Enable storage permission in settings to use export feature.</string>
+    <string name="export_permission_alert_justification">Storage permission required to export images to public storage on device. Enable storage permission in settings to use export feature.</string>
     <string name="permission_alert_negative">No Thanks</string>
     <string name="permission_alert_positive">App Permissions</string>
     <string name="articles">Articles</string>

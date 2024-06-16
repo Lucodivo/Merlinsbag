@@ -48,8 +48,8 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
-import com.inasweaterpoorlyknit.core.ui.component.NoopAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
@@ -151,12 +151,12 @@ fun DeleteEnsembleAlertDialog(
     onDismiss: () -> Unit,
     onClickPositive: () -> Unit,
 ) {
-  NoopAlertDialog(
+  NoopSimpleAlertDialog(
     title = stringResource(id = R.string.delete_ensemble),
     text = stringResource(id = R.string.are_you_sure),
+    headerIcon = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
     confirmText = stringResource(id = R.string.delete),
-    dismissText = stringResource(id = R.string.cancel),
-    headerIcon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
+    cancelText = stringResource(id = R.string.cancel),
     onDismiss = onDismiss,
     onConfirm = onClickPositive,
   )

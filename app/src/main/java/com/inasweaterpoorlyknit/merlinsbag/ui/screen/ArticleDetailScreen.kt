@@ -11,13 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +43,7 @@ import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.repeatedFullResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
@@ -180,18 +178,10 @@ fun ArticleDetailScreen(
     onClickExport = onClickExport,
   )
   if(showDeleteArticleAlertDialog){
-    DeleteArticleAlertDialog(
-      onClickOutside = onDismissDeleteDialog,
-      onClickNegative = onDismissDeleteDialog,
-      onClickPositive = onConfirmDeleteDialog,
-    )
+    DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
   }
   if(showPermissionsAlertDialog) {
-    ExportPermissionsAlertDialog(
-      onClickOutside = onDismissPermissionsDialog,
-      onClickNegative = onDismissPermissionsDialog,
-      onClickPositive = onConfirmPermissionsDialog,
-    )
+    ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
   }
 }
 
@@ -226,27 +216,28 @@ fun FloatingActionButtonDetailScreen(
 }
 
 @Composable
-fun DeleteArticleAlertDialog(onClickOutside: () -> Unit, onClickNegative: () -> Unit, onClickPositive: () -> Unit) {
-  AlertDialog(
-    title = { Text(text = stringResource(id = R.string.delete_article)) },
-    text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
-    icon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
-    onDismissRequest = onClickOutside,
-    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.delete)) } },
-    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.cancel)) } }
+fun DeleteArticleAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+  NoopSimpleAlertDialog(
+    title = stringResource(id = R.string.delete_article),
+    text = stringResource(id = R.string.deleted_articles_unrecoverable),
+    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    onDismiss = onDismiss,
+    onConfirm = onConfirm,
+    confirmText = stringResource(id = R.string.delete),
+    cancelText = stringResource(id = R.string.cancel),
   )
-}
 
 @Composable
-fun ExportPermissionsAlertDialog(onClickOutside: () -> Unit, onClickNegative: () -> Unit, onClickPositive: () -> Unit) {
-  AlertDialog(
-    title = { Text(text = stringResource(id = R.string.permission_alert_title)) },
-    text = { Text(text = stringResource(id = R.string.export_permission_alert_justification)) },
-    onDismissRequest = onClickOutside,
-    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.permission_alert_positive)) } },
-    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.permission_alert_negative)) } }
+fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+  NoopSimpleAlertDialog(
+    title = stringResource(id = R.string.permission_alert_title),
+    text = stringResource(id = R.string.export_permission_alert_justification),
+    onDismiss = onDismiss,
+    onConfirm = onConfirm,
+    confirmText = stringResource(id = R.string.permission_alert_positive),
+    cancelText = stringResource(id = R.string.permission_alert_negative),
+    headerIcon = { Icon(imageVector = NoopIcons.Folder, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
   )
-}
 
 //region COMPOSABLE PREVIEWS
 @Composable

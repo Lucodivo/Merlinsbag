@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
@@ -21,6 +19,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -48,13 +47,14 @@ import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.ui.LargeFontSizePreview
-import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
+import com.inasweaterpoorlyknit.core.ui.component.NoopAlertDialog
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
+import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 
 private val headerModifier = Modifier.fillMaxWidth()
@@ -85,7 +85,7 @@ fun SettingsRoute(
 ) {
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
-  var showDeleteAllDataAlertDialog by remember{ mutableStateOf(false) }
+  var showDeleteAllDataAlertDialog by remember { mutableStateOf(false) }
   var expandedDarkModeMenu by remember { mutableStateOf(false) }
   var expandedColorPaletteMenu by remember { mutableStateOf(false) }
   var expandedHighContrastMenu by remember { mutableStateOf(false) }
@@ -122,7 +122,7 @@ fun SettingsRoute(
       settingsViewModel.clearCache()
     },
     onClickDeleteAllData = { showDeleteAllDataAlertDialog = true },
-    onClickDismissDeleteAllDataAlertDialog = { showDeleteAllDataAlertDialog = false },
+    onDismissDeleteAllDataAlertDialog = { showDeleteAllDataAlertDialog = false },
     onClickConfirmDeleteAllDataAlertDialog = {
       showDeleteAllDataAlertDialog = false
       settingsViewModel.deleteAllData()
@@ -217,8 +217,8 @@ fun DarkModeRow(
     expandedMenu: Boolean,
     onClick: () -> Unit,
     onSelectDarkMode: (DarkMode) -> Unit,
-    onDismiss: () -> Unit)
-{
+    onDismiss: () -> Unit,
+) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
     Pair(stringResource(R.string.system), IconData(NoopIcons.systemMode(), TODO_ICON_CONTENT_DESCRIPTION)),
@@ -243,11 +243,11 @@ fun ColorPaletteRow(
     expandedMenu: Boolean,
     onClick: () -> Unit,
     onSelectColorPalette: (ColorPalette) -> Unit,
-    onDismiss: () -> Unit)
-{
+    onDismiss: () -> Unit,
+) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = NoopColorSchemes.colorPaletteSchemes.map { scheme ->
-      Pair(stringResource(scheme.nameStrRes), null)
+    Pair(stringResource(scheme.nameStrRes), null)
   }
   DropdownSettingsRow(
     title = stringResource(R.string.color_palette),
@@ -274,8 +274,8 @@ fun HighContrastRow(
     expandedMenu: Boolean,
     onClick: () -> Unit,
     onSelectHighContrast: (HighContrast) -> Unit,
-    onDismiss: () -> Unit)
-{
+    onDismiss: () -> Unit,
+) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
     Pair(stringResource(R.string.off), null),
@@ -304,14 +304,14 @@ fun HighContrastRow(
 @Composable
 fun ClearCacheRow(
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) = SettingsTextIndicatorButton(
-    enabled = enabled,
-    text = stringResource(R.string.clear_cache),
-    indicator = { Icon(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION) },
-    onClick = onClick,
-    modifier = itemModifier,
-  )
+  enabled = enabled,
+  text = stringResource(R.string.clear_cache),
+  indicator = { Icon(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION) },
+  onClick = onClick,
+  modifier = itemModifier,
+)
 
 @Composable
 fun DeleteAllDataRow(onClick: () -> Unit) {
@@ -320,8 +320,6 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
     indicator = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
     onClick = onClick,
     modifier = itemModifier,
-    containerColor = MaterialTheme.colorScheme.error,
-    contentColor = MaterialTheme.colorScheme.onError,
   )
 }
 
@@ -340,7 +338,7 @@ fun SettingsScreen(
     onClickEccohedra: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
-    onClickDismissDeleteAllDataAlertDialog: () -> Unit,
+    onDismissDeleteAllDataAlertDialog: () -> Unit,
     onClickConfirmDeleteAllDataAlertDialog: () -> Unit,
     onClickDarkMode: () -> Unit,
     onDismissDarkMode: () -> Unit,
@@ -356,7 +354,7 @@ fun SettingsScreen(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Top,
     modifier = Modifier.fillMaxSize(),
-  ){
+  ) {
     item { Spacer(modifier = bookendSpacerModifier) }
     item { SettingsTitle(stringResource(R.string.theme)) }
     item {
@@ -396,13 +394,12 @@ fun SettingsScreen(
     item { SettingsTitle(stringResource(R.string.about)) }
     item { AuthorRow(onClickAuthor) }
     item { SourceRow(onClickSource) }
-    item { EccohedraRow (onClickEccohedra) }
+    item { EccohedraRow(onClickEccohedra) }
     item { Spacer(modifier = bookendSpacerModifier) }
   }
   if(showDeleteAllDataAlertDialog) {
     DeleteAllDataAlertDialog(
-      onClickOutside = onClickDismissDeleteAllDataAlertDialog,
-      onClickNegative = onClickDismissDeleteAllDataAlertDialog,
+      onDismiss = onDismissDeleteAllDataAlertDialog,
       onClickPositive = onClickConfirmDeleteAllDataAlertDialog,
     )
   }
@@ -425,26 +422,18 @@ fun SettingsTextIndicatorButton(
     modifier: Modifier = Modifier,
     indicator: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
-    containerColor: Color? = null,
-    contentColor: Color? = null,
-){
-  val buttonDefaultColors = ButtonDefaults.elevatedButtonColors()
-  val buttonColors = buttonDefaultColors.copy(
-    containerColor = containerColor ?: buttonDefaultColors.containerColor,
-    contentColor = contentColor ?: buttonDefaultColors.contentColor
-  )
+) {
   ElevatedButton(
     onClick = onClick,
     enabled = enabled,
     shape = MaterialTheme.shapes.medium,
-    colors = buttonColors,
     modifier = modifier.fillMaxWidth()
-  ){
+  ) {
     Row(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceBetween,
       modifier = Modifier.fillMaxWidth(),
-    ){
+    ) {
       Text(
         text = text,
         fontSize = settingsFontSize(),
@@ -457,57 +446,53 @@ fun SettingsTextIndicatorButton(
 
 @Composable
 fun DeleteAllDataAlertDialog(
-    onClickOutside: () -> Unit,
-    onClickNegative: () -> Unit,
+    onDismiss: () -> Unit,
     onClickPositive: () -> Unit,
 ) {
   val enteredText = remember { mutableStateOf("") }
   val spacerSize = 8.dp
-  val label: @Composable () -> Unit = {
-    Row{
-      Icon(imageVector = NoopIcons.Key, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
-      Spacer(modifier = Modifier.width(spacerSize))
-      Text(text = DELETE_ALL_CAPTCHA)
-    }
-  }
-  AlertDialog(
-    title = { Text(text = stringResource(id = R.string.delete_all_data)) },
-    icon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+  val containerColor = MaterialTheme.colorScheme.errorContainer
+  val contentColor = MaterialTheme.colorScheme.onErrorContainer
+  NoopAlertDialog(
+    title = { Text(stringResource(id = R.string.delete_all_data)) },
+    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
     text = {
-      Column{
+      Column {
         Text(text = stringResource(id = R.string.deleted_all_data_unrecoverable))
         Spacer(modifier = Modifier.height(spacerSize))
         OutlinedTextField(
           value = enteredText.value,
-          label = label,
-          placeholder = {Text(DELETE_ALL_CAPTCHA)},
+          label = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(imageVector = NoopIcons.Key, contentDescription = TODO_ICON_CONTENT_DESCRIPTION, tint = contentColor)
+              Spacer(modifier = Modifier.width(spacerSize))
+              Text(text = DELETE_ALL_CAPTCHA, color = contentColor)
+            }
+          },
+          placeholder = { Text(DELETE_ALL_CAPTCHA) },
           onValueChange = { enteredText.value = it },
           singleLine = true,
+          colors = OutlinedTextFieldDefaults.colors().copy(
+            focusedTextColor = contentColor, disabledTextColor = contentColor, unfocusedTextColor = contentColor, errorTextColor = contentColor,
+            errorSupportingTextColor = contentColor, disabledSupportingTextColor = contentColor, unfocusedSupportingTextColor = contentColor, focusedSupportingTextColor = contentColor,
+            disabledPlaceholderColor = contentColor, errorPlaceholderColor = contentColor, unfocusedPlaceholderColor = contentColor, focusedPlaceholderColor = contentColor,
+            cursorColor = contentColor, errorCursorColor = contentColor,
+          ),
         )
       }
     },
-    onDismissRequest = onClickOutside,
     confirmButton = {
       if(enteredText.value == DELETE_ALL_CAPTCHA) {
-        TextButton(onClick = onClickPositive) {
-          Text(stringResource(id = R.string.delete))
-        }
+        TextButton(onClick = onClickPositive) {(stringResource(id = R.string.delete).uppercase()) }
       } else {
-        Box(contentAlignment = Alignment.Center) {
-          TextButton(onClick = {}){} // Note: Simply to match height of delete button
-          Icon(
-            imageVector = NoopIcons.Lock,
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
-            tint = Color.Gray,
-          )
-        }
+        Spacer(modifier = Modifier.width(20.dp))
+        Icon(imageVector = NoopIcons.Lock, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
       }
     },
-    dismissButton = {
-      TextButton(onClick = onClickNegative) {
-        Text(stringResource(id = R.string.cancel))
-      }
-    }
+    cancelButton = { Text(stringResource(id = R.string.cancel)) },
+    onDismiss = onDismiss,
+    contentColor = contentColor,
+    containerColor = containerColor,
   )
 }
 
@@ -535,7 +520,7 @@ fun PreviewUtilSettingsScreen(
       highContrast = highContrast,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
       onClickConfirmDeleteAllDataAlertDialog = {}, onClickEccohedra = {},
-      onClickDismissDeleteAllDataAlertDialog = {},
+      onDismissDeleteAllDataAlertDialog = {},
       onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
       onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},
       onClickHighContrast = {}, onSelectHighContrast = {}, onDismissHighContrast = {},
@@ -546,7 +531,5 @@ fun PreviewUtilSettingsScreen(
 @Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK, colorPalette = ColorPalette.SYSTEM_DYNAMIC)
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
-@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) {
-  DeleteAllDataAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
-}
+@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(onClickPositive = {}, onDismiss = {}) }
 //endregion

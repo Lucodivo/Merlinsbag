@@ -83,7 +83,7 @@ fun AddArticleControls(
     if(landscape) {
       Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
+) {
         NoopIconButton(iconData = IconData(NoopIcons.FocusNarrow, TODO_ICON_CONTENT_DESCRIPTION), onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier)
         NoopIconButton(iconData = IconData(NoopIcons.FocusBroaden, TODO_ICON_CONTENT_DESCRIPTION), onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier)
       }

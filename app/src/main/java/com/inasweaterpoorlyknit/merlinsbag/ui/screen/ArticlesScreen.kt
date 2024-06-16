@@ -12,10 +12,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -40,6 +37,7 @@ import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -132,45 +130,44 @@ fun ArticlesRoute(
     onClickDelete = { showDeleteArticlesAlert = true },
     onClickSelectionCancel = isItemSelected::clear,
     onClickSettings = { navController.navigateToSettings() },
-    onPermissionsAlertPositive = {
+    onConfirmPermissionsAlert = {
       showPermissionsAlert = false
       appSettingsLauncher.launch()
     },
-    onDeleteArticlesAlertPositive = {
+    onConfirmDeleteArticlesAlert = {
       showDeleteArticlesAlert = false
       articlesViewModel.onDelete(isItemSelected.keys.toList())
       isItemSelected.clear()
     },
-    onAlertNegative = { showDeleteArticlesAlert = false; showPermissionsAlert = false },
-    onAlertOutside = { showDeleteArticlesAlert = false; showPermissionsAlert = false },
+    onDismissDeleteArticlesAlert = { showDeleteArticlesAlert = false },
+    onDismissPermissionsAlert = { showPermissionsAlert = false },
   )
 }
 
 @Composable
-fun CameraPermissionsAlertDialog(onClickOutside: () -> Unit, onClickNegative: () -> Unit, onClickPositive: () -> Unit) {
-  val justificationText = stringResource(id = if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
-                                                      else R.string.camera_permission_alert_justification)
-  AlertDialog(
-    title = { Text(text = stringResource(id = R.string.permission_alert_title)) },
-    text = { Text(text = justificationText) },
-    onDismissRequest = onClickOutside,
-    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.permission_alert_positive)) } },
-    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.permission_alert_negative)) } }
+fun CameraPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+  NoopSimpleAlertDialog(
+    title = stringResource(id = R.string.permission_alert_title),
+    text = stringResource(if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
+                          else R.string.camera_permission_alert_justification),
+    headerIcon = { Icon(imageVector = NoopIcons.Camera, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    onDismiss = onDismiss,
+    onConfirm = onConfirm,
+    confirmText = stringResource(id = R.string.permission_alert_positive),
+    cancelText = stringResource(id = R.string.permission_alert_negative),
   )
-}
 
 @Composable
-fun DeleteArticlesAlertDialog(onClickOutside: () -> Unit, onClickNegative: () -> Unit, onClickPositive: () -> Unit) {
-  AlertDialog(
-    title = { Text(text = stringResource(id = R.string.delete_articles)) },
-    text = { Text(text = stringResource(id = R.string.deleted_articles_unrecoverable)) },
-    icon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
-    onDismissRequest = onClickOutside,
-    confirmButton = { TextButton(onClick = onClickPositive) { Text(stringResource(id = R.string.delete)) } },
-    dismissButton = { TextButton(onClick = onClickNegative) { Text(stringResource(id = R.string.cancel)) }
-    }
+fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+  NoopSimpleAlertDialog(
+    title = stringResource(id = R.string.delete_article),
+    text = stringResource(id = R.string.deleted_articles_unrecoverable),
+    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    onDismiss = onDismiss,
+    onConfirm = onConfirm,
+    confirmText = stringResource(id = R.string.delete),
+    cancelText = stringResource(id = R.string.cancel),
   )
-}
 
 @Composable
 fun ArticlesScreen(
@@ -187,24 +184,22 @@ fun ArticlesScreen(
     onClickDelete: () -> Unit,
     onClickSelectionCancel: () -> Unit,
     onClickSettings: () -> Unit,
-    onPermissionsAlertPositive: () -> Unit,
-    onDeleteArticlesAlertPositive: () -> Unit,
-    onAlertNegative: () -> Unit,
-    onAlertOutside: () -> Unit,
+    onConfirmPermissionsAlert: () -> Unit,
+    onConfirmDeleteArticlesAlert: () -> Unit,
+    onDismissDeleteArticlesAlert: () -> Unit,
+    onDismissPermissionsAlert: () -> Unit,
 ) {
   if(showPermissionsAlert) {
     CameraPermissionsAlertDialog(
-      onClickOutside = onAlertOutside,
-      onClickNegative = onAlertNegative,
-      onClickPositive = onPermissionsAlertPositive,
+      onDismiss = onDismissPermissionsAlert,
+      onConfirm = onConfirmPermissionsAlert,
     )
   }
 
   if(showDeleteArticlesAlert) {
     DeleteArticlesAlertDialog(
-      onClickOutside = onAlertOutside,
-      onClickNegative = onAlertNegative,
-      onClickPositive = onDeleteArticlesAlertPositive,
+      onDismiss = onDismissDeleteArticlesAlert,
+      onConfirm = onConfirmDeleteArticlesAlert,
     )
   }
 
@@ -286,8 +281,8 @@ fun PreviewUtilArticleScreen(
     showPermissionsAlert = showPermissionsAlert,
     showDeleteArticlesAlert = showDeleteArticlesAlert,
     onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
-    onPermissionsAlertPositive = {}, onDeleteArticlesAlertPositive = {}, onAlertNegative = {},
-    onClickDelete = {}, onClickSelectionCancel = {}, onClickSettings = {}, onAlertOutside = {},
+    onConfirmPermissionsAlert = {}, onConfirmDeleteArticlesAlert = {}, onDismissDeleteArticlesAlert = {},
+    onClickDelete = {}, onClickSelectionCancel = {}, onClickSettings = {}, onDismissPermissionsAlert = {},
     onLongPressArticle = {},
   )
 }
@@ -321,12 +316,12 @@ fun PreviewArticlesScreenWithDeleteArticlesAlert() = PreviewUtilArticleScreen(
 @Preview
 @Composable
 fun PreviewCameraPermissionsAlert() = NoopTheme {
-  CameraPermissionsAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
+  CameraPermissionsAlertDialog(onConfirm = {}, onDismiss = {})
 }
 
 @Preview
 @Composable
 fun PreviewDeleteArticlesAlert() = NoopTheme {
-  DeleteArticlesAlertDialog(onClickPositive = {}, onClickNegative = {}, onClickOutside = {})
+  DeleteArticlesAlertDialog(onConfirm = {}, onDismiss = {})
 }
 //endregion

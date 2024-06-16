@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -32,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -137,38 +139,61 @@ fun NoopBottomSheetDialog(
   }
 }
 
+// TODO: Visibility?
 @Composable
 fun NoopAlertDialog(
+    title: @Composable () -> Unit,
+    text: @Composable () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    cancelButton: @Composable () -> Unit,
+    onDismiss: () -> Unit,
+    headerIcon: @Composable (() -> Unit)? = null,
+    containerColor: Color = AlertDialogDefaults.containerColor,
+    contentColor: Color = AlertDialogDefaults.titleContentColor,
+) =
+  AlertDialog(
+    title = title,
+    text = text,
+    icon = headerIcon,
+    onDismissRequest = onDismiss,
+    confirmButton = confirmButton,
+    dismissButton = cancelButton,
+    containerColor = containerColor,
+    textContentColor = contentColor,
+    iconContentColor = contentColor,
+    titleContentColor = contentColor,
+  )
+
+@Composable
+fun NoopSimpleAlertDialog(
     title: String,
     text: String,
     confirmText: String,
-    dismissText: String,
+    cancelText: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    headerIcon: IconData? = null,
-) {
-  AlertDialog(
+    headerIcon: @Composable (() -> Unit)? = null,
+) = NoopAlertDialog(
     title = { Text(title) },
-    text = { Text(text) },
-    icon = headerIcon?.let{ { Icon(it.icon, it.contentDescription) } },
-    onDismissRequest = onDismiss,
-    confirmButton = { TextButton(onClick = onConfirm) { Text(confirmText) } },
-    dismissButton = { TextButton(onClick = onDismiss) { Text(dismissText) } }
+    text = { Text(text = text) },
+    confirmButton = { TextButton(onClick = onConfirm){ Text(text = confirmText, color = MaterialTheme.colorScheme.secondary) } },
+    cancelButton = { TextButton(onClick = onDismiss){ Text(text = cancelText, color = MaterialTheme.colorScheme.secondary) } },
+    onDismiss = onDismiss,
+    headerIcon = headerIcon,
   )
-}
 
 //region COMPOSABLE PREVIEWS
 @Preview
 @Composable
 fun PreviewNoopAlertDialog() = NoopTheme {
-  NoopAlertDialog (
+  NoopSimpleAlertDialog (
     title = "Delete All Data",
     text = "Are you sure you want to delete all data?",
-    headerIcon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
     confirmText = "Delete",
-    dismissText = "Cancel",
+    cancelText = "Cancel",
     onDismiss = {},
     onConfirm = {},
+    headerIcon = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
   )
 }
 

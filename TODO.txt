@@ -51,6 +51,10 @@ Settings Screen:
     - Let user choose their preferred font
 Aesthetics:
     - placeholder shimmer could use a little work
+Performance:
+    - Investigate any performance issues from pre-emptively dispatching to IO for file writing operations.
+        - Ex: In AddArticleScreen, saving the article is dispatched to IO, but saving requires compression and compression is CPU intensive.
+
 
 // Unknowns
 Aesthetic Questions:

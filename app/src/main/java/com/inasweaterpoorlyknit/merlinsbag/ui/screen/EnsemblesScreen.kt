@@ -55,11 +55,11 @@ import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.HorizontalOverlappingLayout
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
-import com.inasweaterpoorlyknit.core.ui.component.NoopAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.SearchBox
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.shimmerBrush
@@ -344,12 +344,12 @@ private fun AddEnsembleDialog(
 fun DeleteEnsemblesAlertDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-) = NoopAlertDialog(
+) = NoopSimpleAlertDialog(
+  headerIcon = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
   title = stringResource(R.string.delete_ensembles),
   text = stringResource(R.string.are_you_sure),
-  headerIcon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
   confirmText = stringResource(R.string.delete),
-  dismissText = stringResource(R.string.cancel),
+  cancelText = stringResource(R.string.cancel),
   onDismiss = onDismiss,
   onConfirm = onConfirm,
 )
