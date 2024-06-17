@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -482,10 +483,10 @@ fun DeleteAllDataAlertDialog(
       }
     },
     confirmButton = {
+      Spacer(modifier = Modifier.width(20.dp))
       if(enteredText.value == DELETE_ALL_CAPTCHA) {
-        TextButton(onClick = onClickPositive) {(stringResource(id = R.string.delete).uppercase()) }
+        Text(stringResource(id = R.string.delete), modifier = Modifier.clickable { onClickPositive() })
       } else {
-        Spacer(modifier = Modifier.width(20.dp))
         Icon(imageVector = NoopIcons.Lock, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
       }
     },
