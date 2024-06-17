@@ -99,7 +99,7 @@ fun EnsemblesRoute(
   val selectedEnsembleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   var showDeleteEnsembleAlertDialog by remember { mutableStateOf(false) }
   var editMode by remember { mutableStateOf(false) }
-  var searchQuery by remember { mutableStateOf("") }
+  var searchQuery by remember { mutableStateOf(ensemblesViewModel.searchQuery) }
   fun toggleSelectedEnsemble(index: Int){
     if(selectedEnsembleIndices.contains(index)) selectedEnsembleIndices.remove(index)
     else selectedEnsembleIndices[index] = Unit
@@ -135,12 +135,12 @@ fun EnsemblesRoute(
     },
     onCloseAddEnsembleDialog = { showAddEnsembleDialog = false },
     onUpdateSearchQuery = { newSearchQuery ->
-      ensemblesViewModel.searchQuery(newSearchQuery)
+      ensemblesViewModel.onSearchQueryUpdate(newSearchQuery)
       searchQuery = newSearchQuery
       editMode = false
     },
     onClearSearchQuery = {
-      ensemblesViewModel.searchQuery("")
+      ensemblesViewModel.onSearchQueryUpdate("")
       searchQuery = ""
       editMode = false
     },

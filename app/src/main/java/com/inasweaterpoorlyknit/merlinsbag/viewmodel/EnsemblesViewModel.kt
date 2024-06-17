@@ -47,6 +47,7 @@ class EnsemblesViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(),
         initialValue = LazyUriStrings.Empty
       )
+  var searchQuery: String = "" // NOTE: Allows compose function to save search query when composable is returned to from the backstack
 
   val lazyEnsembles: StateFlow<List<Pair<String, LazyUriStrings>>> =
       combine(
@@ -83,7 +84,10 @@ class EnsemblesViewModel @Inject constructor(
     }
   }
   fun onClickEnsemble(index: Int): String = ensembles[index].ensemble.id
-  fun searchQuery(query: String) = searchEnsemblesQuery.tryEmit(if(query.isEmpty()) "" else "$query*")
+  fun onSearchQueryUpdate(query: String) {
+    searchQuery = query
+    searchEnsemblesQuery.tryEmit(if(query.isEmpty()) "" else "$query*")
+  }
   fun deleteEnsembles(ensembleIndices: List<Int>) {
     val ensembleIds = ensembles.slice(ensembleIndices).map { it.ensemble.id }
     viewModelScope.launch(Dispatchers.IO) {
