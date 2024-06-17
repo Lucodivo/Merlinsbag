@@ -150,8 +150,7 @@ fun NoopAlertDialog(
     headerIcon: @Composable (() -> Unit)? = null,
     containerColor: Color = AlertDialogDefaults.containerColor,
     contentColor: Color = AlertDialogDefaults.titleContentColor,
-) =
-  AlertDialog(
+) = AlertDialog(
     title = title,
     text = text,
     icon = headerIcon,
@@ -185,7 +184,7 @@ fun NoopSimpleAlertDialog(
 //region COMPOSABLE PREVIEWS
 @Preview
 @Composable
-fun PreviewNoopAlertDialog() = NoopTheme {
+fun PreviewNoopSimpleAlertDialog() = NoopTheme {
   NoopSimpleAlertDialog (
     title = "Delete All Data",
     text = "Are you sure you want to delete all data?",
@@ -196,7 +195,6 @@ fun PreviewNoopAlertDialog() = NoopTheme {
     headerIcon = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
   )
 }
-
 
 @Preview
 @Composable

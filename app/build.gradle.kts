@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
 
     // Firebase (crashlytics)
     implementation(platform(libs.firebase.bom))
@@ -98,6 +99,7 @@ dependencies {
 
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.material3.adaptive.navigation.suite.android)
     androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.androidx.navigation.compose)
 

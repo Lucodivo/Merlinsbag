@@ -30,8 +30,13 @@
     <foreground android:drawable="@drawable/ic_launcher_color_foreground"/>
     <monochrome android:drawable="@drawable/ic_launcher_monochrome_foreground"/>
 </adaptive-icon>
-```
+``` 
 
 ## IDE Errors
 #### Error running 'Android Java Debugger (pid: 28478, debug port: 53060)' Unable to open debugger port (localhost:53060): java.net.SocketException "Connection reset"
 - Restart Android Studio (killing adb server did not work)
+
+## Runtime Errors
+#### java.lang.IllegalStateException: Room cannot verify the data integrity. Looks like you've changed schema but forgot to update the version number. You can simply fix this by increasing the version number.
+- The answer to solve this problem when legitimate is obvious. However, it can occur on completely fresh installs when it is undesireable to update the database version just to satisfy this error.
+- Solution: Install app. Let it crash at least once. Go into 'App Info' on Android OS -> Storage -> Clear Data. Restart app.

@@ -30,7 +30,9 @@ class MainActivityViewModel @Inject constructor(
       .onEach { _uiState.value = MainActivityUiState.Success }
       .stateIn(
         scope = viewModelScope,
-        initialValue = UserPreferences(),
+        initialValue = UserPreferences(
+          hasCompletedOnboarding = true,
+        ),
         started = SharingStarted.WhileSubscribed(5_000),
       )
 }
