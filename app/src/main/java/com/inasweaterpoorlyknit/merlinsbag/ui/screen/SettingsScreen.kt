@@ -71,6 +71,7 @@ private val bookendSpacerModifier = Modifier.height(sectionSpacerHeight)
 private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
 private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
 private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
+private const val PRIVACY_POLICY_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
 private const val DELETE_ALL_CAPTCHA = "1234"
 
 const val SETTINGS_ROUTE = "settings_route"
@@ -120,6 +121,7 @@ fun SettingsRoute(
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
+    onClickPrivacyPolicy = { uriHandler.openUri(PRIVACY_POLICY_URL) },
     onClickClearCache = {
       clearCacheEnabled = false
       settingsViewModel.clearCache()
@@ -177,6 +179,14 @@ fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 fun EccohedraRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.eccohedra),
   indicator = { Icon(NoopIcons.eccohedra(), TODO_ICON_CONTENT_DESCRIPTION) },
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun PrivacyPolicyRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+  text = stringResource(R.string.privacy_policy),
+  indicator = { Icon(NoopIcons.Privacy, TODO_ICON_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -384,6 +394,7 @@ fun SettingsScreen(
     onClickAuthor: () -> Unit,
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
+    onClickPrivacyPolicy: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
     onDismissDeleteAllDataAlertDialog: () -> Unit,
@@ -448,6 +459,7 @@ fun SettingsScreen(
     }
     item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
     item { SettingsTitle(stringResource(R.string.data)) }
+    item { PrivacyPolicyRow(onClickPrivacyPolicy) }
     item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
     item { DeleteAllDataRow(onClickDeleteAllData) }
     item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
@@ -586,7 +598,7 @@ fun PreviewUtilSettingsScreen(
       typography = typography,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
       onClickConfirmDeleteAllDataAlertDialog = {}, onClickEccohedra = {},
-      onDismissDeleteAllDataAlertDialog = {},
+      onDismissDeleteAllDataAlertDialog = {}, onClickPrivacyPolicy = {},
       onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
       onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},
       onClickHighContrast = {}, onSelectHighContrast = {}, onDismissHighContrast = {},
