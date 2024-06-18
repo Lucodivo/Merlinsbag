@@ -6,9 +6,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,11 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -89,9 +92,7 @@ fun EnsembleDetailRoute(
   val selectedEditArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   var showAddArticlesDialog by remember { mutableStateOf(false) }
   val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
-  val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
   EnsembleDetailScreen(
-    systemBarTopHeight = systemBarPaddingValues.calculateTopPadding(),
     title = ensembleTitle,
     editingTitle = editingTitle,
     editEnsemblesMode = editMode,
@@ -178,8 +179,9 @@ fun EnsembleDetailFloatingActionButtons(
     onClickCancelSelection: () -> Unit,
     onClickRemoveArticles: () -> Unit,
     onClickDeleteEnsemble: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-  NoopBottomEndButtonContainer {
+  NoopBottomEndButtonContainer(modifier) {
     NoopExpandingIconButton(
       expanded = editEnsemblesMode,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
@@ -227,7 +229,6 @@ fun EnsembleDetailFloatingActionButtons(
 
 @Composable
 fun EnsembleDetailScreen(
-    systemBarTopHeight: Dp,
     title: String,
     editEnsemblesMode: Boolean,
     editingTitle: Boolean,
@@ -253,7 +254,9 @@ fun EnsembleDetailScreen(
     onDismissDeleteEnsembleDialog: () -> Unit,
     onClickPositiveDeleteEnsembleDialog: () -> Unit,
     modifier: Modifier = Modifier,
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
 ) {
+  val layoutDir = LocalLayoutDirection.current
   Surface(
     modifier = modifier.fillMaxSize()
   ) {
@@ -261,7 +264,7 @@ fun EnsembleDetailScreen(
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      Spacer(modifier = Modifier.height(systemBarTopHeight))
+      Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding()))
       val titleRowInteractionSource = remember { MutableInteractionSource() }
       val outsideKeyboardRowInteractionSource = remember { MutableInteractionSource() }
       Box(
@@ -332,6 +335,7 @@ fun EnsembleDetailScreen(
     onClickCancelSelection = onClickCancelSelection,
     onClickRemoveArticles = onClickRemoveArticles,
     onClickDeleteEnsemble = onClickDeleteEnsemble,
+    modifier = Modifier.padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
   )
   AddArticlesDialog(
     visible = showAddArticlesDialog,
@@ -413,7 +417,6 @@ fun PreviewUtilEnsembleDetailScreen(
     selectedAddArticleIndices: Set<Int> = emptySet(),
     showDeleteEnsembleAlertDialog: Boolean = false,
 ) = EnsembleDetailScreen(
-  systemBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
   title = "Ensemble Title",
   editEnsemblesMode = editMode,
   editingTitle = editingTitle,

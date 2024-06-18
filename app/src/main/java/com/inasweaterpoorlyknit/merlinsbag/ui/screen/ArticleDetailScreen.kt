@@ -6,8 +6,14 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -24,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -158,7 +165,9 @@ fun ArticleDetailScreen(
     onDismissPermissionsDialog: () -> Unit,
     onConfirmPermissionsDialog: () -> Unit,
     modifier: Modifier = Modifier,
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
 ) {
+  val layoutDir = LocalLayoutDirection.current
   HorizontalPager(
     state = pagerState
   ) { page ->
@@ -176,6 +185,7 @@ fun ArticleDetailScreen(
     onClickEdit = onClickEdit,
     onClickDelete = onClickDelete,
     onClickExport = onClickExport,
+    modifier = Modifier.padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
   )
   if(showDeleteArticleAlertDialog){
     DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
@@ -192,8 +202,9 @@ fun FloatingActionButtonDetailScreen(
     onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
     onClickExport: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-  NoopBottomEndButtonContainer {
+  NoopBottomEndButtonContainer(modifier = modifier) {
     NoopExpandingIconButton(
       expanded = expanded,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),

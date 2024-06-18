@@ -28,9 +28,12 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
 @Composable
-fun NoopBottomEndButtonContainer(content: @Composable BoxScope.() -> Unit) = Box(
+fun NoopBottomEndButtonContainer(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) = Box(
     contentAlignment = Alignment.BottomEnd,
-    modifier = Modifier.fillMaxSize().padding(8.dp),
+    modifier = modifier.fillMaxSize().padding(8.dp),
     content = content,
   )
 

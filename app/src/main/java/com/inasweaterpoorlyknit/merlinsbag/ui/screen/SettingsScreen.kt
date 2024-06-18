@@ -4,10 +4,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -112,9 +116,7 @@ fun SettingsRoute(
     }
   }
 
-  val systemBarHeight = WindowInsets.systemBars.asPaddingValues()
   SettingsScreen(
-    statusBarTopHeight = systemBarHeight.calculateTopPadding(),
     showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
     expandDarkModeDropdownMenu = expandedDarkModeMenu,
     expandColorPaletteDropdownMenu = expandedColorPaletteMenu,
@@ -389,7 +391,7 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 
 @Composable
 fun SettingsScreen(
-    statusBarTopHeight: Dp,
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     showDeleteAllDataAlertDialog: Boolean,
     expandDarkModeDropdownMenu: Boolean,
     expandColorPaletteDropdownMenu: Boolean,
@@ -422,65 +424,68 @@ fun SettingsScreen(
     onSelectTypography: (Typography) -> Unit,
     onDismissTypography: () -> Unit,
 ) {
-  LazyColumn(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Top,
-    modifier = Modifier.fillMaxSize(),
-  ) {
-    item { Spacer(modifier = Modifier.height(statusBarTopHeight)) }
-    item { SettingsTitle(stringResource(R.string.appearance)) }
-    item {
-      ColorPaletteRow(
-        selectedColorPalette = colorPalette,
-        expandedMenu = expandColorPaletteDropdownMenu,
-        onClick = onClickColorPalette,
-        onSelectColorPalette = onSelectColorPalette,
-        onDismiss = onDismissColorPalette,
-      )
+  val layourDir = LocalLayoutDirection.current
+  Row {
+    LazyColumn(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Top,
+      modifier = Modifier.fillMaxSize().padding(start = systemBarPaddingValues.calculateStartPadding(layourDir), end = systemBarPaddingValues.calculateEndPadding(layourDir)),
+    ) {
+      item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding())) }
+      item { SettingsTitle(stringResource(R.string.appearance)) }
+      item {
+        ColorPaletteRow(
+          selectedColorPalette = colorPalette,
+          expandedMenu = expandColorPaletteDropdownMenu,
+          onClick = onClickColorPalette,
+          onSelectColorPalette = onSelectColorPalette,
+          onDismiss = onDismissColorPalette,
+        )
+      }
+      item {
+        TypographyRow(
+          selectedTypography = typography,
+          expandedMenu = expandTypographyDropdownMenu,
+          onClick = onClickTypography,
+          onSelectTypography = onSelectTypography,
+          onDismiss = onDismissTypography,
+        )
+      }
+      item {
+        DarkModeRow(
+          selectedDarkMode = darkMode,
+          expandedMenu = expandDarkModeDropdownMenu,
+          onClick = onClickDarkMode,
+          onSelectDarkMode = onSelectDarkMode,
+          onDismiss = onDismissDarkMode,
+        )
+      }
+      item {
+        val systemDynamic = colorPalette == ColorPalette.SYSTEM_DYNAMIC
+        HighContrastRow(
+          enabled = !systemDynamic, // System dynamic color schemes do not currently support high contrast
+          selectedHighContrast = if(systemDynamic) HighContrast.OFF else highContrast,
+          expandedMenu = expandHighContrastDropdownMenu,
+          onClick = onClickHighContrast,
+          onSelectHighContrast = onSelectHighContrast,
+          onDismiss = onDismissHighContrast,
+        )
+      }
+      item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+      item { SettingsTitle(stringResource(R.string.data)) }
+      item { PrivacyInfoRow(onClickPrivacyInfo) }
+      item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
+      item { DeleteAllDataRow(onClickDeleteAllData) }
+      item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+      item { SettingsTitle(stringResource(R.string.about)) }
+      item { AuthorRow(onClickAuthor) }
+      item { SourceRow(onClickSource) }
+      item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+      item { SettingsTitle(stringResource(R.string.etc)) }
+      item { WelcomePageRow(onClickWelcomePage)}
+      item { EccohedraRow(onClickEccohedra) }
+      item { Spacer(modifier = bookendSpacerModifier) }
     }
-    item {
-      TypographyRow(
-        selectedTypography = typography,
-        expandedMenu = expandTypographyDropdownMenu,
-        onClick = onClickTypography,
-        onSelectTypography = onSelectTypography,
-        onDismiss = onDismissTypography,
-      )
-    }
-    item {
-      DarkModeRow(
-        selectedDarkMode = darkMode,
-        expandedMenu = expandDarkModeDropdownMenu,
-        onClick = onClickDarkMode,
-        onSelectDarkMode = onSelectDarkMode,
-        onDismiss = onDismissDarkMode,
-      )
-    }
-    item {
-      val systemDynamic = colorPalette == ColorPalette.SYSTEM_DYNAMIC
-      HighContrastRow(
-        enabled = !systemDynamic, // System dynamic color schemes do not currently support high contrast
-        selectedHighContrast = if(systemDynamic) HighContrast.OFF else highContrast,
-        expandedMenu = expandHighContrastDropdownMenu,
-        onClick = onClickHighContrast,
-        onSelectHighContrast = onSelectHighContrast,
-        onDismiss = onDismissHighContrast,
-      )
-    }
-    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
-    item { SettingsTitle(stringResource(R.string.data)) }
-    item { PrivacyInfoRow(onClickPrivacyInfo) }
-    item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
-    item { DeleteAllDataRow(onClickDeleteAllData) }
-    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
-    item { SettingsTitle(stringResource(R.string.about)) }
-    item { AuthorRow(onClickAuthor) }
-    item { SourceRow(onClickSource) }
-    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
-    item { SettingsTitle(stringResource(R.string.etc)) }
-    item { WelcomePageRow(onClickWelcomePage)}
-    item { EccohedraRow(onClickEccohedra) }
-    item { Spacer(modifier = bookendSpacerModifier) }
   }
   if(showDeleteAllDataAlertDialog) {
     DeleteAllDataAlertDialog(
@@ -607,7 +612,6 @@ fun PreviewUtilSettingsScreen(
 ) = NoopTheme(darkMode = darkMode) {
   Surface {
     SettingsScreen(
-      statusBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
       showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
       expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
       expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,

@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -109,9 +113,7 @@ fun EnsemblesRoute(
     else selectedEnsembleIndices[index] = Unit
     if(selectedEnsembleIndices.isEmpty()) editMode = false
   }
-  val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
   EnsemblesScreen(
-    statusBarTopHeight = systemBarPaddingValues.calculateTopPadding(),
     lazyEnsembleThumbnails = lazyEnsembleThumbnails,
     showAddEnsembleDialog = showAddEnsembleDialog,
     showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
@@ -164,7 +166,7 @@ fun EnsemblesRoute(
 
 @Composable
 fun EnsemblesScreen(
-    statusBarTopHeight: Dp,
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
     showAddEnsembleDialog: Boolean,
     editMode: Boolean,
@@ -186,8 +188,9 @@ fun EnsemblesScreen(
 ) {
   val sidePadding = 8.dp
   val bottomPadding = 4.dp
+  val layoutDir = LocalLayoutDirection.current
   Surface(
-    modifier = Modifier.fillMaxSize(),
+    modifier = Modifier.fillMaxSize().padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
   ) {
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
       targetValue = if(showPlaceholder) 1.0f else 0.0f,
@@ -195,7 +198,7 @@ fun EnsemblesScreen(
       label = "placeholder ensemble grid visibility"
     )
     Column {
-      Spacer(modifier = Modifier.height(statusBarTopHeight))
+      Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding()))
       if(placeholderVisibilityAnimatedFloat == 0.0f) {
         SearchBox(
           query = searchQuery,
@@ -574,7 +577,6 @@ fun PreviewUtilEnsembleScreen(
     showAddEnsembleForm: Boolean,
 ) = NoopTheme {
   EnsemblesScreen(
-    statusBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
     lazyEnsembleThumbnails = ensembles,
     showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,

@@ -12,12 +12,16 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -29,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -107,10 +112,7 @@ fun ArticlesRoute(
     onNeverAskAgain = { showPermissionsAlert = true },
   )
 
-  val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
-
   ArticlesScreen(
-    statusBarTopHeight = systemBarPaddingValues.calculateTopPadding(),
     thumbnailUris = articleThumbnails,
     selectedThumbnails = isItemSelected.keys,
     editMode = editMode,
@@ -182,7 +184,7 @@ fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
 
 @Composable
 fun ArticlesScreen(
-    statusBarTopHeight: Dp,
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
     editMode: Boolean,
@@ -215,11 +217,14 @@ fun ArticlesScreen(
     )
   }
 
+  val layoutDir = LocalLayoutDirection.current
+  val startPadding = systemBarPaddingValues.calculateStartPadding(layoutDir)
+  val endPadding = systemBarPaddingValues.calculateEndPadding(layoutDir)
   Column(
     verticalArrangement = Arrangement.Top,
-    modifier = Modifier.fillMaxSize()
+    modifier = Modifier.fillMaxSize().padding(start = startPadding, end = endPadding)
   ) {
-    Spacer(modifier = Modifier.fillMaxWidth().height(statusBarTopHeight))
+    Spacer(modifier = Modifier.fillMaxWidth().height(systemBarPaddingValues.calculateTopPadding()))
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
       targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
       animationSpec = tween(durationMillis = 1000),
@@ -241,7 +246,7 @@ fun ArticlesScreen(
   }
 
   val articlesAreSelected = selectedThumbnails.isNotEmpty()
-  NoopBottomEndButtonContainer {
+  NoopBottomEndButtonContainer(modifier = Modifier.padding(start = startPadding, end = endPadding)) {
     NoopExpandingIconButton(
       expanded = editMode,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
@@ -291,7 +296,6 @@ fun PreviewUtilArticleScreen(
     selectedThumbnails: Set<Int> = emptySet(),
 ) = NoopTheme {
   ArticlesScreen(
-    statusBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
     thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails = selectedThumbnails,
     editMode = editMode,
