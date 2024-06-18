@@ -1,11 +1,18 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -17,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -118,6 +126,7 @@ fun AddArticleControls(
 
 @Composable
 fun AddArticleScreen(
+    systemBarPaddingValues: PaddingValues,
     windowSizeClass: WindowSizeClass,
     processing: Boolean = true,
     processedImage: Bitmap? = null,
@@ -129,7 +138,7 @@ fun AddArticleScreen(
     onDiscard: () -> Unit,
     onSave: () -> Unit,
 ) {
-  val landscape: Boolean = LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+  val landscape: Boolean = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
   val image: @Composable () -> Unit = {
     AddArticleImage(
       modifier = Modifier.padding(16.dp),
@@ -151,12 +160,19 @@ fun AddArticleScreen(
     )
   }
   if(landscape){
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    val layoutDir = LocalLayoutDirection.current
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      modifier = Modifier.padding(
+        start = systemBarPaddingValues.calculateStartPadding(layoutDir),
+        end = systemBarPaddingValues.calculateEndPadding(layoutDir)
+      )
+    ){
       Column(modifier = Modifier.weight(1f)) { image() }
       Column { controls() }
     }
   } else {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = systemBarPaddingValues.calculateBottomPadding())) {
       Row(modifier = Modifier.weight(1f)) { image() }
       Row { controls() }
     }
@@ -181,7 +197,10 @@ fun AddArticleRoute(
     Toast(msg = R.string.no_subject_found)
   }
 
+  val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
+
   AddArticleScreen(
+    systemBarPaddingValues = systemBarPaddingValues,
     windowSizeClass = windowSizeClass,
     processing = addArticleViewModel.processing.value,
     processedImage = addArticleViewModel.processedBitmap.value,
@@ -201,6 +220,7 @@ fun AddArticleRoute(
 @Composable
 fun PreviewAddArticleScreen() = NoopTheme(darkMode = DarkMode.DARK) {
   AddArticleScreen(
+    systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues(),
     windowSizeClass = currentWindowAdaptiveInfo(),
     processing = false,
     processedImage = previewAssetBitmap(filename = composePreviewArticleAsset),

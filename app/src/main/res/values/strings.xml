@@ -83,5 +83,5 @@
     <string name="welcome_page">Welcome Page</string>
     <string name="font">Font</string>
     <string name="colors">Colors</string>
-    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_information">Privacy Information</string>
 </resources>

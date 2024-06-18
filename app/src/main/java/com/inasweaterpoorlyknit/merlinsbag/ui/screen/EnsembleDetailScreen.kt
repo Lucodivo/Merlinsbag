@@ -6,10 +6,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Icon
@@ -33,6 +37,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -84,7 +89,9 @@ fun EnsembleDetailRoute(
   val selectedEditArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   var showAddArticlesDialog by remember { mutableStateOf(false) }
   val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+  val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
   EnsembleDetailScreen(
+    systemBarTopHeight = systemBarPaddingValues.calculateTopPadding(),
     title = ensembleTitle,
     editingTitle = editingTitle,
     editEnsemblesMode = editMode,
@@ -220,6 +227,7 @@ fun EnsembleDetailFloatingActionButtons(
 
 @Composable
 fun EnsembleDetailScreen(
+    systemBarTopHeight: Dp,
     title: String,
     editEnsemblesMode: Boolean,
     editingTitle: Boolean,
@@ -253,12 +261,12 @@ fun EnsembleDetailScreen(
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+      Spacer(modifier = Modifier.height(systemBarTopHeight))
       val titleRowInteractionSource = remember { MutableInteractionSource() }
       val outsideKeyboardRowInteractionSource = remember { MutableInteractionSource() }
       Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .height(height = 90.dp)
             .fillMaxWidth()
             .clickable(
               interactionSource = titleRowInteractionSource,
@@ -405,18 +413,18 @@ fun PreviewUtilEnsembleDetailScreen(
     selectedAddArticleIndices: Set<Int> = emptySet(),
     showDeleteEnsembleAlertDialog: Boolean = false,
 ) = EnsembleDetailScreen(
+  systemBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
   title = "Ensemble Title",
   editEnsemblesMode = editMode,
-  showAddArticlesDialog = showAddArticlesDialog,
   editingTitle = editingTitle,
   ensembleArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
-  selectedEditArticleIndices = selectedArticleIndices,
   addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
+  selectedEditArticleIndices = selectedArticleIndices,
   selectedAddArticleIndices = selectedAddArticleIndices,
-  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
-  onTitleClicked = {}, onTitleChanged = {}, onClickEdit = {}, onSelectArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {}, onAbandonEditTitle = {},
-  onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {}, onClickAddArticles = {}, onClickDeleteEnsemble = {}, onDismissDeleteEnsembleDialog = {},
-  onClickPositiveDeleteEnsembleDialog = {}, onLongSelectArticle = {},
+  onTitleClicked = {},
+  onTitleChanged = {}, onClickEdit = {}, onClickAddArticles = {}, onSelectArticle = {}, onLongSelectArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {},
+  onClickDeleteEnsemble = {}, onAbandonEditTitle = {}, showAddArticlesDialog = showAddArticlesDialog, onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {},
+  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog, onDismissDeleteEnsembleDialog = {}, onClickPositiveDeleteEnsembleDialog = {},
 )
 
 @Composable

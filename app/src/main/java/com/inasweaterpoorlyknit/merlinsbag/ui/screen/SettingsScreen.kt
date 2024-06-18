@@ -6,11 +6,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.DropdownMenu
@@ -38,6 +41,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -47,6 +51,7 @@ import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.ui.LargeFontSizePreview
+import com.inasweaterpoorlyknit.core.ui.SystemUiPreview
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopAlertDialog
@@ -71,7 +76,7 @@ private val bookendSpacerModifier = Modifier.height(sectionSpacerHeight)
 private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
 private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
 private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
-private const val PRIVACY_POLICY_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
+private const val PRIVACY_INFO_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
 private const val DELETE_ALL_CAPTCHA = "1234"
 
 const val SETTINGS_ROUTE = "settings_route"
@@ -107,7 +112,9 @@ fun SettingsRoute(
     }
   }
 
+  val systemBarHeight = WindowInsets.systemBars.asPaddingValues()
   SettingsScreen(
+    statusBarTopHeight = systemBarHeight.calculateTopPadding(),
     showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
     expandDarkModeDropdownMenu = expandedDarkModeMenu,
     expandColorPaletteDropdownMenu = expandedColorPaletteMenu,
@@ -122,7 +129,7 @@ fun SettingsRoute(
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
-    onClickPrivacyPolicy = { uriHandler.openUri(PRIVACY_POLICY_URL) },
+    onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
     onClickClearCache = {
       clearCacheEnabled = false
       settingsViewModel.clearCache()
@@ -185,8 +192,8 @@ fun EccohedraRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 )
 
 @Composable
-fun PrivacyPolicyRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
-  text = stringResource(R.string.privacy_policy),
+fun PrivacyInfoRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+  text = stringResource(R.string.privacy_information),
   indicator = { Icon(NoopIcons.Privacy, TODO_ICON_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
@@ -382,6 +389,7 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 
 @Composable
 fun SettingsScreen(
+    statusBarTopHeight: Dp,
     showDeleteAllDataAlertDialog: Boolean,
     expandDarkModeDropdownMenu: Boolean,
     expandColorPaletteDropdownMenu: Boolean,
@@ -396,7 +404,7 @@ fun SettingsScreen(
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
     onClickWelcomePage: () -> Unit,
-    onClickPrivacyPolicy: () -> Unit,
+    onClickPrivacyInfo: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
     onDismissDeleteAllDataAlertDialog: () -> Unit,
@@ -419,7 +427,7 @@ fun SettingsScreen(
     verticalArrangement = Arrangement.Top,
     modifier = Modifier.fillMaxSize(),
   ) {
-    item { Spacer(modifier = bookendSpacerModifier) }
+    item { Spacer(modifier = Modifier.height(statusBarTopHeight)) }
     item { SettingsTitle(stringResource(R.string.appearance)) }
     item {
       ColorPaletteRow(
@@ -461,7 +469,7 @@ fun SettingsScreen(
     }
     item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
     item { SettingsTitle(stringResource(R.string.data)) }
-    item { PrivacyPolicyRow(onClickPrivacyPolicy) }
+    item { PrivacyInfoRow(onClickPrivacyInfo) }
     item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
     item { DeleteAllDataRow(onClickDeleteAllData) }
     item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
@@ -599,6 +607,7 @@ fun PreviewUtilSettingsScreen(
 ) = NoopTheme(darkMode = darkMode) {
   Surface {
     SettingsScreen(
+      statusBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
       showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
       expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
       expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,
@@ -607,20 +616,19 @@ fun PreviewUtilSettingsScreen(
       clearCacheEnabled = clearCacheEnabled,
       darkMode = darkMode,
       colorPalette = colorPalette,
-      highContrast = highContrast,
       typography = typography,
-      onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
-      onClickConfirmDeleteAllDataAlertDialog = {}, onClickEccohedra = {}, onClickWelcomePage = {},
-      onDismissDeleteAllDataAlertDialog = {}, onClickPrivacyPolicy = {},
-      onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
-      onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},
-      onClickHighContrast = {}, onSelectHighContrast = {}, onDismissHighContrast = {},
-      onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {},
+      highContrast = highContrast, onClickAuthor = {}, onClickSource = {}, onClickEccohedra = {},
+      onClickWelcomePage = {}, onClickPrivacyInfo = {}, onClickClearCache = {},
+      onClickDeleteAllData = {}, onDismissDeleteAllDataAlertDialog = {},
+      onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {}, onDismissDarkMode = {},
+      onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
+      onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {},
+      onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {},
     )
   }
 }
 
-@Preview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
+@SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK, colorPalette = ColorPalette.SYSTEM_DYNAMIC)
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
 @Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(onClickPositive = {}, onDismiss = {}) }

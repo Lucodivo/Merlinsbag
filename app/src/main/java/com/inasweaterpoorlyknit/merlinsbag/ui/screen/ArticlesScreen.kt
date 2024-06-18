@@ -10,8 +10,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +31,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -99,7 +107,10 @@ fun ArticlesRoute(
     onNeverAskAgain = { showPermissionsAlert = true },
   )
 
+  val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
+
   ArticlesScreen(
+    statusBarTopHeight = systemBarPaddingValues.calculateTopPadding(),
     thumbnailUris = articleThumbnails,
     selectedThumbnails = isItemSelected.keys,
     editMode = editMode,
@@ -171,6 +182,7 @@ fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
 
 @Composable
 fun ArticlesScreen(
+    statusBarTopHeight: Dp,
     thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
     editMode: Boolean,
@@ -203,7 +215,11 @@ fun ArticlesScreen(
     )
   }
 
-  Box(modifier = Modifier.fillMaxSize()) {
+  Column(
+    verticalArrangement = Arrangement.Top,
+    modifier = Modifier.fillMaxSize()
+  ) {
+    Spacer(modifier = Modifier.fillMaxWidth().height(statusBarTopHeight))
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
       targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
       animationSpec = tween(durationMillis = 1000),
@@ -275,6 +291,7 @@ fun PreviewUtilArticleScreen(
     selectedThumbnails: Set<Int> = emptySet(),
 ) = NoopTheme {
   ArticlesScreen(
+    statusBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
     thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails = selectedThumbnails,
     editMode = editMode,

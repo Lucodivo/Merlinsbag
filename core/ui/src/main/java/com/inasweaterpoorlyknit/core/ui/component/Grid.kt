@@ -7,7 +7,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -24,6 +27,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.LandscapePreview
@@ -41,40 +45,43 @@ val staggeredGridItemPadding = 8.dp
 fun PlaceholderThumbnailGrid(modifier: Modifier = Modifier){
   val lazyGridState = rememberLazyStaggeredGridState()
   val shimmerBrush = shimmerBrush(color = MaterialTheme.colorScheme.onSurface)
-  LazyVerticalStaggeredGrid(
-    // typical dp width of a smart phone is 320dp-480dp
-    columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
-    content = {
-      items(count = repeatedPlaceholderDrawables.size) { thumbnailGridItemIndex ->
-        val placeholderDrawable = repeatedPlaceholderDrawables[thumbnailGridItemIndex]
-        Box(
-          contentAlignment = Alignment.Center,
-          modifier = Modifier.padding(staggeredGridItemPadding)
-        ) {
-          Icon(
-            painter = painterResource(placeholderDrawable),
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
-            modifier = Modifier
-                .alpha(0.8f)
-                .drawWithContent {
-                  drawContent()
-                  drawRect(shimmerBrush, blendMode = BlendMode.SrcIn)
-                }
-                .sizeIn(maxHeight = staggeredGridColumnMinWidth),
-          )
+  Box {
+    LazyVerticalStaggeredGrid(
+      // typical dp width of a smart phone is 320dp-480dp
+      columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
+      content = {
+        items(count = repeatedPlaceholderDrawables.size) { thumbnailGridItemIndex ->
+          val placeholderDrawable = repeatedPlaceholderDrawables[thumbnailGridItemIndex]
+          Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(staggeredGridItemPadding)
+          ) {
+            Icon(
+              painter = painterResource(placeholderDrawable),
+              contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+              modifier = Modifier
+                  .alpha(0.8f)
+                  .drawWithContent {
+                    drawContent()
+                    drawRect(shimmerBrush, blendMode = BlendMode.SrcIn)
+                  }
+                  .sizeIn(maxHeight = staggeredGridColumnMinWidth),
+            )
+          }
         }
-      }
-    },
-    modifier = modifier.fillMaxSize(),
-    state = lazyGridState,
-  )
-  // disable interactions with grid by placing a transparent interactable scrim on top
-  val scrimInteractionSource = remember { MutableInteractionSource() }
-  Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = {})
-  )
+      },
+      modifier = modifier.fillMaxSize(),
+      state = lazyGridState,
+    )
+
+    // disable interactions with grid by placing a transparent interactable scrim on top
+    val scrimInteractionSource = remember { MutableInteractionSource() }
+    Box(
+      modifier = Modifier
+          .fillMaxSize()
+          .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = {})
+    )
+  }
 }
 
 @Composable

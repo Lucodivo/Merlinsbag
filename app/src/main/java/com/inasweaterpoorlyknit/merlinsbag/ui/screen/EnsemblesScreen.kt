@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.ElevatedCard
@@ -43,6 +46,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -105,7 +109,9 @@ fun EnsemblesRoute(
     else selectedEnsembleIndices[index] = Unit
     if(selectedEnsembleIndices.isEmpty()) editMode = false
   }
+  val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
   EnsemblesScreen(
+    statusBarTopHeight = systemBarPaddingValues.calculateTopPadding(),
     lazyEnsembleThumbnails = lazyEnsembleThumbnails,
     showAddEnsembleDialog = showAddEnsembleDialog,
     showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
@@ -158,6 +164,7 @@ fun EnsemblesRoute(
 
 @Composable
 fun EnsemblesScreen(
+    statusBarTopHeight: Dp,
     lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
     showAddEnsembleDialog: Boolean,
     editMode: Boolean,
@@ -178,7 +185,7 @@ fun EnsemblesScreen(
     onAlertDialogPositive: () -> Unit,
 ) {
   val sidePadding = 8.dp
-  val topPadding = 4.dp
+  val bottomPadding = 4.dp
   Surface(
     modifier = Modifier.fillMaxSize(),
   ) {
@@ -187,8 +194,9 @@ fun EnsemblesScreen(
       animationSpec = tween(durationMillis = 1000),
       label = "placeholder ensemble grid visibility"
     )
-    if(placeholderVisibilityAnimatedFloat == 0.0f) {
-      Column {
+    Column {
+      Spacer(modifier = Modifier.height(statusBarTopHeight))
+      if(placeholderVisibilityAnimatedFloat == 0.0f) {
         SearchBox(
           query = searchQuery,
           placeholder = stringResource(R.string.search_ensembles),
@@ -196,7 +204,7 @@ fun EnsemblesScreen(
           onClearQuery = onClearSearchQuery,
           modifier = Modifier
               .fillMaxWidth()
-              .padding(vertical = topPadding, horizontal = sidePadding),
+              .padding(bottom = bottomPadding, start = sidePadding, end = sidePadding),
         )
         EnsemblesOverlappingImageRowColumn(
           selectedEnsembleIndices,
@@ -206,9 +214,9 @@ fun EnsemblesScreen(
           onLongPress = onLongPressEnsemble,
           modifier = Modifier.padding(horizontal = sidePadding)
         )
+      } else {
+        EnsemblesOverlappingPlaceholderRowColumn(modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat))
       }
-    } else {
-      EnsemblesOverlappingPlaceholderRowColumn(modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat))
     }
     NoopBottomEndButtonContainer {
       EditEnsemblesExpandingActionButton(
@@ -503,32 +511,35 @@ private val drawablePlaceholders: List<Pair<Int, List<Int>>> =
 fun EnsemblesOverlappingPlaceholderRowColumn(
     modifier: Modifier = Modifier,
 ) {
-  LazyColumn(
-    verticalArrangement = Arrangement.Top,
-    horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = modifier
-  ) {
-    items(drawablePlaceholders.size) { index ->
-      val ensembles = drawablePlaceholders[index]
-      EnsembleOverlappingPlaceholderRow(
-        drawables = ensembles.second,
-        title = stringResource(ensembles.first),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-              top = if(index != 0) rowVerticalSpacing else 0.dp,
-              bottom = if(index != drawablePlaceholders.lastIndex) rowVerticalSpacing else 0.dp,
-            )
-      )
+  Box{
+    LazyColumn(
+      verticalArrangement = Arrangement.Top,
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = modifier
+    ) {
+      items(drawablePlaceholders.size) { index ->
+        val ensembles = drawablePlaceholders[index]
+        EnsembleOverlappingPlaceholderRow(
+          drawables = ensembles.second,
+          title = stringResource(ensembles.first),
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(
+                top = if(index != 0) rowVerticalSpacing else 0.dp,
+                bottom = if(index != drawablePlaceholders.lastIndex) rowVerticalSpacing else 0.dp,
+              )
+        )
+      }
     }
+
+    // disable interactions with column by placing a transparent interactable scrim on top
+    val scrimInteractionSource = remember { MutableInteractionSource() }
+    Box(
+      modifier = Modifier
+          .fillMaxSize()
+          .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = {})
+    )
   }
-  // disable interactions with column by placing a transparent interactable scrim on top
-  val scrimInteractionSource = remember { MutableInteractionSource() }
-  Box(
-    modifier = Modifier
-        .fillMaxSize()
-        .clickable(interactionSource = scrimInteractionSource, indication = null, onClick = {})
-  )
 }
 
 //region COMPOSABLE PREVIEWS
@@ -563,15 +574,15 @@ fun PreviewUtilEnsembleScreen(
     showAddEnsembleForm: Boolean,
 ) = NoopTheme {
   EnsemblesScreen(
+    statusBarTopHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding(),
     lazyEnsembleThumbnails = ensembles,
     showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,
     showDeleteEnsembleAlertDialog = false,
-    selectedEnsembleIndices = emptySet(),
-    showPlaceholder = false, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings, searchQuery = "Goth 2 Boss", onClickEnsemble = {},
-    onClickActionButton = {}, onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {},
-    onUpdateSearchQuery = {}, onClearSearchQuery = {},
-    onClickDeleteSelected = {}, onAlertDialogDismiss = {}, onAlertDialogPositive = {}, onLongPressEnsemble = {},
+    selectedEnsembleIndices = emptySet(), showPlaceholder = false, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings, searchQuery = "Goth 2 Boss",
+    onClickEnsemble = {}, onLongPressEnsemble = {}, onClickActionButton = {},
+    onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {},
+    onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onAlertDialogDismiss = {}, onAlertDialogPositive = {},
   )
 }
 

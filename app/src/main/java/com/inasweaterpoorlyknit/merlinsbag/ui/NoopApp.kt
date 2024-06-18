@@ -122,7 +122,7 @@ fun NoopScaffold(
   },
   containerColor = Color.Transparent,
   contentColor = MaterialTheme.colorScheme.onBackground,
-  contentWindowInsets = WindowInsets.systemBars,
+  contentWindowInsets = WindowInsets(0, 0, 0, 0),
   snackbarHost = { SnackbarHost(snackbarHostState) },
   content = content,
 )

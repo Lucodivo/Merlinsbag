@@ -61,6 +61,9 @@ annotation class LandscapePreview
 @Preview(name = "large_font_size", fontScale = 2.0f)
 annotation class LargeFontSizePreview
 
+@Preview(name = "system_bar_preview", showSystemUi = true)
+annotation class SystemUiPreview
+
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun currentWindowAdaptiveInfo(): WindowSizeClass {
