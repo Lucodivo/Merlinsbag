@@ -121,6 +121,7 @@ fun SettingsRoute(
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
+    onClickWelcomePage = { settingsViewModel.showWelcomePage() },
     onClickPrivacyPolicy = { uriHandler.openUri(PRIVACY_POLICY_URL) },
     onClickClearCache = {
       clearCacheEnabled = false
@@ -394,6 +395,7 @@ fun SettingsScreen(
     onClickAuthor: () -> Unit,
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
+    onClickWelcomePage: () -> Unit,
     onClickPrivacyPolicy: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
@@ -468,6 +470,7 @@ fun SettingsScreen(
     item { SourceRow(onClickSource) }
     item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
     item { SettingsTitle(stringResource(R.string.etc)) }
+    item { WelcomePageRow(onClickWelcomePage)}
     item { EccohedraRow(onClickEccohedra) }
     item { Spacer(modifier = bookendSpacerModifier) }
   }
@@ -517,6 +520,16 @@ fun SettingsTextIndicatorButton(
     }
   }
 }
+
+@Composable
+fun WelcomePageRow(
+    onClick: () -> Unit,
+) = SettingsTextIndicatorButton(
+  text = stringResource(R.string.welcome_page),
+  indicator = { Icon(NoopIcons.WavingHand, TODO_ICON_CONTENT_DESCRIPTION) },
+  onClick = onClick,
+  modifier = itemModifier,
+)
 
 @Composable
 fun DeleteAllDataAlertDialog(
@@ -597,7 +610,7 @@ fun PreviewUtilSettingsScreen(
       highContrast = highContrast,
       typography = typography,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
-      onClickConfirmDeleteAllDataAlertDialog = {}, onClickEccohedra = {},
+      onClickConfirmDeleteAllDataAlertDialog = {}, onClickEccohedra = {}, onClickWelcomePage = {},
       onDismissDeleteAllDataAlertDialog = {}, onClickPrivacyPolicy = {},
       onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
       onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},
