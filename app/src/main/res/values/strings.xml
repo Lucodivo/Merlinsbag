@@ -70,4 +70,18 @@
     <string name="search_ensembles">Search ensembles</string>
     <string name="about">About</string>
     <string name="eccohedra">Eccohedra</string>
+    <string name="typography">Typography</string>
+    <string name="default_">Default</string>
+    <string name="montserrat">Montserrat</string>
+    <string name="jetbrains_mono">JetBrains Mono</string>
+    <string name="concert_one">Concert One</string>
+    <string name="tiny5">Tiny5</string>
+    <string name="cinzel">Cinzel</string>
+    <string name="macondo">Macondo</string>
+    <string name="appearance">Appearance</string>
+    <string name="etc">Etc.</string>
+    <string name="welcome_page">Welcome Page</string>
+    <string name="font">Font</string>
+    <string name="colors">Colors</string>
+    <string name="privacy_policy">Privacy Policy</string>
 </resources>

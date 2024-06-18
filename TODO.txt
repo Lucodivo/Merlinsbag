@@ -22,7 +22,7 @@ Features:
         - Chips
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
-    - Navigation Drawer / Navigation Rail
+    - NavigationRail [COMPLETED]
 Articles:
     - thumbnails with random "shimmer"/"rotation"
 Accessibility:
@@ -48,13 +48,14 @@ Bugs:
         - UPDATE: Not able to reproduce outside of debug build. Will verify at some random point in future before bug is removed.
 Settings Screen:
     - Export All Data
-    - Let user choose their preferred font
 Aesthetics:
     - placeholder shimmer could use a little work
 Performance:
     - Investigate any performance issues from pre-emptively dispatching to IO for file writing operations.
-        - Ex: In AddArticleScreen, saving the article is dispatched to IO, but saving requires compression and compression is CPU intensive.
-
+        - Potential areas:
+            - AddArticleViewModel.onSave()
+            - ArticleDetailViewModel.exportArticle()
+            - In both the examples above, maybe compress on Default and *only* write to a file on IO
 
 // Unknowns
 Aesthetic Questions:

@@ -39,6 +39,7 @@ class MainActivity: ComponentActivity() {
         darkMode = userPreferences.darkMode,
         colorPalette = userPreferences.colorPalette,
         highContrast = userPreferences.highContrast,
+        typography = userPreferences.typography,
       ) {
         NoopApp(
           appState = appState,

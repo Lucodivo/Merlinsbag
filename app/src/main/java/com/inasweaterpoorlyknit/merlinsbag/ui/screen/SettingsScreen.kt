@@ -24,7 +24,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -47,6 +45,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
+import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.ui.LargeFontSizePreview
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
@@ -90,6 +89,7 @@ fun SettingsRoute(
   var expandedDarkModeMenu by remember { mutableStateOf(false) }
   var expandedColorPaletteMenu by remember { mutableStateOf(false) }
   var expandedHighContrastMenu by remember { mutableStateOf(false) }
+  var expandedTypographyMenu by remember { mutableStateOf(false) }
   var clearCacheEnabled by remember { mutableStateOf(true) }
   val userPreferences by settingsViewModel.userPreferences.collectAsState()
 
@@ -111,10 +111,12 @@ fun SettingsRoute(
     expandDarkModeDropdownMenu = expandedDarkModeMenu,
     expandColorPaletteDropdownMenu = expandedColorPaletteMenu,
     expandHighContrastDropdownMenu = expandedHighContrastMenu,
+    expandTypographyDropdownMenu = expandedTypographyMenu,
     clearCacheEnabled = clearCacheEnabled,
     darkMode = userPreferences.darkMode,
     colorPalette = userPreferences.colorPalette,
     highContrast = userPreferences.highContrast,
+    typography = userPreferences.typography,
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
@@ -146,6 +148,12 @@ fun SettingsRoute(
     },
     onDismissHighContrast = { expandedHighContrastMenu = false },
     onClickHighContrast = { expandedHighContrastMenu = !expandedHighContrastMenu },
+    onSelectTypography = {
+      settingsViewModel.setTypography(it)
+      expandedTypographyMenu = false
+    },
+    onDismissTypography = { expandedTypographyMenu = false },
+    onClickTypography = { expandedTypographyMenu = !expandedTypographyMenu },
   )
 }
 
@@ -239,6 +247,43 @@ fun DarkModeRow(
 }
 
 @Composable
+fun TypographyRow(
+    selectedTypography: Typography,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectTypography: (Typography) -> Unit,
+    onDismiss: () -> Unit,
+) {
+  // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
+  val dropdownData = listOf(
+    Pair(stringResource(R.string.default_), null),
+    Pair(stringResource(R.string.montserrat), null),
+    Pair(stringResource(R.string.jetbrains_mono), null),
+    Pair(stringResource(R.string.cinzel), null),
+    Pair(stringResource(R.string.concert_one), null),
+    Pair(stringResource(R.string.macondo), null),
+    Pair(stringResource(R.string.tiny5), null),
+  )
+  val selectedTypographyText = dropdownData[selectedTypography.ordinal]
+  DropdownSettingsRow(
+    title = stringResource(R.string.font),
+    indicator = {
+      Text(
+        text = selectedTypographyText.first,
+        fontSize = settingsFontSize(),
+        textAlign = TextAlign.Right,
+        modifier = Modifier.fillMaxHeight()
+      )
+      },
+    expanded = expandedMenu,
+    items = dropdownData,
+    onClick = onClick,
+    onSelect = { index -> onSelectTypography(Typography.entries[index]) },
+    onDismiss = onDismiss,
+  )
+}
+
+@Composable
 fun ColorPaletteRow(
     selectedColorPalette: ColorPalette,
     expandedMenu: Boolean,
@@ -251,7 +296,7 @@ fun ColorPaletteRow(
     Pair(stringResource(scheme.nameStrRes), null)
   }
   DropdownSettingsRow(
-    title = stringResource(R.string.color_palette),
+    title = stringResource(R.string.colors),
     indicator = {
       Text(
         text = dropdownData[selectedColorPalette.ordinal].first,
@@ -330,9 +375,11 @@ fun SettingsScreen(
     expandDarkModeDropdownMenu: Boolean,
     expandColorPaletteDropdownMenu: Boolean,
     expandHighContrastDropdownMenu: Boolean,
+    expandTypographyDropdownMenu: Boolean,
     clearCacheEnabled: Boolean,
     darkMode: DarkMode,
     colorPalette: ColorPalette,
+    typography: Typography,
     highContrast: HighContrast,
     onClickAuthor: () -> Unit,
     onClickSource: () -> Unit,
@@ -350,6 +397,9 @@ fun SettingsScreen(
     onClickHighContrast: () -> Unit,
     onSelectHighContrast: (HighContrast) -> Unit,
     onDismissHighContrast: () -> Unit,
+    onClickTypography: () -> Unit,
+    onSelectTypography: (Typography) -> Unit,
+    onDismissTypography: () -> Unit,
 ) {
   LazyColumn(
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -357,7 +407,7 @@ fun SettingsScreen(
     modifier = Modifier.fillMaxSize(),
   ) {
     item { Spacer(modifier = bookendSpacerModifier) }
-    item { SettingsTitle(stringResource(R.string.theme)) }
+    item { SettingsTitle(stringResource(R.string.appearance)) }
     item {
       ColorPaletteRow(
         selectedColorPalette = colorPalette,
@@ -365,6 +415,15 @@ fun SettingsScreen(
         onClick = onClickColorPalette,
         onSelectColorPalette = onSelectColorPalette,
         onDismiss = onDismissColorPalette,
+      )
+    }
+    item {
+      TypographyRow(
+        selectedTypography = typography,
+        expandedMenu = expandTypographyDropdownMenu,
+        onClick = onClickTypography,
+        onSelectTypography = onSelectTypography,
+        onDismiss = onDismissTypography,
       )
     }
     item {
@@ -395,6 +454,8 @@ fun SettingsScreen(
     item { SettingsTitle(stringResource(R.string.about)) }
     item { AuthorRow(onClickAuthor) }
     item { SourceRow(onClickSource) }
+    item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+    item { SettingsTitle(stringResource(R.string.etc)) }
     item { EccohedraRow(onClickEccohedra) }
     item { Spacer(modifier = bookendSpacerModifier) }
   }
@@ -504,10 +565,12 @@ fun PreviewUtilSettingsScreen(
     expandDarkModeDropdownMenu: Boolean = false,
     expandColorPaletteDropdownMenu: Boolean = false,
     expandHighContrastDropdownMenu: Boolean = false,
+    expandTypographyDropdownMenu: Boolean = false,
     clearCacheEnabled: Boolean = true,
     darkMode: DarkMode = DarkMode.SYSTEM,
     colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
     highContrast: HighContrast = HighContrast.OFF,
+    typography: Typography = Typography.DEFAULT,
 ) = NoopTheme(darkMode = darkMode) {
   Surface {
     SettingsScreen(
@@ -515,16 +578,19 @@ fun PreviewUtilSettingsScreen(
       expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
       expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,
       expandHighContrastDropdownMenu = expandHighContrastDropdownMenu,
+      expandTypographyDropdownMenu = expandTypographyDropdownMenu,
       clearCacheEnabled = clearCacheEnabled,
       darkMode = darkMode,
       colorPalette = colorPalette,
       highContrast = highContrast,
+      typography = typography,
       onClickAuthor = {}, onClickSource = {}, onClickClearCache = {}, onClickDeleteAllData = {},
       onClickConfirmDeleteAllDataAlertDialog = {}, onClickEccohedra = {},
       onDismissDeleteAllDataAlertDialog = {},
       onClickDarkMode = {}, onSelectDarkMode = {}, onDismissDarkMode = {},
       onClickColorPalette = {}, onSelectColorPalette = {}, onDismissColorPalette = {},
       onClickHighContrast = {}, onSelectHighContrast = {}, onDismissHighContrast = {},
+      onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {},
     )
   }
 }

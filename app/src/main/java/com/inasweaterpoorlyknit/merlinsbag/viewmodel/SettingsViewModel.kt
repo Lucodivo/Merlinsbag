@@ -8,6 +8,7 @@ import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.model.UserPreferences
+import com.inasweaterpoorlyknit.core.model.Typography
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,5 +55,13 @@ class SettingsViewModel @Inject constructor(
 
   fun setHighContrast(highContrast: HighContrast) = viewModelScope.launch(Dispatchers.IO){
     userPreferencesRepository.setHighContrast(highContrast)
+  }
+
+  fun setTypography(typography: Typography) = viewModelScope.launch(Dispatchers.IO){
+    userPreferencesRepository.setTypography(typography)
+  }
+
+  fun showWelcomePage() = viewModelScope.launch(Dispatchers.IO){
+    userPreferencesRepository.setHasCompletedOnboarding(false)
   }
 }

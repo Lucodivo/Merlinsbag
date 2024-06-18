@@ -24,9 +24,20 @@ enum class HighContrast {
   HIGH,
 }
 
+enum class Typography {
+  DEFAULT,
+  MONTSERRAT,
+  JETBRAINS_MONO,
+  CINZEL,
+  CONCERT_ONE,
+  MACONDO,
+  TINY_5,
+}
+
 data class UserPreferences(
     val hasCompletedOnboarding: Boolean = false,
     val darkMode: DarkMode = DarkMode.SYSTEM,
     val colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
     val highContrast: HighContrast = HighContrast.OFF,
+    val typography: Typography = Typography.DEFAULT,
 )

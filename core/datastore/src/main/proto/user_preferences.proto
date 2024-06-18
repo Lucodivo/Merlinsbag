@@ -9,6 +9,16 @@ enum DarkMode {
   DarkMode_Dark = 2;
 }
 
+enum Typography {
+  Typography_Default = 0;
+  Typography_Montserrat = 1;
+  Typography_JetBrainsMono = 2;
+  Typography_Cinzel = 3;
+  Typography_ConcertOne = 4;
+  Typography_Macondo = 5;
+  Typography_Tiny5 = 6;
+}
+
 enum ColorPalette {
   ColorPalette_SystemDynamic = 0;
   ColorPalette_RoadWarrior = 1;
@@ -29,4 +39,5 @@ message UserPreferences {
   DarkMode dark_mode = 2;
   ColorPalette color_palette = 3;
   HighContrast high_contrast = 4;
+  Typography typography = 5;
 }

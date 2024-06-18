@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Web
-import androidx.compose.material.icons.outlined.Camera
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.Category
@@ -31,19 +30,17 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
 import androidx.compose.material.icons.outlined.Rotate90DegreesCw
-import androidx.compose.material.icons.outlined.SdCard
-import androidx.compose.material.icons.outlined.Storage
+import androidx.compose.material.icons.outlined.WavingHand
 import androidx.compose.material.icons.outlined.ZoomInMap
 import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.inasweaterpoorlyknit.core.ui.R
-import java.security.Permission
 
 object NoopIcons {
   val Close = Icons.Filled.Close
@@ -80,6 +77,8 @@ object NoopIcons {
   val Items = Icons.Outlined.Category
   val ItemsSelected = Icons.Filled.Category
   val Folder = Icons.Outlined.Inventory2
+  val WavingHand = Icons.Outlined.WavingHand
+  val Privacy = Icons.Outlined.PrivacyTip
   @Composable fun ensembles() = ImageVector.vectorResource(R.drawable.hashtag)
   @Composable fun ensemblesSelected() = ImageVector.vectorResource(R.drawable.hashtag_heavy)
   @Composable fun systemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)

@@ -5,6 +5,7 @@ import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.model.UserPreferences
+import com.inasweaterpoorlyknit.core.model.Typography
 import kotlinx.coroutines.flow.Flow
 
 class UserPreferencesRepository(
@@ -26,5 +27,9 @@ class UserPreferencesRepository(
 
   suspend fun setHighContrast(highContrast: HighContrast) {
     preferencesDao.setHighContrast(highContrast)
+  }
+
+  suspend fun setTypography(typography: Typography) {
+    preferencesDao.setTypography(typography)
   }
 }

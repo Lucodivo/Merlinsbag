@@ -11,6 +11,7 @@ import androidx.core.view.WindowCompat
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
+import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 
 @Composable
@@ -18,6 +19,7 @@ fun NoopTheme(
     darkMode: DarkMode = DarkMode.SYSTEM,
     colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
     highContrast: HighContrast = HighContrast.OFF,
+    typography: Typography = Typography.DEFAULT,
     content: @Composable () -> Unit,
 ) {
   val dark = when(darkMode){
@@ -34,9 +36,19 @@ fun NoopTheme(
       WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = dark
     }
   }
+  val composeTypography = when(typography) {
+    Typography.DEFAULT -> typographyDefault
+    Typography.MONTSERRAT -> typographyMontserrat
+    Typography.JETBRAINS_MONO -> typographyJetBrainsMono
+    Typography.CINZEL -> typographyCinzel
+    Typography.CONCERT_ONE -> typographyConcertOne
+    Typography.MACONDO -> typographyMacondo
+    Typography.TINY_5 -> typographyTiny5
+  }
   MaterialTheme(
     colorScheme = colorScheme,
-    content = content
+    content = content,
+    typography = composeTypography,
   )
 }
 
