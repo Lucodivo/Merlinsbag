@@ -60,8 +60,6 @@ object NoopIcons {
   val Cancel = Icons.Outlined.Cancel
   val RotateCW = Icons.Outlined.Rotate90DegreesCw
   val Check = Icons.Outlined.Check
-  val Label = Icons.AutoMirrored.Outlined.Label
-  val LabelSelected = Icons.AutoMirrored.Filled.Label
   val SelectableIndicator = Icons.Outlined.Circle
   val SelectedIndicator = Icons.Filled.CheckCircle
   val Settings = Icons.Filled.Settings

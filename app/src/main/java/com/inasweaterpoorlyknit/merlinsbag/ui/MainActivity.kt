@@ -1,15 +1,26 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui
 
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Window
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityUiState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel
@@ -23,6 +34,7 @@ class MainActivity: ComponentActivity() {
   @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     val splashscreen = installSplashScreen()
+    enableEdgeToEdge()
     super.onCreate(savedInstanceState)
 
     var loading = true
@@ -35,6 +47,7 @@ class MainActivity: ComponentActivity() {
       val uiState by mainActivityViewModel.uiState.collectAsStateWithLifecycle()
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
       if(loading && uiState !is MainActivityUiState.Loading) loading = false
+
       NoopTheme(
         darkMode = userPreferences.darkMode,
         colorPalette = userPreferences.colorPalette,

@@ -43,7 +43,6 @@ fun NavController.navigateToAppStartDestination() {
 @Composable
 fun NoopNavHost(
     appState: NoopAppState,
-    modifier: Modifier = Modifier,
     startDestination: String = APP_START_DESTINATION,
 ) {
   val navController = appState.navController
@@ -51,7 +50,6 @@ fun NoopNavHost(
   NavHost(
     navController = navController,
     startDestination = startDestination,
-    modifier = modifier,
   ) {
     composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController) }
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController) }

@@ -29,7 +29,7 @@ android {
             resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true")
         }
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false // TODO: Reverse on release builds
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
             resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")

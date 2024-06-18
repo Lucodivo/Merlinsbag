@@ -3,8 +3,11 @@ package com.inasweaterpoorlyknit.merlinsbag.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -62,7 +65,6 @@ fun NavController.navigateToTopLevelDestination(from: NavUIDestinations, to: Nav
 @Composable
 fun NoopApp(
     appState: NoopAppState,
-    modifier: Modifier = Modifier,
     showOnboarding: Boolean,
 ) {
   Box{
@@ -91,16 +93,15 @@ fun NoopApp(
     ){
       NoopScaffold(
         snackbarHostState = appState.snackbarHostState,
-        modifier = modifier,
+        modifier = Modifier,
       ) { padding ->
         Surface(
-          modifier = modifier
+          modifier = Modifier
               .fillMaxSize()
               .padding(padding),
         ) {
           NoopNavHost(
             appState = appState,
-            modifier = modifier,
           )
         }
       }
@@ -121,7 +122,7 @@ fun NoopScaffold(
   },
   containerColor = Color.Transparent,
   contentColor = MaterialTheme.colorScheme.onBackground,
-  contentWindowInsets = WindowInsets(0, 0, 0, 0),
+  contentWindowInsets = WindowInsets.systemBars,
   snackbarHost = { SnackbarHost(snackbarHostState) },
   content = content,
 )
