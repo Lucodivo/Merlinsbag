@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.core.database
 
+import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -90,5 +91,35 @@ class EnsembleDaoTests: DatabaseTests() {
       assertEquals(ensembleArticles[index].size, it.articles.size)
       assertNotEquals(0, it.articles.size)
     }
+  }
+
+  @Test
+  fun getEnsemblesByArticle() = runBlocking(Dispatchers.IO) {
+    val ensembles1 = createEnsembleEntity(1).sortedBy { it.title }.toTypedArray()
+    val ensembles2 = createEnsembleEntity(5).sortedBy { it.title }.toTypedArray()
+    val ensembles3 = createEnsembleEntity(10).sortedBy { it.title }.toTypedArray()
+    val ensembles4 = createEnsembleEntity(0).sortedBy { it.title }.toTypedArray()
+    val articles = createArticleEntity(4)
+    val ensembleArticles1 = Array(ensembles1.size) { EnsembleArticleEntity(ensembleId = ensembles1[it].id, articleId = articles[0].id) }
+    val ensembleArticles2 = Array(ensembles2.size) { EnsembleArticleEntity(ensembleId = ensembles2[it].id, articleId = articles[1].id) }
+    val ensembleArticles3 = Array(ensembles3.size) { EnsembleArticleEntity(ensembleId = ensembles3[it].id, articleId = articles[2].id) }
+    val ensembleArticles4 = Array(ensembles4.size) { EnsembleArticleEntity(ensembleId = ensembles4[it].id, articleId = articles[3].id) }
+    articleDao.insertArticles(*articles)
+    ensembleDao.insertEnsembles(*ensembles1, *ensembles2, *ensembles3, *ensembles4)
+    ensembleDao.insertArticleEnsemble(*ensembleArticles1, *ensembleArticles2, *ensembleArticles3, *ensembleArticles4)
+
+    val ensemblesByArticle1 = ensembleDao.getEnsemblesByArticle(articles[0].id).first().sortedBy { it.title }
+    val ensemblesByArticle2 = ensembleDao.getEnsemblesByArticle(articles[1].id).first().sortedBy { it.title }
+    val ensemblesByArticle3 = ensembleDao.getEnsemblesByArticle(articles[2].id).first().sortedBy { it.title }
+    val ensemblesByArticle4 = ensembleDao.getEnsemblesByArticle(articles[3].id).first().sortedBy { it.title }
+
+    assertEquals(ensembleArticles1.size, ensemblesByArticle1.size)
+    assertEquals(ensembleArticles2.size, ensemblesByArticle2.size)
+    assertEquals(ensembleArticles3.size, ensemblesByArticle3.size)
+    assertEquals(ensembleArticles4.size, ensemblesByArticle4.size)
+    ensembles1.forEachIndexed{ i, it -> assertEquals(it.title, ensemblesByArticle1[i].title) }
+    ensembles2.forEachIndexed{ i, it -> assertEquals(it.title, ensemblesByArticle2[i].title) }
+    ensembles3.forEachIndexed{ i, it -> assertEquals(it.title, ensemblesByArticle3[i].title) }
+    ensembles4.forEachIndexed{ i, it -> assertEquals(it.title, ensemblesByArticle4[i].title) }
   }
 }

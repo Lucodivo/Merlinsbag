@@ -11,10 +11,10 @@ import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
 fun createCounterString() = Counter.next().toString()
 fun createCounterString(count: Int) = Array(count){ Counter.next().toString() }
 
-fun createArticleEntity(id: String = createCounterString()) = ArticleEntity(id = id, created = Counter.next(), modified = Counter.next())
+fun createArticleEntity(id: String = createCounterString()) = ArticleEntity(id = id, created = 0, modified = 0)
 fun createArticleEntity(count: Int) = Array(count){ createArticleEntity() }
 
-fun createEnsembleEntity(id: String = createCounterString()) = EnsembleEntity(id = id, title = id, created = Counter.next(), modified = Counter.next())
+fun createEnsembleEntity(id: String = createCounterString()) = EnsembleEntity(id = id, title = id, created = 0, modified = 0)
 fun createEnsembleEntity(count: Int) = Array(count){ createEnsembleEntity() }
 
 fun createArticleImageEntity(ArticleId: String = randUUIDString()) = ArticleImageEntity(

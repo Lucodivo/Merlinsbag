@@ -63,6 +63,13 @@ interface EnsembleDao {
             WHERE id = :ensembleId """)
   fun getEnsemble(ensembleId: String): Flow<Ensemble>
 
+  @Transaction @Query(
+    """SELECT ensemble.id, ensemble.title
+      FROM ensemble 
+      JOIN ensemble_article ON ensemble_article.ensemble_id = ensemble.id
+      WHERE ensemble_article.article_id = :articleId""")
+  fun getEnsemblesByArticle(articleId: String): Flow<List<Ensemble>>
+
   // NOTE: Only used for tests
   @Query("""SELECT COUNT(id) FROM ensemble""") fun getEnsemblesCount(): Flow<Int>
 
