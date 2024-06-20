@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -49,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.LandscapePreview
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
@@ -278,7 +280,7 @@ fun EnsembleDetailScreen(
       val titleRowInteractionSource = remember { MutableInteractionSource() }
       val outsideKeyboardRowInteractionSource = remember { MutableInteractionSource() }
       Box(
-        contentAlignment = Alignment.Center,
+        contentAlignment = if(compactWidth) Alignment.TopCenter else Alignment.TopStart,
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
@@ -299,19 +301,23 @@ fun EnsembleDetailScreen(
             keyboardActions = KeyboardActions(onDone = { onTitleChanged(editTitle) }),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp)
+                .padding(horizontal = 20.dp)
                 .focusRequester(focusRequester)
           )
           LaunchedEffect(Unit) { focusRequester.requestFocus() }
           BackHandler { onAbandonEditTitle() }
         } else {
-          val titleModifier = Modifier.fillMaxWidth().padding(horizontal = if(compactWidth) 0.dp else 16.dp)
+          val titleModifier = Modifier
+          val iconModifier = Modifier.padding(start = if(compactWidth) 0.dp else 16.dp, end = 4.dp)
           val titleAlign = if(compactWidth) TextAlign.Center else TextAlign.Start
           val titleFontSize = MaterialTheme.typography.titleLarge.fontSize
-          if(title.isNotEmpty()) {
-            Text(text = title, textAlign = titleAlign, fontSize = titleFontSize, modifier = titleModifier)
-          } else {
-            Text(text = "[untitled]", textAlign = titleAlign, fontSize = titleFontSize, color = Color.Gray, modifier = titleModifier)
+          Row{
+            Icon(NoopIcons.ensembles(), TODO_ICON_CONTENT_DESCRIPTION, modifier = iconModifier)
+            if(title.isNotEmpty()) {
+              Text(text = title, textAlign = titleAlign, fontSize = titleFontSize, modifier = titleModifier)
+            } else {
+              Text(text = "[untitled]", textAlign = titleAlign, fontSize = titleFontSize, color = Color.Gray, modifier = titleModifier)
+            }
           }
         }
       }
@@ -453,11 +459,9 @@ fun PreviewUtilEnsembleDetailFloatingActionButtons(
   )
 }
 
-@Preview
-@Composable
-fun PreviewEnsembleDetailScreen() = NoopTheme {
-  PreviewUtilEnsembleDetailScreen(editingTitle = false)
-}
+@Preview @Composable fun PreviewEnsembleDetailScreen() = NoopTheme { PreviewUtilEnsembleDetailScreen() }
+
+@LandscapePreview @Composable fun PreviewEnsembleDetailScreen_EditingLandscape() = NoopTheme { PreviewUtilEnsembleDetailScreen(editMode = true) }
 
 @Preview
 @Composable
@@ -514,8 +518,5 @@ fun PreviewAddArticlesDialog_noAddArticles() = NoopTheme {
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = PreviewUtilEnsembleDetailFloatingActionButtons(false)
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = PreviewUtilEnsembleDetailFloatingActionButtons(true)
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(true, setOf(0))
-
-@Preview
-@Composable
-fun PreviewDeleteEnsembleAlertDialog() = NoopTheme { DeleteEnsembleAlertDialog(onDismiss = {}, onClickPositive = {}) }
+@Preview @Composable fun PreviewDeleteEnsembleAlertDialog() = NoopTheme { DeleteEnsembleAlertDialog(onDismiss = {}, onClickPositive = {}) }
 //endregion

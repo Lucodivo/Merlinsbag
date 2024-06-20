@@ -11,17 +11,12 @@ Database:
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
-Article Detail:
-    - Display article filter at the top if one is active
 Ensembles:
     - More efficient grid-type view?
 Ensemble Detail:
     - Swipe between ensemble details
 Features:
     - Collage
-    - Tags
-        - Are ensembles already tags?
-        - Chips
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - NavigationRail [COMPLETED]

@@ -7,8 +7,10 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -255,11 +257,14 @@ fun ArticleDetailScreen(
     )
   }
   val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
-  val horizontalTitlePadding = if(compactWidth) 0.dp else 16.dp
+  val iconModifier = Modifier.padding(start = if(compactWidth) 0.dp else 16.dp, end = 4.dp)
   if(filter.isNotEmpty()) {
     Box(contentAlignment = if(compactWidth) Alignment.TopCenter else Alignment.TopStart,
-      modifier = Modifier.fillMaxSize().padding(top = systemBarTopPadding, start = horizontalTitlePadding, end = horizontalTitlePadding)) {
-      Text(text = filter, textAlign = TextAlign.Start, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+      modifier = Modifier.fillMaxSize().padding(top = systemBarTopPadding)) {
+      Row {
+        Icon(NoopIcons.ensembles(), TODO_ICON_CONTENT_DESCRIPTION, modifier = iconModifier)
+        Text(text = filter, textAlign = TextAlign.Start, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+      }
     }
   }
   Box(
@@ -284,7 +289,7 @@ fun ArticleDetailScreen(
         item { Spacer(modifier = Modifier.fillParentMaxWidth(0.90f)) }
       }
     } else {
-      LazyColumn(state = ensembleListState) {
+      LazyColumn(state = ensembleListState, horizontalAlignment = Alignment.End) {
         item { Spacer(modifier = Modifier.height(systemBarTopPadding)) }
         items()
         item { Spacer(modifier = Modifier.fillParentMaxHeight(0.90f)) }
