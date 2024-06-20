@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -14,13 +15,17 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +33,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -83,7 +89,8 @@ fun ArticleDetailRoute(
         factory.create(ensembleId)
       }
   val settingsLauncher = rememberSettingsLauncher()
-  val lazyArticleImagesUris by articleDetailViewModel.articleDetailUiState.collectAsStateWithLifecycle()
+  val lazyArticleImagesUris by articleDetailViewModel.articleLazyUriStrings.collectAsStateWithLifecycle()
+  val articlesEnsembles by articleDetailViewModel.articleEnsembles.collectAsStateWithLifecycle()
   var floatingActionButtonExpanded by remember { mutableStateOf(false) }
   var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
   var showPermissionsAlertDialog by remember { mutableStateOf(false) }
@@ -124,8 +131,14 @@ fun ArticleDetailRoute(
       }
     }
   }
+  LaunchedEffect(pagerState) {
+    snapshotFlow { pagerState.currentPage }.collect { page ->
+      articleDetailViewModel.onArticleFocus(page)
+    }
+  }
   ArticleDetailScreen(
     articlesWithImages = lazyArticleImagesUris,
+    articleEnsembleTitles = articlesEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
     pagerState = pagerState,
     floatingActionButtonExpanded = floatingActionButtonExpanded,
     exportingEnabled = !articleBeingExported.containsKey(pagerState.currentPage),
@@ -145,6 +158,7 @@ fun ArticleDetailRoute(
       showPermissionsAlertDialog = false
       settingsLauncher.launch()
     },
+    onClickEnsemble = { navController.navigateToEnsembleDetail(articlesEnsembles[it].id) },
     modifier = modifier,
   )
 }
@@ -152,6 +166,7 @@ fun ArticleDetailRoute(
 @Composable
 fun ArticleDetailScreen(
     articlesWithImages: LazyUriStrings,
+    articleEnsembleTitles: List<String>,
     pagerState: PagerState,
     exportingEnabled: Boolean,
     floatingActionButtonExpanded: Boolean,
@@ -165,19 +180,32 @@ fun ArticleDetailScreen(
     onDismissPermissionsDialog: () -> Unit,
     onConfirmPermissionsDialog: () -> Unit,
     modifier: Modifier = Modifier,
+    onClickEnsemble: (index: Int) -> Unit,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
 ) {
   val layoutDir = LocalLayoutDirection.current
-  HorizontalPager(
-    state = pagerState
-  ) { page ->
-    NoopImage(
-      uriString = articlesWithImages.getUriString(page),
-      contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-      modifier = modifier
-          .fillMaxSize()
-          .padding(16.dp),
-    )
+  Column {
+    HorizontalPager(
+      state = pagerState,
+      modifier = Modifier.weight(1f)
+    ) { page ->
+      NoopImage(
+        uriString = articlesWithImages.getUriString(page),
+        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+      )
+    }
+    LazyRow {
+      items(articleEnsembleTitles.size) { i ->
+        SuggestionChip(
+          label = { Text(text = articleEnsembleTitles[i]) },
+          onClick = { onClickEnsemble(i) },
+          modifier = Modifier.padding(horizontal = 2.dp)
+        )
+      }
+    }
   }
   FloatingActionButtonDetailScreen(
     expanded = floatingActionButtonExpanded,
@@ -272,14 +300,16 @@ fun PreviewUtilArticleDetailScreen(
       )
   ArticleDetailScreen(
     articlesWithImages = articlesWithImages,
+    articleEnsembleTitles = listOf("Road Warrior","Goth 2 Boss","John Prine","Townes Van Zandt","Deafheaven",),
     pagerState = rememberPagerState(initialPage = 0, pageCount = { articlesWithImages.size }),
-    floatingActionButtonExpanded = floatingActionButtonExpanded,
     exportingEnabled = true,
+    floatingActionButtonExpanded = floatingActionButtonExpanded,
     showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
-    showPermissionsAlertDialog = showPermissionsAlertDialog,
-    onClickDelete = {}, onClickExport = {}, onClickEdit = {}, onConfirmDeleteDialog = {},
-    onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {},
-    onDismissDeleteDialog = {},
+    showPermissionsAlertDialog = showPermissionsAlertDialog, onClickEdit = {}, onClickExport = {}, onClickDelete = {},
+    onDismissDeleteDialog = {}, onConfirmDeleteDialog = {},
+    onDismissPermissionsDialog = {},
+    onConfirmPermissionsDialog = {},
+    onClickEnsemble = {},
   )
 }
 

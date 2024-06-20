@@ -32,6 +32,7 @@ class EnsembleRepository(
       ensembleDao.searchEnsembleArticleThumbnails(query).listMap { it.toLazyEnsembleThumbnails() }
   fun getEnsembleArticleThumbnails(ensembleId: String) = ensembleDao.getEnsembleArticleThumbnails(ensembleId).map{ LazyArticleThumbnails(articleFilesDirStr(context), it) }
   fun getEnsemble(ensembleId: String): Flow<Ensemble> = ensembleDao.getEnsemble(ensembleId)
+  fun getEnsemblesByArticle(articleId: String): Flow<List<Ensemble>> = ensembleDao.getEnsemblesByArticle(articleId)
   fun insertEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(title, articleIds)
   fun deleteEnsembleArticles(ensembleId: String, articleIds: List<String>) = ensembleDao.deleteArticleEnsembles(ensembleId, articleIds)
   fun updateEnsemble(updatedEnsemble: Ensemble) = ensembleDao.updateEnsemble(updatedEnsemble)

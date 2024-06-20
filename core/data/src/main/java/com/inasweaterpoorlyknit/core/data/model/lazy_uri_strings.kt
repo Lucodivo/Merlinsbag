@@ -12,6 +12,7 @@ class LazyArticleFullImages(
   override val size get() = articleFullImagePaths.size
   fun getArticleId(index: Int) = articleFullImagePaths[index].articleId
   override fun getUriString(index: Int): String = "$directory${articleFullImagePaths[index].fullImagePaths[0].filename}"
+  companion object { val Empty = LazyArticleFullImages("", emptyList()) }
 }
 
 class LazyArticleThumbnails(

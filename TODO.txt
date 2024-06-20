@@ -31,7 +31,6 @@ Accessibility:
             - If form, app icons can be localized to a single file with content descriptions instead of writing descriptions per Icon usage
             - https://m3.material.io/foundations/content-design/alt-text
 App-wide UI:
-    - EdgeToEdge
     - Explicit to Screen animations
 Tooling:
     - UI Catalog
