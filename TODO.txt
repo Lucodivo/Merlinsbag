@@ -12,9 +12,11 @@ Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
 Article Detail:
-    - Ensemble chips
+    - Display article filter at the top if one is active
 Ensembles:
     - More efficient grid-type view?
+Ensemble Detail:
+    - Swipe between ensemble details
 Features:
     - Collage
     - Tags

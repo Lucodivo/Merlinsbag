@@ -34,7 +34,7 @@ class EnsembleRepository(
   fun getEnsemble(ensembleId: String): Flow<Ensemble> = ensembleDao.getEnsemble(ensembleId)
   fun getEnsemblesByArticle(articleId: String): Flow<List<Ensemble>> = ensembleDao.getEnsemblesByArticle(articleId)
   fun insertEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(title, articleIds)
-  fun deleteEnsembleArticles(ensembleId: String, articleIds: List<String>) = ensembleDao.deleteArticleEnsembles(ensembleId, articleIds)
+  fun deleteEnsembleArticles(ensembleId: String, articleIds: List<String>) = ensembleDao.deleteArticleEnsemblesFromEnsemble(ensembleId = ensembleId, articleIds = articleIds)
   fun updateEnsemble(updatedEnsemble: Ensemble) = ensembleDao.updateEnsemble(updatedEnsemble)
   fun addEnsembleArticles(ensembleId: String, articleIds: List<String>) {
     val ensembleArticles = Array(articleIds.size){ EnsembleArticleEntity(ensembleId, articleIds[it]) }
@@ -42,4 +42,5 @@ class EnsembleRepository(
   }
   fun deleteEnsemble(ensembleId: String) = ensembleDao.deleteEnsemble(ensembleId)
   fun deleteEnsembles(ensembleIds: List<String>) = ensembleDao.deleteEnsembles(ensembleIds)
+  fun removeArticleEnsembles(articleId: String, ensembleIds: List<String>) = ensembleDao.deleteArticleEnsemblesFromArticle(articleId = articleId, ensembleIds = ensembleIds)
 }

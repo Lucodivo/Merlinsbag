@@ -36,7 +36,11 @@ interface EnsembleDao {
 
   @Query("""DELETE FROM ensemble_article 
             WHERE ensemble_id = :ensembleId AND article_id IN (:articleIds)""")
-  fun deleteArticleEnsembles(ensembleId: String, articleIds: List<String>)
+  fun deleteArticleEnsemblesFromEnsemble(ensembleId: String, articleIds: List<String>)
+
+  @Query("""DELETE FROM ensemble_article 
+            WHERE article_id = :articleId AND ensemble_id IN (:ensembleIds)""")
+  fun deleteArticleEnsemblesFromArticle(articleId: String, ensembleIds: List<String>)
 
   @Transaction @Query(
     """SELECT ensemble_article.article_id as article_id 

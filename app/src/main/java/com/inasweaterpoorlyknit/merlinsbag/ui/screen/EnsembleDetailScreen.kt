@@ -198,7 +198,7 @@ fun EnsembleDetailFloatingActionButtons(
           ),
           IconButtonData(
             icon = IconData(
-              icon = NoopIcons.Delete,
+              icon = NoopIcons.attachmentRemove(),
               contentDescription = TODO_ICON_CONTENT_DESCRIPTION
             ),
             onClick = onClickRemoveArticles

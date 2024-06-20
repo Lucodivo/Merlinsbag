@@ -1,8 +1,6 @@
 package com.inasweaterpoorlyknit.core.ui.theme
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddPhotoAlternate
@@ -81,4 +79,5 @@ object NoopIcons {
   @Composable fun ensemblesSelected() = ImageVector.vectorResource(R.drawable.hashtag_heavy)
   @Composable fun systemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)
   @Composable fun eccohedra() = ImageVector.vectorResource(R.drawable.eccohedra)
+  @Composable fun attachmentRemove() = ImageVector.vectorResource(R.drawable.attachment_remove)
 }

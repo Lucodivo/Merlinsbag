@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalFoundationApi::class)
+
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.Manifest.permission
@@ -6,26 +7,35 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,11 +44,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +59,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
+import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.COMPOSE_ID
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
@@ -57,6 +70,7 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
+import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.repeatedFullResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
@@ -81,6 +95,7 @@ fun ArticleDetailRoute(
     snackbarHostState: SnackbarHostState,
     articleIndex: Int,
     ensembleId: String?,
+    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
@@ -91,15 +106,17 @@ fun ArticleDetailRoute(
   val settingsLauncher = rememberSettingsLauncher()
   val lazyArticleImagesUris by articleDetailViewModel.articleLazyUriStrings.collectAsStateWithLifecycle()
   val articlesEnsembles by articleDetailViewModel.articleEnsembles.collectAsStateWithLifecycle()
-  var floatingActionButtonExpanded by remember { mutableStateOf(false) }
+  var editMode by remember { mutableStateOf(false) }
   var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
   var showPermissionsAlertDialog by remember { mutableStateOf(false) }
+  val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
+  var ensembleListState by remember { mutableStateOf(LazyListState()) }
   val pagerState = rememberPagerState(
     initialPage = articleIndex,
     initialPageOffsetFraction = 0.0f,
     pageCount = { lazyArticleImagesUris.size },
   )
-  val articleBeingExported = remember { mutableStateMapOf<Int,Unit>() } // TODO: No mutableStateSetOf ??
+  val articleBeingExported = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
     onPermissionsGranted = {
       val index = pagerState.currentPage
@@ -116,7 +133,7 @@ fun ArticleDetailRoute(
         message = context.getString(R.string.image_exported),
         actionLabel = context.getString(R.string.open),
         duration = SnackbarDuration.Short,
-      )){
+      )) {
         SnackbarResult.Dismissed -> {}
         SnackbarResult.ActionPerformed -> {
           // TODO: There are other ways to open up an image URI that may need to be explored
@@ -134,17 +151,25 @@ fun ArticleDetailRoute(
   LaunchedEffect(pagerState) {
     snapshotFlow { pagerState.currentPage }.collect { page ->
       articleDetailViewModel.onArticleFocus(page)
+      ensembleListState = LazyListState()
+      selectedEnsembles.clear()
     }
   }
   ArticleDetailScreen(
+    windowSizeClass = windowSizeClass,
     articlesWithImages = lazyArticleImagesUris,
     articleEnsembleTitles = articlesEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
     pagerState = pagerState,
-    floatingActionButtonExpanded = floatingActionButtonExpanded,
+    ensembleListState = ensembleListState,
+    selectedEnsembles = selectedEnsembles.keys,
+    editMode = editMode,
     exportingEnabled = !articleBeingExported.containsKey(pagerState.currentPage),
     showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
     showPermissionsAlertDialog = showPermissionsAlertDialog,
-    onClickEdit = { floatingActionButtonExpanded = !floatingActionButtonExpanded },
+    onClickEdit = {
+      if(editMode) selectedEnsembles.clear()
+      editMode = !editMode
+    },
     onClickExport = { exportWithPermissionsCheckLauncher.launch(REQUIRED_STORAGE_PERMISSIONS) },
     onClickDelete = { showDeleteArticleAlertDialog = true },
     onDismissDeleteDialog = { showDeleteArticleAlertDialog = false },
@@ -158,23 +183,35 @@ fun ArticleDetailRoute(
       showPermissionsAlertDialog = false
       settingsLauncher.launch()
     },
-    onClickEnsemble = { navController.navigateToEnsembleDetail(articlesEnsembles[it].id) },
+    onClickEnsemble = {
+      if(editMode) {
+        if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
+        else selectedEnsembles[it] = Unit
+      } else navController.navigateToEnsembleDetail(articlesEnsembles[it].id)
+    },
+    onClickRemoveEnsembles = {
+      articleDetailViewModel.removeArticleEnsembles(pagerState.currentPage, selectedEnsembles.keys.toList())
+      selectedEnsembles.clear()
+    },
     modifier = modifier,
   )
 }
 
 @Composable
 fun ArticleDetailScreen(
+    windowSizeClass: WindowSizeClass,
     articlesWithImages: LazyUriStrings,
     articleEnsembleTitles: List<String>,
     pagerState: PagerState,
-    exportingEnabled: Boolean,
-    floatingActionButtonExpanded: Boolean,
+    ensembleListState: LazyListState,
+    selectedEnsembles: Set<Int>,
+    editMode: Boolean,
     showDeleteArticleAlertDialog: Boolean,
     showPermissionsAlertDialog: Boolean,
     onClickEdit: () -> Unit,
     onClickExport: () -> Unit,
     onClickDelete: () -> Unit,
+    onClickRemoveEnsembles: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
     onConfirmDeleteDialog: () -> Unit,
     onDismissPermissionsDialog: () -> Unit,
@@ -182,40 +219,62 @@ fun ArticleDetailScreen(
     modifier: Modifier = Modifier,
     onClickEnsemble: (index: Int) -> Unit,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
+    exportingEnabled: Boolean,
 ) {
   val layoutDir = LocalLayoutDirection.current
-  Column {
-    HorizontalPager(
-      state = pagerState,
-      modifier = Modifier.weight(1f)
-    ) { page ->
-      NoopImage(
-        uriString = articlesWithImages.getUriString(page),
-        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-      )
-    }
-    LazyRow {
+  HorizontalPager(
+    state = pagerState,
+    verticalAlignment = Alignment.Bottom,
+    modifier = Modifier.sizeIn(minHeight = ButtonDefaults.MinHeight)
+  ) { page ->
+    NoopImage(
+      uriString = articlesWithImages.getUriString(page),
+      contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+      modifier = modifier
+          .fillMaxSize()
+          .padding(16.dp),
+    )
+  }
+  val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+  Box(
+    contentAlignment = if(compactWidth) Alignment.BottomStart else Alignment.TopStart,
+    modifier = Modifier.fillMaxSize()
+  ) {
+    val items: LazyListScope.() -> Unit = {
       items(articleEnsembleTitles.size) { i ->
-        SuggestionChip(
+        InputChip(
+          selected = selectedEnsembles.contains(i),
           label = { Text(text = articleEnsembleTitles[i]) },
+          leadingIcon = { Icon(imageVector = NoopIcons.ensembles(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+          trailingIcon = { if(editMode) Icon(imageVector = NoopIcons.Close, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
           onClick = { onClickEnsemble(i) },
-          modifier = Modifier.padding(horizontal = 2.dp)
+          modifier = Modifier.padding(horizontal = 2.dp),
         )
+      }
+    }
+    if(compactWidth) {
+      LazyRow(state = ensembleListState) {
+        items()
+        item { Spacer(modifier = Modifier.fillParentMaxWidth(0.90f)) }
+      }
+    } else {
+      LazyColumn(state = ensembleListState) {
+        items()
+        item { Spacer(modifier = Modifier.fillParentMaxHeight(0.90f)) }
       }
     }
   }
   FloatingActionButtonDetailScreen(
-    expanded = floatingActionButtonExpanded,
+    expanded = editMode,
     exportingEnabled = exportingEnabled,
+    removeEnsemblesEnabled = selectedEnsembles.isNotEmpty(),
     onClickEdit = onClickEdit,
     onClickDelete = onClickDelete,
     onClickExport = onClickExport,
+    onClickRemoveEnsembles = onClickRemoveEnsembles,
     modifier = Modifier.padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
   )
-  if(showDeleteArticleAlertDialog){
+  if(showDeleteArticleAlertDialog) {
     DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
   }
   if(showPermissionsAlertDialog) {
@@ -227,9 +286,11 @@ fun ArticleDetailScreen(
 fun FloatingActionButtonDetailScreen(
     expanded: Boolean,
     exportingEnabled: Boolean,
+    removeEnsemblesEnabled: Boolean,
     onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
     onClickExport: () -> Unit,
+    onClickRemoveEnsembles: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
   NoopBottomEndButtonContainer(modifier = modifier) {
@@ -244,6 +305,11 @@ fun FloatingActionButtonDetailScreen(
           onClick = { onClickDelete() }
         ),
         IconButtonData(
+          icon = IconData(NoopIcons.attachmentRemove(), TODO_ICON_CONTENT_DESCRIPTION),
+          onClick = onClickRemoveEnsembles,
+          enabled = removeEnsemblesEnabled,
+        ),
+        IconButtonData(
           icon = IconData(NoopIcons.Download, TODO_ICON_CONTENT_DESCRIPTION),
           onClick = onClickExport,
           enabled = exportingEnabled,
@@ -256,67 +322,74 @@ fun FloatingActionButtonDetailScreen(
 
 @Composable
 fun DeleteArticleAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-  NoopSimpleAlertDialog(
-    title = stringResource(id = R.string.delete_article),
-    text = stringResource(id = R.string.deleted_articles_unrecoverable),
-    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
-    onDismiss = onDismiss,
-    onConfirm = onConfirm,
-    confirmText = stringResource(id = R.string.delete),
-    cancelText = stringResource(id = R.string.cancel),
-  )
+    NoopSimpleAlertDialog(
+      title = stringResource(id = R.string.delete_article),
+      text = stringResource(id = R.string.deleted_articles_unrecoverable),
+      headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+      onDismiss = onDismiss,
+      onConfirm = onConfirm,
+      confirmText = stringResource(id = R.string.delete),
+      cancelText = stringResource(id = R.string.cancel),
+    )
 
 @Composable
 fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-  NoopSimpleAlertDialog(
-    title = stringResource(id = R.string.permission_alert_title),
-    text = stringResource(id = R.string.export_permission_alert_justification),
-    onDismiss = onDismiss,
-    onConfirm = onConfirm,
-    confirmText = stringResource(id = R.string.permission_alert_positive),
-    cancelText = stringResource(id = R.string.permission_alert_negative),
-    headerIcon = { Icon(imageVector = NoopIcons.Folder, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
-  )
+    NoopSimpleAlertDialog(
+      title = stringResource(id = R.string.permission_alert_title),
+      text = stringResource(id = R.string.export_permission_alert_justification),
+      onDismiss = onDismiss,
+      onConfirm = onConfirm,
+      confirmText = stringResource(id = R.string.permission_alert_positive),
+      cancelText = stringResource(id = R.string.permission_alert_negative),
+      headerIcon = { Icon(imageVector = NoopIcons.Folder, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    )
 
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilArticleDetailScreen(
+    darkMode: Boolean = false,
     floatingActionButtonExpanded: Boolean = false,
     showDeleteArticleAlertDialog: Boolean = false,
     showPermissionsAlertDialog: Boolean = false,
-) = NoopTheme {
+) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   val articlesWithImages = LazyArticleThumbnails(
-        directory = "",
-        articleThumbnailPaths = listOf(
-          ArticleWithThumbnails(
-            articleId = COMPOSE_ID,
-            thumbnailPaths = listOf(
-              ThumbnailFilename(
-                filenameThumb = repeatedFullResourceIdsAsStrings[0],
-              ),
-            ),
-          )
-        )
+    directory = "",
+    articleThumbnailPaths = listOf(
+      ArticleWithThumbnails(
+        articleId = COMPOSE_ID,
+        thumbnailPaths = listOf(
+          ThumbnailFilename(
+            filenameThumb = repeatedFullResourceIdsAsStrings[0],
+          ),
+        ),
       )
-  ArticleDetailScreen(
-    articlesWithImages = articlesWithImages,
-    articleEnsembleTitles = listOf("Road Warrior","Goth 2 Boss","John Prine","Townes Van Zandt","Deafheaven",),
-    pagerState = rememberPagerState(initialPage = 0, pageCount = { articlesWithImages.size }),
-    exportingEnabled = true,
-    floatingActionButtonExpanded = floatingActionButtonExpanded,
-    showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
-    showPermissionsAlertDialog = showPermissionsAlertDialog, onClickEdit = {}, onClickExport = {}, onClickDelete = {},
-    onDismissDeleteDialog = {}, onConfirmDeleteDialog = {},
-    onDismissPermissionsDialog = {},
-    onConfirmPermissionsDialog = {},
-    onClickEnsemble = {},
+    )
   )
+  Surface {
+    ArticleDetailScreen(
+      windowSizeClass = currentWindowAdaptiveInfo(),
+      articlesWithImages = articlesWithImages,
+      articleEnsembleTitles = listOf("Road Warrior", "Goth 2 Boss", "John Prine", "Townes Van Zandt", "Deafheaven"),
+      pagerState = rememberPagerState(initialPage = 0, pageCount = { articlesWithImages.size }),
+      ensembleListState = rememberLazyListState(),
+      selectedEnsembles = setOf(1),
+      editMode = floatingActionButtonExpanded,
+      showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
+      showPermissionsAlertDialog = showPermissionsAlertDialog, onClickEdit = {}, onClickExport = {}, onClickDelete = {},
+      onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onClickRemoveEnsembles = {},
+      onDismissPermissionsDialog = {},
+      onConfirmPermissionsDialog = {},
+      onClickEnsemble = {},
+      exportingEnabled = true,
+    )
+  }
 }
 
-@Preview @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen()
-@Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true)
+@PreviewScreenSizes @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen()
+@Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, darkMode = true)
 @Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() =
     PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, showDeleteArticleAlertDialog = true)
+
 @Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() =
     PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, showPermissionsAlertDialog = true)
 //endregion

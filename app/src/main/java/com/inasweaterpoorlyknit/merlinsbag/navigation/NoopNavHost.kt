@@ -72,6 +72,7 @@ fun NoopNavHost(
       ArticleDetailRoute(
         navController = navController,
         snackbarHostState = appState.snackbarHostState,
+        windowSizeClass = appState.windowSizeClass,
         articleIndex = articleIndexArg,
         ensembleId = ensembleIdArg,
       )
