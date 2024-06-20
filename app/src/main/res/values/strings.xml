@@ -84,4 +84,7 @@
     <string name="font">Font</string>
     <string name="colors">Colors</string>
     <string name="privacy_information">Privacy Information</string>
+    <string name="remove_ensembles">Remove Ensembles</string>
+    <string name="remove">Remove</string>
+    <string name="are_you_sure_remove_article_from_ensembles">Are you sure you would like to remove this article from the selected ensembles? You can add it back at any time.</string>
 </resources>

@@ -109,6 +109,7 @@ fun ArticleDetailRoute(
   var editMode by remember { mutableStateOf(false) }
   var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
   var showPermissionsAlertDialog by remember { mutableStateOf(false) }
+  var showRemoveFromEnsemblesAlertDialog by remember { mutableStateOf(false) }
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
   val pagerState = rememberPagerState(
@@ -166,6 +167,7 @@ fun ArticleDetailRoute(
     exportingEnabled = !articleBeingExported.containsKey(pagerState.currentPage),
     showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
     showPermissionsAlertDialog = showPermissionsAlertDialog,
+    showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
     onClickEdit = {
       if(editMode) selectedEnsembles.clear()
       editMode = !editMode
@@ -178,6 +180,13 @@ fun ArticleDetailRoute(
       if(pagerState.pageCount == 1) navController.popBackStack()
       articleDetailViewModel.deleteArticle(pagerState.currentPage)
     },
+    onDismissRemoveFromEnsemblesDialog = { showRemoveFromEnsemblesAlertDialog = false },
+    onConfirmRemoveFromEnsemblesDialog = {
+      articleDetailViewModel.removeArticleEnsembles(pagerState.currentPage, selectedEnsembles.keys.toList())
+      selectedEnsembles.clear()
+      showRemoveFromEnsemblesAlertDialog = false
+      ensembleListState = LazyListState()
+    },
     onDismissPermissionsDialog = { showPermissionsAlertDialog = false },
     onConfirmPermissionsDialog = {
       showPermissionsAlertDialog = false
@@ -189,10 +198,8 @@ fun ArticleDetailRoute(
         else selectedEnsembles[it] = Unit
       } else navController.navigateToEnsembleDetail(articlesEnsembles[it].id)
     },
-    onClickRemoveEnsembles = {
-      articleDetailViewModel.removeArticleEnsembles(pagerState.currentPage, selectedEnsembles.keys.toList())
-      selectedEnsembles.clear()
-    },
+    onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
+    onClickCancelEnsemblesSelection = { selectedEnsembles.clear() },
     modifier = modifier,
   )
 }
@@ -208,18 +215,22 @@ fun ArticleDetailScreen(
     editMode: Boolean,
     showDeleteArticleAlertDialog: Boolean,
     showPermissionsAlertDialog: Boolean,
-    onClickEdit: () -> Unit,
+    showRemoveFromEnsemblesAlertDialog: Boolean,
     onClickExport: () -> Unit,
     onClickDelete: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
+    onClickCancelEnsemblesSelection: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
     onConfirmDeleteDialog: () -> Unit,
+    onConfirmRemoveFromEnsemblesDialog: () -> Unit,
+    onDismissRemoveFromEnsemblesDialog: () -> Unit,
     onDismissPermissionsDialog: () -> Unit,
     onConfirmPermissionsDialog: () -> Unit,
     modifier: Modifier = Modifier,
     onClickEnsemble: (index: Int) -> Unit,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     exportingEnabled: Boolean,
+    onClickEdit: () -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
   HorizontalPager(
@@ -272,14 +283,12 @@ fun ArticleDetailScreen(
     onClickDelete = onClickDelete,
     onClickExport = onClickExport,
     onClickRemoveEnsembles = onClickRemoveEnsembles,
+    onClickCancelEnsemblesSelection = onClickCancelEnsemblesSelection,
     modifier = Modifier.padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
   )
-  if(showDeleteArticleAlertDialog) {
-    DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
-  }
-  if(showPermissionsAlertDialog) {
-    ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
-  }
+  if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
+  if(showPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
+  if(showRemoveFromEnsemblesAlertDialog) RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
 }
 
 @Composable
@@ -291,6 +300,7 @@ fun FloatingActionButtonDetailScreen(
     onClickDelete: () -> Unit,
     onClickExport: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
+    onClickCancelEnsemblesSelection: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
   NoopBottomEndButtonContainer(modifier = modifier) {
@@ -299,15 +309,19 @@ fun FloatingActionButtonDetailScreen(
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
       expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
       onClick = onClickEdit,
-      verticalExpandedButtons = listOf(
+      verticalExpandedButtons = if(removeEnsemblesEnabled) listOf(
         IconButtonData(
-          icon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
-          onClick = { onClickDelete() }
+          icon = IconData(icon = NoopIcons.Cancel, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+          onClick = onClickCancelEnsemblesSelection
         ),
         IconButtonData(
           icon = IconData(NoopIcons.attachmentRemove(), TODO_ICON_CONTENT_DESCRIPTION),
           onClick = onClickRemoveEnsembles,
-          enabled = removeEnsemblesEnabled,
+        ),
+      ) else listOf(
+        IconButtonData(
+          icon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
+          onClick = { onClickDelete() }
         ),
         IconButtonData(
           icon = IconData(NoopIcons.Download, TODO_ICON_CONTENT_DESCRIPTION),
@@ -333,6 +347,18 @@ fun DeleteArticleAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
     )
 
 @Composable
+fun RemoveFromEnsemblesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+    NoopSimpleAlertDialog(
+      title = stringResource(id = R.string.remove_ensembles),
+      text = stringResource(id = R.string.are_you_sure_remove_article_from_ensembles),
+      headerIcon = { Icon(imageVector = NoopIcons.attachmentRemove(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+      onDismiss = onDismiss,
+      onConfirm = onConfirm,
+      confirmText = stringResource(id = R.string.remove),
+      cancelText = stringResource(id = R.string.cancel),
+    )
+
+@Composable
 fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
     NoopSimpleAlertDialog(
       title = stringResource(id = R.string.permission_alert_title),
@@ -351,6 +377,7 @@ fun PreviewUtilArticleDetailScreen(
     floatingActionButtonExpanded: Boolean = false,
     showDeleteArticleAlertDialog: Boolean = false,
     showPermissionsAlertDialog: Boolean = false,
+    showRemoveFromEnsemblesAlertDialog: Boolean = false,
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   val articlesWithImages = LazyArticleThumbnails(
     directory = "",
@@ -375,21 +402,18 @@ fun PreviewUtilArticleDetailScreen(
       selectedEnsembles = setOf(1),
       editMode = floatingActionButtonExpanded,
       showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
-      showPermissionsAlertDialog = showPermissionsAlertDialog, onClickEdit = {}, onClickExport = {}, onClickDelete = {},
-      onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onClickRemoveEnsembles = {},
-      onDismissPermissionsDialog = {},
-      onConfirmPermissionsDialog = {},
-      onClickEnsemble = {},
-      exportingEnabled = true,
+      showPermissionsAlertDialog = showPermissionsAlertDialog,
+      showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
+      onClickExport = {}, onClickDelete = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
+      onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {}, onDismissDeleteDialog = {}, onConfirmDeleteDialog = {},
+      onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, exportingEnabled = true, onClickEdit = {},
     )
   }
 }
 
 @PreviewScreenSizes @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen()
 @Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, darkMode = true)
-@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() =
-    PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, showDeleteArticleAlertDialog = true)
-
-@Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() =
-    PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, showPermissionsAlertDialog = true)
+@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(showDeleteArticleAlertDialog = true)
+@Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() = PreviewUtilArticleDetailScreen(showPermissionsAlertDialog = true)
+@Preview @Composable fun PreviewArticleDetailScreen_removeFromEnsemblesDialog() = PreviewUtilArticleDetailScreen(showRemoveFromEnsemblesAlertDialog = true)
 //endregion
