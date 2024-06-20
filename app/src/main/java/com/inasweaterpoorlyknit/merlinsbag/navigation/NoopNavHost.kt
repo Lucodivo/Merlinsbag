@@ -87,7 +87,7 @@ fun NoopNavHost(
       ),
     ) { navBackStackEntry ->
       val ensembleIdArg = navBackStackEntry.arguments!!.getString(ENSEMBLE_ID_ARG)!!
-      EnsembleDetailRoute(navController = navController, ensembleId = ensembleIdArg)
+      EnsembleDetailRoute(navController = navController, ensembleId = ensembleIdArg, windowSizeClass = appState.windowSizeClass)
     }
     composable(
       route = ADD_ARTICLES_ROUTE,

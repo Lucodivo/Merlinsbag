@@ -20,10 +20,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.lang.Thread.State
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
@@ -69,6 +72,14 @@ class ArticleDetailViewModel @AssistedInject constructor(
       ensembleRepository.removeArticleEnsembles(articleId, ensembleIds)
     }
   }
+
+  val filter: StateFlow<String> = if(ensembleId != null) { ensembleRepository.getEnsemble(ensembleId) } else { emptyFlow() }
+      .map { it.title }
+      .stateIn(
+        scope = viewModelScope,
+        initialValue = "",
+        started = SharingStarted.WhileSubscribed()
+      )
 
   val articleLazyUriStrings: StateFlow<LazyUriStrings> = articleRepository.getArticlesWithFullImages(ensembleId)
       .onEach{ images ->

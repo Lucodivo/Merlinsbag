@@ -24,6 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +60,7 @@ import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
+import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
@@ -77,6 +80,7 @@ fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOp
 @Composable
 fun EnsembleDetailRoute(
     navController: NavController,
+    windowSizeClass: WindowSizeClass,
     ensembleId: String,
     modifier: Modifier = Modifier,
 ) {
@@ -93,6 +97,7 @@ fun EnsembleDetailRoute(
   var showAddArticlesDialog by remember { mutableStateOf(false) }
   val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   EnsembleDetailScreen(
+    windowSizeClass = windowSizeClass,
     title = ensembleTitle,
     editingTitle = editingTitle,
     editEnsemblesMode = editMode,
@@ -229,6 +234,7 @@ fun EnsembleDetailFloatingActionButtons(
 
 @Composable
 fun EnsembleDetailScreen(
+    windowSizeClass: WindowSizeClass,
     title: String,
     editEnsemblesMode: Boolean,
     editingTitle: Boolean,
@@ -257,6 +263,10 @@ fun EnsembleDetailScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
 ) {
   val layoutDir = LocalLayoutDirection.current
+  val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+  val systemBarTopPadding = systemBarPaddingValues.calculateTopPadding()
+  val systemBarStartPadding = systemBarPaddingValues.calculateStartPadding(layoutDir)
+  val systemBarEndPadding = systemBarPaddingValues.calculateEndPadding(layoutDir)
   Surface(
     modifier = modifier.fillMaxSize()
   ) {
@@ -264,7 +274,7 @@ fun EnsembleDetailScreen(
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding()))
+      Spacer(modifier = Modifier.height(systemBarTopPadding))
       val titleRowInteractionSource = remember { MutableInteractionSource() }
       val outsideKeyboardRowInteractionSource = remember { MutableInteractionSource() }
       Box(
@@ -277,9 +287,6 @@ fun EnsembleDetailScreen(
               onClick = { if(!editingTitle) onTitleClicked() }
             ),
       ) {
-        val titleModifier = Modifier.fillMaxWidth()
-        val titleAlign = TextAlign.Center
-        val titleFontSize = MaterialTheme.typography.titleLarge.fontSize
         if(editingTitle) {
           val (editTitle, setEditTitle) = remember { mutableStateOf("") }
           val focusRequester = FocusRequester()
@@ -290,13 +297,17 @@ fun EnsembleDetailScreen(
             singleLine = true,
             label = { Text(text = stringResource(id = R.string.ensemble_title)) },
             keyboardActions = KeyboardActions(onDone = { onTitleChanged(editTitle) }),
-            modifier = titleModifier
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 20.dp, end = 20.dp)
                 .focusRequester(focusRequester)
           )
           LaunchedEffect(Unit) { focusRequester.requestFocus() }
           BackHandler { onAbandonEditTitle() }
         } else {
+          val titleModifier = Modifier.fillMaxWidth().padding(horizontal = if(compactWidth) 0.dp else 16.dp)
+          val titleAlign = if(compactWidth) TextAlign.Center else TextAlign.Start
+          val titleFontSize = MaterialTheme.typography.titleLarge.fontSize
           if(title.isNotEmpty()) {
             Text(text = title, textAlign = titleAlign, fontSize = titleFontSize, modifier = titleModifier)
           } else {
@@ -335,7 +346,7 @@ fun EnsembleDetailScreen(
     onClickCancelSelection = onClickCancelSelection,
     onClickRemoveArticles = onClickRemoveArticles,
     onClickDeleteEnsemble = onClickDeleteEnsemble,
-    modifier = Modifier.padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
+    modifier = Modifier.padding(start = systemBarStartPadding, end = systemBarEndPadding),
   )
   AddArticlesDialog(
     visible = showAddArticlesDialog,
@@ -427,7 +438,7 @@ fun PreviewUtilEnsembleDetailScreen(
   onTitleClicked = {},
   onTitleChanged = {}, onClickEdit = {}, onClickAddArticles = {}, onSelectArticle = {}, onLongSelectArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {},
   onClickDeleteEnsemble = {}, onAbandonEditTitle = {}, showAddArticlesDialog = showAddArticlesDialog, onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {},
-  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog, onDismissDeleteEnsembleDialog = {}, onClickPositiveDeleteEnsembleDialog = {},
+  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog, onDismissDeleteEnsembleDialog = {}, onClickPositiveDeleteEnsembleDialog = {}, windowSizeClass = currentWindowAdaptiveInfo(),
 )
 
 @Composable

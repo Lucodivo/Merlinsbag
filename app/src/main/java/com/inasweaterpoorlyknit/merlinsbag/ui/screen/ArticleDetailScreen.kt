@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
@@ -29,6 +31,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -49,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
@@ -112,6 +116,7 @@ fun ArticleDetailRoute(
   var showRemoveFromEnsemblesAlertDialog by remember { mutableStateOf(false) }
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
+  val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
   val pagerState = rememberPagerState(
     initialPage = articleIndex,
     initialPageOffsetFraction = 0.0f,
@@ -158,6 +163,7 @@ fun ArticleDetailRoute(
   }
   ArticleDetailScreen(
     windowSizeClass = windowSizeClass,
+    filter = filter,
     articlesWithImages = lazyArticleImagesUris,
     articleEnsembleTitles = articlesEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
     pagerState = pagerState,
@@ -207,11 +213,11 @@ fun ArticleDetailRoute(
 @Composable
 fun ArticleDetailScreen(
     windowSizeClass: WindowSizeClass,
-    articlesWithImages: LazyUriStrings,
+    filter: String,
     articleEnsembleTitles: List<String>,
     pagerState: PagerState,
     ensembleListState: LazyListState,
-    selectedEnsembles: Set<Int>,
+    articlesWithImages: LazyUriStrings,
     editMode: Boolean,
     showDeleteArticleAlertDialog: Boolean,
     showPermissionsAlertDialog: Boolean,
@@ -231,8 +237,10 @@ fun ArticleDetailScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     exportingEnabled: Boolean,
     onClickEdit: () -> Unit,
+    selectedEnsembles: Set<Int>,
 ) {
   val layoutDir = LocalLayoutDirection.current
+  val systemBarTopPadding = systemBarPaddingValues.calculateTopPadding()
   HorizontalPager(
     state = pagerState,
     verticalAlignment = Alignment.Bottom,
@@ -247,8 +255,15 @@ fun ArticleDetailScreen(
     )
   }
   val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+  val horizontalTitlePadding = if(compactWidth) 0.dp else 16.dp
+  if(filter.isNotEmpty()) {
+    Box(contentAlignment = if(compactWidth) Alignment.TopCenter else Alignment.TopStart,
+      modifier = Modifier.fillMaxSize().padding(top = systemBarTopPadding, start = horizontalTitlePadding, end = horizontalTitlePadding)) {
+      Text(text = filter, textAlign = TextAlign.Start, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+    }
+  }
   Box(
-    contentAlignment = if(compactWidth) Alignment.BottomStart else Alignment.TopStart,
+    contentAlignment = if(compactWidth) Alignment.BottomStart else Alignment.TopEnd,
     modifier = Modifier.fillMaxSize()
   ) {
     val items: LazyListScope.() -> Unit = {
@@ -270,6 +285,7 @@ fun ArticleDetailScreen(
       }
     } else {
       LazyColumn(state = ensembleListState) {
+        item { Spacer(modifier = Modifier.height(systemBarTopPadding)) }
         items()
         item { Spacer(modifier = Modifier.fillParentMaxHeight(0.90f)) }
       }
@@ -373,6 +389,7 @@ fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilArticleDetailScreen(
+    filter: String = "",
     darkMode: Boolean = false,
     floatingActionButtonExpanded: Boolean = false,
     showDeleteArticleAlertDialog: Boolean = false,
@@ -395,23 +412,23 @@ fun PreviewUtilArticleDetailScreen(
   Surface {
     ArticleDetailScreen(
       windowSizeClass = currentWindowAdaptiveInfo(),
-      articlesWithImages = articlesWithImages,
+      filter = filter,
       articleEnsembleTitles = listOf("Road Warrior", "Goth 2 Boss", "John Prine", "Townes Van Zandt", "Deafheaven"),
       pagerState = rememberPagerState(initialPage = 0, pageCount = { articlesWithImages.size }),
       ensembleListState = rememberLazyListState(),
-      selectedEnsembles = setOf(1),
+      articlesWithImages = articlesWithImages,
       editMode = floatingActionButtonExpanded,
       showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
       showPermissionsAlertDialog = showPermissionsAlertDialog,
       showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
-      onClickExport = {}, onClickDelete = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
-      onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {}, onDismissDeleteDialog = {}, onConfirmDeleteDialog = {},
-      onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, exportingEnabled = true, onClickEdit = {},
+      onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
+      onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
+      onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = setOf(1),
     )
   }
 }
 
-@PreviewScreenSizes @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen()
+@PreviewScreenSizes @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen(filter = "Golden Girls")
 @Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, darkMode = true)
 @Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(showDeleteArticleAlertDialog = true)
 @Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() = PreviewUtilArticleDetailScreen(showPermissionsAlertDialog = true)
