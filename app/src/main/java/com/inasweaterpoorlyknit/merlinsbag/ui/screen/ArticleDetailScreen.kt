@@ -7,7 +7,8 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -206,6 +206,14 @@ fun ArticleDetailRoute(
         else selectedEnsembles[it] = Unit
       } else navController.navigateToEnsembleDetail(articlesEnsembles[it].id)
     },
+    onLongPressEnsemble = {
+      if(!editMode) {
+        selectedEnsembles.clear()
+        editMode = true
+      }
+    if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
+      else selectedEnsembles[it] = Unit
+    },
     onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
     onClickCancelEnsemblesSelection = { selectedEnsembles.clear() },
     modifier = modifier,
@@ -236,6 +244,7 @@ fun ArticleDetailScreen(
     onConfirmPermissionsDialog: () -> Unit,
     modifier: Modifier = Modifier,
     onClickEnsemble: (index: Int) -> Unit,
+    onLongPressEnsemble: (index: Int) -> Unit,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     exportingEnabled: Boolean,
     onClickEdit: () -> Unit,
@@ -273,14 +282,25 @@ fun ArticleDetailScreen(
   ) {
     val items: LazyListScope.() -> Unit = {
       items(articleEnsembleTitles.size) { i ->
-        InputChip(
-          selected = selectedEnsembles.contains(i),
-          label = { Text(text = articleEnsembleTitles[i]) },
-          leadingIcon = { Icon(imageVector = NoopIcons.ensembles(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
-          trailingIcon = { if(editMode) Icon(imageVector = NoopIcons.Close, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
-          onClick = { onClickEnsemble(i) },
-          modifier = Modifier.padding(horizontal = 2.dp),
-        )
+        val inputChipInteractionSource = remember { MutableInteractionSource() }
+        Box(modifier = Modifier.padding(horizontal = 2.dp)) {
+          val selected = selectedEnsembles.contains(i)
+          InputChip(
+            selected = selected,
+            label = { Text(text = articleEnsembleTitles[i]) },
+            leadingIcon = { Icon(imageVector = if(selected) NoopIcons.attachmentRemove() else NoopIcons.ensembles(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+            onClick = {},
+            interactionSource = inputChipInteractionSource,
+          )
+          Box(modifier = Modifier
+              .matchParentSize()
+              .combinedClickable (
+                onLongClick = { onLongPressEnsemble(i) },
+                onClick = { onClickEnsemble(i) },
+                interactionSource = inputChipInteractionSource,
+                indication = null,
+              ))
+        }
       }
     }
     if(compactWidth) {
@@ -427,7 +447,7 @@ fun PreviewUtilArticleDetailScreen(
       showPermissionsAlertDialog = showPermissionsAlertDialog,
       showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
       onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
-      onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
+      onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {}, onLongPressEnsemble = {},
       onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = setOf(1),
     )
   }
