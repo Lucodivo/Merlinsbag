@@ -13,6 +13,9 @@ Add Article:
     - Primary / Secondary color classifications?
 Ensembles:
     - More efficient grid-type view?
+    - Composite ensembles?
+        - Exclusive: #Goth & #Tops
+        - Inclusive: #HealthGoth | #Hiking
 Ensemble Detail:
     - Swipe between ensemble details
 Features:
@@ -20,6 +23,7 @@ Features:
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - NavigationRail [COMPLETED]
+    - NavRail [COMPLETED]
 Articles:
     - thumbnails with random "shimmer"/"rotation"
 Accessibility:

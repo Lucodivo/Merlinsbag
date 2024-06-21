@@ -1,19 +1,39 @@
 package com.inasweaterpoorlyknit.core.ui
 
-val placeholderDrawables = arrayOf(
+val topDrawables = arrayOf(
   R.drawable.army_jacket,
-  R.drawable.hat,
-  R.drawable.cat,
   R.drawable.denim_jacket,
   R.drawable.shirt,
+)
+
+val bottomDrawables = arrayOf(
+  R.drawable.pants
+)
+
+val shoeDrawables = arrayOf(
+  R.drawable.shoe,
   R.drawable.boot,
+)
+
+val accessoryDrawables = arrayOf(
+  R.drawable.wallet,
+  R.drawable.hat,
+  R.drawable.phone,
+)
+
+val etcDrawables = arrayOf(
+  R.drawable.cat,
   R.drawable.guitar,
   R.drawable.guy,
   R.drawable.kid,
-  R.drawable.pants,
-  R.drawable.phone,
-  R.drawable.wallet,
-  R.drawable.shoe,
+)
+
+val placeholderDrawables = arrayOf(
+  *topDrawables,
+  *shoeDrawables,
+  *bottomDrawables,
+  *accessoryDrawables,
+  *etcDrawables,
 )
 val repeatedPlaceholderDrawables = arrayListOf(
   *placeholderDrawables,

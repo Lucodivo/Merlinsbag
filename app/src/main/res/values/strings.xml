@@ -60,13 +60,9 @@
     <string name="high">High</string>
     <string name="high_contrast">High Contrast</string>
     <string name="sporty_spice">Sporty Spice</string>
-    <string name="derelicte">Derelicte</string>
     <string name="bowie_nite">Bowie Nite</string>
     <string name="road_warrior">Road Warrior</string>
-    <string name="hyperpop">Hyperpop</string>
-    <string name="rain_steam_and_speed">Rain, Steam and Speed</string>
     <string name="chrome_country">Chrome Country</string>
-    <string name="joseph_mallord_william_turner">Joseph Mallord William Turner</string>
     <string name="search_ensembles">Search ensembles</string>
     <string name="about">About</string>
     <string name="eccohedra">Eccohedra</string>
@@ -87,4 +83,7 @@
     <string name="remove_ensembles">Remove Ensembles</string>
     <string name="remove">Remove</string>
     <string name="are_you_sure_remove_article_from_ensembles">Are you sure you would like to remove this article from the selected ensembles? You can add it back at any time.</string>
+    <string name="bottoms">Bottoms</string>
+    <string name="tops">Tops</string>
+    <string name="shoes">Shoes</string>
 </resources>

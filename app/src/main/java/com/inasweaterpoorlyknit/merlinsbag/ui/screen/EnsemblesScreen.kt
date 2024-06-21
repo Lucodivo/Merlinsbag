@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -65,6 +67,9 @@ import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.TabletPreview
+import com.inasweaterpoorlyknit.core.ui.accessoryDrawables
+import com.inasweaterpoorlyknit.core.ui.bottomDrawables
 import com.inasweaterpoorlyknit.core.ui.component.HorizontalOverlappingLayout
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
@@ -81,8 +86,10 @@ import com.inasweaterpoorlyknit.core.ui.isComposePreview
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.shoeDrawables
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.core.ui.topDrawables
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
@@ -229,7 +236,10 @@ fun EnsemblesScreen(
           modifier = Modifier.padding(horizontal = sidePadding)
         )
       } else {
-        EnsemblesOverlappingPlaceholderRowColumn(modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat))
+        EnsemblesOverlappingPlaceholderRowColumn(
+          windowSizeClass = windowSizeClass,
+          modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
+        )
       }
     }
     NoopBottomEndButtonContainer {
@@ -511,37 +521,43 @@ fun EnsembleOverlappingPlaceholderRow(
 private val drawablePlaceholders: List<Pair<Int, List<Int>>> =
     repeatedPlaceholderDrawables.let { thumbnails ->
       listOf(
-        Pair(R.string.goth_2_boss, thumbnails.slice(0..5)),
-        Pair(R.string.sporty_spice, thumbnails.slice(6..12)),
-        Pair(R.string.derelicte, thumbnails.slice(1..13)),
-        Pair(R.string.bowie_nite, thumbnails.slice(3..5)),
-        Pair(R.string.road_warrior, thumbnails.slice(5..11)),
-        Pair(R.string.chrome_country, thumbnails.slice(7..11)),
-        Pair(R.string.rain_steam_and_speed, thumbnails.slice(12..17)),
-        Pair(R.string.joseph_mallord_william_turner, thumbnails.slice(11..15)),
+        Pair(R.string.tops, listOf(*topDrawables, *topDrawables)),
+        Pair(R.string.shoes, listOf(*shoeDrawables, *shoeDrawables)),
+        Pair(R.string.goth_2_boss, listOf(*bottomDrawables, *topDrawables, *shoeDrawables, *accessoryDrawables)),
+        Pair(R.string.road_warrior, thumbnails.slice(4..9)),
+        Pair(R.string.bowie_nite, thumbnails.slice(7..12)),
+        Pair(R.string.chrome_country, listOf(*accessoryDrawables, *accessoryDrawables))
       )
     }
 
 @Composable
 fun EnsemblesOverlappingPlaceholderRowColumn(
+    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier,
 ) {
+  val maxPlaceholderRows = 20
+  val rowSize = if(windowSizeClass.compactWidth()) 1 else 2
+  val widthPercent = 1.0 / rowSize
   Box{
-    LazyColumn(
-      verticalArrangement = Arrangement.Top,
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = modifier
-    ) {
-      items(drawablePlaceholders.size) { index ->
-        val ensembles = drawablePlaceholders[index]
+    val lazyGridState = rememberLazyStaggeredGridState()
+    LazyVerticalStaggeredGrid(
+      columns = StaggeredGridCells.Fixed(rowSize),
+      horizontalArrangement = Arrangement.spacedBy(2.dp),
+      verticalItemSpacing = 2.dp,
+      modifier = modifier.fillMaxSize(),
+      state = lazyGridState,
+    ){
+      items(maxPlaceholderRows) { index ->
+        val repeatedIndex = index % drawablePlaceholders.size
+        val ensembles = drawablePlaceholders[repeatedIndex]
         EnsembleOverlappingPlaceholderRow(
           drawables = ensembles.second,
           title = stringResource(ensembles.first),
           modifier = Modifier
-              .fillMaxWidth()
+              .fillMaxWidth(widthPercent.toFloat())
               .padding(
-                top = if(index != 0) rowVerticalSpacing else 0.dp,
-                bottom = if(index != drawablePlaceholders.lastIndex) rowVerticalSpacing else 0.dp,
+                top = if(repeatedIndex != 0) rowVerticalSpacing else 0.dp,
+                bottom = if(repeatedIndex != (maxPlaceholderRows - 1)) rowVerticalSpacing else 0.dp,
               )
         )
       }
@@ -585,16 +601,17 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
 
 @Composable
 fun PreviewUtilEnsembleScreen(
+    ensembles: List<Pair<String, LazyUriStrings>> = previewEnsembles,
     darkMode: Boolean = false,
-    ensembles: List<Pair<String, LazyUriStrings>>,
-    showAddEnsembleForm: Boolean,
+    showAddEnsembleForm: Boolean = false,
+    showPlaceholder: Boolean = false,
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   EnsemblesScreen(
     lazyEnsembleThumbnails = ensembles,
     showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,
     showDeleteEnsembleAlertDialog = false,
-    selectedEnsembleIndices = emptySet(), showPlaceholder = false, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings, searchQuery = "Goth 2 Boss",
+    selectedEnsembleIndices = emptySet(), showPlaceholder = showPlaceholder, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings, searchQuery = "Goth 2 Boss",
     windowSizeClass = currentWindowAdaptiveInfo(),
     onClickEnsemble = {}, onLongPressEnsemble = {}, onClickActionButton = {},
     onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {},
@@ -648,18 +665,15 @@ fun PreviewEnsembleOverlappingPlaceholderRowOverflow() = NoopTheme {
 
 @DevicePreviews
 @Composable
-fun PreviewEnsembleScreen() = PreviewUtilEnsembleScreen(
-  darkMode = true,
-  ensembles = previewEnsembles,
-  showAddEnsembleForm = false,
-)
+fun PreviewEnsembleScreen() = PreviewUtilEnsembleScreen(darkMode = true)
+
+@DevicePreviews
+@Composable
+fun PreviewEnsembleScreen_Placeholders() = PreviewUtilEnsembleScreen(darkMode = true, showPlaceholder = true)
 
 @Preview
 @Composable
-fun PreviewEnsemblesScreenAddEnsembleDialog() = PreviewUtilEnsembleScreen(
-  ensembles = previewEnsembles,
-  showAddEnsembleForm = true,
-)
+fun PreviewEnsemblesScreenAddEnsembleDialog() = PreviewUtilEnsembleScreen()
 
 @Preview
 @Composable
