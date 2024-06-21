@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -34,7 +35,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NavUIDestinations
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
@@ -42,6 +46,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToSettings
 
 fun NavController.navigateToNavUiDestination(from: NavUIDestinations, to: NavUIDestinations) {
   val topLevelNavOptions = navOptions {
@@ -64,8 +69,17 @@ fun NoopApp(
 ) {
   Box{
     var currentDestination by rememberSaveable { mutableStateOf(NavUIDestinations.ARTICLES) }
+    val compactWidth = appState.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
     NavigationSuiteScaffold(
       navigationSuiteItems = {
+        if(!compactWidth){
+          item(
+            icon = { Icon(NoopIcons.Settings, TODO_ICON_CONTENT_DESCRIPTION) },
+            label = { Text(stringResource(R.string.settings)) },
+            selected = false,
+            onClick = { appState.navController.navigateToSettings() }
+          )
+        }
         NavUIDestinations.entries.forEach {
           val selected = it == currentDestination
           item(
@@ -81,8 +95,8 @@ fun NoopApp(
       },
       layoutType =
         if(!appState.showNavBar.value) NavigationSuiteType.None
-        else if(appState.windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact) NavigationSuiteType.NavigationRail
-        else NavigationSuiteType.NavigationBar
+        else if(compactWidth) NavigationSuiteType.NavigationBar
+        else NavigationSuiteType.NavigationRail
       ,
       containerColor = Color.Transparent,
     ){
