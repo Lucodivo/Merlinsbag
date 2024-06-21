@@ -33,6 +33,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -62,6 +63,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import androidx.wear.compose.material.ChipDefaults
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
@@ -211,7 +213,7 @@ fun ArticleDetailRoute(
         selectedEnsembles.clear()
         editMode = true
       }
-    if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
+      if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
       else selectedEnsembles[it] = Unit
     },
     onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
@@ -268,14 +270,19 @@ fun ArticleDetailScreen(
   val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
   val iconModifier = Modifier.padding(start = if(compactWidth) 0.dp else 16.dp, end = 4.dp)
   if(filter.isNotEmpty()) {
-    Box(contentAlignment = if(compactWidth) Alignment.TopCenter else Alignment.TopStart,
-      modifier = Modifier.fillMaxSize().padding(top = systemBarTopPadding)) {
+    Box(
+      contentAlignment = if(compactWidth) Alignment.TopCenter else Alignment.TopStart,
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(top = systemBarTopPadding)
+    ) {
       Row {
         Icon(NoopIcons.ensembles(), TODO_ICON_CONTENT_DESCRIPTION, modifier = iconModifier)
         Text(text = filter, textAlign = TextAlign.Start, fontSize = MaterialTheme.typography.titleLarge.fontSize)
       }
     }
   }
+  val chipHeight = InputChipDefaults.Height
   Box(
     contentAlignment = if(compactWidth) Alignment.BottomStart else Alignment.TopEnd,
     modifier = Modifier.fillMaxSize()
@@ -283,23 +290,36 @@ fun ArticleDetailScreen(
     val items: LazyListScope.() -> Unit = {
       items(articleEnsembleTitles.size) { i ->
         val inputChipInteractionSource = remember { MutableInteractionSource() }
-        Box(modifier = Modifier.padding(horizontal = 2.dp)) {
+        Box(
+          contentAlignment = Alignment.CenterStart,
+          modifier = Modifier.padding(horizontal = 2.dp).height(chipHeight + 8.dp)
+        ) {
           val selected = selectedEnsembles.contains(i)
           InputChip(
             selected = selected,
             label = { Text(text = articleEnsembleTitles[i]) },
-            leadingIcon = { Icon(imageVector = if(selected) NoopIcons.attachmentRemove() else NoopIcons.ensembles(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+            leadingIcon = {
+              if(editMode) {
+                if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+                else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+              } else {
+                Icon(imageVector = NoopIcons.ensembles(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+              }
+            },
             onClick = {},
             interactionSource = inputChipInteractionSource,
+            modifier = Modifier.height(InputChipDefaults.Height)
           )
-          Box(modifier = Modifier
-              .matchParentSize()
-              .combinedClickable (
-                onLongClick = { onLongPressEnsemble(i) },
-                onClick = { onClickEnsemble(i) },
-                interactionSource = inputChipInteractionSource,
-                indication = null,
-              ))
+          Box(
+            modifier = Modifier
+                .matchParentSize()
+                .combinedClickable(
+                  onLongClick = { onLongPressEnsemble(i) },
+                  onClick = { onClickEnsemble(i) },
+                  interactionSource = inputChipInteractionSource,
+                  indication = null,
+                )
+          )
         }
       }
     }
@@ -325,7 +345,11 @@ fun ArticleDetailScreen(
     onClickExport = onClickExport,
     onClickRemoveEnsembles = onClickRemoveEnsembles,
     onClickCancelEnsemblesSelection = onClickCancelEnsemblesSelection,
-    modifier = Modifier.padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
+    modifier = Modifier.padding(
+      start = systemBarPaddingValues.calculateStartPadding(layoutDir),
+      end = systemBarPaddingValues.calculateEndPadding(layoutDir),
+      bottom = if(compactWidth) InputChipDefaults.Height else 0.dp,
+    ),
   )
   if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
   if(showPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
@@ -344,7 +368,7 @@ fun FloatingActionButtonDetailScreen(
     onClickCancelEnsemblesSelection: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  NoopBottomEndButtonContainer(modifier = modifier) {
+  NoopBottomEndButtonContainer(extraPadding = PaddingValues(bottom = 4.dp, end = 8.dp), modifier = modifier) {
     NoopExpandingIconButton(
       expanded = expanded,
       collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.ui.COMPOSE_PREVIEW_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.NoopComposePreviewIcons
@@ -30,10 +32,11 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 @Composable
 fun NoopBottomEndButtonContainer(
     modifier: Modifier = Modifier,
+    extraPadding: PaddingValues = PaddingValues(8.dp),
     content: @Composable BoxScope.() -> Unit,
 ) = Box(
     contentAlignment = Alignment.BottomEnd,
-    modifier = modifier.fillMaxSize().padding(8.dp),
+    modifier = modifier.fillMaxSize().padding(extraPadding),
     content = content,
   )
 
