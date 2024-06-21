@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -39,11 +38,12 @@ import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NavUIDestinations
+import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.compactWidth
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToSettings
@@ -69,7 +69,7 @@ fun NoopApp(
 ) {
   Box{
     var currentDestination by rememberSaveable { mutableStateOf(NavUIDestinations.ARTICLES) }
-    val compactWidth = appState.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+    val compactWidth = appState.windowSizeClass.compactWidth()
     NavigationSuiteScaffold(
       navigationSuiteItems = {
         if(!compactWidth){

@@ -38,8 +38,8 @@ import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
-val staggeredGridColumnMinWidth = 90.dp
-val staggeredGridItemPadding = 8.dp
+private val staggeredGridColumnMinWidth = 90.dp
+private val staggeredGridItemPadding = 8.dp
 
 @Composable
 fun PlaceholderThumbnailGrid(modifier: Modifier = Modifier){
@@ -49,30 +49,29 @@ fun PlaceholderThumbnailGrid(modifier: Modifier = Modifier){
     LazyVerticalStaggeredGrid(
       // typical dp width of a smart phone is 320dp-480dp
       columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
-      content = {
-        items(count = repeatedPlaceholderDrawables.size) { thumbnailGridItemIndex ->
-          val placeholderDrawable = repeatedPlaceholderDrawables[thumbnailGridItemIndex]
-          Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(staggeredGridItemPadding)
-          ) {
-            Icon(
-              painter = painterResource(placeholderDrawable),
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
-              modifier = Modifier
-                  .alpha(0.8f)
-                  .drawWithContent {
-                    drawContent()
-                    drawRect(shimmerBrush, blendMode = BlendMode.SrcIn)
-                  }
-                  .sizeIn(maxHeight = staggeredGridColumnMinWidth),
-            )
-          }
-        }
-      },
       modifier = modifier.fillMaxSize(),
       state = lazyGridState,
-    )
+    ){
+      items(count = repeatedPlaceholderDrawables.size) { thumbnailGridItemIndex ->
+        val placeholderDrawable = repeatedPlaceholderDrawables[thumbnailGridItemIndex]
+        Box(
+          contentAlignment = Alignment.Center,
+          modifier = Modifier.padding(staggeredGridItemPadding)
+        ) {
+          Icon(
+            painter = painterResource(placeholderDrawable),
+            contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+            modifier = Modifier
+                .alpha(0.8f)
+                .drawWithContent {
+                  drawContent()
+                  drawRect(shimmerBrush, blendMode = BlendMode.SrcIn)
+                }
+                .sizeIn(maxHeight = staggeredGridColumnMinWidth),
+          )
+        }
+      }
+    }
 
     // disable interactions with grid by placing a transparent interactable scrim on top
     val scrimInteractionSource = remember { MutableInteractionSource() }
@@ -96,31 +95,30 @@ fun SelectableStaggeredThumbnailGrid(
   LazyVerticalStaggeredGrid(
     // typical dp width of a smart phone is 320dp-480dp
     columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
-    content = {
-      items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
-        Box(
-          contentAlignment = Alignment.Center,
-          modifier = Modifier
-              .combinedClickable(
-                onClick = { onSelect(thumbnailGridItemIndex) },
-                onLongClick = { onLongSelect(thumbnailGridItemIndex) }
-              )
-              .padding(staggeredGridItemPadding)
-        ) {
-          val uriString = thumbnailUris.getUriString(thumbnailGridItemIndex)
-          SelectableNoopImage(
-            uriString = uriString,
-            contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
-            selected = selectedThumbnails.contains(thumbnailGridItemIndex),
-            selectable = selectable,
-            modifier = Modifier.sizeIn(maxHeight = staggeredGridColumnMinWidth),
-          )
-        }
-      }
-    },
     modifier = Modifier.fillMaxSize(),
     state = staggeredGridState,
-  )
+  ){
+    items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .combinedClickable(
+              onClick = { onSelect(thumbnailGridItemIndex) },
+              onLongClick = { onLongSelect(thumbnailGridItemIndex) }
+            )
+            .padding(staggeredGridItemPadding)
+      ) {
+        val uriString = thumbnailUris.getUriString(thumbnailGridItemIndex)
+        SelectableNoopImage(
+          uriString = uriString,
+          contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+          selected = selectedThumbnails.contains(thumbnailGridItemIndex),
+          selectable = selectable,
+          modifier = Modifier.sizeIn(maxHeight = staggeredGridColumnMinWidth),
+        )
+      }
+    }
+  }
 }
 
 //region COMPOSABLE PREVIEWS

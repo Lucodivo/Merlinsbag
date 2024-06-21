@@ -42,6 +42,9 @@ Bugs:
         - could it be linked to the memory size of thumbnails on the articles screen?
     - During screen transitions, the previous screen is still interactable?
         - UPDATE: Not able to reproduce outside of debug build. Will verify at some random point in future before bug is removed.
+    - FTS is imperfect sometimes shows irrelevant results on first character
+        - Reproduce: Type one random character in search bar. Sometimes show unrelated results. Have seen unrelated results on pairs of 2 characters.
+        - Maybe expected due to efficient imperfect hashing?
 Settings Screen:
     - Export All Data
 Aesthetics:

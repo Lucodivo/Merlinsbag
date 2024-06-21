@@ -12,6 +12,8 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
@@ -35,6 +37,8 @@ fun Context.getActivity(): ComponentActivity? = when(this) {
 
 fun Context.toast(msg: String) = android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
 fun Context.toast(@StringRes msg: Int) = android.widget.Toast.makeText(this, resources.getString(msg), android.widget.Toast.LENGTH_SHORT).show()
+
+fun WindowSizeClass.compactWidth(): Boolean = widthSizeClass == WindowWidthSizeClass.Compact
 
 @Composable
 fun rememberLauncherForActivityResultPermissions(

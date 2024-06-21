@@ -29,12 +29,17 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -50,7 +55,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,6 +62,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.DevicePreviews
 import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.HorizontalOverlappingLayout
@@ -71,6 +76,7 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.SearchBox
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.shimmerBrush
+import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.isComposePreview
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
@@ -98,6 +104,7 @@ fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate
 @Composable
 fun EnsemblesRoute(
     navController: NavController,
+    windowSizeClass: WindowSizeClass,
     ensemblesViewModel: EnsemblesViewModel = hiltViewModel(),
 ) {
   val lazyEnsembleThumbnails by ensemblesViewModel.lazyEnsembles.collectAsStateWithLifecycle()
@@ -114,6 +121,7 @@ fun EnsemblesRoute(
     if(selectedEnsembleIndices.isEmpty()) editMode = false
   }
   EnsemblesScreen(
+    windowSizeClass = windowSizeClass,
     lazyEnsembleThumbnails = lazyEnsembleThumbnails,
     showAddEnsembleDialog = showAddEnsembleDialog,
     showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
@@ -164,8 +172,10 @@ fun EnsemblesRoute(
   )
 }
 
+
 @Composable
 fun EnsemblesScreen(
+    windowSizeClass: WindowSizeClass,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
     showAddEnsembleDialog: Boolean,
@@ -210,6 +220,7 @@ fun EnsemblesScreen(
               .padding(bottom = bottomPadding, start = sidePadding, end = sidePadding),
         )
         EnsemblesOverlappingImageRowColumn(
+          windowSizeClass,
           selectedEnsembleIndices,
           selectable = editMode,
           lazyEnsembleThumbnails,
@@ -383,7 +394,7 @@ fun EnsembleOverlappingImageRow(
     modifier: Modifier = Modifier,
 ) {
   RowCard(modifier = modifier) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box {
       Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -403,9 +414,7 @@ fun EnsembleOverlappingImageRow(
           }
         }
         if(title.isNotEmpty()) {
-          if(lazyUriStrings.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(overlapTitleSpacing))
-          }
+          if(lazyUriStrings.isNotEmpty()) Spacer(modifier = Modifier.height(overlapTitleSpacing))
           RowText(text = title, modifier = Modifier.fillMaxWidth())
         }
       }
@@ -423,6 +432,7 @@ fun EnsembleOverlappingImageRow(
 
 @Composable
 fun EnsemblesOverlappingImageRowColumn(
+    windowSizeClass: WindowSizeClass,
     selectedEnsembleIndices: Set<Int>,
     selectable: Boolean,
     lazyTitleAndUriStrings: List<Pair<String, LazyUriStrings>>,
@@ -430,11 +440,17 @@ fun EnsemblesOverlappingImageRowColumn(
     onLongPress: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  LazyColumn(
-    verticalArrangement = Arrangement.Top,
-    horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = modifier
-  ) {
+  val lazyGridState = rememberLazyStaggeredGridState()
+  // TODO: RowSize could be more versatile to accomidate better for tablet size screens
+  val rowSize = if(windowSizeClass.compactWidth()) 1 else 2
+  val widthPercent = 1.0 / rowSize
+  LazyVerticalStaggeredGrid(
+    columns = StaggeredGridCells.Fixed(rowSize),
+    horizontalArrangement = Arrangement.spacedBy(2.dp),
+    verticalItemSpacing = 2.dp,
+    modifier = modifier.fillMaxSize(),
+    state = lazyGridState,
+  ){
     items(lazyTitleAndUriStrings.size) { index ->
       val (rowTitle, lazyStrings) = lazyTitleAndUriStrings[index]
       EnsembleOverlappingImageRow(
@@ -443,15 +459,11 @@ fun EnsemblesOverlappingImageRowColumn(
         selected = selectedEnsembleIndices.contains(index),
         selectable = selectable,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-              top = if(index != 0) rowVerticalSpacing else 0.dp,
-              bottom = if(index != lazyTitleAndUriStrings.lastIndex) rowVerticalSpacing else 0.dp,
-            )
             .combinedClickable(
               onClick = { onClick(index) },
               onLongClick = { onLongPress(index) }
             )
+            .fillMaxWidth(widthPercent.toFloat())
       )
     }
   }
@@ -573,15 +585,17 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
 
 @Composable
 fun PreviewUtilEnsembleScreen(
+    darkMode: Boolean = false,
     ensembles: List<Pair<String, LazyUriStrings>>,
     showAddEnsembleForm: Boolean,
-) = NoopTheme {
+) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   EnsemblesScreen(
     lazyEnsembleThumbnails = ensembles,
     showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,
     showDeleteEnsembleAlertDialog = false,
     selectedEnsembleIndices = emptySet(), showPlaceholder = false, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings, searchQuery = "Goth 2 Boss",
+    windowSizeClass = currentWindowAdaptiveInfo(),
     onClickEnsemble = {}, onLongPressEnsemble = {}, onClickActionButton = {},
     onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {},
     onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onAlertDialogDismiss = {}, onAlertDialogPositive = {},
@@ -632,9 +646,10 @@ fun PreviewEnsembleOverlappingPlaceholderRowOverflow() = NoopTheme {
   )
 }
 
-@Preview
+@DevicePreviews
 @Composable
 fun PreviewEnsembleScreen() = PreviewUtilEnsembleScreen(
+  darkMode = true,
   ensembles = previewEnsembles,
   showAddEnsembleForm = false,
 )

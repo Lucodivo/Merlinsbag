@@ -14,11 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,9 +27,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.DarkMode
-import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
+import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopRotatableImage
@@ -42,6 +38,7 @@ import com.inasweaterpoorlyknit.core.ui.previewAssetBitmap
 import com.inasweaterpoorlyknit.core.ui.state.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.AddArticleViewModel
 
 const val IMAGE_URI_STRING_LIST_ARG = "imageUriStringArray"
@@ -82,7 +79,7 @@ fun AddArticleControls(
     onDiscard: () -> Unit,
     onSave: () -> Unit,
 ) {
-  val compactWidth = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+  val compactWidth = windowSizeClass.compactWidth()
   Column(
     horizontalAlignment = Alignment.End,
     verticalArrangement = if(landscape) Arrangement.Center else Arrangement.Bottom,
