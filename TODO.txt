@@ -56,8 +56,10 @@ Aesthetics:
 Performance:
     - Investigate any performance issues from pre-emptively dispatching to IO for file writing operations.
         - Potential areas:
-            - AddArticleViewModel.onSave()
             - ArticleDetailViewModel.exportArticle()
+                - Tracing shows that exporting takes ~1.6s and 1.44s of this is from Bitmap.compress()
+            - AddArticleViewModel.onSave()
+                - Tracing shows that Bitmap.compress() is taking ~5.1s
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
 
 // Unknowns

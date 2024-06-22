@@ -32,6 +32,47 @@
 </adaptive-icon>
 ``` 
 
+#### Analyze performance and hardware usage with traces using androidx.tracing library
+- Use the androidx.tracing library to create a trace
+  - Examples:
+``` 
+trace(label = "ArticleDetailViewModel: exportArticle"){
+  articleRepository.exportArticle(articleId)
+}
+``` 
+``` 
+beginSection(label = "ArticleDetailViewModel: exportArticle")
+  articleRepository.exportArticle(articleId)
+endSection()
+``` 
+``` 
+beginAsyncSection(label = "ArticleDetailViewModel: exportArticle", cookie = A_UNIQUE_TRACE_ID)
+  articleRepository.exportArticle(articleId) // if suspendable
+endSection(A_UNIQUE_TRACE_ID)
+``` 
+- View traces using Android Studio Profiler
+  - Run app as profileable (low overhead)
+  - Start a profiler task using Capture System Activities (System Trace)
+  - When the capture begins (it may restart the app), perform desired actions that are being traced
+  - Click "stop recording and show results"
+  - The capture results will open up in the Profiler tool window
+  - In the "Analysis" pane, select the "All Threads" tab
+  - Choose either the "Top Down" or "Bottom Up" tabs
+  - Search for the supplied label for the trace
+- Common Issues:
+  - *NEVER* profile an app as debuggable. 
+    - Debug builds provide irrelevant information as performance is drastically different in release builds.
+  - Dropping traces for seemingly no reason? Search is jank and might be the problem. Traces might have actually been dropped for no reason. Try again. 🤷‍♀️
+  - Ensure the work that you are attempting to measure is not dispatched on a separate thread.
+    - For example, the following code will not measure any work done in the exportArticle() function.
+``` 
+trace("ArticleDetailViewModel: exportArticle"){
+  viewModelScope.launch(Dispatchers.IO) {
+    articleRepository.exportArticle(articleId)
+  }
+}
+``` 
+
 ## IDE Errors
 #### Error running 'Android Java Debugger (pid: 28478, debug port: 53060)' Unable to open debugger port (localhost:53060): java.net.SocketException "Connection reset"
 - Restart Android Studio (killing adb server did not work)

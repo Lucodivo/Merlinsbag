@@ -9,6 +9,10 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.tracing.Trace.beginAsyncSection
+import androidx.tracing.Trace.beginSection
+import androidx.tracing.Trace.endAsyncSection
+import androidx.tracing.trace
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.ml.image.SegmentedImage
@@ -137,19 +141,22 @@ class AddArticleViewModel @AssistedInject constructor(
   }
 
   fun onSave() {
-    val rotationMatrix = Matrix()
-    rotationMatrix.postRotate(rotation.floatValue)
-    val bitmapToSave = Bitmap.createBitmap(
-      segmentedImage.subjectBitmap,
-      segmentedImage.subjectBoundingBox.minX,
-      segmentedImage.subjectBoundingBox.minY,
-      segmentedImage.subjectBoundingBox.width,
-      segmentedImage.subjectBoundingBox.height,
-      rotationMatrix,
-      false // e.g. bilinear filtering of source
-    )
+    lateinit var bitmapToSave: Bitmap
+      val rotationMatrix = Matrix()
+      rotationMatrix.postRotate(rotation.floatValue)
+      bitmapToSave = Bitmap.createBitmap(
+        segmentedImage.subjectBitmap,
+        segmentedImage.subjectBoundingBox.minX,
+        segmentedImage.subjectBoundingBox.minY,
+        segmentedImage.subjectBoundingBox.width,
+        segmentedImage.subjectBoundingBox.height,
+        rotationMatrix,
+        false // e.g. bilinear filtering of source
+      )
     viewModelScope.launch(Dispatchers.IO) {
-      articleRepository.insertArticle(bitmapToSave)
+      trace("AddArticleViewModel: onSave - insertArticle") {
+        articleRepository.insertArticle(bitmapToSave)
+      }
     }
     nextSubject()
   }

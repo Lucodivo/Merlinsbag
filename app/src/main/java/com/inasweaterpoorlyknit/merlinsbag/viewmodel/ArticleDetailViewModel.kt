@@ -5,6 +5,7 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.tracing.trace
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
@@ -60,9 +61,14 @@ class ArticleDetailViewModel @AssistedInject constructor(
     articleRepository.deleteArticle(cachedArticlesWithFullImages.getArticleId(index))
   }
 
-  fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
-    val exportedImageUri = articleRepository.exportArticle(cachedArticlesWithFullImages.getArticleId(index))
-    exportedImageUri?.let { _exportedImageUri.emit(Pair(index, exportedImageUri)) }
+  fun exportArticle(index: Int) {
+      viewModelScope.launch(Dispatchers.IO) {
+        var exportedImageUri: Uri? = null
+        trace(label = "ArticleDetailViewModel: exportArticle"){
+          exportedImageUri = articleRepository.exportArticle(cachedArticlesWithFullImages.getArticleId(index))
+        }
+        exportedImageUri?.let { _exportedImageUri.emit(Pair(index, it)) }
+      }
   }
 
   fun removeArticleEnsembles(articleIndex: Int, articleEnsembleIndices: List<Int>) {
