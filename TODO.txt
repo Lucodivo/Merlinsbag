@@ -59,7 +59,7 @@ Performance:
             - ArticleDetailViewModel.exportArticle()
                 - Tracing shows that exporting takes ~1.6s and 1.44s of this is from Bitmap.compress()
             - AddArticleViewModel.onSave()
-                - Tracing shows that Bitmap.compress() is taking ~5.1s
+                - Tracing/System.nanoTime() shows that Bitmap.compress() is taking ~3.5-5.1s (depends on the image)
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
 
 // Unknowns

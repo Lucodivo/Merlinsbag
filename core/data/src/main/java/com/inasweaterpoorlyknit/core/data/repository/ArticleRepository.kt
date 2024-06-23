@@ -16,13 +16,18 @@ import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import kotlin.coroutines.coroutineContext
 
-val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSLESS else Bitmap.CompressFormat.WEBP
+val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
+val compressionQuality = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) 100 else 99
 val exportFormat = Bitmap.CompressFormat.PNG
 
 class ArticleRepository(
@@ -122,7 +127,7 @@ private fun Bitmap.toThumbnail(): Bitmap{
 private fun saveBitmap(directory: File, fileName: String, bitmap: Bitmap){
   val imageFile = File(directory, fileName)
   FileOutputStream(imageFile).use { outStream ->
-    bitmap.compress(compressionFormat, 100, outStream)
+    bitmap.compress(compressionFormat, compressionQuality, outStream)
     outStream.flush()
   }
 }

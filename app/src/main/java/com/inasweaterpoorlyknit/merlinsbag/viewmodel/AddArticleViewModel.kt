@@ -15,6 +15,7 @@ import androidx.tracing.Trace.endAsyncSection
 import androidx.tracing.trace
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.common.Event
+import com.inasweaterpoorlyknit.core.common.profiling.Timer
 import com.inasweaterpoorlyknit.core.ml.image.SegmentedImage
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -51,7 +52,7 @@ class AddArticleViewModel @AssistedInject constructor(
   val finished = mutableStateOf(Event<Unit>(null))
   val noSubjectFound = mutableStateOf(Event<Unit>(null))
 
-  private val segmentedImage = com.inasweaterpoorlyknit.core.ml.image.SegmentedImage()
+  private val segmentedImage = SegmentedImage()
 
   init {
     processNextImage()
@@ -86,7 +87,7 @@ class AddArticleViewModel @AssistedInject constructor(
                 Log.e("processImage()", "ML Kit failed to process image")
               }
             }
-          } catch(e: IOException){
+          } catch(e: IOException) {
             Log.e("processImage()", "ML Kit failed to open image - ${e.message}")
           }
         }
@@ -140,24 +141,22 @@ class AddArticleViewModel @AssistedInject constructor(
     }
   }
 
-  fun onSave() {
+  fun onSave() = viewModelScope.launch(Dispatchers.Default) {
+    val stopWatch = Timer()
     lateinit var bitmapToSave: Bitmap
-      val rotationMatrix = Matrix()
-      rotationMatrix.postRotate(rotation.floatValue)
-      bitmapToSave = Bitmap.createBitmap(
-        segmentedImage.subjectBitmap,
-        segmentedImage.subjectBoundingBox.minX,
-        segmentedImage.subjectBoundingBox.minY,
-        segmentedImage.subjectBoundingBox.width,
-        segmentedImage.subjectBoundingBox.height,
-        rotationMatrix,
-        false // e.g. bilinear filtering of source
-      )
-    viewModelScope.launch(Dispatchers.IO) {
-      trace("AddArticleViewModel: onSave - insertArticle") {
-        articleRepository.insertArticle(bitmapToSave)
-      }
-    }
+    val rotationMatrix = Matrix()
+    rotationMatrix.postRotate(rotation.floatValue)
+    bitmapToSave = Bitmap.createBitmap(
+      segmentedImage.subjectBitmap,
+      segmentedImage.subjectBoundingBox.minX,
+      segmentedImage.subjectBoundingBox.minY,
+      segmentedImage.subjectBoundingBox.width,
+      segmentedImage.subjectBoundingBox.height,
+      rotationMatrix,
+      false // e.g. bilinear filtering of source
+    )
     nextSubject()
+    articleRepository.insertArticle(bitmapToSave)
+    stopWatch.logElapsed("AddArticleViewModel", "Save article time")
   }
 }

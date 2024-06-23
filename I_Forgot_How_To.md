@@ -63,6 +63,8 @@ endSection(A_UNIQUE_TRACE_ID)
   - *NEVER* profile an app as debuggable. 
     - Debug builds provide irrelevant information as performance is drastically different in release builds.
   - Dropping traces for seemingly no reason? Search is jank and might be the problem. Traces might have actually been dropped for no reason. Try again. 🤷‍♀️
+  - Often times, System.nanoTime() works just fine and performing a SystemTrace is overkill
+    - SystemTrace is great if you have little idea of what is slow. Sometimes it might be a good idea to start with a SystemTrace and then move back to System.nanoTime()
   - Ensure the work that you are attempting to measure is not dispatched on a separate thread.
     - For example, the following code will not measure any work done in the exportArticle() function.
 ``` 
