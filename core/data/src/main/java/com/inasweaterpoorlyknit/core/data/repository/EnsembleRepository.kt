@@ -28,6 +28,7 @@ class EnsembleRepository(
       LazyArticleThumbnails(directory, articles)
     )
 
+  fun getAllEnsembles(): Flow<List<Ensemble>> = ensembleDao.getAllEnsembles()
   fun getAllEnsembleArticleThumbnails(): Flow<List<LazyEnsembleThumbnails>> =
       ensembleDao.getAllEnsembleArticleThumbnails().listMap { it.toLazyEnsembleThumbnails() }
   fun searchEnsembleArticleThumbnails(query: String): Flow<List<LazyEnsembleThumbnails>> =
@@ -47,11 +48,17 @@ class EnsembleRepository(
     articleDao.updateArticlesModified(articleIds = listOf(articleId))
   }
   fun updateEnsemble(updatedEnsemble: Ensemble) = ensembleDao.updateEnsemble(updatedEnsemble)
-  fun addEnsembleArticles(ensembleId: String, articleIds: List<String>) {
-    val ensembleArticles = Array(articleIds.size){ EnsembleArticleEntity(ensembleId, articleIds[it]) }
+  fun addArticlesToEnsemble(ensembleId: String, articleIds: List<String>) {
+    val ensembleArticles = Array(articleIds.size){ EnsembleArticleEntity(ensembleId = ensembleId, articleId = articleIds[it]) }
     ensembleDao.insertArticleEnsemble(*ensembleArticles)
     ensembleDao.updateEnsemblesModified(ensembleIds = listOf(ensembleId))
     articleDao.updateArticlesModified(articleIds = articleIds)
+  }
+  fun addEnsemblesToArticle(articleId: String, ensembleIds: List<String>) {
+    val ensembleArticles = Array(ensembleIds.size){ EnsembleArticleEntity(ensembleId = ensembleIds[it], articleId = articleId) }
+    ensembleDao.insertArticleEnsemble(*ensembleArticles)
+    ensembleDao.updateEnsemblesModified(ensembleIds = ensembleIds)
+    articleDao.updateArticlesModified(articleIds = listOf(articleId))
   }
   fun deleteEnsemble(ensembleId: String) = ensembleDao.deleteEnsemble(ensembleId)
   fun deleteEnsembles(ensembleIds: List<String>) = ensembleDao.deleteEnsembles(ensembleIds)

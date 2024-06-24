@@ -62,6 +62,12 @@ interface EnsembleDao {
       WHERE ensemble_article.ensemble_id = :ensembleId""")
   fun getEnsembleArticleFullImages(ensembleId: String): Flow<List<ArticleWithFullImages>>
 
+  @Query(
+    """SELECT id, title 
+       FROM ensemble
+       ORDER BY modified DESC """)
+  fun getAllEnsembles(): Flow<List<Ensemble>>
+
   @Transaction @Query(
     """SELECT ensemble.id as ensemble_id, ensemble.title as ensemble_title 
        FROM ensemble

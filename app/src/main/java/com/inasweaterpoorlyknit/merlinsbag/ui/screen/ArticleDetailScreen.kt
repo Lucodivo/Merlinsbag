@@ -6,9 +6,11 @@ import android.Manifest.permission
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -64,6 +66,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
@@ -73,6 +76,7 @@ import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
@@ -107,15 +111,16 @@ fun ArticleDetailRoute(
   val context = LocalContext.current
   val articleDetailViewModel =
       hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
-        factory.create(ensembleId)
+        factory.create(ensembleId = ensembleId, articleIndex = articleIndex)
       }
   val settingsLauncher = rememberSettingsLauncher()
   val lazyArticleImagesUris by articleDetailViewModel.articleLazyUriStrings.collectAsStateWithLifecycle()
-  val articlesEnsembles by articleDetailViewModel.articleEnsembles.collectAsStateWithLifecycle()
+  val ensembleUiState by articleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   var editMode by remember { mutableStateOf(false) }
   var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
   var showPermissionsAlertDialog by remember { mutableStateOf(false) }
   var showRemoveFromEnsemblesAlertDialog by remember { mutableStateOf(false) }
+  var showAddToEnsemblesDialog by remember { mutableStateOf(false) }
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
@@ -167,7 +172,7 @@ fun ArticleDetailRoute(
     windowSizeClass = windowSizeClass,
     filter = filter,
     articlesWithImages = lazyArticleImagesUris,
-    articleEnsembleTitles = articlesEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
+    articleEnsembleTitles = ensembleUiState.articleEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
     pagerState = pagerState,
     ensembleListState = ensembleListState,
     selectedEnsembles = selectedEnsembles.keys,
@@ -176,6 +181,7 @@ fun ArticleDetailRoute(
     showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
     showPermissionsAlertDialog = showPermissionsAlertDialog,
     showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
+    showAddToEnsembleDialog = showAddToEnsemblesDialog,
     onClickEdit = {
       if(editMode) selectedEnsembles.clear()
       editMode = !editMode
@@ -204,7 +210,7 @@ fun ArticleDetailRoute(
       if(editMode) {
         if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
         else selectedEnsembles[it] = Unit
-      } else navController.navigateToEnsembleDetail(articlesEnsembles[it].id)
+      } else navController.navigateToEnsembleDetail(ensembleUiState.articleEnsembles[it].id)
     },
     onLongPressEnsemble = {
       if(!editMode) {
@@ -216,6 +222,13 @@ fun ArticleDetailRoute(
     },
     onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
     onClickCancelEnsemblesSelection = { selectedEnsembles.clear() },
+    onClickAddToEnsemble = { showAddToEnsemblesDialog = true },
+    onClickCloseAddToEnsembleDialog = { showAddToEnsemblesDialog = false },
+    onClickSaveAttachedEnsembles = { ensembleIds ->
+      articleDetailViewModel.addArticleToEnsembles(pagerState.currentPage, ensembleIds)
+      showAddToEnsemblesDialog = false
+    },
+    ensemblesToAdd = ensembleUiState.addEnsembles,
     modifier = modifier,
   )
 }
@@ -232,10 +245,12 @@ fun ArticleDetailScreen(
     showDeleteArticleAlertDialog: Boolean,
     showPermissionsAlertDialog: Boolean,
     showRemoveFromEnsemblesAlertDialog: Boolean,
+    showAddToEnsembleDialog: Boolean,
     onClickExport: () -> Unit,
     onClickDelete: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
     onClickCancelEnsemblesSelection: () -> Unit,
+    onClickAddToEnsemble: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
     onConfirmDeleteDialog: () -> Unit,
     onConfirmRemoveFromEnsemblesDialog: () -> Unit,
@@ -249,6 +264,9 @@ fun ArticleDetailScreen(
     exportingEnabled: Boolean,
     onClickEdit: () -> Unit,
     selectedEnsembles: Set<Int>,
+    ensemblesToAdd: List<Ensemble>,
+    onClickSaveAttachedEnsembles: (ensembleIds: List<String>) -> Unit,
+    onClickCloseAddToEnsembleDialog: () -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
   val systemBarTopPadding = systemBarPaddingValues.calculateTopPadding()
@@ -343,6 +361,7 @@ fun ArticleDetailScreen(
     onClickExport = onClickExport,
     onClickRemoveEnsembles = onClickRemoveEnsembles,
     onClickCancelEnsemblesSelection = onClickCancelEnsemblesSelection,
+    onClickAddToEnsemble = onClickAddToEnsemble,
     modifier = Modifier.padding(
       start = systemBarPaddingValues.calculateStartPadding(layoutDir),
       end = systemBarPaddingValues.calculateEndPadding(layoutDir),
@@ -352,6 +371,7 @@ fun ArticleDetailScreen(
   if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
   if(showPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
   if(showRemoveFromEnsemblesAlertDialog) RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
+  AddToEnsembleDialog(showAddToEnsembleDialog, ensemblesToAdd, onClickSaveAttachedEnsembles, onClickCloseAddToEnsembleDialog)
 }
 
 @Composable
@@ -364,6 +384,7 @@ fun FloatingActionButtonDetailScreen(
     onClickExport: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
     onClickCancelEnsemblesSelection: () -> Unit,
+    onClickAddToEnsemble: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
   NoopBottomEndButtonContainer(extraPadding = PaddingValues(bottom = 4.dp, end = 8.dp), modifier = modifier) {
@@ -390,6 +411,10 @@ fun FloatingActionButtonDetailScreen(
           icon = IconData(NoopIcons.Download, TODO_ICON_CONTENT_DESCRIPTION),
           onClick = onClickExport,
           enabled = exportingEnabled,
+        ),
+        IconButtonData(
+          icon = IconData(NoopIcons.Attachment, TODO_ICON_CONTENT_DESCRIPTION),
+          onClick = { onClickAddToEnsemble() }
         ),
       ),
       horizontalExpandedButtons = listOf(),
@@ -433,6 +458,70 @@ fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
       headerIcon = { Icon(imageVector = NoopIcons.Folder, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
     )
 
+@Composable
+private fun AddToEnsembleDialog(
+    visible: Boolean,
+    ensembles: List<Ensemble>,
+    onClickSave: (ensembleIds: List<String>) -> Unit,
+    onClickClose: () -> Unit,
+) {
+  BackHandler(enabled = visible) { onClickClose() }
+  val selectedEnsembleIds = remember { mutableStateMapOf<String, Unit>() }
+  NoopBottomSheetDialog(
+    visible = visible,
+    title = stringResource(id = R.string.attach_to_ensemble),
+    positiveButtonText = stringResource(id = R.string.save),
+    positiveButtonEnabled = selectedEnsembleIds.isNotEmpty(),
+    onClose = onClickClose,
+    onPositive = {
+      onClickSave(selectedEnsembleIds.keys.toList())
+      selectedEnsembleIds.clear()
+    },
+  ) {
+    if(ensembles.isNotEmpty()) {
+      Text(
+        text = stringResource(id = R.string.ensembles),
+        modifier = Modifier.padding(10.dp)
+      )
+      LazyRow(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.padding(start = 10.dp),
+      ) {
+        items(count = ensembles.size) { ensembleIndex ->
+          val ensemble = ensembles[ensembleIndex]
+          Box(contentAlignment = Alignment.Center) {
+            val (selected, setSelected) = remember { mutableStateOf(selectedEnsembleIds.contains(ensemble.id)) }
+            InputChip(
+              selected = selected,
+              label = { Text(text = ensemble.title) },
+              leadingIcon = {
+                if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+                else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+              },
+              onClick = {
+                if(selected) {
+                  selectedEnsembleIds.remove(ensemble.id)
+                  setSelected(false)
+                } else {
+                  selectedEnsembleIds[ensemble.id] = Unit
+                  setSelected(true)
+                }
+              },
+              modifier = Modifier.height(InputChipDefaults.Height)
+            )
+          }
+        }
+      }
+    } else {
+      Text(
+        text = stringResource(R.string.no_ensembles_available),
+        modifier = Modifier.padding(10.dp),
+      )
+    }
+  }
+}
+
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilArticleDetailScreen(
@@ -442,6 +531,9 @@ fun PreviewUtilArticleDetailScreen(
     showDeleteArticleAlertDialog: Boolean = false,
     showPermissionsAlertDialog: Boolean = false,
     showRemoveFromEnsemblesAlertDialog: Boolean = false,
+    showAddToEnsembleDialog: Boolean = false,
+    selectedEnsembles: Set<Int> = emptySet(),
+    addEnsembles: List<Ensemble> = emptyList()
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   val articlesWithImages = LazyArticleThumbnails(
     directory = "",
@@ -468,16 +560,26 @@ fun PreviewUtilArticleDetailScreen(
       showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
       showPermissionsAlertDialog = showPermissionsAlertDialog,
       showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
-      onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
-      onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {}, onLongPressEnsemble = {},
-      onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = setOf(1),
+      showAddToEnsembleDialog = showAddToEnsembleDialog, onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
+      onClickAddToEnsemble = {}, onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
+      onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = selectedEnsembles,
+      ensemblesToAdd = addEnsembles, onClickSaveAttachedEnsembles = {}, onClickCloseAddToEnsembleDialog = {},
     )
   }
 }
 
 @PreviewScreenSizes @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen(filter = "Golden Girls")
 @Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = true, darkMode = true)
-@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(showDeleteArticleAlertDialog = true)
+@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(showDeleteArticleAlertDialog = true, floatingActionButtonExpanded = true, selectedEnsembles = setOf(1))
 @Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() = PreviewUtilArticleDetailScreen(showPermissionsAlertDialog = true)
 @Preview @Composable fun PreviewArticleDetailScreen_removeFromEnsemblesDialog() = PreviewUtilArticleDetailScreen(showRemoveFromEnsemblesAlertDialog = true)
+@Preview @Composable fun PreviewArticleDetailScreen_addToEnsembleDialog() = PreviewUtilArticleDetailScreen(
+  showAddToEnsembleDialog = true,
+  addEnsembles = listOf(
+    Ensemble(id = "1", title = "Road Warrior"),
+    Ensemble(id = "2", title = "Goth 2 Boss"),
+    Ensemble(id = "3", title = "Boy Wonder"),
+    Ensemble(id = "4", title = "Deely Stan"),
+  )
+)
 //endregion

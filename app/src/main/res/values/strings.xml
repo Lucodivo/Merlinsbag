@@ -86,4 +86,6 @@
     <string name="bottoms">Bottoms</string>
     <string name="tops">Tops</string>
     <string name="shoes">Shoes</string>
+    <string name="attach_to_ensemble">Attach To Ensemble</string>
+    <string name="no_ensembles_available">No Ensembles Available</string>
 </resources>

@@ -44,7 +44,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   }
 
   fun addEnsembleArticles(addArticleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
-    ensemblesRepository.addEnsembleArticles(ensemble.id, addArticleIndices.map { addArticles.getArticleId(it) })
+    ensemblesRepository.addArticlesToEnsemble(ensemble.id, addArticleIndices.map { addArticles.getArticleId(it) })
   }
 
   fun deleteEnsemble() = viewModelScope.launch(Dispatchers.IO) {
