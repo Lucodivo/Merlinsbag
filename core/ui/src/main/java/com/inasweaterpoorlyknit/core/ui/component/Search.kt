@@ -29,7 +29,6 @@ fun SearchBox(
     modifier: Modifier = Modifier,
 ){
   val focusRequester = remember { FocusRequester() }
-  val focusManager = LocalFocusManager.current
   val iconPadding = 4.dp
   TextField(
     value = query,

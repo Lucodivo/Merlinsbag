@@ -60,7 +60,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   private val _articleId = MutableSharedFlow<String>()
 
-  private val _searchQuery = MutableSharedFlow<String>(replay = 1).apply { tryEmit("") }
+  private var searchQuery = ""
+  private val _searchQuery = MutableSharedFlow<String>(replay = 1).apply { tryEmit(searchQuery) }
 
   fun onArticleFocus(index: Int) = viewModelScope.launch {
     articleIndex = index
@@ -77,7 +78,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
   }
 
   fun searchEnsembles(query: String) = viewModelScope.launch(Dispatchers.IO) {
-    _searchQuery.emit(if(query.isEmpty()) "" else "$query*")
+    searchQuery = if(query.isEmpty()) "" else "$query*"
+    _searchQuery.emit(searchQuery)
   }
 
   fun removeArticleEnsembles(articleIndex: Int, articleEnsembleIndices: List<Int>) {
@@ -122,10 +124,9 @@ class ArticleDetailViewModel @AssistedInject constructor(
           cachedArticleEnsembles = it
           cachedArticleEnsembleIdSet = it.map { it.id }.toSet()
         },
-    _searchQuery,
     _searchQuery.flatMapLatest { searchQuery -> ensembleRepository.searchAllEnsembles(searchQuery) },
     ensembleRepository.getAllEnsembles().onEach { cachedAllEnsembles = it },
-  ) { articleEnsembles, searchQuery, searchEnsembles, _ ->
+  ) { articleEnsembles, searchEnsembles, _ ->
     val searchResults = if(searchQuery.isEmpty()) cachedAllEnsembles else searchEnsembles
     ArticleEnsembleUiState(
       articleEnsembles = articleEnsembles,

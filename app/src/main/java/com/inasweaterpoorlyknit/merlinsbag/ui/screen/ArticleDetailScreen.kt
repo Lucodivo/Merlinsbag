@@ -98,9 +98,10 @@ const val ARTICLE_DETAIL_ROUTE = "$ARTICLE_DETAIL_ROUTE_BASE?$ARTICLE_INDEX_ARG=
 val storagePermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_STORAGE_PERMISSIONS = if(storagePermissionsRequired) arrayOf(permission.WRITE_EXTERNAL_STORAGE) else emptyArray()
 
+fun articleDetailRoute(articleIndex: Int, ensembleId: String? = null) = "${ARTICLE_DETAIL_ROUTE_BASE}?$ARTICLE_INDEX_ARG=$articleIndex?$ENSEMBLE_ID_ARG=$ensembleId"
+
 fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null) {
-  val route = "${ARTICLE_DETAIL_ROUTE_BASE}?$ARTICLE_INDEX_ARG=$articleIndex?$ENSEMBLE_ID_ARG=$ensembleId"
-  navigate(route, navOptions)
+  navigate(articleDetailRoute(articleIndex, ensembleId), navOptions)
 }
 
 @Composable
@@ -472,6 +473,7 @@ private fun AddToEnsembleDialog(
     onClickClose: () -> Unit,
     onSearchQueryUpdateAddToEnsembles: (String) -> Unit,
 ) {
+  val ensembleChipsHeight = 50.dp
   BackHandler(enabled = visible) { onClickClose() }
   val selectedEnsembleIds = remember { mutableStateMapOf<String, Unit>() }
   NoopBottomSheetDialog(
@@ -489,27 +491,12 @@ private fun AddToEnsembleDialog(
     },
   ) {
     Text(text = stringResource(id = R.string.ensembles))
-    val (userSearch, setUserSearch) = remember { mutableStateOf("") }
-    SearchBox(
-      query = userSearch,
-      placeholder = stringResource(R.string.search_ensembles),
-      onQueryChange = { updatedSearch ->
-        setUserSearch(updatedSearch)
-        onSearchQueryUpdateAddToEnsembles(updatedSearch)
-      },
-      onClearQuery = {
-        setUserSearch("")
-        onSearchQueryUpdateAddToEnsembles("")
-      },
-      modifier = Modifier
-          .fillMaxWidth()
-          .padding(20.dp),
-    )
     if(ensembles.isNotEmpty()) {
       LazyRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
-        modifier = Modifier.padding(start = 10.dp),
+        contentPadding = PaddingValues(5.dp),
+        modifier = Modifier.height(ensembleChipsHeight),
       ) {
         items(count = ensembles.size) { ensembleIndex ->
           val ensemble = ensembles[ensembleIndex]
@@ -526,17 +513,40 @@ private fun AddToEnsembleDialog(
                 if(selected) selectedEnsembleIds.remove(ensemble.id)
                 else selectedEnsembleIds[ensemble.id] = Unit
               },
-              modifier = Modifier.height(InputChipDefaults.Height)
+              modifier = Modifier.padding(horizontal = 2.dp)
             )
           }
         }
       }
     } else {
-      Text(
-        text = stringResource(R.string.no_ensembles_available),
-        modifier = Modifier.padding(10.dp),
-      )
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(ensembleChipsHeight),
+      ){
+        Text(
+          text = stringResource(R.string.no_ensembles_available),
+        )
+      }
     }
+    val (userSearch, setUserSearch) = remember { mutableStateOf("") }
+    SearchBox(
+      query = userSearch,
+      placeholder = stringResource(R.string.search_ensembles),
+      onQueryChange = { updatedSearch ->
+        setUserSearch(updatedSearch)
+        onSearchQueryUpdateAddToEnsembles(updatedSearch)
+      },
+      onClearQuery = {
+        setUserSearch("")
+
+        onSearchQueryUpdateAddToEnsembles("")
+      },
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(15.dp),
+    )
   }
 }
 

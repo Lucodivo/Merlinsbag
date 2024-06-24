@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
@@ -57,7 +58,6 @@ fun NoopBottomSheetDialog(
     positiveButtonEnabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-  val headerHeight = 56.dp
   val padding = 16.dp
   val scrimAlphaAnimatedScale by animateFloatAsState(
     targetValue = if(visible) 1.0f else 0.0f,
@@ -98,7 +98,6 @@ fun NoopBottomSheetDialog(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(headerHeight),
           ) {
             Row(
               horizontalArrangement = Arrangement.Start,
@@ -108,7 +107,6 @@ fun NoopBottomSheetDialog(
                 imageVector = NoopIcons.Close,
                 contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
                 modifier = Modifier
-                    .size(headerHeight)
                     .padding(padding)
                     .clickable { onClose() }
               )
@@ -125,7 +123,6 @@ fun NoopBottomSheetDialog(
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 textAlign = TextAlign.End,
                 modifier = Modifier
-                    .height(headerHeight)
                     .padding(padding)
                     .clickable { onPositive() }
               )
