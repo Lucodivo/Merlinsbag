@@ -5,8 +5,8 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
+import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
@@ -22,14 +22,17 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+
+data class ArticleEnsembleUiState(
+    val articleEnsembles: List<Ensemble>,
+    val addEnsembles: List<Ensemble>,
+)
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
@@ -48,31 +51,38 @@ class ArticleDetailViewModel @AssistedInject constructor(
   }
 
   private var cachedArticlesWithFullImages: LazyArticleFullImages = LazyArticleFullImages.Empty
-  private var cachedEnsembles: List<Ensemble> = emptyList()
-  private var cachedEnsembleIdSet: Set<String> = emptySet()
+  private var cachedArticleEnsembleIdSet: Set<String> = emptySet()
+  private var cachedArticleEnsembles: List<Ensemble> = emptyList()
+  private var cachedAllEnsembles: List<Ensemble> = emptyList()
 
-  private val _exportedImageUri = MutableSharedFlow<Pair<Int,Uri>>()
-  val articleExported: SharedFlow<Pair<Int,Uri>> = _exportedImageUri
+  private val _exportedImageUri = MutableSharedFlow<Pair<Int, Uri>>()
+  val articleExported: SharedFlow<Pair<Int, Uri>> = _exportedImageUri
 
   private val _articleId = MutableSharedFlow<String>()
 
+  private val _searchQuery = MutableSharedFlow<String>(replay = 1).apply { tryEmit("") }
+
   fun onArticleFocus(index: Int) = viewModelScope.launch {
     articleIndex = index
-    if(index < cachedArticlesWithFullImages.size) _articleId.emit( cachedArticlesWithFullImages.getArticleId(index))
+    if(index < cachedArticlesWithFullImages.size) _articleId.emit(cachedArticlesWithFullImages.getArticleId(index))
   }
 
   fun deleteArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
     articleRepository.deleteArticle(cachedArticlesWithFullImages.getArticleId(index))
   }
 
-  fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.Default){
-        val exportedImageUri = articleRepository.exportArticle(cachedArticlesWithFullImages.getArticleId(index))
-        exportedImageUri?.let { _exportedImageUri.emit(Pair(index, it)) }
+  fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.Default) {
+    val exportedImageUri = articleRepository.exportArticle(cachedArticlesWithFullImages.getArticleId(index))
+    exportedImageUri?.let { _exportedImageUri.emit(Pair(index, it)) }
+  }
+
+  fun searchEnsembles(query: String) = viewModelScope.launch(Dispatchers.IO) {
+    _searchQuery.emit(if(query.isEmpty()) "" else "$query*")
   }
 
   fun removeArticleEnsembles(articleIndex: Int, articleEnsembleIndices: List<Int>) {
     val articleId = cachedArticlesWithFullImages.getArticleId(articleIndex)
-    val ensembleIds = articleEnsembleIndices.map { cachedEnsembles[it].id }
+    val ensembleIds = articleEnsembleIndices.map { cachedArticleEnsembles[it].id }
     viewModelScope.launch(Dispatchers.IO) {
       ensembleRepository.deleteEnsemblesFromArticle(articleId, ensembleIds)
     }
@@ -82,7 +92,11 @@ class ArticleDetailViewModel @AssistedInject constructor(
     ensembleRepository.addEnsemblesToArticle(articleId = cachedArticlesWithFullImages.getArticleId(articleIndex), ensembleIds = ensembleIds)
   }
 
-  val filter: StateFlow<String> = if(ensembleId != null) { ensembleRepository.getEnsemble(ensembleId) } else { emptyFlow() }
+  val filter: StateFlow<String> = if(ensembleId != null) {
+    ensembleRepository.getEnsemble(ensembleId)
+  } else {
+    emptyFlow()
+  }
       .map { it.title }
       .stateIn(
         scope = viewModelScope,
@@ -92,11 +106,9 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   val articleLazyUriStrings: StateFlow<LazyUriStrings> = articleRepository.getArticlesWithFullImages(ensembleId)
       .take(1) // A constantly updating article set in the ArticleDetailScreen is a bad user experience
-      .onEach{ images ->
+      .onEach { images ->
         cachedArticlesWithFullImages = images
-        articleIndex?.let { i ->
-          if(i < images.size) _articleId.emit(images.getArticleId(i))
-        }
+        if(articleIndex < images.size) _articleId.emit(images.getArticleId(articleIndex))
       }
       .stateIn(
         scope = viewModelScope,
@@ -104,26 +116,24 @@ class ArticleDetailViewModel @AssistedInject constructor(
         started = SharingStarted.WhileSubscribed()
       )
 
-  data class EnsembleUiState(
-      val articleEnsembles: List<Ensemble>,
-      val addEnsembles: List<Ensemble>,
-  )
-
-  val ensembleUiState: StateFlow<EnsembleUiState> = combine(
+  val ensembleUiState: StateFlow<ArticleEnsembleUiState> = combine(
     _articleId.flatMapLatest { ensembleRepository.getEnsemblesByArticle(it) }
         .onEach {
-          cachedEnsembles = it
-          cachedEnsembleIdSet = it.map { it.id }.toSet()
+          cachedArticleEnsembles = it
+          cachedArticleEnsembleIdSet = it.map { it.id }.toSet()
         },
-    ensembleRepository.getAllEnsembles(),
-  ){ articleEnsembles, allEnsembles ->
-    EnsembleUiState(
+    _searchQuery,
+    _searchQuery.flatMapLatest { searchQuery -> ensembleRepository.searchAllEnsembles(searchQuery) },
+    ensembleRepository.getAllEnsembles().onEach { cachedAllEnsembles = it },
+  ) { articleEnsembles, searchQuery, searchEnsembles, _ ->
+    val searchResults = if(searchQuery.isEmpty()) cachedAllEnsembles else searchEnsembles
+    ArticleEnsembleUiState(
       articleEnsembles = articleEnsembles,
-      addEnsembles = allEnsembles.filter { !cachedEnsembleIdSet.contains(it.id) }
+      addEnsembles = searchResults.filter { !cachedArticleEnsembleIdSet.contains(it.id) }
     )
   }.stateIn(
     scope = viewModelScope,
-    initialValue = EnsembleUiState(emptyList(), emptyList()),
+    initialValue = ArticleEnsembleUiState(emptyList(), emptyList()),
     started = SharingStarted.WhileSubscribed()
   )
 }

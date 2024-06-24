@@ -29,6 +29,9 @@ class EnsembleRepository(
     )
 
   fun getAllEnsembles(): Flow<List<Ensemble>> = ensembleDao.getAllEnsembles()
+  fun searchAllEnsembles(query: String): Flow<List<Ensemble>> {
+    return ensembleDao.searchEnsemble(query)
+  }
   fun getAllEnsembleArticleThumbnails(): Flow<List<LazyEnsembleThumbnails>> =
       ensembleDao.getAllEnsembleArticleThumbnails().listMap { it.toLazyEnsembleThumbnails() }
   fun searchEnsembleArticleThumbnails(query: String): Flow<List<LazyEnsembleThumbnails>> =

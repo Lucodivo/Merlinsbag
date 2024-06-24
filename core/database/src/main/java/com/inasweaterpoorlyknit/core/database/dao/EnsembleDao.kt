@@ -97,4 +97,12 @@ interface EnsembleDao {
        WHERE ensemble_fts MATCH :query
        ORDER BY modified DESC """)
   fun searchEnsembleArticleThumbnails(query: String): Flow<List<EnsembleArticleThumbnails>>
+
+  @Query(
+    """SELECT ensemble.id, ensemble.title
+       FROM ensemble
+       JOIN ensemble_fts ON ensemble.id = ensemble_fts.id
+       WHERE ensemble_fts MATCH :query
+       ORDER BY modified DESC """)
+  fun searchEnsemble(query: String): Flow<List<Ensemble>>
 }

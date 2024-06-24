@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.core.database
 
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
+import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -35,6 +36,39 @@ class EnsembleDaoTests: DatabaseTests() {
     assertEquals(ensembleArticles[2].size, actualEnsembleArticles[2].articles.size)
     assertEquals(ensembleArticles[3].size, actualEnsembleArticles[3].articles.size)
     assertEquals(ensembleArticles[4].size, actualEnsembleArticles[4].articles.size)
+  }
+
+  @Test
+  fun searchEnsemble() = runBlocking(Dispatchers.IO) {
+    val ensembleTitles = arrayOf(
+      "Road Warrior",
+      "The Railway",
+      "The Rangers",
+      "Fantastic Raddish Warlock",
+      "Secret Way of Fans"
+    ).apply { sort() }
+
+    ensembleDao.insertEnsembles(
+      *ensembleTitles.map { EnsembleEntity(id = createCounterString(), title = it, created = 0, modified = 0) }.toTypedArray()
+    )
+
+    val ensembleSearch_rStar = ensembleDao.searchEnsemble("r*").first().toTypedArray() // Road Warrior, The Railway, Fantastic Raddish Warlock, The Rangers
+    val ensembleSearch_thStar = ensembleDao.searchEnsemble("th*").first().toTypedArray() // The Railway, The Rangers
+    val ensembleSearch_the = ensembleDao.searchEnsemble("THE").first().toTypedArray() // The Road, The Shire
+    val ensembleSearch_theRaStar = ensembleDao.searchEnsemble("the ra*").first().toTypedArray() // The Road, The Shire
+    val ensembleSearch_fanStar = ensembleDao.searchEnsemble("fan*").first().toTypedArray() // Fantastic Raddish Warlock, Secret Life of Fans
+    val ensembleSearch_waStar = ensembleDao.searchEnsemble("wa*").first().toTypedArray() // Road Warrior, Fantastic Raddish Warlock, Secret Way of Fans
+    val ensembleSearch_fantastic = ensembleDao.searchEnsemble("fantastic*").first().toTypedArray() // Fantastic Raddish Warlock
+    val ensembleSearch_zStar = ensembleDao.searchEnsemble("z*").first().toTypedArray() // none
+
+    assertEquals(4, ensembleSearch_rStar.size)
+    assertEquals(2, ensembleSearch_thStar.size)
+    assertEquals(2, ensembleSearch_the.size)
+    assertEquals(2, ensembleSearch_theRaStar.size)
+    assertEquals(2, ensembleSearch_fanStar.size)
+    assertEquals(3, ensembleSearch_waStar.size)
+    assertEquals(1, ensembleSearch_fantastic.size)
+    assertEquals(0, ensembleSearch_zStar.size)
   }
 
   @Test
