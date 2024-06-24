@@ -25,6 +25,11 @@ interface ArticleDao {
     insertArticleImages(articleImage)
   }
 
+  @Query("""UPDATE article
+            SET modified = :modified
+            WHERE id IN (:articleIds) """)
+  fun updateArticlesModified(modified: Long = generateTime(), articleIds: List<String>)
+
   @Update fun updateArticle(articleEntity: ArticleEntity)
 
   @Query("""DELETE FROM article WHERE id IN (:articleIds)""")
@@ -57,7 +62,8 @@ interface ArticleDao {
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article
-        WHERE article.id = :articleId""")
+        WHERE article.id = :articleId
+        ORDER BY article.modified DESC""")
   fun getArticleFilenames(articleId: String): Flow<ArticleWithImages>
 
   @Query("""SELECT COUNT(id) FROM article""")

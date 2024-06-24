@@ -32,6 +32,12 @@ interface EnsembleDao {
                 modified = :modified
             WHERE id = :ensembleId """)
   fun updateEnsemble(ensembleId: String, title: String, modified: Long = generateTime())
+
+  @Query("""UPDATE ensemble
+            SET modified = :modified
+            WHERE id IN (:ensembleIds) """)
+  fun updateEnsemblesModified(modified: Long = generateTime(), ensembleIds: List<String>)
+
   fun updateEnsemble(ensemble: Ensemble) = updateEnsemble(ensemble.id, ensemble.title)
 
   @Query("""DELETE FROM ensemble_article 
@@ -71,7 +77,8 @@ interface EnsembleDao {
     """SELECT ensemble.id, ensemble.title
       FROM ensemble 
       JOIN ensemble_article ON ensemble_article.ensemble_id = ensemble.id
-      WHERE ensemble_article.article_id = :articleId""")
+      WHERE ensemble_article.article_id = :articleId
+      ORDER BY ensemble.modified DESC""")
   fun getEnsemblesByArticle(articleId: String): Flow<List<Ensemble>>
 
   // NOTE: Only used for tests

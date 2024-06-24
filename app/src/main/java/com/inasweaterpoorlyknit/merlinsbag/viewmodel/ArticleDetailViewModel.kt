@@ -5,7 +5,6 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.tracing.trace
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.lang.Thread.State
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
@@ -61,21 +59,17 @@ class ArticleDetailViewModel @AssistedInject constructor(
     articleRepository.deleteArticle(cachedArticlesWithFullImages.getArticleId(index))
   }
 
-  fun exportArticle(index: Int) {
-      viewModelScope.launch(Dispatchers.IO) {
+  fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.Default){
         var exportedImageUri: Uri? = null
-        trace(label = "ArticleDetailViewModel: exportArticle"){
-          exportedImageUri = articleRepository.exportArticle(cachedArticlesWithFullImages.getArticleId(index))
-        }
+        exportedImageUri = articleRepository.exportArticle(cachedArticlesWithFullImages.getArticleId(index))
         exportedImageUri?.let { _exportedImageUri.emit(Pair(index, it)) }
-      }
   }
 
   fun removeArticleEnsembles(articleIndex: Int, articleEnsembleIndices: List<Int>) {
     val articleId = cachedArticlesWithFullImages.getArticleId(articleIndex)
     val ensembleIds = articleEnsembleIndices.map { cachedEnsembles[it].id }
     viewModelScope.launch(Dispatchers.IO) {
-      ensembleRepository.removeArticleEnsembles(articleId, ensembleIds)
+      ensembleRepository.deleteEnsemblesFromArticle(articleId, ensembleIds)
     }
   }
 

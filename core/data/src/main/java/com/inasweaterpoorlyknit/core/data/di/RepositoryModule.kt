@@ -27,7 +27,7 @@ object RepositoryModule {
 
   @Provides
   @Singleton
-  fun providesEnsembleRepository(@ApplicationContext context: Context, ensembleDao: EnsembleDao): EnsembleRepository = EnsembleRepository(context, ensembleDao)
+  fun providesEnsembleRepository(@ApplicationContext context: Context, ensembleDao: EnsembleDao, articleDao: ArticleDao): EnsembleRepository = EnsembleRepository(context, ensembleDao, articleDao)
 
   @Provides
   @Singleton
