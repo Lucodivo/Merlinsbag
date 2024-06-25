@@ -105,4 +105,7 @@ interface EnsembleDao {
        WHERE ensemble_fts MATCH :query
        ORDER BY modified DESC """)
   fun searchEnsemble(query: String): Flow<List<Ensemble>>
+
+  @Query("""SELECT EXISTS(SELECT 1 FROM ensemble WHERE title = :title)""")
+  fun existsEnsembleTitle(title: String): Boolean
 }

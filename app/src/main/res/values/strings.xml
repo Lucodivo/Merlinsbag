@@ -120,4 +120,5 @@
     <string name="welcome_page_capture_description">Four photographs of a shoe, a pair of pants, a denim jacket, and a T-shirt</string>
     <string name="welcome_page_virtualize_description">A shoe, T-shirt, denim jacket, and pair of pants cropped out isolated from their original photographs.</string>
     <string name="welcome_page_organize_description">Cropped out articles grouped into three collections.</string>
+    <string name="ensemble_with_title_already_exists">Ensemble w/ title already exists</string>
 </resources>

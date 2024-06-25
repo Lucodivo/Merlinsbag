@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1d5e6b172e16c70242d9698f379d4566",
+    "identityHash": "8c2e868602f1e1970dc758add7fe0516",
     "entities": [
       {
         "tableName": "article",
@@ -131,7 +131,17 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_ensemble_title",
+            "unique": true,
+            "columnNames": [
+              "title"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ensemble_title` ON `${TABLE_NAME}` (`title`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -248,7 +258,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d5e6b172e16c70242d9698f379d4566')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8c2e868602f1e1970dc758add7fe0516')"
     ]
   }
 }

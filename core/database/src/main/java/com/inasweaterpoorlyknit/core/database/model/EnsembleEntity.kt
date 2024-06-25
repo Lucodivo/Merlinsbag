@@ -4,9 +4,12 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Fts4
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "ensemble")
+@Entity(
+  tableName = "ensemble",
+  indices = [Index(value = ["title"], unique = true)])
 data class EnsembleEntity(
     @PrimaryKey
     @ColumnInfo(name = "id") val id: String,

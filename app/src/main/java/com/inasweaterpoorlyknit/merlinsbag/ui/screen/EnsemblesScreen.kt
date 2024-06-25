@@ -3,6 +3,7 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -112,13 +113,14 @@ fun EnsemblesRoute(
     ensemblesViewModel: EnsemblesViewModel = hiltViewModel(),
 ) {
   val lazyEnsembleThumbnails by ensemblesViewModel.lazyEnsembles.collectAsStateWithLifecycle()
-  var showAddEnsembleDialog by remember { mutableStateOf(false) }
+  val showAddEnsembleDialog by ensemblesViewModel.showAddEnsembleDialog.collectAsStateWithLifecycle(false)
   val showPlaceholder by ensemblesViewModel.showPlaceholder.collectAsStateWithLifecycle()
   val addEnsembleDialogArticles by ensemblesViewModel.addArticleThumbnails.collectAsStateWithLifecycle()
   val selectedEnsembleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   var showDeleteEnsembleAlertDialog by remember { mutableStateOf(false) }
   var editMode by remember { mutableStateOf(false) }
   var searchQuery by remember { mutableStateOf(ensemblesViewModel.searchQuery) }
+  val ensembleTitleError by ensemblesViewModel.ensembleTitleError.collectAsStateWithLifecycle()
   fun toggleSelectedEnsemble(index: Int){
     if(selectedEnsembleIndices.contains(index)) selectedEnsembleIndices.remove(index)
     else selectedEnsembleIndices[index] = Unit
@@ -147,13 +149,13 @@ fun EnsemblesRoute(
     },
     onClickActionButton = {
       if(editMode) editMode = false
-      else showAddEnsembleDialog = true
+      else ensemblesViewModel.onClickAddEnsemble()
     },
     onClickSaveEnsemble = { saveEnsembleData ->
       ensemblesViewModel.onClickSaveAddEnsembleDialog(saveEnsembleData)
-      showAddEnsembleDialog = false
     },
-    onCloseAddEnsembleDialog = { showAddEnsembleDialog = false },
+    ensembleTitleError = ensembleTitleError,
+    onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog,
     onUpdateSearchQuery = { newSearchQuery ->
       ensemblesViewModel.onSearchQueryUpdate(newSearchQuery)
       searchQuery = newSearchQuery
@@ -193,12 +195,13 @@ fun EnsemblesScreen(
     onLongPressEnsemble: (index: Int) -> Unit,
     onClickActionButton: () -> Unit,
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
+    ensembleTitleError: Int?,
+    onAlertDialogPositive: () -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
     onUpdateSearchQuery: (String) -> Unit,
     onClearSearchQuery: () -> Unit,
     onClickDeleteSelected: () -> Unit,
     onAlertDialogDismiss: () -> Unit,
-    onAlertDialogPositive: () -> Unit,
 ) {
   val sidePadding = 8.dp
   val bottomPadding = 4.dp
@@ -251,6 +254,7 @@ fun EnsemblesScreen(
       articleThumbnails = addEnsembleDialogArticles,
       onClickSave = onClickSaveEnsemble,
       onClickClose = onCloseAddEnsembleDialog,
+      ensembleTitleError = ensembleTitleError,
     )
     if(showDeleteEnsembleAlertDialog) {
       DeleteEnsemblesAlertDialog(onDismiss = onAlertDialogDismiss, onConfirm = onAlertDialogPositive)
@@ -281,6 +285,7 @@ private fun AddEnsembleDialog(
     articleThumbnails: LazyUriStrings,
     onClickSave: (SaveEnsembleData) -> Unit,
     onClickClose: () -> Unit,
+    ensembleTitleError: Int?,
 ) {
   BackHandler(enabled = visible) { onClickClose() }
   val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
@@ -304,7 +309,7 @@ private fun AddEnsembleDialog(
       setUserInputTitle("")
     },
   ) {
-    Row {
+    Column {
       OutlinedTextField(
         value = userInputTitle,
         placeholder = { Text(text = stringResource(id = R.string.goth_2_boss)) },
@@ -316,6 +321,13 @@ private fun AddEnsembleDialog(
         label = { Text(text = stringResource(id = R.string.ensemble_title)) },
         singleLine = true,
       )
+      if(ensembleTitleError != null) {
+        Text(
+          text = "* ${stringResource(id = ensembleTitleError)}",
+          color = MaterialTheme.colorScheme.error,
+          modifier = Modifier.padding(top = 4.dp)
+        )
+      }
     }
     if(articleThumbnails.isNotEmpty()) {
       Text(
@@ -606,95 +618,59 @@ fun PreviewUtilEnsembleScreen(
     showPlaceholder: Boolean = false,
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   EnsemblesScreen(
+    windowSizeClass = currentWindowAdaptiveInfo(),
     lazyEnsembleThumbnails = ensembles,
     showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,
-    showDeleteEnsembleAlertDialog = false,
-    selectedEnsembleIndices = emptySet(), showPlaceholder = showPlaceholder, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings, searchQuery = "Goth 2 Boss",
-    windowSizeClass = currentWindowAdaptiveInfo(),
+    showDeleteEnsembleAlertDialog = false, selectedEnsembleIndices = emptySet(), showPlaceholder = showPlaceholder, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
+    searchQuery = "Goth 2 Boss",
     onClickEnsemble = {}, onLongPressEnsemble = {}, onClickActionButton = {},
-    onClickSaveEnsemble = {}, onCloseAddEnsembleDialog = {},
-    onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onAlertDialogDismiss = {}, onAlertDialogPositive = {},
+    onClickSaveEnsemble = {}, ensembleTitleError = null,
+    onAlertDialogPositive = {}, onCloseAddEnsembleDialog = {}, onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onAlertDialogDismiss = {},
   )
 }
 
-@Preview
 @Composable
-fun PreviewEnsembleOverlappingImageRow() = NoopTheme(darkMode = DarkMode.DARK) {
-  EnsembleOverlappingImageRow(
-    title = "Road Warrior",
-    lazyUriStrings = previewEnsembles[1].second,
-    selected = false,
-    selectable = false,
-    modifier = Modifier.fillMaxWidth()
+fun PreviewUtilAddEnsembleDialog(
+    thumbnails: LazyUriStrings = lazyRepeatedThumbnailResourceIdsAsStrings,
+    ensembleTitleError: Int? = null,
+) = NoopTheme(DarkMode.DARK) {
+  AddEnsembleDialog(
+    visible = true,
+    articleThumbnails = thumbnails,
+    ensembleTitleError = ensembleTitleError,
+    onClickSave = {}, onClickClose = {},
   )
 }
 
-@Preview
-@Composable
-fun PreviewEnsembleOverlappingImageRowOverflow() = NoopTheme {
-  EnsembleOverlappingImageRow(
-    title = "Road Warrior",
-    lazyUriStrings = previewEnsembles[2].second,
-    selected = true,
-    selectable = true,
-    modifier = Modifier.fillMaxWidth()
-  )
+@Preview @Composable fun PreviewEnsembleOverlappingImageRow() = NoopTheme(darkMode = DarkMode.DARK) {
+  EnsembleOverlappingImageRow(title = "Road Warrior", lazyUriStrings = previewEnsembles[1].second, selected = false, selectable = false, modifier = Modifier.fillMaxWidth())
+}
+
+@Preview @Composable fun PreviewEnsembleOverlappingImageRowOverflow() = NoopTheme {
+  EnsembleOverlappingImageRow(title = "Road Warrior", lazyUriStrings = previewEnsembles[2].second, selected = true, selectable = true, modifier = Modifier.fillMaxWidth())
 }
 
 @Preview
 @Composable
 fun PreviewEnsembleOverlappingPlaceholderRow() = NoopTheme(darkMode = DarkMode.DARK) {
-  EnsembleOverlappingPlaceholderRow(
-    title = "Road Warrior",
-    drawables = drawablePlaceholders[1].second,
-    modifier = Modifier.fillMaxWidth()
-  )
+  EnsembleOverlappingPlaceholderRow(title = "Road Warrior", drawables = drawablePlaceholders[1].second, modifier = Modifier.fillMaxWidth())
 }
 
 @Preview
 @Composable
 fun PreviewEnsembleOverlappingPlaceholderRowOverflow() = NoopTheme {
-  EnsembleOverlappingPlaceholderRow(
-    title = "Road Warrior",
-    drawables = drawablePlaceholders[2].second,
-    modifier = Modifier.fillMaxWidth()
-  )
+  EnsembleOverlappingPlaceholderRow(title = "Road Warrior", drawables = drawablePlaceholders[2].second, modifier = Modifier.fillMaxWidth())
 }
 
-@DevicePreviews
-@Composable
-fun PreviewEnsembleScreen() = PreviewUtilEnsembleScreen(darkMode = true)
+@DevicePreviews @Composable fun PreviewEnsembleScreen() = PreviewUtilEnsembleScreen(darkMode = true)
+@DevicePreviews @Composable fun PreviewEnsembleScreen_Placeholders() = PreviewUtilEnsembleScreen(darkMode = true, showPlaceholder = true)
 
-@DevicePreviews
-@Composable
-fun PreviewEnsembleScreen_Placeholders() = PreviewUtilEnsembleScreen(darkMode = true, showPlaceholder = true)
+@Preview @Composable fun PreviewEnsemblesScreenAddEnsembleDialog() = PreviewUtilEnsembleScreen()
 
-@Preview
-@Composable
-fun PreviewEnsemblesScreenAddEnsembleDialog() = PreviewUtilEnsembleScreen()
-
-@Preview
-@Composable
-fun PreviewAddEnsembleDialog() = NoopTheme {
-  AddEnsembleDialog(
-    visible = true,
-    articleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
-    onClickSave = {},
-    onClickClose = {},
-  )
-}
-
-@Preview
-@Composable
-fun PreviewAddEnsembleDialog_NoArticles() = NoopTheme {
-  AddEnsembleDialog(
-    visible = true,
-    articleThumbnails = LazyUriStrings.Companion.Empty,
-    onClickSave = {},
-    onClickClose = {},
-  )
-}
+@Preview @Composable fun PreviewAddEnsembleDialog() = PreviewUtilAddEnsembleDialog()
+@Preview @Composable fun PreviewAddEnsembleDialog_NoArticles() = PreviewUtilAddEnsembleDialog(thumbnails = LazyUriStrings.Empty)
+@Preview @Composable fun PreviewAddEnsembleDialog_EnsembleTitleError() = PreviewUtilAddEnsembleDialog(ensembleTitleError = R.string.ensemble_with_title_already_exists)
 
 @Preview @Composable fun PreviewDeleteEnsemblesAlertDialog() = NoopTheme { DeleteEnsemblesAlertDialog(onConfirm = {}, onDismiss = {}) }
 //endregion

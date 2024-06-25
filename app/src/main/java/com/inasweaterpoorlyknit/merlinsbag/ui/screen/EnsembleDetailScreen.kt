@@ -97,6 +97,7 @@ fun EnsembleDetailRoute(
   val selectedEditArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   var showAddArticlesDialog by remember { mutableStateOf(false) }
   val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+  ensembleDetailViewModel.titleChangeError.value.getContentIfNotHandled()?.let { Toast(it) }
   EnsembleDetailScreen(
     windowSizeClass = windowSizeClass,
     title = ensembleTitle,

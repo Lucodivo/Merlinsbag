@@ -1,12 +1,15 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.merlinsbag.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -34,9 +37,14 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   private lateinit var ensembleArticles: LazyArticleThumbnails
   private lateinit var addArticles: LazyArticleThumbnails
   private lateinit var ensembleArticleIds: Set<String>
+  val titleChangeError = mutableStateOf(Event<Int>(null))
 
   fun onTitleChanged(newTitle: String) = viewModelScope.launch(Dispatchers.IO) {
-    ensemblesRepository.updateEnsemble(ensemble.copy(title = newTitle))
+    if(ensemblesRepository.isEnsembleTitleUnique(newTitle)){
+      ensemblesRepository.updateEnsemble(ensemble.copy(title = newTitle))
+    } else {
+      titleChangeError.value = Event(R.string.ensemble_with_title_already_exists)
+    }
   }
 
   fun removeEnsembleArticles(articleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {

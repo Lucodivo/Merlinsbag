@@ -2,14 +2,18 @@
 
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import androidx.annotation.StringRes
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.merlinsbag.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +44,11 @@ class EnsemblesViewModel @Inject constructor(
 
   private val _showPlaceholder = MutableStateFlow(false)
   val showPlaceholder: StateFlow<Boolean> = _showPlaceholder
+  private val _showAddEnsembleDialog = MutableStateFlow(false)
+  val showAddEnsembleDialog: StateFlow<Boolean> = _showAddEnsembleDialog
+  private val _ensembleTitleError = MutableStateFlow<Int?>(null)
+  val ensembleTitleError: StateFlow<Int?> = _ensembleTitleError
+
   val addArticleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
       .onEach { articleImages = it }
       .stateIn(
@@ -75,12 +84,16 @@ class EnsemblesViewModel @Inject constructor(
       )
 
   fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
-    val articleIds = saveEnsembleData.articleIndices.map { articleImages.getArticleId(it) }
     viewModelScope.launch(Dispatchers.IO) {
-      ensemblesRepository.insertEnsemble(
-        saveEnsembleData.title,
-        articleIds,
-      )
+      val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(saveEnsembleData.title)
+      if(ensembleTitleUnique){
+        val articleIds = saveEnsembleData.articleIndices.map { articleImages.getArticleId(it) }
+        _showAddEnsembleDialog.value = false
+        ensemblesRepository.insertEnsemble(
+          saveEnsembleData.title,
+          articleIds,
+        )
+      } else _ensembleTitleError.value = R.string.ensemble_with_title_already_exists
     }
   }
   fun onClickEnsemble(index: Int): String = ensembles[index].ensemble.id
@@ -94,6 +107,9 @@ class EnsemblesViewModel @Inject constructor(
       ensemblesRepository.deleteEnsembles(ensembleIds)
     }
   }
+
+  fun onClickAddEnsemble() { _showAddEnsembleDialog.value = true }
+  fun onClickCloseAddEnsembleDialog() { _showAddEnsembleDialog.value = false }
 
   companion object {
     const val MAX_ENSEMBLE_TITLE_LENGTH = 128
