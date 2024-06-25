@@ -313,11 +313,7 @@ private fun AddEnsembleDialog(
       OutlinedTextField(
         value = userInputTitle,
         placeholder = { Text(text = stringResource(id = R.string.goth_2_boss)) },
-        onValueChange = { updatedTitle ->
-          if(updatedTitle.length <= MAX_ENSEMBLE_TITLE_LENGTH) {
-            setUserInputTitle(updatedTitle)
-          }
-        },
+        onValueChange = { if(it.length <= MAX_ENSEMBLE_TITLE_LENGTH) setUserInputTitle(it) },
         label = { Text(text = stringResource(id = R.string.ensemble_title)) },
         singleLine = true,
       )

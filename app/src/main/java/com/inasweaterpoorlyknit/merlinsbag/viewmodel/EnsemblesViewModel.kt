@@ -2,15 +2,12 @@
 
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
-import androidx.annotation.StringRes
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.listMap
-import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
+import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
@@ -38,6 +35,11 @@ class EnsemblesViewModel @Inject constructor(
     articleRepository: ArticleRepository,
     val ensemblesRepository: EnsembleRepository,
 ): ViewModel() {
+
+  companion object {
+    const val MAX_ENSEMBLE_TITLE_LENGTH = 256
+  }
+
   private lateinit var articleImages: LazyArticleThumbnails
   private lateinit var ensembles: List<LazyEnsembleThumbnails>
   private var searchEnsemblesQuery: MutableSharedFlow<String> = MutableStateFlow("")
@@ -110,8 +112,4 @@ class EnsemblesViewModel @Inject constructor(
 
   fun onClickAddEnsemble() { _showAddEnsembleDialog.value = true }
   fun onClickCloseAddEnsembleDialog() { _showAddEnsembleDialog.value = false }
-
-  companion object {
-    const val MAX_ENSEMBLE_TITLE_LENGTH = 128
-  }
 }

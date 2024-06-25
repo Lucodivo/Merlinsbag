@@ -68,6 +68,7 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 
 const val ENSEMBLE_ID_ARG = "ensembleId"
 const val ENSEMBLE_DETAIL_ROUTE_BASE = "ensembles_route"
@@ -109,7 +110,7 @@ fun EnsembleDetailRoute(
     selectedAddArticleIndices = selectedAddArticleIndices.keys,
     onTitleClicked = { editingTitle = true },
     onTitleChanged = { newTitle ->
-      ensembleDetailViewModel.onTitleChanged(newTitle)
+      if(newTitle != ensembleTitle) ensembleDetailViewModel.onTitleChanged(newTitle)
       editingTitle = false
     },
     onClickEdit = {
@@ -295,7 +296,7 @@ fun EnsembleDetailScreen(
           OutlinedTextField(
             value = editTitle,
             placeholder = { Text(text = title.ifEmpty { "Goth 2 Boss" }) },
-            onValueChange = setEditTitle,
+            onValueChange = { if(it.length <= MAX_ENSEMBLE_TITLE_LENGTH) setEditTitle(it) },
             singleLine = true,
             label = { Text(text = stringResource(id = R.string.ensemble_title)) },
             keyboardActions = KeyboardActions(onDone = { onTitleChanged(editTitle) }),
