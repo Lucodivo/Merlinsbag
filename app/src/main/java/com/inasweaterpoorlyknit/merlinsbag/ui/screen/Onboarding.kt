@@ -41,10 +41,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.HorizontalPageIndicator
 import androidx.wear.compose.material.PageIndicatorState
 import com.google.common.primitives.Floats.max
-import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.getActivity
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.OnboardingViewModel
 
 // NOTE: Onboarding is NOT a Screen in the sense that it cannot be navigated too
@@ -76,6 +74,7 @@ fun Onboarding(
 private fun OnboardingSlide(
     title: String,
     text: String,
+    contentDescription: String,
     @DrawableRes imageId: Int = R.drawable.onboarding_photographs,
 ){
   val slideHorizontalPadding = 32.dp
@@ -91,7 +90,7 @@ private fun OnboardingSlide(
   ) {
     Image(
       painter = painterResource(imageId),
-      contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+      contentDescription = contentDescription,
       contentScale = ContentScale.FillWidth,
       modifier = Modifier.fillMaxWidth()
     )
@@ -124,6 +123,7 @@ private fun OnboardingSlideOne(){
     imageId = R.drawable.ic_launcher_color_foreground,
     title = stringResource(R.string.welcome),
     text = stringResource(R.string.merlinsbag_is_an_app_for_cataloging),
+    contentDescription = stringResource(R.string.merlinsbag_icon_description)
   )
 }
 
@@ -133,6 +133,7 @@ private fun OnboardingSlideTwo(){
     imageId = R.drawable.onboarding_photographs,
     title = stringResource(R.string.capture),
     text = stringResource(R.string.collect_photographs),
+    contentDescription = stringResource(R.string.welcome_page_capture_description)
   )
 }
 
@@ -142,6 +143,7 @@ private fun OnboardingSlideThree(){
     imageId = R.drawable.onboarding_articles,
     title = stringResource(R.string.virtualize),
     text = stringResource(R.string.merlinsbag_will_stencil_out),
+    contentDescription = stringResource(R.string.welcome_page_virtualize_description)
   )
 }
 
@@ -151,6 +153,7 @@ private fun OnboardingSlideFour(){
     imageId = R.drawable.onboarding_ensembles,
     title = stringResource(R.string.organize),
     text = stringResource(R.string.categorize_your_keepsakes),
+    contentDescription = stringResource(R.string.welcome_page_organize_description)
   )
 }
 

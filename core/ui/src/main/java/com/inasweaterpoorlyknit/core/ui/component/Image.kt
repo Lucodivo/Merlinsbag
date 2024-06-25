@@ -28,14 +28,14 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.COMPOSE_PREVIEW_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.R
 import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
@@ -117,7 +117,7 @@ fun SelectableNoopImage(
     if(selectable) {
       Icon(
         imageVector = if(selected) NoopIcons.SelectedIndicator else NoopIcons.SelectableIndicator,
-        contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+        contentDescription = stringResource(if(selected) R.string.selected else R.string.selectable),
         modifier = Modifier.align(Alignment.BottomEnd),
         tint = MaterialTheme.colorScheme.primary,
       )
@@ -152,7 +152,7 @@ fun NoopRotatableImage(
       )
       Image(
         bitmap = bitmap.asImageBitmap(),
-        contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+        contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
         modifier = Modifier
             .rotate(ccwRotationAngle)
             .sizeIn(maxWidth = maxImageSize.width, maxHeight = maxImageSize.height)

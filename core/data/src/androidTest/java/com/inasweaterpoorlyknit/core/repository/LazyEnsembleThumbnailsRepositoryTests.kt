@@ -40,6 +40,7 @@ class LazyEnsembleThumbnailsRepositoryTests {
     ensembleRepository = EnsembleRepository(
       context = context,
       ensembleDao = database.EnsembleDao(),
+      articleDao = database.ArticleDao(),
     )
   }
 

@@ -13,10 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.R
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
@@ -37,7 +37,7 @@ fun SearchBox(
     singleLine = true,
     leadingIcon = { Icon(
           imageVector = NoopIcons.Search,
-          contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+          contentDescription = stringResource(R.string.search),
           modifier = Modifier.padding(start = iconPadding)
     )},
     shape = MaterialTheme.shapes.extraLarge,
@@ -47,7 +47,7 @@ fun SearchBox(
           onClick = onClearQuery,
           modifier = Modifier.padding(end = iconPadding)
         ){
-          Icon(NoopIcons.Close, TODO_ICON_CONTENT_DESCRIPTION)
+          Icon(NoopIcons.Close, stringResource(R.string.clear_query))
         }
       }
     },

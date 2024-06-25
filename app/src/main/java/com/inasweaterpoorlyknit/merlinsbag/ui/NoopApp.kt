@@ -34,7 +34,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
@@ -74,7 +73,7 @@ fun NoopApp(
       navigationSuiteItems = {
         if(!compactWidth){
           item(
-            icon = { Icon(NoopIcons.Settings, TODO_ICON_CONTENT_DESCRIPTION) },
+            icon = { Icon(NoopIcons.Settings, stringResource(R.string.cog)) },
             label = { Text(stringResource(R.string.settings)) },
             selected = false,
             onClick = { appState.navController.navigateToSettings() }

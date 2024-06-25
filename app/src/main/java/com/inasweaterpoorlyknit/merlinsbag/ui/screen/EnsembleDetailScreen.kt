@@ -49,9 +49,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.LandscapePreview
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
@@ -168,7 +168,7 @@ fun DeleteEnsembleAlertDialog(
   NoopSimpleAlertDialog(
     title = stringResource(id = R.string.delete_ensemble),
     text = stringResource(id = R.string.are_you_sure),
-    headerIcon = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
+    headerIcon = { Icon(NoopIcons.DeleteForever, REDUNDANT_CONTENT_DESCRIPTION) },
     confirmText = stringResource(id = R.string.delete),
     cancelText = stringResource(id = R.string.cancel),
     onDismiss = onDismiss,
@@ -190,22 +190,22 @@ fun EnsembleDetailFloatingActionButtons(
   NoopBottomEndButtonContainer(modifier) {
     NoopExpandingIconButton(
       expanded = editEnsemblesMode,
-      collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
-      expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+      collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
+      expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       verticalExpandedButtons =
       if(selectedEditArticleIndices.isNotEmpty()) {
         listOf(
           IconButtonData(
             icon = IconData(
               icon = NoopIcons.Cancel,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              contentDescription = stringResource(R.string.clear_selected_articles)
             ),
             onClick = onClickCancelSelection
           ),
           IconButtonData(
             icon = IconData(
               icon = NoopIcons.attachmentRemove(),
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              contentDescription = stringResource(R.string.remove_selected_articles_from_ensemble)
             ),
             onClick = onClickRemoveArticles
           ),
@@ -215,14 +215,14 @@ fun EnsembleDetailFloatingActionButtons(
           IconButtonData(
             icon = IconData(
               icon = NoopIcons.DeleteForever,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              contentDescription = stringResource(R.string.delete_ensemble)
             ),
             onClick = onClickDeleteEnsemble
           ),
           IconButtonData(
             icon = IconData(
               icon = NoopIcons.Attachment,
-              contentDescription = TODO_ICON_CONTENT_DESCRIPTION
+              contentDescription = stringResource(R.string.attach_articles_to_ensemble)
             ),
             onClick = onClickAddArticles
           ),
@@ -311,7 +311,7 @@ fun EnsembleDetailScreen(
           val titleAlign = if(compactWidth) TextAlign.Center else TextAlign.Start
           val titleFontSize = MaterialTheme.typography.titleLarge.fontSize
           Row{
-            Icon(NoopIcons.ensembles(), TODO_ICON_CONTENT_DESCRIPTION, modifier = iconModifier)
+            Icon(NoopIcons.ensembles(), stringResource(R.string.hashtag), modifier = iconModifier)
             if(title.isNotEmpty()) {
               Text(text = title, textAlign = titleAlign, fontSize = titleFontSize, modifier = titleModifier)
             } else {
@@ -401,19 +401,11 @@ fun AddArticlesDialog(
               selectable = true,
               selected = selected,
               uriString = addArticleThumbnailUri,
-              contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+              contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                   .padding(padding)
                   .clickable { onSelectedArticle(articleIndex) }
             )
-            if(selected) {
-              Icon(
-                imageVector = NoopIcons.SelectedIndicator,
-                contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
-                modifier = Modifier.align(Alignment.BottomEnd),
-                tint = MaterialTheme.colorScheme.primary,
-              )
-            }
           }
         }
       }

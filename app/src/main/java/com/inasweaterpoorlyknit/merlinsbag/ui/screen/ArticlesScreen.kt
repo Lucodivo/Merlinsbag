@@ -36,25 +36,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
+import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
-import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
-import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
-import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
 
 const val ARTICLES_ROUTE = "articles_route"
@@ -163,7 +162,7 @@ fun CameraPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
     title = stringResource(id = R.string.permission_alert_title),
     text = stringResource(if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
                           else R.string.camera_permission_alert_justification),
-    headerIcon = { Icon(imageVector = NoopIcons.Camera, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    headerIcon = { Icon(imageVector = NoopIcons.Camera, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
     onDismiss = onDismiss,
     onConfirm = onConfirm,
     confirmText = stringResource(id = R.string.permission_alert_positive),
@@ -175,7 +174,7 @@ fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
   NoopSimpleAlertDialog(
     title = stringResource(id = R.string.delete_article),
     text = stringResource(id = R.string.deleted_articles_unrecoverable),
-    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
     onDismiss = onDismiss,
     onConfirm = onConfirm,
     confirmText = stringResource(id = R.string.delete),
@@ -249,27 +248,27 @@ fun ArticlesScreen(
   NoopBottomEndButtonContainer(modifier = Modifier.padding(start = startPadding, end = endPadding)) {
     NoopExpandingIconButton(
       expanded = editMode,
-      collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
-      expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+      collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
+      expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       verticalExpandedButtons = if(articlesAreSelected) {
         listOf(
           IconButtonData(
-            icon = IconData(icon = NoopIcons.Cancel, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+            icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_articles)),
             onClick = onClickSelectionCancel
           ),
           IconButtonData(
-            icon = IconData(icon = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+            icon = IconData(icon = NoopIcons.DeleteForever, contentDescription = stringResource(R.string.delete_selected_articles)),
             onClick = onClickDelete
           ),
         )
       } else {
         listOf(
           IconButtonData(
-            icon = IconData(icon = NoopIcons.AddPhotoAlbum, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+            icon = IconData(icon = NoopIcons.AddPhotoAlbum, contentDescription = stringResource(R.string.add_article_from_camera_roll)),
             onClick = onClickAddPhotoAlbum
           ),
           IconButtonData(
-            icon = IconData(icon = NoopIcons.AddPhotoCamera, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+            icon = IconData(icon = NoopIcons.AddPhotoCamera, contentDescription = stringResource(R.string.add_article_from_camera)),
             onClick = onClickAddPhotoCamera
           ),
         )
@@ -277,7 +276,7 @@ fun ArticlesScreen(
       horizontalExpandedButtons = if(!articlesAreSelected) {
         listOf(
           IconButtonData(
-            icon = IconData(icon = NoopIcons.Settings, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+            icon = IconData(icon = NoopIcons.Settings, contentDescription = stringResource(R.string.cog)),
             onClick = onClickSettings,
           ),
         )

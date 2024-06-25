@@ -38,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -72,9 +71,9 @@ import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.COMPOSE_ID
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
@@ -89,7 +88,6 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 
 const val ARTICLE_INDEX_ARG = "articleIndex"
 const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
@@ -284,7 +282,7 @@ fun ArticleDetailScreen(
   ) { page ->
     NoopImage(
       uriString = articlesWithImages.getUriString(page),
-      contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+      contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
       modifier = modifier
           .fillMaxSize()
           .padding(16.dp),
@@ -300,7 +298,7 @@ fun ArticleDetailScreen(
           .padding(top = systemBarTopPadding)
     ) {
       Row {
-        Icon(NoopIcons.ensembles(), TODO_ICON_CONTENT_DESCRIPTION, modifier = iconModifier)
+        Icon(NoopIcons.ensembles(), stringResource(R.string.hashtag), modifier = iconModifier)
         Text(text = filter, textAlign = TextAlign.Start, fontSize = MaterialTheme.typography.titleLarge.fontSize)
       }
     }
@@ -323,10 +321,10 @@ fun ArticleDetailScreen(
             label = { Text(text = articleEnsembleTitles[i]) },
             leadingIcon = {
               if(editMode) {
-                if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
-                else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+                if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selected))
+                else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selectable))
               } else {
-                Icon(imageVector = NoopIcons.ensembles(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+                Icon(imageVector = NoopIcons.ensembles(), contentDescription = stringResource(R.string.hashtag))
               }
             },
             onClick = {},
@@ -397,30 +395,30 @@ fun FloatingActionButtonDetailScreen(
   NoopBottomEndButtonContainer(extraPadding = PaddingValues(bottom = 4.dp, end = 8.dp), modifier = modifier) {
     NoopExpandingIconButton(
       expanded = expanded,
-      collapsedIcon = IconData(NoopIcons.Edit, TODO_ICON_CONTENT_DESCRIPTION),
-      expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+      collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
+      expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       onClick = onClickEdit,
       verticalExpandedButtons = if(removeEnsemblesEnabled) listOf(
         IconButtonData(
-          icon = IconData(icon = NoopIcons.Cancel, contentDescription = TODO_ICON_CONTENT_DESCRIPTION),
+          icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_ensembles)),
           onClick = onClickCancelEnsemblesSelection
         ),
         IconButtonData(
-          icon = IconData(NoopIcons.attachmentRemove(), TODO_ICON_CONTENT_DESCRIPTION),
+          icon = IconData(NoopIcons.attachmentRemove(), stringResource(R.string.remove_article_from_selected_ensembles)),
           onClick = onClickRemoveEnsembles,
         ),
       ) else listOf(
         IconButtonData(
-          icon = IconData(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION),
+          icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
           onClick = { onClickDelete() }
         ),
         IconButtonData(
-          icon = IconData(NoopIcons.Download, TODO_ICON_CONTENT_DESCRIPTION),
+          icon = IconData(NoopIcons.Download, stringResource(R.string.export_article_image)),
           onClick = onClickExport,
           enabled = exportingEnabled,
         ),
         IconButtonData(
-          icon = IconData(NoopIcons.Attachment, TODO_ICON_CONTENT_DESCRIPTION),
+          icon = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to_ensembles)),
           onClick = { onClickAddToEnsemble() }
         ),
       ),
@@ -434,7 +432,7 @@ fun DeleteArticleAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
     NoopSimpleAlertDialog(
       title = stringResource(id = R.string.delete_article),
       text = stringResource(id = R.string.deleted_articles_unrecoverable),
-      headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+      headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
       onDismiss = onDismiss,
       onConfirm = onConfirm,
       confirmText = stringResource(id = R.string.delete),
@@ -446,7 +444,7 @@ fun RemoveFromEnsemblesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit)
     NoopSimpleAlertDialog(
       title = stringResource(id = R.string.remove_ensembles),
       text = stringResource(id = R.string.are_you_sure_remove_article_from_ensembles),
-      headerIcon = { Icon(imageVector = NoopIcons.attachmentRemove(), contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+      headerIcon = { Icon(imageVector = NoopIcons.attachmentRemove(), contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
       onDismiss = onDismiss,
       onConfirm = onConfirm,
       confirmText = stringResource(id = R.string.remove),
@@ -462,7 +460,7 @@ fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
       onConfirm = onConfirm,
       confirmText = stringResource(id = R.string.permission_alert_positive),
       cancelText = stringResource(id = R.string.permission_alert_negative),
-      headerIcon = { Icon(imageVector = NoopIcons.Folder, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+      headerIcon = { Icon(imageVector = NoopIcons.Folder, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
     )
 
 @Composable
@@ -506,8 +504,8 @@ private fun AddToEnsembleDialog(
               selected = selected,
               label = { Text(text = ensemble.title) },
               leadingIcon = {
-                if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
-                else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+                if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selected))
+                else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selectable))
               },
               onClick = {
                 if(selected) selectedEnsembleIds.remove(ensemble.id)

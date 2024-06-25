@@ -43,9 +43,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -55,8 +56,8 @@ import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.ui.LargeFontSizePreview
+import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.SystemUiPreview
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopAlertDialog
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -172,7 +173,7 @@ fun SettingsRoute(
 @Composable
 fun AuthorRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.developer),
-  indicator = { Icon(NoopIcons.Web, TODO_ICON_CONTENT_DESCRIPTION) },
+  indicator = { Icon(NoopIcons.Web, stringResource(R.string.web_page)) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -180,23 +181,26 @@ fun AuthorRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 @Composable
 fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.source),
-  indicator = { Icon(NoopIcons.Code, TODO_ICON_CONTENT_DESCRIPTION) },
+  indicator = { Icon(NoopIcons.Code, stringResource(R.string.source_code)) },
   onClick = onClick,
   modifier = itemModifier,
 )
 
 @Composable
-fun EccohedraRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
-  text = stringResource(R.string.eccohedra),
-  indicator = { Icon(NoopIcons.eccohedra(), TODO_ICON_CONTENT_DESCRIPTION) },
-  onClick = onClick,
-  modifier = itemModifier,
-)
+fun EccohedraRow(onClick: () -> Unit) {
+  val eccohedraContentDescription = stringResource(R.string.eccohedra_description)
+  SettingsTextIndicatorButton(
+    text = stringResource(R.string.eccohedra),
+    indicator = { Icon(NoopIcons.eccohedra(), REDUNDANT_CONTENT_DESCRIPTION) },
+    onClick = onClick,
+    modifier = itemModifier.semantics { contentDescription = eccohedraContentDescription},
+  )
+}
 
 @Composable
 fun PrivacyInfoRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.privacy_information),
-  indicator = { Icon(NoopIcons.Privacy, TODO_ICON_CONTENT_DESCRIPTION) },
+  indicator = { Icon(NoopIcons.Privacy, REDUNDANT_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -250,9 +254,9 @@ fun DarkModeRow(
 ) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
-    Pair(stringResource(R.string.system), IconData(NoopIcons.systemMode(), TODO_ICON_CONTENT_DESCRIPTION)),
-    Pair(stringResource(R.string.light), IconData(NoopIcons.LightMode, TODO_ICON_CONTENT_DESCRIPTION)),
-    Pair(stringResource(R.string.dark), IconData(NoopIcons.DarkMode, TODO_ICON_CONTENT_DESCRIPTION))
+    Pair(stringResource(R.string.system), IconData(NoopIcons.systemMode(), REDUNDANT_CONTENT_DESCRIPTION)),
+    Pair(stringResource(R.string.light), IconData(NoopIcons.LightMode, REDUNDANT_CONTENT_DESCRIPTION)),
+    Pair(stringResource(R.string.dark), IconData(NoopIcons.DarkMode, REDUNDANT_CONTENT_DESCRIPTION))
   )
   val selectedDarkModeIcon = dropdownData[selectedDarkMode.ordinal].second
   DropdownSettingsRow(
@@ -374,7 +378,7 @@ fun ClearCacheRow(
 ) = SettingsTextIndicatorButton(
   enabled = enabled,
   text = stringResource(R.string.clear_cache),
-  indicator = { Icon(NoopIcons.Clean, TODO_ICON_CONTENT_DESCRIPTION) },
+  indicator = { Icon(NoopIcons.Clean, REDUNDANT_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -383,7 +387,7 @@ fun ClearCacheRow(
 fun DeleteAllDataRow(onClick: () -> Unit) {
   SettingsTextIndicatorButton(
     text = stringResource(R.string.delete_all_data),
-    indicator = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
+    indicator = { Icon(NoopIcons.DeleteForever, REDUNDANT_CONTENT_DESCRIPTION) },
     onClick = onClick,
     modifier = itemModifier,
   )
@@ -539,7 +543,7 @@ fun WelcomePageRow(
     onClick: () -> Unit,
 ) = SettingsTextIndicatorButton(
   text = stringResource(R.string.welcome_page),
-  indicator = { Icon(NoopIcons.WavingHand, TODO_ICON_CONTENT_DESCRIPTION) },
+  indicator = { Icon(NoopIcons.WavingHand, stringResource(R.string.waving_hand)) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -555,7 +559,7 @@ fun DeleteAllDataAlertDialog(
   val contentColor = MaterialTheme.colorScheme.onErrorContainer
   NoopAlertDialog(
     title = { Text(stringResource(id = R.string.delete_all_data)) },
-    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = TODO_ICON_CONTENT_DESCRIPTION) },
+    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
     text = {
       Column {
         Text(text = stringResource(id = R.string.deleted_all_data_unrecoverable))
@@ -564,7 +568,7 @@ fun DeleteAllDataAlertDialog(
           value = enteredText.value,
           label = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(imageVector = NoopIcons.Key, contentDescription = TODO_ICON_CONTENT_DESCRIPTION, tint = contentColor)
+              Icon(imageVector = NoopIcons.Key, contentDescription = stringResource(R.string.confirmation_key), tint = contentColor)
               Spacer(modifier = Modifier.width(spacerSize))
               Text(text = DELETE_ALL_CAPTCHA, color = contentColor)
             }
@@ -586,7 +590,7 @@ fun DeleteAllDataAlertDialog(
       if(enteredText.value == DELETE_ALL_CAPTCHA) {
         Text(stringResource(id = R.string.delete), modifier = Modifier.clickable { onClickPositive() })
       } else {
-        Icon(imageVector = NoopIcons.Lock, contentDescription = TODO_ICON_CONTENT_DESCRIPTION)
+        Icon(imageVector = NoopIcons.Lock, contentDescription = stringResource(R.string.confirmation_locked))
       }
     },
     cancelButton = { Text(stringResource(id = R.string.cancel)) },

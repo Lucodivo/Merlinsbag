@@ -27,10 +27,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -41,7 +38,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -56,6 +52,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,10 +62,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.core.ui.TODO_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.core.ui.TabletPreview
+import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.accessoryDrawables
 import com.inasweaterpoorlyknit.core.ui.bottomDrawables
 import com.inasweaterpoorlyknit.core.ui.component.HorizontalOverlappingLayout
@@ -269,11 +266,11 @@ private fun EditEnsemblesExpandingActionButton(
 ) {
   NoopExpandingIconButton(
     expanded = expanded,
-    collapsedIcon = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
-    expandedIcon = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+    collapsedIcon = IconData(NoopIcons.Add, stringResource(R.string.add_ensemble)),
+    expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
     onClick = onClickAddEnsemble,
     verticalExpandedButtons = listOf(
-      IconButtonData(IconData(NoopIcons.Delete, TODO_ICON_CONTENT_DESCRIPTION)) { onClickDeleteSelected() },
+      IconButtonData(IconData(NoopIcons.Delete, stringResource(R.string.delete_selected_ensembles))) { onClickDeleteSelected() },
     )
   )
 }
@@ -339,7 +336,7 @@ private fun AddEnsembleDialog(
               selectable = true,
               selected = selected,
               uriString = articleThumbnailUriString,
-              contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+              contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                   .padding(padding)
                   .clickable {
@@ -355,7 +352,7 @@ private fun AddEnsembleDialog(
             if(selected) {
               Icon(
                 imageVector = NoopIcons.SelectedIndicator,
-                contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+                contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selected),
                 modifier = Modifier.align(Alignment.BottomEnd),
                 tint = MaterialTheme.colorScheme.primary,
               )
@@ -377,7 +374,7 @@ fun DeleteEnsemblesAlertDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) = NoopSimpleAlertDialog(
-  headerIcon = { Icon(NoopIcons.DeleteForever, TODO_ICON_CONTENT_DESCRIPTION) },
+  headerIcon = { Icon(NoopIcons.DeleteForever, REDUNDANT_CONTENT_DESCRIPTION) },
   title = stringResource(R.string.delete_ensembles),
   text = stringResource(R.string.are_you_sure),
   confirmText = stringResource(R.string.delete),
@@ -403,7 +400,8 @@ fun EnsembleOverlappingImageRow(
     selectable: Boolean,
     modifier: Modifier = Modifier,
 ) {
-  RowCard(modifier = modifier) {
+  val ensembleOverlappingImagesDescription = stringResource(R.string.ensemble_overlapping)
+  RowCard(modifier = modifier.semantics { contentDescription = ensembleOverlappingImagesDescription }) {
     Box {
       Column(
         verticalArrangement = Arrangement.Center,
@@ -418,7 +416,7 @@ fun EnsembleOverlappingImageRow(
           repeat(lazyUriStrings.size) { index ->
             NoopImage(
               uriString = lazyUriStrings.getUriString(index),
-              contentDescription = TODO_IMAGE_CONTENT_DESCRIPTION,
+              contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier.sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
             )
           }
@@ -431,7 +429,7 @@ fun EnsembleOverlappingImageRow(
       if(selectable) {
         Icon(
           imageVector = if(selected) NoopIcons.SelectedIndicator else NoopIcons.SelectableIndicator,
-          contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+          contentDescription = stringResource(if(selected) com.inasweaterpoorlyknit.core.ui.R.string.selected else com.inasweaterpoorlyknit.core.ui.R.string.selectable),
           tint = MaterialTheme.colorScheme.primary,
           modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)
         )
@@ -451,7 +449,7 @@ fun EnsemblesOverlappingImageRowColumn(
     modifier: Modifier = Modifier,
 ) {
   val lazyGridState = rememberLazyStaggeredGridState()
-  // TODO: RowSize could be more versatile to accomidate better for tablet size screens
+  // TODO: RowSize could be more versatile to accommodate better for tablet size screens
   val rowSize = if(windowSizeClass.compactWidth()) 1 else 2
   val widthPercent = 1.0 / rowSize
   LazyVerticalStaggeredGrid(
@@ -506,7 +504,7 @@ fun EnsembleOverlappingPlaceholderRow(
         repeat(drawables.size) { index ->
           Icon(
             painter = painterResource(drawables[index]),
-            contentDescription = TODO_ICON_CONTENT_DESCRIPTION,
+            contentDescription = REDUNDANT_CONTENT_DESCRIPTION,
             modifier = Modifier
                 .sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize),
           )
@@ -538,7 +536,8 @@ fun EnsemblesOverlappingPlaceholderRowColumn(
   val maxPlaceholderRows = 20
   val rowSize = if(windowSizeClass.compactWidth()) 1 else 2
   val widthPercent = 1.0 / rowSize
-  Box{
+  val ensemblesPlaceholderDescription = stringResource(R.string.ensemble_overlapping)
+  Box(modifier = Modifier.semantics { contentDescription = ensemblesPlaceholderDescription }){
     val lazyGridState = rememberLazyStaggeredGridState()
     LazyVerticalStaggeredGrid(
       columns = StaggeredGridCells.Fixed(rowSize),

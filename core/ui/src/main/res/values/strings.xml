@@ -7,4 +7,13 @@
     <string name="sky">Sky</string>
     <string name="crimson">Crimson</string>
     <string name="ninety_five">Ninety-Five</string>
+    <string name="search">Search</string>
+    <string name="clear_query">Clear query</string>
+    <string name="addition_symbol">Addition symbol</string>
+    <string name="close_dialog">Close dialog</string>
+    <string name="placeholder_article_thumbnail">shimmering article thumbnails as a placeholder to an empty catalog</string>
+    <string name="selected">Selected</string>
+    <string name="selectable">Selectable</string>
+    <string name="more">More</string>
+    <string name="subtraction_symbol">Subtraction symbol</string>
 </resources>

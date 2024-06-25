@@ -1,10 +1,5 @@
 // TODO
 Database:
-    - Full text search
-        - Room database @Fts3/@Fts4
-            - https://developer.android.com/training/data-storage/room/defining-data#fts
-            - Potentially create separate tables specifically for text search, as demonstrated here:
-                https://github.com/android/nowinandroid/tree/afad1b9ac7e3d5efc798e786bd6548229a55735c/core/database/src/main/kotlin/com/google/samples/apps/nowinandroid/core/database/model
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
     - remove app modules dependency on Database models?
@@ -12,25 +7,18 @@ Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
 Ensembles:
-    - More efficient grid-type view?
     - Composite ensembles?
         - Exclusive: #Goth & #Tops
         - Inclusive: #HealthGoth | #Hiking
-Ensemble Detail:
-    - Swipe between ensemble details
 Features:
     - Collage
+    - Share!
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - NavigationRail [COMPLETED]
     - NavRail [COMPLETED]
 Articles:
     - thumbnails with random "shimmer"/"rotation"
-Accessibility:
-    - Icon content description
-        - Research what kind of descriptions are desired for accessibility services? Describe the form only or function as well?
-            - If form, app icons can be localized to a single file with content descriptions instead of writing descriptions per Icon usage
-            - https://m3.material.io/foundations/content-design/alt-text
 App-wide UI:
     - Explicit to Screen animations
 Tooling:
@@ -60,6 +48,7 @@ Performance:
                 - Tracing shows that exporting takes ~1.6s and 1.44s of this is from Bitmap.compress()
             - AddArticleViewModel.onSave()
                 - Tracing/System.nanoTime() shows that Bitmap.compress() is taking ~3.5-5.1s (depends on the image)
+                - Reduces to ~.5s by changing compression from WebP lossless to WebP lossy 100% quality
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
 
 // Unknowns
@@ -79,3 +68,16 @@ Aesthetic Questions:
             - the most intrusive to the user's overall device experience
             - Silent with no badge on app icon allows notifications to be a lot less annoying
             - Can be turned off by the user (good and bad)
+
+Accessibility:
+    - Icon / Image content description
+        - Research what kind of descriptions are desired for accessibility services? Describe the form only or function as well?
+            - If form, app icons can be localized to a single file with content descriptions instead of writing descriptions per Icon usage
+            - https://m3.material.io/foundations/content-design/alt-text
+                - If an image or icon can be removed with no information lost, it is considered decorative and doesn't need an alt text
+                - Describe context and overall meaning instead of focusing in on the details.
+                    - In Merlinsbag, if the idea is showing us capturing a photograph of a t-shirt, there is no need to mention the photographers feet in the picture
+                - 140 characters is considered the general maximum length
+                - If image or icon of a dog, do not say "image of a dog" or "icon of a dog", just say "a dog"
+                    - although it may be helpful to describe a more specific type of image (ex: graph, chart, headshot, etc.)
+                - alt text can also be a place for creative expressions

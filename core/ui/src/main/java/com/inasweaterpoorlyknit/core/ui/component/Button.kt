@@ -20,12 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.inasweaterpoorlyknit.core.ui.COMPOSE_PREVIEW_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.NoopComposePreviewIcons
-import com.inasweaterpoorlyknit.core.ui.TODO_ICON_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.R
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
@@ -62,8 +62,8 @@ fun NoopIconButton(
 fun NoopExpandingIconButton(
     expanded: Boolean,
     enabled: Boolean = true,
-    collapsedIcon: IconData = IconData(NoopIcons.Add, TODO_ICON_CONTENT_DESCRIPTION),
-    expandedIcon: IconData = IconData(NoopIcons.Remove, TODO_ICON_CONTENT_DESCRIPTION),
+    collapsedIcon: IconData = IconData(NoopIcons.Add, stringResource(R.string.addition_symbol)),
+    expandedIcon: IconData = IconData(NoopIcons.Remove, stringResource(R.string.subtraction_symbol)),
     onClick: () -> Unit,
     verticalExpandedButtons: List<IconButtonData> = emptyList(),
     horizontalExpandedButtons: List<IconButtonData> = emptyList(),
