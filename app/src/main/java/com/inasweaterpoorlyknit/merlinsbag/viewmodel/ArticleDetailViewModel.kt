@@ -78,9 +78,12 @@ class ArticleDetailViewModel @AssistedInject constructor(
     articleRepository.deleteArticle(cachedArticlesWithFullImages.getArticleId(index))
   }
 
-  fun exportArticle(index: Int) = viewModelScope.launch(Dispatchers.Default) {
-    val exportedImageUri = articleRepository.exportArticle(cachedArticlesWithFullImages.getArticleId(index))
-    exportedImageUri?.let { _exportedImageUri.emit(Pair(index, it)) }
+  fun exportArticle(index: Int) {
+    val articleId = cachedArticlesWithFullImages.getArticleId(index)
+    viewModelScope.launch(Dispatchers.Default) {
+      val exportedImageUri = articleRepository.exportArticle(articleId)
+      exportedImageUri?.let { _exportedImageUri.emit(Pair(index, it)) }
+    }
   }
 
   fun searchEnsembles(query: String) = viewModelScope.launch(Dispatchers.IO) {

@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.core.graphics.scale
@@ -16,15 +15,11 @@ import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import kotlin.coroutines.coroutineContext
 
 val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
 val compressionQuality = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) 100 else 99
@@ -65,10 +60,9 @@ class ArticleRepository(
   suspend fun exportArticle(articleId: String): Uri? {
     val articleFilenames = articleDao.getArticleFilenames(articleId).first()
     val articleFilename = articleFilenames.imagePaths[0].filename
-    val articleFilesDir = articleFilesDir(context)
-    val articleFile = File(articleFilesDir, articleFilename)
-
+    val articleFile = File(articleFilesDir(context), articleFilename)
     val bitmapToExport = BitmapFactory.decodeFile(articleFile.path)
+
     val exportFilname = articleFilename.replace(".webp", ".png")
 
     var exportUri: Uri? = null

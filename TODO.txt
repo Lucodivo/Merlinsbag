@@ -6,6 +6,7 @@ Database:
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
+    - Add to ensemble?
 Ensembles:
     - Composite ensembles?
         - Exclusive: #Goth & #Tops

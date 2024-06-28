@@ -132,7 +132,7 @@ fun ArticleDetailRoute(
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
-  val (userSearch, setUserSearch) = remember { mutableStateOf("") }
+  val userSearch = remember { mutableStateOf("") }
   val pagerState = rememberPagerState(
     initialPage = articleIndex,
     initialPageOffsetFraction = 0.0f,
@@ -175,6 +175,10 @@ fun ArticleDetailRoute(
       articleDetailViewModel.onArticleFocus(page)
       ensembleListState = LazyListState()
       selectedEnsembles.clear()
+      if(userSearch.value.isNotEmpty()){
+        articleDetailViewModel.searchEnsembles("")
+        userSearch.value = ""
+      }
     }
   }
   ArticleDetailScreen(
@@ -239,10 +243,10 @@ fun ArticleDetailRoute(
       showAddToEnsemblesDialog = false
     },
     onSearchQueryUpdateAddToEnsembles = {
-      setUserSearch(it)
+      userSearch.value = it
       articleDetailViewModel.searchEnsembles(it)
     },
-    ensemblesSearchQuery = userSearch,
+    ensemblesSearchQuery = userSearch.value,
     searchQueryUniqueTitle = ensembleUiState.searchIsUniqueTitle,
     ensemblesToAdd = ensembleUiState.searchEnsembles,
     modifier = modifier,
