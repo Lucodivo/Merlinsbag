@@ -17,6 +17,7 @@ Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - NavigationRail [COMPLETED]
     - NavRail [COMPLETED]
+    - Ensembles List / Ensemble Detail for tablets
 Articles:
     - thumbnails with random "shimmer"/"rotation"
 App-wide UI:

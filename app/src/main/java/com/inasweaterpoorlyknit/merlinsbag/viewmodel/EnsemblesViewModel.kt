@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -87,7 +88,7 @@ class EnsemblesViewModel @Inject constructor(
 
   fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
     viewModelScope.launch(Dispatchers.IO) {
-      val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(saveEnsembleData.title)
+      val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(saveEnsembleData.title).first()
       if(ensembleTitleUnique){
         val articleIds = saveEnsembleData.articleIndices.map { articleImages.getArticleId(it) }
         _showAddEnsembleDialog.value = false

@@ -37,6 +37,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -57,10 +58,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -117,8 +122,8 @@ fun ArticleDetailRoute(
         factory.create(ensembleId = ensembleId, articleIndex = articleIndex)
       }
   val settingsLauncher = rememberSettingsLauncher()
-  val lazyArticleImagesUris by articleDetailViewModel.articleLazyUriStrings.collectAsStateWithLifecycle()
   val ensembleUiState by articleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
+  val lazyArticleImagesUris by articleDetailViewModel.articleLazyUriStrings.collectAsStateWithLifecycle()
   var editMode by remember { mutableStateOf(false) }
   var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
   var showPermissionsAlertDialog by remember { mutableStateOf(false) }
@@ -127,6 +132,7 @@ fun ArticleDetailRoute(
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
+  val (userSearch, setUserSearch) = remember { mutableStateOf("") }
   val pagerState = rememberPagerState(
     initialPage = articleIndex,
     initialPageOffsetFraction = 0.0f,
@@ -226,13 +232,19 @@ fun ArticleDetailRoute(
     onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
     onClickCancelEnsemblesSelection = { selectedEnsembles.clear() },
     onClickAddToEnsemble = { showAddToEnsemblesDialog = true },
+    addNewEnsemble = { articleDetailViewModel.addArticleToNewEnsemble(pagerState.currentPage, it) },
     onClickCloseAddToEnsembleDialog = { showAddToEnsemblesDialog = false },
     onClickSaveAttachedEnsembles = { ensembleIds ->
       articleDetailViewModel.addArticleToEnsembles(pagerState.currentPage, ensembleIds)
       showAddToEnsemblesDialog = false
     },
-    onSearchQueryUpdateAddToEnsembles = { articleDetailViewModel.searchEnsembles(it) },
-    ensemblesToAdd = ensembleUiState.addEnsembles,
+    onSearchQueryUpdateAddToEnsembles = {
+      setUserSearch(it)
+      articleDetailViewModel.searchEnsembles(it)
+    },
+    ensemblesSearchQuery = userSearch,
+    searchQueryUniqueTitle = ensembleUiState.searchIsUniqueTitle,
+    ensemblesToAdd = ensembleUiState.searchEnsembles,
     modifier = modifier,
   )
 }
@@ -269,9 +281,12 @@ fun ArticleDetailScreen(
     onClickEdit: () -> Unit,
     selectedEnsembles: Set<Int>,
     ensemblesToAdd: List<Ensemble>,
+    addNewEnsemble: (String) -> Unit,
     onClickSaveAttachedEnsembles: (ensembleIds: List<String>) -> Unit,
+    searchQueryUniqueTitle: Boolean,
     onClickCloseAddToEnsembleDialog: () -> Unit,
     onSearchQueryUpdateAddToEnsembles: (String) -> Unit,
+    ensemblesSearchQuery: String,
 ) {
   val layoutDir = LocalLayoutDirection.current
   val systemBarTopPadding = systemBarPaddingValues.calculateTopPadding()
@@ -313,7 +328,9 @@ fun ArticleDetailScreen(
         val inputChipInteractionSource = remember { MutableInteractionSource() }
         Box(
           contentAlignment = Alignment.CenterStart,
-          modifier = Modifier.padding(horizontal = 2.dp).height(chipHeight + 8.dp)
+          modifier = Modifier
+              .padding(horizontal = 2.dp)
+              .height(chipHeight + 8.dp)
         ) {
           val selected = selectedEnsembles.contains(i)
           InputChip(
@@ -376,7 +393,16 @@ fun ArticleDetailScreen(
   if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
   if(showPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
   if(showRemoveFromEnsemblesAlertDialog) RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
-  AddToEnsembleDialog(showAddToEnsembleDialog, ensemblesToAdd, onClickSaveAttachedEnsembles, onClickCloseAddToEnsembleDialog, onSearchQueryUpdateAddToEnsembles)
+  AddToEnsembleDialog(
+    visible = showAddToEnsembleDialog,
+    userSearch = ensemblesSearchQuery,
+    ensemblesToAdd = ensemblesToAdd,
+    addNewEnsemble = addNewEnsemble,
+    onClickSave = onClickSaveAttachedEnsembles,
+    onClickClose = onClickCloseAddToEnsembleDialog,
+    onSearchQueryUpdate = onSearchQueryUpdateAddToEnsembles,
+    searchQueryUniqueTitle = searchQueryUniqueTitle
+  )
 }
 
 @Composable
@@ -466,14 +492,19 @@ fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
 @Composable
 private fun AddToEnsembleDialog(
     visible: Boolean,
-    ensembles: List<Ensemble>,
+    ensemblesToAdd: List<Ensemble>,
+    addNewEnsemble: (String) -> Unit,
     onClickSave: (ensembleIds: List<String>) -> Unit,
     onClickClose: () -> Unit,
-    onSearchQueryUpdateAddToEnsembles: (String) -> Unit,
+    userSearch: String,
+    onSearchQueryUpdate: (String) -> Unit,
+    searchQueryUniqueTitle: Boolean,
 ) {
   val ensembleChipsHeight = 50.dp
   BackHandler(enabled = visible) { onClickClose() }
   val selectedEnsembleIds = remember { mutableStateMapOf<String, Unit>() }
+  val chipRowPadding = PaddingValues(5.dp)
+  val chipHorizontalPadding = 2.dp
   NoopBottomSheetDialog(
     visible = visible,
     title = stringResource(id = R.string.attach_to_ensemble),
@@ -489,15 +520,15 @@ private fun AddToEnsembleDialog(
     },
   ) {
     Text(text = stringResource(id = R.string.ensembles))
-    if(ensembles.isNotEmpty()) {
+    if(ensemblesToAdd.isNotEmpty()) {
       LazyRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
-        contentPadding = PaddingValues(5.dp),
+        contentPadding = chipRowPadding,
         modifier = Modifier.height(ensembleChipsHeight),
       ) {
-        items(count = ensembles.size) { ensembleIndex ->
-          val ensemble = ensembles[ensembleIndex]
+        items(count = ensemblesToAdd.size) { ensembleIndex ->
+          val ensemble = ensemblesToAdd[ensembleIndex]
           Box(contentAlignment = Alignment.Center) {
             val selected = selectedEnsembleIds.contains(ensemble.id)
             InputChip(
@@ -511,7 +542,7 @@ private fun AddToEnsembleDialog(
                 if(selected) selectedEnsembleIds.remove(ensemble.id)
                 else selectedEnsembleIds[ensemble.id] = Unit
               },
-              modifier = Modifier.padding(horizontal = 2.dp)
+              modifier = Modifier.padding(horizontal = chipHorizontalPadding)
             )
           }
         }
@@ -522,25 +553,38 @@ private fun AddToEnsembleDialog(
         modifier = Modifier
             .fillMaxWidth()
             .height(ensembleChipsHeight),
-      ){
+      ) {
         Text(
           text = stringResource(R.string.no_ensembles_available),
         )
       }
     }
-    val (userSearch, setUserSearch) = remember { mutableStateOf("") }
+    Box(
+      contentAlignment = Alignment.Center,
+      modifier = Modifier
+          .fillMaxWidth()
+          .height(ensembleChipsHeight),
+    ) {
+      if(ensemblesToAdd.isEmpty() || !ensemblesToAdd.first().equals(userSearch))
+        InputChip(
+          selected = searchQueryUniqueTitle,
+          label = { Text(
+            text = userSearch,
+            style = if(searchQueryUniqueTitle) LocalTextStyle.current else TextStyle(textDecoration = TextDecoration.LineThrough),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+          ) },
+          leadingIcon = { Icon(imageVector = NoopIcons.ensembles(), contentDescription = stringResource(R.string.hashtag)) },
+          trailingIcon = { Icon(imageVector = NoopIcons.Add, contentDescription = stringResource(R.string.add_ensemble)) },
+          onClick = { if(searchQueryUniqueTitle) addNewEnsemble(userSearch) },
+          modifier = Modifier.padding(horizontal = chipRowPadding.calculateStartPadding(LocalLayoutDirection.current) + chipHorizontalPadding)
+        )
+    }
     SearchBox(
       query = userSearch,
       placeholder = stringResource(R.string.search_ensembles),
-      onQueryChange = { updatedSearch ->
-        setUserSearch(updatedSearch)
-        onSearchQueryUpdateAddToEnsembles(updatedSearch)
-      },
-      onClearQuery = {
-        setUserSearch("")
-
-        onSearchQueryUpdateAddToEnsembles("")
-      },
+      onQueryChange = { onSearchQueryUpdate(it) },
+      onClearQuery = { onSearchQueryUpdate("") },
       modifier = Modifier
           .fillMaxWidth()
           .padding(15.dp),
@@ -559,7 +603,7 @@ fun PreviewUtilArticleDetailScreen(
     showRemoveFromEnsemblesAlertDialog: Boolean = false,
     showAddToEnsembleDialog: Boolean = false,
     selectedEnsembles: Set<Int> = emptySet(),
-    addEnsembles: List<Ensemble> = emptyList()
+    addEnsembles: List<Ensemble> = emptyList(),
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   val articlesWithImages = LazyArticleThumbnails(
     directory = "",
@@ -589,7 +633,8 @@ fun PreviewUtilArticleDetailScreen(
       showAddToEnsembleDialog = showAddToEnsembleDialog, onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
       onClickAddToEnsemble = {}, onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
       onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = selectedEnsembles,
-      ensemblesToAdd = addEnsembles, onClickSaveAttachedEnsembles = {}, onClickCloseAddToEnsembleDialog = {}, onSearchQueryUpdateAddToEnsembles = {},
+      ensemblesToAdd = addEnsembles, onClickSaveAttachedEnsembles = {}, searchQueryUniqueTitle = true, onClickCloseAddToEnsembleDialog = {}, onSearchQueryUpdateAddToEnsembles = {}, ensemblesSearchQuery = "Goth 2 Boss",
+      addNewEnsemble = {}
     )
   }
 }
@@ -608,18 +653,21 @@ fun PreviewUtilArticleDetailScreen(
     Ensemble(id = "4", title = "Deely Stan"),
   )
 )
+
 @Preview @Composable fun PreviewAddToEnsembleDialog() = NoopTheme(darkMode = DarkMode.DARK) {
   AddToEnsembleDialog(
     visible = true,
     onClickSave = {},
     onClickClose = {},
-    onSearchQueryUpdateAddToEnsembles = {},
-    ensembles = listOf(
+    onSearchQueryUpdate = {}, addNewEnsemble = {},
+    ensemblesToAdd = listOf(
       Ensemble(id = "1", title = "Road Warrior"),
       Ensemble(id = "2", title = "Goth 2 Boss"),
       Ensemble(id = "3", title = "Boy Wonder"),
       Ensemble(id = "4", title = "Deely Stan"),
-    )
+    ),
+    searchQueryUniqueTitle = true,
+    userSearch = "Jurassic Bark ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
   )
 }
 //endregion

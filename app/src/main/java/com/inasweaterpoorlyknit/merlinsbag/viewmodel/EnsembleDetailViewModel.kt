@@ -17,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -40,7 +41,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   val titleChangeError = mutableStateOf(Event<Int>(null))
 
   fun onTitleChanged(newTitle: String) = viewModelScope.launch(Dispatchers.IO) {
-    if(ensemblesRepository.isEnsembleTitleUnique(newTitle)){
+    if(ensemblesRepository.isEnsembleTitleUnique(newTitle).first()){
       ensemblesRepository.updateEnsemble(ensemble.copy(title = newTitle))
     } else {
       titleChangeError.value = Event(R.string.ensemble_with_title_already_exists)

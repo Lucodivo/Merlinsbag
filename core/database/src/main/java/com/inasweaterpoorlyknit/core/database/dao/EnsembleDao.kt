@@ -107,5 +107,5 @@ interface EnsembleDao {
   fun searchEnsemble(query: String): Flow<List<Ensemble>>
 
   @Query("""SELECT EXISTS(SELECT 1 FROM ensemble WHERE title = :title)""")
-  fun existsEnsembleTitle(title: String): Boolean
+  fun existsEnsembleTitle(title: String): Flow<Boolean>
 }

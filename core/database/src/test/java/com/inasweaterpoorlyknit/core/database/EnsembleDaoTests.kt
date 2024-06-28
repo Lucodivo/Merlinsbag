@@ -60,6 +60,7 @@ class EnsembleDaoTests: DatabaseTests() {
     val ensembleSearch_waStar = ensembleDao.searchEnsemble("wa*").first().toTypedArray() // Road Warrior, Fantastic Raddish Warlock, Secret Way of Fans
     val ensembleSearch_fantastic = ensembleDao.searchEnsemble("fantastic*").first().toTypedArray() // Fantastic Raddish Warlock
     val ensembleSearch_zStar = ensembleDao.searchEnsemble("z*").first().toTypedArray() // none
+    val ensembleSearch_star = ensembleDao.searchEnsemble("*").first().toTypedArray() // none
 
     assertEquals(4, ensembleSearch_rStar.size)
     assertEquals(2, ensembleSearch_thStar.size)
@@ -69,6 +70,7 @@ class EnsembleDaoTests: DatabaseTests() {
     assertEquals(3, ensembleSearch_waStar.size)
     assertEquals(1, ensembleSearch_fantastic.size)
     assertEquals(0, ensembleSearch_zStar.size)
+    assertEquals(0, ensembleSearch_star.size)
   }
 
   @Test

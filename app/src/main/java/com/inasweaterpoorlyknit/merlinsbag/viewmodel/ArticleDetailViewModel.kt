@@ -16,22 +16,28 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 
 data class ArticleEnsembleUiState(
     val articleEnsembles: List<Ensemble>,
-    val addEnsembles: List<Ensemble>,
+    val searchEnsembles: List<Ensemble>,
+    val searchIsUniqueTitle: Boolean,
 )
 
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
@@ -78,7 +84,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
   }
 
   fun searchEnsembles(query: String) = viewModelScope.launch(Dispatchers.IO) {
-    searchQuery = if(query.isEmpty()) "" else "$query*"
+    searchQuery = query
     _searchQuery.emit(searchQuery)
   }
 
@@ -90,6 +96,14 @@ class ArticleDetailViewModel @AssistedInject constructor(
     }
   }
 
+  fun addArticleToNewEnsemble(articleIndex: Int, title: String) {
+    val articleId: String = cachedArticlesWithFullImages.getArticleId(articleIndex)
+    viewModelScope.launch(Dispatchers.IO) {
+      val isUnique = ensembleRepository.isEnsembleTitleUnique(title).first()
+      if(isUnique) ensembleRepository.insertEnsemble(title, listOf(articleId))
+    }
+  }
+
   fun addArticleToEnsembles(articleIndex: Int, ensembleIds: List<String>) = viewModelScope.launch(Dispatchers.IO) {
     ensembleRepository.addEnsemblesToArticle(articleId = cachedArticlesWithFullImages.getArticleId(articleIndex), ensembleIds = ensembleIds)
   }
@@ -98,8 +112,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
     ensembleRepository.getEnsemble(ensembleId)
   } else {
     emptyFlow()
-  }
-      .map { it.title }
+  }.map { it.title }
       .stateIn(
         scope = viewModelScope,
         initialValue = "",
@@ -124,17 +137,23 @@ class ArticleDetailViewModel @AssistedInject constructor(
           cachedArticleEnsembles = it
           cachedArticleEnsembleIdSet = it.map { it.id }.toSet()
         },
-    _searchQuery.flatMapLatest { searchQuery -> ensembleRepository.searchAllEnsembles(searchQuery) },
+    _searchQuery.flatMapLatest {  searchQuery ->
+      if(searchQuery.isEmpty()) { flowOf(Pair(emptyList(), false)) }
+      else ensembleRepository.searchAllEnsembles(searchQuery).zip(ensembleRepository.isEnsembleTitleUnique(searchQuery)){ searchEnsembles, unique ->
+        Pair(searchEnsembles, unique)
+      }
+    },
     ensembleRepository.getAllEnsembles().onEach { cachedAllEnsembles = it },
-  ) { articleEnsembles, searchEnsembles, _ ->
-    val searchResults = if(searchQuery.isEmpty()) cachedAllEnsembles else searchEnsembles
+  ) { articleEnsembles, searchResults, allEnsembles ->
+    val searchEnsembles: List<Ensemble> = if(searchQuery.isEmpty()) allEnsembles else searchResults.first
     ArticleEnsembleUiState(
       articleEnsembles = articleEnsembles,
-      addEnsembles = searchResults.filter { !cachedArticleEnsembleIdSet.contains(it.id) }
+      searchEnsembles = searchEnsembles.filter { !cachedArticleEnsembleIdSet.contains(it.id) },
+      searchIsUniqueTitle = searchResults.second
     )
   }.stateIn(
     scope = viewModelScope,
-    initialValue = ArticleEnsembleUiState(emptyList(), emptyList()),
+    initialValue = ArticleEnsembleUiState(emptyList(), emptyList(), false),
     started = SharingStarted.WhileSubscribed()
   )
 }

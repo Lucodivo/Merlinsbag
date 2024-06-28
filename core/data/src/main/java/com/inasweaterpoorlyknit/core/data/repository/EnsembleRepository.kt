@@ -29,7 +29,7 @@ class EnsembleRepository(
     )
 
   fun getAllEnsembles(): Flow<List<Ensemble>> = ensembleDao.getAllEnsembles()
-  fun searchAllEnsembles(query: String): Flow<List<Ensemble>> = ensembleDao.searchEnsemble(query)
+  fun searchAllEnsembles(query: String): Flow<List<Ensemble>> = ensembleDao.searchEnsemble("$query*")
   fun getAllEnsembleArticleThumbnails(): Flow<List<LazyEnsembleThumbnails>> =
       ensembleDao.getAllEnsembleArticleThumbnails().listMap { it.toLazyEnsembleThumbnails() }
   fun searchEnsembleArticleThumbnails(query: String): Flow<List<LazyEnsembleThumbnails>> =
@@ -63,5 +63,5 @@ class EnsembleRepository(
   }
   fun deleteEnsemble(ensembleId: String) = ensembleDao.deleteEnsemble(ensembleId)
   fun deleteEnsembles(ensembleIds: List<String>) = ensembleDao.deleteEnsembles(ensembleIds)
-  fun isEnsembleTitleUnique(title: String): Boolean = !ensembleDao.existsEnsembleTitle(title)
+  fun isEnsembleTitleUnique(title: String): Flow<Boolean> = ensembleDao.existsEnsembleTitle(title).map { !it }
 }
