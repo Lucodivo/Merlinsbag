@@ -52,11 +52,11 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 fun NoopBottomSheetDialog(
     visible: Boolean,
     title: String,
-    positiveButtonText: String,
     modifier: Modifier = Modifier,
-    onPositive: () -> Unit,
     onClose: () -> Unit,
+    onPositive: () -> Unit = {},
     positiveButtonEnabled: Boolean = true,
+    positiveButtonText: String = "",
     content: @Composable ColumnScope.() -> Unit,
 ) {
   val padding = 16.dp

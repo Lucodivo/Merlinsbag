@@ -65,7 +65,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -238,7 +237,7 @@ fun ArticleDetailRoute(
     onClickAddToEnsemble = { showAddToEnsemblesDialog = true },
     addNewEnsemble = { articleDetailViewModel.addArticleToNewEnsemble(pagerState.currentPage, it) },
     onClickCloseAddToEnsembleDialog = { showAddToEnsemblesDialog = false },
-    onClickSaveAttachedEnsembles = { ensembleIds ->
+    onSaveAttachedEnsembles = { ensembleIds ->
       articleDetailViewModel.addArticleToEnsembles(pagerState.currentPage, ensembleIds)
       showAddToEnsemblesDialog = false
     },
@@ -286,7 +285,7 @@ fun ArticleDetailScreen(
     selectedEnsembles: Set<Int>,
     ensemblesToAdd: List<Ensemble>,
     addNewEnsemble: (String) -> Unit,
-    onClickSaveAttachedEnsembles: (ensembleIds: List<String>) -> Unit,
+    onSaveAttachedEnsembles: (ensembleIds: List<String>) -> Unit,
     searchQueryUniqueTitle: Boolean,
     onClickCloseAddToEnsembleDialog: () -> Unit,
     onSearchQueryUpdateAddToEnsembles: (String) -> Unit,
@@ -402,8 +401,7 @@ fun ArticleDetailScreen(
     userSearch = ensemblesSearchQuery,
     ensemblesToAdd = ensemblesToAdd,
     addNewEnsemble = addNewEnsemble,
-    onClickSave = onClickSaveAttachedEnsembles,
-    onClickClose = onClickCloseAddToEnsembleDialog,
+    onClickCloseAndSave = onSaveAttachedEnsembles,
     onSearchQueryUpdate = onSearchQueryUpdateAddToEnsembles,
     searchQueryUniqueTitle = searchQueryUniqueTitle
   )
@@ -498,30 +496,25 @@ private fun AddToEnsembleDialog(
     visible: Boolean,
     ensemblesToAdd: List<Ensemble>,
     addNewEnsemble: (String) -> Unit,
-    onClickSave: (ensembleIds: List<String>) -> Unit,
-    onClickClose: () -> Unit,
+    onClickCloseAndSave: (ensembleIds: List<String>) -> Unit,
     userSearch: String,
     onSearchQueryUpdate: (String) -> Unit,
     searchQueryUniqueTitle: Boolean,
 ) {
   val ensembleChipsHeight = 50.dp
-  BackHandler(enabled = visible) { onClickClose() }
   val selectedEnsembleIds = remember { mutableStateMapOf<String, Unit>() }
   val chipRowPadding = PaddingValues(5.dp)
   val chipHorizontalPadding = 2.dp
+  val close = {
+    onClickCloseAndSave(selectedEnsembleIds.keys.toList())
+    selectedEnsembleIds.clear()
+  }
+  BackHandler(enabled = visible, onBack = close)
   NoopBottomSheetDialog(
     visible = visible,
     title = stringResource(id = R.string.attach_to_ensemble),
-    positiveButtonText = stringResource(id = R.string.save),
-    positiveButtonEnabled = selectedEnsembleIds.isNotEmpty(),
-    onClose = {
-      onClickClose()
-      selectedEnsembleIds.clear()
-    },
-    onPositive = {
-      onClickSave(selectedEnsembleIds.keys.toList())
-      selectedEnsembleIds.clear()
-    },
+    positiveButtonEnabled = false,
+    onClose = close,
   ) {
     Text(text = stringResource(id = R.string.ensembles))
     if(ensemblesToAdd.isNotEmpty()) {
@@ -637,7 +630,7 @@ fun PreviewUtilArticleDetailScreen(
       showAddToEnsembleDialog = showAddToEnsembleDialog, onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
       onClickAddToEnsemble = {}, onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
       onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = selectedEnsembles,
-      ensemblesToAdd = addEnsembles, onClickSaveAttachedEnsembles = {}, searchQueryUniqueTitle = true, onClickCloseAddToEnsembleDialog = {}, onSearchQueryUpdateAddToEnsembles = {}, ensemblesSearchQuery = "Goth 2 Boss",
+      ensemblesToAdd = addEnsembles, onSaveAttachedEnsembles = {}, searchQueryUniqueTitle = true, onClickCloseAddToEnsembleDialog = {}, onSearchQueryUpdateAddToEnsembles = {}, ensemblesSearchQuery = "Goth 2 Boss",
       addNewEnsemble = {}
     )
   }
@@ -661,8 +654,7 @@ fun PreviewUtilArticleDetailScreen(
 @Preview @Composable fun PreviewAddToEnsembleDialog() = NoopTheme(darkMode = DarkMode.DARK) {
   AddToEnsembleDialog(
     visible = true,
-    onClickSave = {},
-    onClickClose = {},
+    onClickCloseAndSave = {},
     onSearchQueryUpdate = {}, addNewEnsemble = {},
     ensemblesToAdd = listOf(
       Ensemble(id = "1", title = "Road Warrior"),
