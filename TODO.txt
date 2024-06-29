@@ -39,7 +39,6 @@ Bugs:
     - FTS is imperfect sometimes shows irrelevant results on first character
         - Reproduce: Type one random character in search bar. Sometimes show unrelated results. Have seen unrelated results on pairs of 2 characters.
         - Maybe expected due to efficient imperfect hashing?
-    - Deleted articles don't disappear from ArticleDetailScreen immediately (could maybe cause a crash if file is reloaded?)
 Settings Screen:
     - Export All Data
 Aesthetics:
@@ -55,6 +54,7 @@ Performance:
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
 QoL:
     - If a picture is taken and processed and insufficient. The user has to perform multiple clicks in order to get back to the camera. This can be annoying, especially if there is an article that is a bit hard to capture.
+    - Tips page
 
 // Unknowns
 Aesthetic Questions:

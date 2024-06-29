@@ -601,6 +601,7 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
             override val size: Int = thumbnailUriStrings.size
             private val articleThumbnailPaths: List<String> = thumbnailUriStrings
             override fun getUriString(index: Int): String = articleThumbnailPaths[index]
+            override fun removeAt(removedIndex: Int) {}
           }
         )
       }

@@ -7,23 +7,27 @@ import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 
 class LazyArticleFullImages(
   val directory: String,
-  private var articleFullImagePaths: List<ArticleWithFullImages>
+  articleFullImagePaths: List<ArticleWithFullImages>
 ): LazyUriStrings {
-  override val size get() = articleFullImagePaths.size
-  fun getArticleId(index: Int) = articleFullImagePaths[index].articleId
-  override fun getUriString(index: Int): String = "$directory${articleFullImagePaths[index].fullImagePaths[0].filename}"
-  companion object { val Empty = LazyArticleFullImages("", emptyList()) }
+  val paths = articleFullImagePaths.toMutableList()
+  override val size get() = paths.size
+  fun getArticleId(index: Int) = paths[index].articleId
+  override fun getUriString(index: Int): String = "$directory${paths[index].fullImagePaths[0].filename}"
+  override fun removeAt(removedIndex: Int) { paths.removeAt(removedIndex) }
+  companion object { val Empty = LazyArticleFullImages("", mutableListOf()) }
 }
 
 class LazyArticleThumbnails(
   val directory: String,
-  private var articleThumbnailPaths: List<ArticleWithThumbnails>
+  articleThumbnailPaths: List<ArticleWithThumbnails>
 ): LazyUriStrings {
-  override val size get() = articleThumbnailPaths.size
-  fun getArticleId(index: Int) = articleThumbnailPaths[index].articleId
-  override fun getUriString(index: Int): String = "$directory${articleThumbnailPaths[index].thumbnailPaths[0].filenameThumb}"
-  fun filter(keep: (ArticleWithThumbnails) -> Boolean) = LazyArticleThumbnails(directory, articleThumbnailPaths.filter(keep))
-  fun articleIds() = articleThumbnailPaths.map { it.articleId }
+  val paths = articleThumbnailPaths.toMutableList()
+  override val size get() = paths.size
+  fun getArticleId(index: Int) = paths[index].articleId
+  override fun getUriString(index: Int): String = "$directory${paths[index].thumbnailPaths[0].filenameThumb}"
+  fun filter(keep: (ArticleWithThumbnails) -> Boolean) = LazyArticleThumbnails(directory, paths.filter(keep).toMutableList())
+  fun articleIds() = paths.map { it.articleId }
+  override fun removeAt(removedIndex: Int) { paths.removeAt(removedIndex) }
 }
 
 class LazyEnsembleThumbnails(

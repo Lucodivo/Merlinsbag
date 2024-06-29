@@ -66,6 +66,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   private val _articleId = MutableSharedFlow<String>()
 
+  private val _removedArticleIndexWithId = MutableSharedFlow<Pair<Int, String>>(replay = 1).apply { tryEmit(Pair(-1,"")) }
+
   private var searchQuery = ""
   private val _searchQuery = MutableSharedFlow<String>(replay = 1).apply { tryEmit(searchQuery) }
 
@@ -74,8 +76,12 @@ class ArticleDetailViewModel @AssistedInject constructor(
     if(index < cachedArticlesWithFullImages.size) _articleId.emit(cachedArticlesWithFullImages.getArticleId(index))
   }
 
-  fun deleteArticle(index: Int) = viewModelScope.launch(Dispatchers.IO) {
-    articleRepository.deleteArticle(cachedArticlesWithFullImages.getArticleId(index))
+  fun deleteArticle(index: Int) {
+    val articleId = cachedArticlesWithFullImages.getArticleId(index)
+    viewModelScope.launch(Dispatchers.IO) {
+      _removedArticleIndexWithId.emit(Pair(index, articleId))
+      articleRepository.deleteArticle(articleId)
+    }
   }
 
   fun exportArticle(index: Int) {
@@ -122,11 +128,25 @@ class ArticleDetailViewModel @AssistedInject constructor(
         started = SharingStarted.WhileSubscribed()
       )
 
-  val articleLazyUriStrings: StateFlow<LazyUriStrings> = articleRepository.getArticlesWithFullImages(ensembleId)
-      .take(1) // A constantly updating article set in the ArticleDetailScreen is a bad user experience
-      .onEach { images ->
-        cachedArticlesWithFullImages = images
-        if(articleIndex < images.size) _articleId.emit(images.getArticleId(articleIndex))
+  val articleLazyUriStrings: StateFlow<LazyUriStrings> =
+      combine(
+        articleRepository.getArticlesWithFullImages(ensembleId)
+                // A constantly updating article set in the ArticleDetailScreen is a bad user experience
+                // An especially annoying thing about a constantly updating list is that articles and ensembles are both arranged by last modified.
+                // Sorting by modified is is considered to be a great user experience in general and will not be changed.
+                // However, when the user is attaching an article to ensembles, this changes the order of the articles in the ensemble.
+                // And rearranging the order so freely in the article detail screen is absolutely disorienting user experience.
+                // TODO: Adjust list for deletions & eventually additional image insertions?
+                .take(1)
+                .onEach { images ->
+                  cachedArticlesWithFullImages = images
+                  if(articleIndex < images.size) _articleId.emit(images.getArticleId(articleIndex))
+                },
+        _removedArticleIndexWithId
+      ){ images, removedArticleIndexWithId ->
+        val (removedIndex, removedId) = removedArticleIndexWithId
+        if(removedIndex >= 0 && removedIndex <= images.size && images.getArticleId(removedIndex) == removedId) images.removeAt(removedIndex)
+        images
       }
       .stateIn(
         scope = viewModelScope,

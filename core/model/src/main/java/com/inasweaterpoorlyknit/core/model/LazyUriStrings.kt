@@ -9,6 +9,7 @@ interface LazyUriStrings {
     val Empty = object : LazyUriStrings {
       override val size get() = 0
       override fun getUriString(index: Int): String = ""
+      override fun removeAt(removedIndex: Int){}
     }
   }
   fun isEmpty() = size == 0
@@ -16,4 +17,5 @@ interface LazyUriStrings {
 
   val size: Int
   fun getUriString(index: Int): String
+  fun removeAt(removedIndex: Int)
 }

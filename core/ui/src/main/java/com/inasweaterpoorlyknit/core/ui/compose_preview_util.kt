@@ -101,6 +101,7 @@ val lazyRepeatedThumbnailResourceIdsAsStrings =
     object : LazyUriStrings {
       override val size: Int = repeatedThumbnailResourceIdsAsStrings.size
       override fun getUriString(index: Int): String = repeatedThumbnailResourceIdsAsStrings[index]
+      override fun removeAt(removedIndex: Int) {}
     }
 val repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
 
