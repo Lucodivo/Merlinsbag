@@ -1,12 +1,9 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
-import android.Manifest.permission
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -32,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,30 +54,18 @@ import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
 
 const val ARTICLES_ROUTE = "articles_route"
 
-val additionalCameraPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
-private val REQUIRED_CAMERA_PERMISSIONS =
-    if(additionalCameraPermissionsRequired) {
-      arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
-    } else {
-      arrayOf(permission.CAMERA)
-    }
-
-fun NavController.navigateToArticles(navOptions: NavOptions? = null) =
-    navigate(ARTICLES_ROUTE, navOptions)
+fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ARTICLES_ROUTE, navOptions)
 
 @Composable
 fun ArticlesRoute(
     navController: NavController,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
-  val context = LocalContext.current
   val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
   var showDeleteArticlesAlert by remember { mutableStateOf(false) }
-  var showPermissionsAlert by remember { mutableStateOf(false) }
   var editMode by remember { mutableStateOf(false) }
   val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
 
-  val appSettingsLauncher = rememberSettingsLauncher()
   val photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments() {
     override fun createIntent(context: Context, input: Array<String>): Intent {
       return super.createIntent(context, input)
@@ -93,29 +77,10 @@ fun ArticlesRoute(
     } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
   }
 
-  val takePictureLauncher = rememberLauncherForActivityResult(
-    contract = ActivityResultContracts.TakePicture(),
-    onResult = { success ->
-      if(success) {
-        val cameraPictureUri = articlesViewModel.takePictureUri
-        if(cameraPictureUri != null) navController.navigateToAddArticle(listOf(navigationSafeUriStringEncode(cameraPictureUri)))
-        else Log.e("GetContent ActivityResultContract", "Camera picture URI was null")
-      }
-      articlesViewModel.pictureTaken(success, context)
-    })
-  articlesViewModel.launchCamera.value.getContentIfNotHandled()?.let { takePictureLauncher.launch(it) }
-
-  val cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
-    onPermissionsGranted = { articlesViewModel.onTakePicture(context) },
-    onPermissionDenied = { navController.context.toast(R.string.camera_permission_required) },
-    onNeverAskAgain = { showPermissionsAlert = true },
-  )
-
   ArticlesScreen(
     thumbnailUris = articleThumbnails,
     selectedThumbnails = isItemSelected.keys,
     editMode = editMode,
-    showPermissionsAlert = showPermissionsAlert,
     showDeleteArticlesAlert = showDeleteArticlesAlert,
     onClickArticle = { index ->
       if(editMode) {
@@ -134,7 +99,7 @@ fun ArticlesRoute(
       else isItemSelected[index] = Unit
     },
     onClickAddPhotoAlbum = { photoAlbumLauncher.launch(arrayOf("image/*")) },
-    onClickAddPhotoCamera = { cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS) },
+    onClickAddPhotoCamera = { navController.navigateToCamera() },
     onClickEdit = {
       editMode = !editMode
       if(editMode) isItemSelected.clear()
@@ -142,32 +107,14 @@ fun ArticlesRoute(
     onClickDelete = { showDeleteArticlesAlert = true },
     onClickSelectionCancel = isItemSelected::clear,
     onClickSettings = { navController.navigateToSettings() },
-    onConfirmPermissionsAlert = {
-      showPermissionsAlert = false
-      appSettingsLauncher.launch()
-    },
     onConfirmDeleteArticlesAlert = {
       showDeleteArticlesAlert = false
       articlesViewModel.onDelete(isItemSelected.keys.toList())
       isItemSelected.clear()
     },
     onDismissDeleteArticlesAlert = { showDeleteArticlesAlert = false },
-    onDismissPermissionsAlert = { showPermissionsAlert = false },
   )
 }
-
-@Composable
-fun CameraPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-  NoopSimpleAlertDialog(
-    title = stringResource(id = R.string.permission_alert_title),
-    text = stringResource(if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
-                          else R.string.camera_permission_alert_justification),
-    headerIcon = { Icon(imageVector = NoopIcons.Camera, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
-    onDismiss = onDismiss,
-    onConfirm = onConfirm,
-    confirmText = stringResource(id = R.string.permission_alert_positive),
-    cancelText = stringResource(id = R.string.permission_alert_negative),
-  )
 
 @Composable
 fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
@@ -187,7 +134,6 @@ fun ArticlesScreen(
     thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
     editMode: Boolean,
-    showPermissionsAlert: Boolean,
     showDeleteArticlesAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
     onLongPressArticle: (index: Int) -> Unit,
@@ -197,18 +143,9 @@ fun ArticlesScreen(
     onClickDelete: () -> Unit,
     onClickSelectionCancel: () -> Unit,
     onClickSettings: () -> Unit,
-    onConfirmPermissionsAlert: () -> Unit,
     onConfirmDeleteArticlesAlert: () -> Unit,
     onDismissDeleteArticlesAlert: () -> Unit,
-    onDismissPermissionsAlert: () -> Unit,
 ) {
-  if(showPermissionsAlert) {
-    CameraPermissionsAlertDialog(
-      onDismiss = onDismissPermissionsAlert,
-      onConfirm = onConfirmPermissionsAlert,
-    )
-  }
-
   if(showDeleteArticlesAlert) {
     DeleteArticlesAlertDialog(
       onDismiss = onDismissDeleteArticlesAlert,
@@ -290,7 +227,6 @@ fun ArticlesScreen(
 @Composable
 fun PreviewUtilArticleScreen(
     editMode: Boolean = false,
-    showPermissionsAlert: Boolean = false,
     showDeleteArticlesAlert: Boolean = false,
     selectedThumbnails: Set<Int> = emptySet(),
 ) = NoopTheme {
@@ -298,11 +234,10 @@ fun PreviewUtilArticleScreen(
     thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails = selectedThumbnails,
     editMode = editMode,
-    showPermissionsAlert = showPermissionsAlert,
     showDeleteArticlesAlert = showDeleteArticlesAlert,
     onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
-    onConfirmPermissionsAlert = {}, onConfirmDeleteArticlesAlert = {}, onDismissDeleteArticlesAlert = {},
-    onClickDelete = {}, onClickSelectionCancel = {}, onClickSettings = {}, onDismissPermissionsAlert = {},
+    onConfirmDeleteArticlesAlert = {}, onDismissDeleteArticlesAlert = {},
+    onClickDelete = {}, onClickSelectionCancel = {}, onClickSettings = {},
     onLongPressArticle = {},
   )
 }
@@ -318,12 +253,6 @@ fun PreviewArticlesScreen_editMode() = PreviewUtilArticleScreen(
   editMode = true,
 )
 
-@Preview
-@Composable
-fun PreviewArticlesScreenWithPermissionsAlert() = PreviewUtilArticleScreen(
-  showPermissionsAlert = true,
-  editMode = true,
-)
 
 @Preview
 @Composable
@@ -332,12 +261,6 @@ fun PreviewArticlesScreenWithDeleteArticlesAlert() = PreviewUtilArticleScreen(
   editMode = true,
   selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
 )
-
-@Preview
-@Composable
-fun PreviewCameraPermissionsAlert() = NoopTheme {
-  CameraPermissionsAlertDialog(onConfirm = {}, onDismiss = {})
-}
 
 @Preview
 @Composable

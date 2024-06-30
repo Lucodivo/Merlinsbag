@@ -40,6 +40,7 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NavUIDestinations
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CAMERA_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.compactWidth
@@ -148,7 +149,8 @@ class NoopAppState(
       val route = destination.route
       if(route != null && (
           route.startsWith(ADD_ARTICLES_BASE) ||
-          route.startsWith(SETTINGS_ROUTE)
+          route.startsWith(SETTINGS_ROUTE) ||
+          route.startsWith(CAMERA_ROUTE)
       )){
         showNavBar.value = false
       } else if(!showNavBar.value) {

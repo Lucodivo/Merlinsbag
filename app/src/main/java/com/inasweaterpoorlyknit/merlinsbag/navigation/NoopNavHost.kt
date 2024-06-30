@@ -16,6 +16,8 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLE_INDEX_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.AddArticleRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CAMERA_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CameraRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLES_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLE_DETAIL_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLE_ID_ARG
@@ -54,6 +56,7 @@ fun NoopNavHost(
     composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController) }
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
     composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController, snackbarHostState = appState.snackbarHostState) }
+    composable(route = CAMERA_ROUTE) { CameraRoute(navController = navController) }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(
