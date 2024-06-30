@@ -121,4 +121,19 @@
     <string name="welcome_page_virtualize_description">A shoe, T-shirt, denim jacket, and pair of pants cropped out isolated from their original photographs.</string>
     <string name="welcome_page_organize_description">Cropped out articles grouped into three collections.</string>
     <string name="ensemble_with_title_already_exists">Ensemble w/ title already exists</string>
+    <string name="tips_and_info"><![CDATA[Tips & Info]]></string>
+    <string name="information">Information</string>
+    <string name="quality_image_answer">This question is quite hard to determine. The model has an easier time isolating subjects in some images than it does in others. But intuitions of a \"good image\" can still be quite helpful. \nThe contrast between a subject and it\'s background is the most important element. This contrast can take many different forms. It can be a different in: \n- Color (ex: red bowl on a white table) \n- Focus (ex: nearby person in front of far away mountains) \n- Texture (ex: glazed ceramic art on a shaggy carpet) \nMost importantly, the better images is simply the one that works. If one picture does not provide the desired results, you can try: \n- a different angle \n- adjusting environmental lighting \n- toggling flash on/off \n- different camera or camera settings</string>
+    <string name="what_is_a_quality_image">What is a quality image?</string>
+    <string name="underlying_technology_answer">Merlinsbag uses a machine learning model to cut subjects out of an image. This \"model\" is just an AI algorithm that takes your image as input and spits out the isolated articles as output. The beauty of this model is it is relatively simple and can run on your device. Your data stays local. Never touching a server. \nBut, as you may have seen from other interactions with AI models, it can still produce imperfect and/or imprecise results. This is where the quality of the images you provide really matter.</string>
+    <string name="underlying_technology">Underlying technology</string>
+    <string name="confirm_catalog_the_article"><![CDATA[: Confirm & catalog the article.]]></string>
+    <string name="discard_the_article">: Discard the article.</string>
+    <string name="rotate_the_article_clockwise_by_90_degrees">: Rotate the article clockwise by 90 degrees.</string>
+    <string name="rotate_the_article_counter_clockwise_by_90_degrees">: Rotate the article counter clockwise by 90 degrees.</string>
+    <string name="broaden_the_cropping_area_around_the_article">: Broaden the cropping area around the article.</string>
+    <string name="tighten_the_cropping_area_around_the_article">: Tighten the cropping area around the article.</string>
+    <string name="ensemble_answer">An ensemble is a category for articles. In Merlinsbag, there is an attempt to associate ensembles with hashtags.</string>
+    <string name="add_article_controls">Add Article Controls</string>
+    <string name="article_answer">An article is an item that you have cataloged from an image. This could be an article of clothing, a book, a record, a person, a pet, or anything else that can be isolated from an photograph.</string>
 </resources>

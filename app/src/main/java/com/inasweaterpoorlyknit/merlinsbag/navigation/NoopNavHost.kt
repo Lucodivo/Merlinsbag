@@ -26,6 +26,9 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.IMAGE_URI_STRING_LIST_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TIPS_AND_INFO_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoScreen
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringDecode
 
 const val APP_START_DESTINATION = ARTICLES_ROUTE
@@ -57,6 +60,7 @@ fun NoopNavHost(
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
     composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController, snackbarHostState = appState.snackbarHostState) }
     composable(route = CAMERA_ROUTE) { CameraRoute(navController = navController) }
+    composable(route = TIPS_AND_INFO_ROUTE) { TipsAndInfoRoute(navController = navController) }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(

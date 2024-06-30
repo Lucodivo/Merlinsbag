@@ -132,6 +132,7 @@ fun SettingsRoute(
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
+    onClickTipsAndInfoPage = { navController.navigateToTipsAndInfo() },
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
     onClickClearCache = {
       clearCacheEnabled = false
@@ -410,6 +411,7 @@ fun SettingsScreen(
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
     onClickWelcomePage: () -> Unit,
+    onClickTipsAndInfoPage: () -> Unit,
     onClickPrivacyInfo: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
@@ -428,12 +430,12 @@ fun SettingsScreen(
     onSelectTypography: (Typography) -> Unit,
     onDismissTypography: () -> Unit,
 ) {
-  val layourDir = LocalLayoutDirection.current
+  val layoutDir = LocalLayoutDirection.current
   Row {
     LazyColumn(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Top,
-      modifier = Modifier.fillMaxSize().padding(start = systemBarPaddingValues.calculateStartPadding(layourDir), end = systemBarPaddingValues.calculateEndPadding(layourDir)),
+      modifier = Modifier.fillMaxSize().padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
     ) {
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding())) }
       item { SettingsTitle(stringResource(R.string.appearance)) }
@@ -487,6 +489,7 @@ fun SettingsScreen(
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.etc)) }
       item { WelcomePageRow(onClickWelcomePage)}
+      item { TipsAndInfoRow(onClickTipsAndInfoPage) }
       item { EccohedraRow(onClickEccohedra) }
       item { Spacer(modifier = bookendSpacerModifier) }
     }
@@ -539,11 +542,17 @@ fun SettingsTextIndicatorButton(
 }
 
 @Composable
-fun WelcomePageRow(
-    onClick: () -> Unit,
-) = SettingsTextIndicatorButton(
+fun WelcomePageRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.welcome_page),
   indicator = { Icon(NoopIcons.WavingHand, stringResource(R.string.waving_hand)) },
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun TipsAndInfoRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+  text = stringResource(R.string.tips_and_info),
+  indicator = { Icon(NoopIcons.Info, stringResource(R.string.information)) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -629,7 +638,7 @@ fun PreviewUtilSettingsScreen(
       onClickWelcomePage = {}, onClickPrivacyInfo = {}, onClickClearCache = {},
       onClickDeleteAllData = {}, onDismissDeleteAllDataAlertDialog = {},
       onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {}, onDismissDarkMode = {},
-      onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
+      onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {}, onClickTipsAndInfoPage = {},
       onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {},
       onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {},
     )
