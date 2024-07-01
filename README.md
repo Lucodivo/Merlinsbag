@@ -1,7 +1,7 @@
 # Merlinsbag
 
-<a href="https://play.google.com/apps/internaltest/4701048209300859521"><img alt="Download" src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/logo/merlinsbag_logo_96x96_rounded.png"></a><br>
-<a href="https://play.google.com/apps/internaltest/4701048209300859521"><img alt="Download" src="https://img.shields.io/badge/Google%20Play-%20?logo=googleplay&amp;color=grey"></a>
+<a href="https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"><img alt="Download" src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/logo/merlinsbag_logo_96x96_rounded.png"></a><br>
+<a href="https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"><img alt="Download" src="https://img.shields.io/badge/Google%20Play-%20?logo=googleplay&amp;color=grey"></a>
 
 Merlinsbag is an Android application for virtualizing & organizing a user's wardrobe and favorite items.
 
@@ -30,19 +30,23 @@ Articles can be viewed in their full glory and navigated through swiping based o
 ### Screenshots
 
 <p float="left">
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Articles.jpg" alt="Articles Screen" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/ArticleDetail.jpg" alt="Article Detail Screen" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/AddArticle.jpg" alt="Add Article Screen" width="200"/><br>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_articles.png" alt="Articles Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_articleDetail.png" alt="Article Detail Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_addArticle.png" alt="Add Article Screen" width="200"/><br>
 </p>
 <p float="left">
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Ensembles.jpg" alt="Ensembles Screen" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/AddEnsemble.jpg" alt="Add Ensemble Dialog" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/EnsembleDetail.jpg" alt="EnsembleDetail" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_ensembles.png" alt="Ensembles Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_createEnsemble.png" alt="Add Ensemble Dialog" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_ensembleDetail.png" alt="EnsembleDetail" width="200"/>
+</p>
+<p float="left">
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_addToEnsemble.png" alt="Add to Ensemble" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_settings.png" alt="Settings" width="200"/>
 </p>
 
 ## Video Demo
 
-[![YouTube Demo Video of Merlinsbag App](https://img.youtube.com/vi/adMqfD-zBIQ/0.jpg)](https://youtu.be/adMqfD-zBIQ)
+[![YouTube Demo Video of Merlinsbag App](https://img.youtube.com/vi/uUQYMU2N4kA/0.jpg)](https://youtu.be/uUQYMU2N4kA )
 
 ## Codebase
 
