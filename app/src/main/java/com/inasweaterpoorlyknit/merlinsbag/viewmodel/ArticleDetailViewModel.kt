@@ -136,7 +136,6 @@ class ArticleDetailViewModel @AssistedInject constructor(
                 // Sorting by modified is is considered to be a great user experience in general and will not be changed.
                 // However, when the user is attaching an article to ensembles, this changes the order of the articles in the ensemble.
                 // And rearranging the order so freely in the article detail screen is absolutely disorienting user experience.
-                // TODO: Adjust list for deletions & eventually additional image insertions?
                 .take(1)
                 .onEach { images ->
                   cachedArticlesWithFullImages = images
@@ -151,7 +150,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
       .stateIn(
         scope = viewModelScope,
         initialValue = LazyUriStrings.Empty,
-        started = SharingStarted.WhileSubscribed()
+        started = SharingStarted.WhileSubscribed(5000) // prevents flow from restarting on simple change
       )
 
   val ensembleUiState: StateFlow<ArticleEnsembleUiState> = combine(
