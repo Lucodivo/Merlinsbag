@@ -136,4 +136,6 @@
     <string name="ensemble_answer">An ensemble is a category for articles. In Merlinsbag, there is an attempt to associate ensembles with hashtags.</string>
     <string name="add_article_controls">Add Article Controls</string>
     <string name="article_answer">An article is an item that you have cataloged from an image. This could be an article of clothing, a book, a record, a person, a pet, or anything else that can be isolated from an photograph.</string>
+    <string name="video">Video</string>
+    <string name="demo_video">Demo</string>
 </resources>

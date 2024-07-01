@@ -150,7 +150,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
       .stateIn(
         scope = viewModelScope,
         initialValue = LazyUriStrings.Empty,
-        started = SharingStarted.WhileSubscribed(5000) // prevents flow from restarting on simple change
+        started = SharingStarted.WhileSubscribed(20000) // prevents flow from restarting on simple change
       )
 
   val ensembleUiState: StateFlow<ArticleEnsembleUiState> = combine(

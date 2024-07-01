@@ -82,6 +82,7 @@ private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
 private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
 private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
 private const val PRIVACY_INFO_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
+private const val DEMO_VIDEO_URL = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
 private const val DELETE_ALL_CAPTCHA = "1234"
 
 const val SETTINGS_ROUTE = "settings_route"
@@ -131,6 +132,7 @@ fun SettingsRoute(
     onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
+    onClickDemoVideo = { uriHandler.openUri(DEMO_VIDEO_URL) },
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
     onClickTipsAndInfoPage = { navController.navigateToTipsAndInfo() },
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
@@ -183,6 +185,14 @@ fun AuthorRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.source),
   indicator = { Icon(NoopIcons.Code, stringResource(R.string.source_code)) },
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun DemoVideoRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+  text = stringResource(R.string.demo_video),
+  indicator = { Icon(NoopIcons.Video, stringResource(R.string.video)) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -415,7 +425,7 @@ fun SettingsScreen(
     onClickPrivacyInfo: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
-    onDismissDeleteAllDataAlertDialog: () -> Unit,
+    onClickDemoVideo: () -> Unit,
     onClickConfirmDeleteAllDataAlertDialog: () -> Unit,
     onClickDarkMode: () -> Unit,
     onDismissDarkMode: () -> Unit,
@@ -429,6 +439,7 @@ fun SettingsScreen(
     onClickTypography: () -> Unit,
     onSelectTypography: (Typography) -> Unit,
     onDismissTypography: () -> Unit,
+    onDismissDeleteAllDataAlertDialog: () -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
   Row {
@@ -489,6 +500,7 @@ fun SettingsScreen(
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.etc)) }
       item { WelcomePageRow(onClickWelcomePage)}
+      item { DemoVideoRow(onClickDemoVideo) }
       item { TipsAndInfoRow(onClickTipsAndInfoPage) }
       item { EccohedraRow(onClickEccohedra) }
       item { Spacer(modifier = bookendSpacerModifier) }
@@ -635,12 +647,12 @@ fun PreviewUtilSettingsScreen(
       colorPalette = colorPalette,
       typography = typography,
       highContrast = highContrast, onClickAuthor = {}, onClickSource = {}, onClickEccohedra = {},
-      onClickWelcomePage = {}, onClickPrivacyInfo = {}, onClickClearCache = {},
-      onClickDeleteAllData = {}, onDismissDeleteAllDataAlertDialog = {},
-      onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {}, onDismissDarkMode = {},
-      onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {}, onClickTipsAndInfoPage = {},
+      onClickWelcomePage = {}, onClickTipsAndInfoPage = {}, onClickPrivacyInfo = {},
+      onClickClearCache = {}, onClickDeleteAllData = {},
+      onClickDemoVideo = {}, onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
+      onDismissDarkMode = {}, onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
       onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {},
-      onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {},
+      onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {}, onDismissDeleteAllDataAlertDialog = {},
     )
   }
 }
