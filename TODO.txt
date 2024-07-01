@@ -40,6 +40,8 @@ Bugs:
         - Reproduce: Type one random character in search bar. Sometimes show unrelated results. Have seen unrelated results on pairs of 2 characters.
         - Maybe expected due to efficient imperfect hashing?
     - Settings page should be top level destination
+    - If the user edits articles on the ArticleDetailScreen, leaves the app, and re-enters, the order of the articles will have changed and their place will not have been saved.
+        - Very unimportant bug that will probably not get fixed any time soon.
 Settings Screen:
     - Export All Data
 Aesthetics:

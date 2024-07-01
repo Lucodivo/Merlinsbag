@@ -174,7 +174,7 @@ fun ArticleDetailRoute(
       articleDetailViewModel.onArticleFocus(page)
       ensembleListState = LazyListState()
       selectedEnsembles.clear()
-      if(userSearch.value.isNotEmpty()){
+      if(userSearch.value.isNotEmpty()) {
         articleDetailViewModel.searchEnsembles("")
         userSearch.value = ""
       }
@@ -236,10 +236,11 @@ fun ArticleDetailRoute(
     onClickCancelEnsemblesSelection = { selectedEnsembles.clear() },
     onClickAddToEnsemble = { showAddToEnsemblesDialog = true },
     addNewEnsemble = { articleDetailViewModel.addArticleToNewEnsemble(pagerState.currentPage, it) },
-    onClickCloseAddToEnsembleDialog = { showAddToEnsemblesDialog = false },
     onSaveAttachedEnsembles = { ensembleIds ->
       articleDetailViewModel.addArticleToEnsembles(pagerState.currentPage, ensembleIds)
       showAddToEnsemblesDialog = false
+      userSearch.value = ""
+      articleDetailViewModel.searchEnsembles("")
     },
     onSearchQueryUpdateAddToEnsembles = {
       userSearch.value = it
@@ -287,7 +288,6 @@ fun ArticleDetailScreen(
     addNewEnsemble: (String) -> Unit,
     onSaveAttachedEnsembles: (ensembleIds: List<String>) -> Unit,
     searchQueryUniqueTitle: Boolean,
-    onClickCloseAddToEnsembleDialog: () -> Unit,
     onSearchQueryUpdateAddToEnsembles: (String) -> Unit,
     ensemblesSearchQuery: String,
 ) {
@@ -565,12 +565,14 @@ private fun AddToEnsembleDialog(
       if(ensemblesToAdd.isEmpty() || !ensemblesToAdd.first().equals(userSearch))
         InputChip(
           selected = searchQueryUniqueTitle,
-          label = { Text(
-            text = userSearch,
-            style = if(searchQueryUniqueTitle) LocalTextStyle.current else TextStyle(textDecoration = TextDecoration.LineThrough),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-          ) },
+          label = {
+            Text(
+              text = userSearch,
+              style = if(searchQueryUniqueTitle) LocalTextStyle.current else TextStyle(textDecoration = TextDecoration.LineThrough),
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis
+            )
+          },
           leadingIcon = { Icon(imageVector = NoopIcons.ensembles(), contentDescription = stringResource(R.string.hashtag)) },
           trailingIcon = { Icon(imageVector = NoopIcons.Add, contentDescription = stringResource(R.string.add_ensemble)) },
           onClick = { if(searchQueryUniqueTitle) addNewEnsemble(userSearch) },
@@ -630,7 +632,7 @@ fun PreviewUtilArticleDetailScreen(
       showAddToEnsembleDialog = showAddToEnsembleDialog, onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
       onClickAddToEnsemble = {}, onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
       onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = selectedEnsembles,
-      ensemblesToAdd = addEnsembles, onSaveAttachedEnsembles = {}, searchQueryUniqueTitle = true, onClickCloseAddToEnsembleDialog = {}, onSearchQueryUpdateAddToEnsembles = {}, ensemblesSearchQuery = "Goth 2 Boss",
+      ensemblesToAdd = addEnsembles, onSaveAttachedEnsembles = {}, searchQueryUniqueTitle = true, onSearchQueryUpdateAddToEnsembles = {}, ensemblesSearchQuery = "Goth 2 Boss",
       addNewEnsemble = {}
     )
   }
