@@ -119,10 +119,10 @@ fun TipsAndInfoScreen(
     }
     item {
       Text(text = stringResource(R.string.quality_image_answer))
+      spacer()
     }
     item {
-      spacer()
-      spacer()
+      Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding()))
     }
   }
 }

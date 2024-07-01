@@ -56,7 +56,7 @@ fun NoopNavHost(
   ) {
     composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController) }
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
-    composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController, snackbarHostState = appState.snackbarHostState) }
+    composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController) }
     composable(route = CAMERA_ROUTE) { CameraRoute(navController = navController) }
     composable(route = TIPS_AND_INFO_ROUTE) { TipsAndInfoRoute(navController = navController) }
     composable(

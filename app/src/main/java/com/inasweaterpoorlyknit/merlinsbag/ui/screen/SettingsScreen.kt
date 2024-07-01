@@ -27,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,7 +73,6 @@ private val dividerHorizontalPadding = itemHorizontalPadding * 2
 private val dividerModifier = Modifier.padding(horizontal = dividerHorizontalPadding, vertical = 8.dp)
 private val dividerThickness = 2.dp
 private val sectionSpacerHeight = 16.dp
-private val bookendSpacerModifier = Modifier.height(sectionSpacerHeight)
 @Composable private fun settingsFontSize() = MaterialTheme.typography.bodyLarge.fontSize
 @Composable private fun settingsTitleFontSize() = MaterialTheme.typography.titleMedium.fontSize
 
@@ -92,7 +90,6 @@ fun NavController.navigateToSettings(navOptions: NavOptions? = null) = navigate(
 @Composable
 fun SettingsRoute(
     navController: NavController,
-    snackbarHostState: SnackbarHostState,
     settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
@@ -105,11 +102,7 @@ fun SettingsRoute(
   var clearCacheEnabled by remember { mutableStateOf(true) }
   val userPreferences by settingsViewModel.userPreferences.collectAsState()
 
-  LaunchedEffect(settingsViewModel.cacheClearedTrigger) {
-    settingsViewModel.cacheClearedTrigger.collect {
-      snackbarHostState.showSnackbar(message = context.getString(R.string.cache_cleared), withDismissAction = true)
-    }
-  }
+  LaunchedEffect(settingsViewModel.cacheClearedTrigger) { settingsViewModel.cacheClearedTrigger.collect { context.toast(R.string.cache_cleared) } }
 
   LaunchedEffect(settingsViewModel.allDataDeletedTrigger) {
     settingsViewModel.allDataDeletedTrigger.collect {
@@ -503,7 +496,7 @@ fun SettingsScreen(
       item { DemoVideoRow(onClickDemoVideo) }
       item { TipsAndInfoRow(onClickTipsAndInfoPage) }
       item { EccohedraRow(onClickEccohedra) }
-      item { Spacer(modifier = bookendSpacerModifier) }
+      item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + sectionSpacerHeight)) }
     }
   }
   if(showDeleteAllDataAlertDialog) {
@@ -614,7 +607,7 @@ fun DeleteAllDataAlertDialog(
         Icon(imageVector = NoopIcons.Lock, contentDescription = stringResource(R.string.confirmation_locked))
       }
     },
-    cancelButton = { Text(stringResource(id = R.string.cancel)) },
+    cancelButton = { Text(text = stringResource(id = R.string.cancel), modifier = Modifier.clickable { onDismiss() }) },
     onDismiss = onDismiss,
     contentColor = contentColor,
     containerColor = containerColor,

@@ -17,8 +17,8 @@ android {
         applicationId = "com.inasweaterpoorlyknit.merlinsbag"
         minSdk = 26
         targetSdk = 34
-        versionCode = 5
-        versionName = "0.2.0"
+        versionCode = 7
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -29,7 +29,7 @@ android {
             resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true")
         }
         release {
-            isMinifyEnabled = false // TODO: Reverse on release builds
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
             resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")

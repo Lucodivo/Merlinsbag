@@ -9,12 +9,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -47,7 +51,6 @@ import com.inasweaterpoorlyknit.merlinsbag.viewmodel.OnboardingViewModel
 
 // NOTE: Onboarding is NOT a Screen in the sense that it cannot be navigated too
 //   It is UI that can be displayed.
-
 @Composable
 fun Onboarding(
     onboardingViewModel: OnboardingViewModel = hiltViewModel(),
@@ -177,20 +180,22 @@ private fun OnboardingInternal(
     pagerState: PagerState,
     onClickSkip: () -> Unit,
     onClickGetStarted: () -> Unit,
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
 ) {
   val pagerIndicatorSpacing = 8.dp
   val pagerIndicatorSize = 8.dp
-  val skipButtonPadding = 10.dp
   val getStartedButtonHorizontalPadding = 30.dp
   val pagerIndicatorState = remember { HorizontalPagerIndicatorState(pagerState) }
   val getStartedAlpha = max(0.0f, (pagerState.currentPage + pagerState.currentPageOffsetFraction) - (pagerState.pageCount - 2))
+  val bottomPadding = systemBarPaddingValues.calculateBottomPadding()
+  val skipButtonPadding = PaddingValues(start = 10.dp, end = 10.dp, bottom = bottomPadding + 10.dp)
   Surface(
     modifier = Modifier.fillMaxSize(),
   ) {
     Column (
       verticalArrangement = Arrangement.Bottom,
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
     ) {
       HorizontalPager(
         state = pagerState,
