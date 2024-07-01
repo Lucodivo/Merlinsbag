@@ -113,8 +113,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
     }
   }
 
-  fun addArticleToEnsembles(articleIndex: Int, ensembleIds: List<String>) = viewModelScope.launch(Dispatchers.IO) {
-    ensembleRepository.addEnsemblesToArticle(articleId = cachedArticlesWithFullImages.getArticleId(articleIndex), ensembleIds = ensembleIds)
+  fun addArticleToEnsemble(articleIndex: Int, ensembleId: String) = viewModelScope.launch(Dispatchers.IO){
+    ensembleRepository.addEnsemblesToArticle(articleId = cachedArticlesWithFullImages.getArticleId(articleIndex), ensembleIds = listOf(ensembleId))
   }
 
   val filter: StateFlow<String> = if(ensembleId != null) {

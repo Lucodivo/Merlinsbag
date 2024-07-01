@@ -1,7 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,7 +27,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TIPS_AND_INFO_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoScreen
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringDecode
 
 const val APP_START_DESTINATION = ARTICLES_ROUTE
@@ -81,7 +79,7 @@ fun NoopNavHost(
         snackbarHostState = appState.snackbarHostState,
         windowSizeClass = appState.windowSizeClass,
         articleIndex = articleIndexArg,
-        ensembleId = ensembleIdArg,
+        filterEnsembleId = ensembleIdArg,
       )
     }
     composable(
