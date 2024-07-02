@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -38,21 +39,15 @@ import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
-private val staggeredGridColumnMinWidth = 90.dp
-private val staggeredGridItemPadding = 8.dp
+val staggeredGridColumnMinWidth = 90.dp
+val staggeredGridItemPadding = 8.dp
 
 @Composable
 fun PlaceholderThumbnailGrid(modifier: Modifier = Modifier){
-  val lazyGridState = rememberLazyStaggeredGridState()
   val shimmerBrush = shimmerBrush(color = MaterialTheme.colorScheme.onSurface)
-  val placeholderContentDescription = stringResource(R.string.placeholder_article_thumbnail)
-  Box(modifier = Modifier.semantics { contentDescription = placeholderContentDescription }) {
-    LazyVerticalStaggeredGrid(
-      // typical dp width of a smart phone is 320dp-480dp
-      columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
-      modifier = modifier.fillMaxSize(),
-      state = lazyGridState,
-    ){
+  Box(modifier = Modifier.fillMaxSize()) {
+    val placeholderContentDescription = stringResource(R.string.placeholder_article_thumbnail)
+    NoopVerticalStaggeredGrid(modifier = modifier.semantics { contentDescription = placeholderContentDescription }) {
       items(count = repeatedPlaceholderDrawables.size) { thumbnailGridItemIndex ->
         val placeholderDrawable = repeatedPlaceholderDrawables[thumbnailGridItemIndex]
         Box(
@@ -85,6 +80,21 @@ fun PlaceholderThumbnailGrid(modifier: Modifier = Modifier){
 }
 
 @Composable
+fun NoopVerticalStaggeredGrid(
+    modifier: Modifier = Modifier,
+    content: LazyStaggeredGridScope.() -> Unit
+){
+  val staggeredGridState = rememberLazyStaggeredGridState()
+  LazyVerticalStaggeredGrid(
+    // typical dp width of a smart phone is 320dp-480dp
+    columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
+    modifier = modifier.fillMaxSize(),
+    state = staggeredGridState,
+    content = content
+  )
+}
+
+@Composable
 fun SelectableStaggeredThumbnailGrid(
     selectable: Boolean,
     onSelect: (index: Int) -> Unit,
@@ -92,13 +102,7 @@ fun SelectableStaggeredThumbnailGrid(
     thumbnailUris: LazyUriStrings,
     selectedThumbnails: Set<Int>,
 ) {
-  val staggeredGridState = rememberLazyStaggeredGridState()
-  LazyVerticalStaggeredGrid(
-    // typical dp width of a smart phone is 320dp-480dp
-    columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
-    modifier = Modifier.fillMaxSize(),
-    state = staggeredGridState,
-  ){
+  NoopVerticalStaggeredGrid {
     items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
       Box(
         contentAlignment = Alignment.Center,

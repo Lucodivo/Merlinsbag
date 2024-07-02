@@ -79,6 +79,7 @@ private val sectionSpacerHeight = 16.dp
 private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
 private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
 private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
+private const val MERLINSBAG_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"
 private const val PRIVACY_INFO_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
 private const val DEMO_VIDEO_URL = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
 private const val DELETE_ALL_CAPTCHA = "1234"
@@ -126,6 +127,7 @@ fun SettingsRoute(
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
     onClickDemoVideo = { uriHandler.openUri(DEMO_VIDEO_URL) },
+    onClickReview = { uriHandler.openUri(MERLINSBAG_URL) },
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
     onClickTipsAndInfoPage = { navController.navigateToTipsAndInfo() },
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
@@ -178,6 +180,14 @@ fun AuthorRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.source),
   indicator = { Icon(NoopIcons.Code, stringResource(R.string.source_code)) },
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun ReviewRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+  text = stringResource(R.string.review),
+  indicator = { Icon(NoopIcons.Reviews, REDUNDANT_CONTENT_DESCRIPTION)},
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -415,6 +425,7 @@ fun SettingsScreen(
     onClickEccohedra: () -> Unit,
     onClickWelcomePage: () -> Unit,
     onClickTipsAndInfoPage: () -> Unit,
+    onClickReview: () -> Unit,
     onClickPrivacyInfo: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
@@ -482,6 +493,11 @@ fun SettingsScreen(
         )
       }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
+      item { SettingsTitle(stringResource(R.string.info)) }
+      item { DemoVideoRow(onClickDemoVideo) }
+      item { TipsAndInfoRow(onClickTipsAndInfoPage) }
+      item { WelcomePageRow(onClickWelcomePage)}
+      item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.data)) }
       item { PrivacyInfoRow(onClickPrivacyInfo) }
       item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
@@ -492,9 +508,7 @@ fun SettingsScreen(
       item { SourceRow(onClickSource) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.etc)) }
-      item { WelcomePageRow(onClickWelcomePage)}
-      item { DemoVideoRow(onClickDemoVideo) }
-      item { TipsAndInfoRow(onClickTipsAndInfoPage) }
+      item { ReviewRow(onClickReview) }
       item { EccohedraRow(onClickEccohedra) }
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + sectionSpacerHeight)) }
     }
@@ -644,7 +658,7 @@ fun PreviewUtilSettingsScreen(
       onClickClearCache = {}, onClickDeleteAllData = {},
       onClickDemoVideo = {}, onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
       onDismissDarkMode = {}, onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
-      onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {},
+      onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {}, onClickReview = {},
       onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {}, onDismissDeleteAllDataAlertDialog = {},
     )
   }

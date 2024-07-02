@@ -32,6 +32,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.Reviews
 import androidx.compose.material.icons.outlined.Rotate90DegreesCcw
 import androidx.compose.material.icons.outlined.Rotate90DegreesCw
 import androidx.compose.material.icons.outlined.WavingHand
@@ -79,6 +80,7 @@ object NoopIcons {
   val Privacy = Icons.Outlined.PrivacyTip
   val Info = Icons.Outlined.Info
   val Video = Icons.Outlined.Movie
+  val Reviews = Icons.Outlined.Reviews
   @Composable fun ensembles() = ImageVector.vectorResource(R.drawable.hashtag)
   @Composable fun ensemblesSelected() = ImageVector.vectorResource(R.drawable.hashtag_heavy)
   @Composable fun systemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)

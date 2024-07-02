@@ -145,7 +145,7 @@ private fun OnboardingSlideThree(){
   OnboardingSlide(
     imageId = R.drawable.onboarding_articles,
     title = stringResource(R.string.virtualize),
-    text = stringResource(R.string.merlinsbag_will_stencil_out),
+    text = stringResource(R.string.merlinsbag_will_cut_out),
     contentDescription = stringResource(R.string.welcome_page_virtualize_description)
   )
 }

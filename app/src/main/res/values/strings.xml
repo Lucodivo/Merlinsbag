@@ -46,7 +46,7 @@
     <string name="categorize_your_keepsakes">Categorize your keepsakes by type, outfit, color, or anyway you see fit!</string>
     <string name="collect_photographs">Collect photographs of your favorite items.</string>
     <string name="merlinsbag_is_an_app_for_cataloging">Merlinsbag is an app for cataloging and appreciating the things around you.</string>
-    <string name="merlinsbag_will_stencil_out">Merlinsbag will stencil out and store these articles in your own personal catalog.</string>
+    <string name="merlinsbag_will_cut_out">Merlinsbag will cut out and store these articles in your own personal catalog.</string>
     <string name="no_articles_available">No Articles Available</string>
     <string name="theme">Theme</string>
     <string name="dark">Dark</string>
@@ -138,4 +138,5 @@
     <string name="article_answer">An article is an item that you have cataloged from an image. This could be an article of clothing, a book, a record, a person, a pet, or anything else that can be isolated from an photograph.</string>
     <string name="video">Video</string>
     <string name="demo_video">Demo</string>
+    <string name="review">Rate &amp; Review</string>
 </resources>
