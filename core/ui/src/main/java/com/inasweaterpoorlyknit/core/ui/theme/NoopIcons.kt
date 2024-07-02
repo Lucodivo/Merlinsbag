@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Attachment
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CleaningServices
@@ -81,6 +82,7 @@ object NoopIcons {
   val Info = Icons.Outlined.Info
   val Video = Icons.Outlined.Movie
   val Reviews = Icons.Outlined.Reviews
+  val Statistics = Icons.Filled.BarChart
   @Composable fun ensembles() = ImageVector.vectorResource(R.drawable.hashtag)
   @Composable fun ensemblesSelected() = ImageVector.vectorResource(R.drawable.hashtag_heavy)
   @Composable fun systemMode() = ImageVector.vectorResource(R.drawable.night_sight_auto)

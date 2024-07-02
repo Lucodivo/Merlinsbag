@@ -28,6 +28,7 @@ class EnsembleRepository(
       LazyArticleThumbnails(directory, articles)
     )
 
+  fun getCountEnsembles(): Flow<Int> = ensembleDao.getCountEnsembles()
   fun getAllEnsembles(): Flow<List<Ensemble>> = ensembleDao.getAllEnsembles()
   fun searchAllEnsembles(query: String): Flow<List<Ensemble>> = ensembleDao.searchEnsemble("$query*")
   fun getAllEnsembleArticleThumbnails(): Flow<List<LazyEnsembleThumbnails>> =

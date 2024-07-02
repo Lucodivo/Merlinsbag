@@ -165,6 +165,7 @@ fun SettingsRoute(
     },
     onDismissTypography = { expandedTypographyMenu = false },
     onClickTypography = { expandedTypographyMenu = !expandedTypographyMenu },
+    onClickStatistics = navController::navigateToStatistics
   )
 }
 
@@ -180,6 +181,14 @@ fun AuthorRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.source),
   indicator = { Icon(NoopIcons.Code, stringResource(R.string.source_code)) },
+  onClick = onClick,
+  modifier = itemModifier,
+)
+
+@Composable
+fun StatisticsRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+  text = stringResource(R.string.statistics),
+  indicator = { Icon(NoopIcons.Statistics, stringResource(R.string.bar_chart))},
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -424,6 +433,7 @@ fun SettingsScreen(
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
     onClickWelcomePage: () -> Unit,
+    onClickStatistics: () -> Unit,
     onClickTipsAndInfoPage: () -> Unit,
     onClickReview: () -> Unit,
     onClickPrivacyInfo: () -> Unit,
@@ -497,6 +507,7 @@ fun SettingsScreen(
       item { DemoVideoRow(onClickDemoVideo) }
       item { TipsAndInfoRow(onClickTipsAndInfoPage) }
       item { WelcomePageRow(onClickWelcomePage)}
+      item { StatisticsRow(onClickStatistics) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.data)) }
       item { PrivacyInfoRow(onClickPrivacyInfo) }
@@ -655,7 +666,7 @@ fun PreviewUtilSettingsScreen(
       typography = typography,
       highContrast = highContrast, onClickAuthor = {}, onClickSource = {}, onClickEccohedra = {},
       onClickWelcomePage = {}, onClickTipsAndInfoPage = {}, onClickPrivacyInfo = {},
-      onClickClearCache = {}, onClickDeleteAllData = {},
+      onClickClearCache = {}, onClickDeleteAllData = {}, onClickStatistics = {},
       onClickDemoVideo = {}, onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
       onDismissDarkMode = {}, onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
       onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {}, onClickReview = {},

@@ -87,8 +87,7 @@ interface EnsembleDao {
       ORDER BY ensemble.modified DESC""")
   fun getEnsemblesByArticle(articleId: String): Flow<List<Ensemble>>
 
-  // NOTE: Only used for tests
-  @Query("""SELECT COUNT(id) FROM ensemble""") fun getEnsemblesCount(): Flow<Int>
+  @Query("""SELECT COUNT(id) FROM ensemble""") fun getCountEnsembles(): Flow<Int>
 
   @Transaction @Query(
     """SELECT ensemble.id as ensemble_id, ensemble.title as ensemble_title 

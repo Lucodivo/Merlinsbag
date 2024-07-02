@@ -141,4 +141,8 @@
     <string name="review">Rate &amp; Review</string>
     <string name="discard_article">Discard Article</string>
     <string name="discard">Discard</string>
+    <string name="ensemble_count">Ensemble Count</string>
+    <string name="statistics">Statistics</string>
+    <string name="bar_chart">Bar chart</string>
+    <string name="article_count">Article Count</string>
 </resources>

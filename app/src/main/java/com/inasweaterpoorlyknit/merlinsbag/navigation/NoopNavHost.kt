@@ -24,7 +24,9 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.IMAGE_URI_STRING_LIST_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.STATISTICS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.StatisticsRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TIPS_AND_INFO_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringDecode
@@ -59,6 +61,7 @@ fun NoopNavHost(
     composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController) }
     composable(route = CAMERA_ROUTE) { CameraRoute(navController = navController) }
     composable(route = TIPS_AND_INFO_ROUTE) { TipsAndInfoRoute(navController = navController) }
+    composable(route = STATISTICS_ROUTE) { StatisticsRoute(navController = navController) }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(

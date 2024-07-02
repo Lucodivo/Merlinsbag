@@ -16,13 +16,13 @@ class PurgeDatabaseDaoTests: DatabaseTests() {
     val entityCount = 10
     articleDao.insertArticles(*createArticleEntity(entityCount))
     ensembleDao.insertEnsembles(*createEnsembleEntity(entityCount))
-    val allArticlesBefore = articleDao.getArticlesCount().first()
-    val allEnsemblesBefore = ensembleDao.getEnsemblesCount().first()
+    val allArticlesBefore = articleDao.getCountArticles().first()
+    val allEnsemblesBefore = ensembleDao.getCountEnsembles().first()
 
     purgeDatabaseDao.purgeDatabase()
 
-    val allArticlesAfter = articleDao.getArticlesCount().first()
-    val allEnsemblesAfter = ensembleDao.getEnsemblesCount().first()
+    val allArticlesAfter = articleDao.getCountArticles().first()
+    val allEnsemblesAfter = ensembleDao.getCountEnsembles().first()
     assertEquals(entityCount, allArticlesBefore)
     assertEquals(entityCount, allEnsemblesBefore)
     assertEquals(0, allArticlesAfter)

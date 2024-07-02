@@ -67,5 +67,5 @@ interface ArticleDao {
   fun getArticleFilenames(articleId: String): Flow<ArticleWithImages>
 
   @Query("""SELECT COUNT(id) FROM article""")
-  fun getArticlesCount(): Flow<Int>
+  fun getCountArticles(): Flow<Int>
 }
