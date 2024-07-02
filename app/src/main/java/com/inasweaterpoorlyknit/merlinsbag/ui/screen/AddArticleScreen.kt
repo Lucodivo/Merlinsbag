@@ -14,15 +14,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -32,6 +35,7 @@ import com.inasweaterpoorlyknit.core.ui.DevicePreviews
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopRotatableImage
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.previewAssetBitmap
@@ -132,6 +136,9 @@ fun AddArticleScreen(
     onRotateCCW: () -> Unit,
     onDiscard: () -> Unit,
     onSave: () -> Unit,
+    showDiscardAlertDialog: Boolean,
+    onDismissDiscardDialog: () -> Unit,
+    onConfirmDiscardDialog: () -> Unit,
 ) {
   val landscape: Boolean = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
   val image: @Composable () -> Unit = {
@@ -172,7 +179,19 @@ fun AddArticleScreen(
       Row { controls() }
     }
   }
+  if(showDiscardAlertDialog) DiscardAlertDialog(onDismiss = onDismissDiscardDialog, onConfirm = onConfirmDiscardDialog)
 }
+
+@Composable
+fun DiscardAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+    NoopSimpleAlertDialog(
+      title = stringResource(id = R.string.discard_article),
+      text = stringResource(id = R.string.are_you_sure),
+      onDismiss = onDismiss,
+      onConfirm = onConfirm,
+      confirmText = stringResource(id = R.string.discard),
+      cancelText = stringResource(id = R.string.cancel),
+    )
 
 @Composable
 fun AddArticleRoute(
@@ -194,6 +213,8 @@ fun AddArticleRoute(
 
   val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
 
+  var showDiscardAlertDialog by remember { mutableStateOf(false) }
+
   AddArticleScreen(
     systemBarPaddingValues = systemBarPaddingValues,
     windowSizeClass = windowSizeClass,
@@ -204,16 +225,20 @@ fun AddArticleRoute(
     onBroadenFocusClick = addArticleViewModel::onWidenClicked,
     onRotateCW = addArticleViewModel::onRotateCW,
     onRotateCCW = addArticleViewModel::onRotateCCW,
-    onDiscard = addArticleViewModel::onDiscard,
+    onDiscard = { showDiscardAlertDialog = true },
     onSave = addArticleViewModel::onSave,
+    showDiscardAlertDialog = showDiscardAlertDialog,
+    onDismissDiscardDialog = { showDiscardAlertDialog = false },
+    onConfirmDiscardDialog = {
+      addArticleViewModel.onDiscard()
+      showDiscardAlertDialog = false
+    },
   )
 }
 
 //region COMPOSABLE PREVIEWS
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@DevicePreviews
 @Composable
-fun PreviewAddArticleScreen() = NoopTheme(darkMode = DarkMode.DARK) {
+fun PreviewUtilAddArticleScreen(showDiscardAlertDialog: Boolean = false) = NoopTheme(darkMode = DarkMode.DARK) {
   AddArticleScreen(
     systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues(),
     windowSizeClass = currentWindowAdaptiveInfo(),
@@ -221,6 +246,12 @@ fun PreviewAddArticleScreen() = NoopTheme(darkMode = DarkMode.DARK) {
     processedImage = previewAssetBitmap(filename = composePreviewArticleAsset),
     imageRotation = 270.0f,
     onNarrowFocusClick = {}, onBroadenFocusClick = {}, onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {},
+    showDiscardAlertDialog = showDiscardAlertDialog,
+    onDismissDiscardDialog = {},
+    onConfirmDiscardDialog = {},
   )
 }
+
+@DevicePreviews @Composable fun PreviewAddArticleScreen() = PreviewUtilAddArticleScreen()
+@Preview @Composable fun PreviewAddArticleScreen_discardAlertDialog() = PreviewUtilAddArticleScreen(showDiscardAlertDialog = true)
 //endregion

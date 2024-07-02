@@ -139,4 +139,6 @@
     <string name="video">Video</string>
     <string name="demo_video">Demo</string>
     <string name="review">Rate &amp; Review</string>
+    <string name="discard_article">Discard Article</string>
+    <string name="discard">Discard</string>
 </resources>
