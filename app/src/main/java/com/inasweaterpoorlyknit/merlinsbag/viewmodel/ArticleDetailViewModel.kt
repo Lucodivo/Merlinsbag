@@ -10,13 +10,13 @@ import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -125,7 +124,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
       .stateIn(
         scope = viewModelScope,
         initialValue = "",
-        started = SharingStarted.WhileSubscribed()
+        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
       )
 
   val articleLazyUriStrings: StateFlow<LazyUriStrings> =
@@ -150,7 +149,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
       .stateIn(
         scope = viewModelScope,
         initialValue = LazyUriStrings.Empty,
-        started = SharingStarted.WhileSubscribed(20000) // prevents flow from restarting on simple change
+        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
       )
 
   val ensembleUiState: StateFlow<ArticleEnsembleUiState> = combine(
@@ -176,6 +175,6 @@ class ArticleDetailViewModel @AssistedInject constructor(
   }.stateIn(
     scope = viewModelScope,
     initialValue = ArticleEnsembleUiState(emptyList(), emptyList(), false),
-    started = SharingStarted.WhileSubscribed()
+    started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
   )
 }

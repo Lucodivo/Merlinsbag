@@ -18,6 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 
+// magic number based on NowInAndroid source code
+// prevents flows from timing out on basic configuration changes
+const val WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS = 5_000L
+
 @Composable
 fun Toast(@StringRes msg: Int) = LocalContext.current.toast(msg)
 
