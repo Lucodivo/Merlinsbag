@@ -68,7 +68,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   val ensembleTitle = ensemblesRepository.getEnsemble(ensembleId)
       .onEach { ensemble = it }
-      .map { it.title }
+      .map { it?.title ?: "" } // Can be null after ensemble is deleted
       .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
