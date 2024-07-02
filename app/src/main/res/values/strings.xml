@@ -145,4 +145,5 @@
     <string name="statistics">Statistics</string>
     <string name="bar_chart">Bar chart</string>
     <string name="article_count">Article Count</string>
+    <string name="ensemble_successfully_added">Ensemble successfully added</string>
 </resources>

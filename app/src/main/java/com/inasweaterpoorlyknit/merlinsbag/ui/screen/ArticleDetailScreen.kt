@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +39,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -47,7 +47,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -60,9 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
@@ -86,8 +83,8 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
-import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopSearchBox
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.repeatedFullResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -131,6 +128,7 @@ fun ArticleDetailRoute(
   var showRemoveFromEnsemblesAlertDialog by remember { mutableStateOf(false) }
   var showAddToEnsemblesDialog by remember { mutableStateOf(false) }
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
+  val newlyAddedEnsembles = remember { mutableStateMapOf<String, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
   val userSearch = remember { mutableStateOf("") }
@@ -237,12 +235,16 @@ fun ArticleDetailRoute(
     onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
     onClickCancelEnsemblesSelection = { selectedEnsembles.clear() },
     onClickAddToEnsemble = { showAddToEnsemblesDialog = true },
-    addNewEnsemble = { articleDetailViewModel.addArticleToNewEnsemble(pagerState.currentPage, it) },
+    addNewEnsemble = {
+      articleDetailViewModel.addArticleToNewEnsemble(pagerState.currentPage, it)
+      newlyAddedEnsembles[it] = Unit
+    },
     addArticleToEnsemble = { articleDetailViewModel.addArticleToEnsemble(pagerState.currentPage, it) },
     onCloseAddToEnsembleDialog = {
       showAddToEnsemblesDialog = false
       userSearch.value = ""
       articleDetailViewModel.searchEnsembles("")
+      newlyAddedEnsembles.clear()
     },
     onSearchQueryUpdateAddToEnsembles = {
       userSearch.value = it
@@ -251,6 +253,7 @@ fun ArticleDetailRoute(
     ensemblesSearchQuery = userSearch.value,
     searchQueryUniqueTitle = ensembleUiState.searchIsUniqueTitle,
     ensemblesToAdd = ensembleUiState.searchEnsembles,
+    newlyAddedEnsembles = newlyAddedEnsembles.keys,
     modifier = modifier,
   )
 }
@@ -293,6 +296,7 @@ fun ArticleDetailScreen(
     ensemblesSearchQuery: String,
     searchQueryUniqueTitle: Boolean,
     onSearchQueryUpdateAddToEnsembles: (String) -> Unit,
+    newlyAddedEnsembles: Set<String>,
 ) {
   val layoutDir = LocalLayoutDirection.current
   val systemBarTopPadding = systemBarPaddingValues.calculateTopPadding()
@@ -407,7 +411,8 @@ fun ArticleDetailScreen(
     addArticleToEnsemble = addArticleToEnsemble,
     onClose = onCloseAddToEnsembleDialog,
     onSearchQueryUpdate = onSearchQueryUpdateAddToEnsembles,
-    searchQueryUniqueTitle = searchQueryUniqueTitle
+    searchQueryUniqueTitle = searchQueryUniqueTitle,
+    newlyAddedEnsembles = newlyAddedEnsembles,
   )
 }
 
@@ -504,6 +509,7 @@ private fun AddToEnsembleDialog(
     onClose: () -> Unit,
     userSearch: String,
     onSearchQueryUpdate: (String) -> Unit,
+    newlyAddedEnsembles: Set<String>,
     searchQueryUniqueTitle: Boolean,
 ) {
   val ensembleChipsHeight = 50.dp
@@ -554,22 +560,40 @@ private fun AddToEnsembleDialog(
           .fillMaxWidth()
           .height(ensembleChipsHeight),
     ) {
-      if(ensemblesToAdd.isEmpty() || !ensemblesToAdd.first().equals(userSearch))
+      val newEnsembleChipInteractionSource = remember { MutableInteractionSource() }
+      val searchQueryHasRecentlyBeenAdded = newlyAddedEnsembles.contains(userSearch)
+      Box{
         InputChip(
           selected = searchQueryUniqueTitle,
           label = {
             Text(
               text = userSearch,
-              style = if(searchQueryUniqueTitle) LocalTextStyle.current else TextStyle(textDecoration = TextDecoration.LineThrough),
               maxLines = 1,
               overflow = TextOverflow.Ellipsis
             )
           },
           leadingIcon = { Icon(imageVector = NoopIcons.ensembles(), contentDescription = stringResource(R.string.hashtag)) },
-          trailingIcon = { Icon(imageVector = NoopIcons.Add, contentDescription = stringResource(R.string.add_ensemble)) },
-          onClick = { if(searchQueryUniqueTitle) addNewEnsemble(userSearch) },
+          trailingIcon = {
+            if(searchQueryHasRecentlyBeenAdded) {
+              Icon(imageVector = NoopIcons.Check, contentDescription = stringResource(R.string.ensemble_successfully_added))
+            } else if(searchQueryUniqueTitle) {
+              Icon(imageVector = NoopIcons.Add, contentDescription = stringResource(R.string.add_ensemble))
+            }
+          },
+          onClick = {},
+          interactionSource = newEnsembleChipInteractionSource,
           modifier = Modifier.padding(horizontal = chipRowPadding.calculateStartPadding(LocalLayoutDirection.current) + chipHorizontalPadding)
         )
+        Box(
+          modifier = Modifier
+              .matchParentSize()
+              .clickable(
+                onClick = { if(searchQueryUniqueTitle) addNewEnsemble(userSearch) },
+                interactionSource = if(searchQueryUniqueTitle) newEnsembleChipInteractionSource else null,
+                indication = null,
+              )
+        )
+      }
     }
     NoopSearchBox(
       query = userSearch,
@@ -627,7 +651,7 @@ fun PreviewUtilArticleDetailScreen(
       ensemblesToAdd = addEnsembles, addNewEnsemble = {}, onCloseAddToEnsembleDialog = {}, addArticleToEnsemble = {},
       ensemblesSearchQuery = "Goth 2 Boss",
       searchQueryUniqueTitle = true,
-      onSearchQueryUpdateAddToEnsembles = {}
+      onSearchQueryUpdateAddToEnsembles = {}, newlyAddedEnsembles = emptySet(),
     )
   }
 }
@@ -658,7 +682,7 @@ fun PreviewUtilArticleDetailScreen(
     ),
     searchQueryUniqueTitle = true,
     userSearch = "Jurassic Bark ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
-    onClose = {}, addArticleToEnsemble = {}, onSearchQueryUpdate = {}, addNewEnsemble = {},
+    onClose = {}, addArticleToEnsemble = {}, onSearchQueryUpdate = {}, addNewEnsemble = {}, newlyAddedEnsembles = emptySet(),
   )
 }
 //endregion
