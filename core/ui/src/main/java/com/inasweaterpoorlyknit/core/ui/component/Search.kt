@@ -21,7 +21,7 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
 @Composable
-fun SearchBox(
+fun NoopSearchBox(
     query: String,
     placeholder: String,
     onQueryChange: (String) -> Unit,
@@ -62,7 +62,7 @@ fun SearchBox(
 
 @Composable
 fun PreviewUtilSearchBox(query: String = "") = NoopTheme {
-  SearchBox(query = query, placeholder = "Goth 2 Boss", onClearQuery = {}, onQueryChange = {})
+  NoopSearchBox(query = query, placeholder = "Goth 2 Boss", onClearQuery = {}, onQueryChange = {})
 }
 
 @Preview @Composable fun PreviewSearchBox() = PreviewUtilSearchBox("Road Warrior")

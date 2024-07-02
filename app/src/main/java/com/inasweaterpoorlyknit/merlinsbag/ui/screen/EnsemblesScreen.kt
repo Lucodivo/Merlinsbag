@@ -3,7 +3,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -34,6 +33,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -75,8 +75,8 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
+import com.inasweaterpoorlyknit.core.ui.component.NoopSearchBox
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
-import com.inasweaterpoorlyknit.core.ui.component.SearchBox
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.shimmerBrush
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
@@ -147,6 +147,7 @@ fun EnsemblesRoute(
       if(editMode) toggleSelectedEnsemble(index)
       else navController.navigateToEnsembleDetail(ensemblesViewModel.onClickEnsemble(index))
     },
+    onClickSettings = navController::navigateToSettings,
     onClickActionButton = {
       if(editMode) editMode = false
       else ensemblesViewModel.onClickAddEnsemble()
@@ -174,7 +175,7 @@ fun EnsemblesRoute(
     onAlertDialogPositive = {
       ensemblesViewModel.deleteEnsembles(selectedEnsembleIndices.keys.toList())
       showDeleteEnsembleAlertDialog = false
-    }
+    },
   )
 }
 
@@ -191,6 +192,7 @@ fun EnsemblesScreen(
     showPlaceholder: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
     searchQuery: String,
+    onClickSettings: () -> Unit,
     onClickEnsemble: (index: Int) -> Unit,
     onLongPressEnsemble: (index: Int) -> Unit,
     onClickActionButton: () -> Unit,
@@ -217,15 +219,26 @@ fun EnsemblesScreen(
     Column {
       Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding()))
       if(placeholderVisibilityAnimatedFloat == 0.0f) {
-        SearchBox(
-          query = searchQuery,
-          placeholder = stringResource(R.string.search_ensembles),
-          onQueryChange = onUpdateSearchQuery,
-          onClearQuery = onClearSearchQuery,
-          modifier = Modifier
-              .fillMaxWidth()
-              .padding(bottom = bottomPadding, start = sidePadding, end = sidePadding),
-        )
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          modifier = Modifier.padding(bottom = bottomPadding, start = sidePadding, end = sidePadding)
+        ){
+          if(windowSizeClass.compactWidth()){
+            IconButton(onClick = onClickSettings) {
+              Icon(
+                imageVector = NoopIcons.Settings,
+                contentDescription = stringResource(R.string.cog),
+              )
+            }
+          }
+          NoopSearchBox(
+            query = searchQuery,
+            placeholder = stringResource(R.string.search_ensembles),
+            onQueryChange = onUpdateSearchQuery,
+            onClearQuery = onClearSearchQuery,
+            modifier = Modifier.fillMaxWidth()
+          )
+        }
         EnsemblesOverlappingImageRowColumn(
           windowSizeClass,
           selectedEnsembleIndices,
@@ -622,7 +635,7 @@ fun PreviewUtilEnsembleScreen(
     showDeleteEnsembleAlertDialog = false, selectedEnsembleIndices = emptySet(), showPlaceholder = showPlaceholder, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
     searchQuery = "Goth 2 Boss",
     onClickEnsemble = {}, onLongPressEnsemble = {}, onClickActionButton = {},
-    onClickSaveEnsemble = {}, ensembleTitleError = null,
+    onClickSaveEnsemble = {}, ensembleTitleError = null, onClickSettings = {},
     onAlertDialogPositive = {}, onCloseAddEnsembleDialog = {}, onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onAlertDialogDismiss = {},
   )
 }

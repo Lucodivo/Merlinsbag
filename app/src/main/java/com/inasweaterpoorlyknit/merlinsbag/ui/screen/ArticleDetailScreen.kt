@@ -86,7 +86,7 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
-import com.inasweaterpoorlyknit.core.ui.component.SearchBox
+import com.inasweaterpoorlyknit.core.ui.component.NoopSearchBox
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.repeatedFullResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -570,7 +570,7 @@ private fun AddToEnsembleDialog(
           modifier = Modifier.padding(horizontal = chipRowPadding.calculateStartPadding(LocalLayoutDirection.current) + chipHorizontalPadding)
         )
     }
-    SearchBox(
+    NoopSearchBox(
       query = userSearch,
       placeholder = stringResource(R.string.search_ensembles),
       onQueryChange = { onSearchQueryUpdate(it) },
