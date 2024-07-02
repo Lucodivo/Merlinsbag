@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Icon
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -45,6 +46,7 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableStaggeredThumbnailGrid
+import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
@@ -59,6 +61,7 @@ fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(
 @Composable
 fun ArticlesRoute(
     navController: NavController,
+    windowSizeClass: WindowSizeClass,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
   val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
@@ -78,6 +81,7 @@ fun ArticlesRoute(
   }
 
   ArticlesScreen(
+    windowSizeClass = windowSizeClass,
     thumbnailUris = articleThumbnails,
     selectedThumbnails = isItemSelected.keys,
     editMode = editMode,
@@ -130,6 +134,7 @@ fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
 
 @Composable
 fun ArticlesScreen(
+    windowSizeClass: WindowSizeClass,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
@@ -210,7 +215,7 @@ fun ArticlesScreen(
           ),
         )
       },
-      horizontalExpandedButtons = if(!articlesAreSelected) {
+      horizontalExpandedButtons = if(!articlesAreSelected && windowSizeClass.compactWidth()) {
         listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Settings, contentDescription = stringResource(R.string.cog)),
@@ -231,6 +236,7 @@ fun PreviewUtilArticleScreen(
     selectedThumbnails: Set<Int> = emptySet(),
 ) = NoopTheme {
   ArticlesScreen(
+    windowSizeClass = currentWindowAdaptiveInfo(),
     thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails = selectedThumbnails,
     editMode = editMode,
