@@ -11,7 +11,7 @@
     <string name="no_subject_found">Subject not found in image.</string>
     <string name="goth_2_boss">Goth 2 Boss</string>
     <string name="ensemble_title">Ensemble title</string>
-    <string name="add_ensemble">Add ensemble</string>
+    <string name="add_ensemble">Add Ensemble</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="delete_article">Delete Article</string>
@@ -23,7 +23,7 @@
     <string name="deleted_all_data_unrecoverable">Deleting all data is a permanent action and cannot be reversed. All articles and ensembles will be destroyed. Photos used to generate articles will not be affected.</string>
     <string name="cancel">Cancel</string>
     <string name="all_articles_already_in_ensemble">All articles already in ensemble.</string>
-    <string name="add_article">Add article</string>
+    <string name="add_article">Add Article</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="developer">Developer</string>
     <string name="info">Info</string>
@@ -123,7 +123,7 @@
     <string name="ensemble_with_title_already_exists">Ensemble w/ title already exists</string>
     <string name="tips_and_info"><![CDATA[Tips & Info]]></string>
     <string name="information">Information</string>
-    <string name="quality_image_answer">This question is quite hard to determine. The model has an easier time isolating subjects in some images than it does in others. But intuitions of a \"good image\" can still be quite helpful. \nThe contrast between a subject and it\'s background is the most important element. This contrast can take many different forms. It can be a different in: \n- Color (ex: red bowl on a white table) \n- Focus (ex: nearby person in front of far away mountains) \n- Texture (ex: glazed ceramic art on a shaggy carpet) \nMost importantly, the better images is simply the one that works. If one picture does not provide the desired results, you can try: \n- a different angle \n- adjusting environmental lighting \n- toggling flash on/off \n- different camera or camera settings</string>
+    <string name="quality_image_answer">This question is quite hard to determine. The model has an easier time isolating subjects in some images than it does in others. But intuitions of a \"good image\" can still be quite helpful. \nThe contrast between a subject and it\'s background is the most important element. This contrast can take many different forms. It can be a difference in: \n- Color (ex: red bowl on a white table) \n- Focus (ex: nearby person in front of far away mountains) \n- Texture (ex: glazed ceramic art on a shaggy carpet) \nMost importantly, the better images is simply the one that works. If one picture does not provide the desired results, you can try: \n- a different angle \n- adjusting environmental lighting \n- toggling flash on/off \n- different camera or camera settings</string>
     <string name="what_is_a_quality_image">What is a quality image?</string>
     <string name="underlying_technology_answer">Merlinsbag uses a machine learning model to cut subjects out of an image. This \"model\" is just an AI algorithm that takes your image as input and spits out the isolated articles as output. The beauty of this model is it is relatively simple and can run on your device. Your data stays local. Never touching a server. \nBut, as you may have seen from other interactions with AI models, it can still produce imperfect and/or imprecise results. This is where the quality of the images you provide really matter.</string>
     <string name="underlying_technology">Underlying technology</string>
@@ -157,6 +157,8 @@
     <string name="image_not_found">Image not found</string>
     <string name="configuring_try_again_soon">Configuring… Try again soon.</string>
     <string name="image_not_recognized">Image not recognized</string>
-    <string name="add_an_article">Add an article</string>
-    <string name="add_an_ensemble">Add an ensemble</string>
+    <string name="faq">FAQ</string>
+    <string name="error_message_configuring_try_again_soon">Error Message: Configuring… Try again soon.</string>
+    <string name="ml_model_must_download">Merlinsbag must download additional code after the application has been installed. This code is necessary for cutting articles out of photographs. An internet connection is required to resolve this issue. No actions are required from the user, aside from waiting for the download to complete. It is a one-time download of about 35MB.</string>
+    <string name="messages">Messages</string>
 </resources>

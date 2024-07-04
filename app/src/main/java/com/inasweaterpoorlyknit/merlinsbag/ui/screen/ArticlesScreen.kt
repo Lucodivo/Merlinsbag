@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -206,7 +205,7 @@ fun ArticlesScreen(
               onClick = onClickEdit,
               modifier = Modifier.alpha(buttonAlpha * addArticleButtonAnimatedAlphaFloat)
             ){
-              Text(text = stringResource(R.string.add_an_article))
+              Text(text = stringResource(R.string.add_article))
             }
           }
         }

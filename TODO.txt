@@ -7,6 +7,7 @@ Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
     - Add to ensemble?
+    - Wait for ML Model to download? Inform user that they need internet?
 Ensembles:
     - Composite ensembles?
         - Exclusive: #Goth & #Tops
@@ -60,7 +61,6 @@ Performance:
                 - Reduces to ~.5s by changing compression from WebP lossless to WebP lossy 100% quality
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
 QoL:
-    - Tips page
 
 // Unknowns
 Aesthetic Questions:

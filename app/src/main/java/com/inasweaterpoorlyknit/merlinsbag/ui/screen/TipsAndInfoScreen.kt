@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -119,6 +120,15 @@ fun TipsAndInfoScreen(
     }
     item {
       Text(text = stringResource(R.string.quality_image_answer))
+      spacer()
+    }
+    item {
+      Text(text = stringResource(R.string.messages), fontSize = MaterialTheme.typography.titleLarge.fontSize)
+      spacer()
+    }
+    item {
+      Text(text = "\"${stringResource(R.string.configuring_try_again_soon)}\"", fontStyle = FontStyle.Italic)
+      Text(text = stringResource(R.string.ml_model_must_download))
       spacer()
     }
     item {

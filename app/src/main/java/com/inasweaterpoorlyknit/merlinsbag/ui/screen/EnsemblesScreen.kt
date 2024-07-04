@@ -266,7 +266,7 @@ fun EnsemblesScreen(
                 onClick = onClickAddEnsemble,
                 modifier = Modifier.alpha(buttonAlpha * addEnsembleButtonAnimatedAlphaFloat)
               ){
-                Text(text = stringResource(R.string.add_an_ensemble))
+                Text(text = stringResource(R.string.add_ensemble))
               }
             }
           }
