@@ -21,10 +21,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,7 +38,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -192,12 +191,24 @@ fun ArticlesScreen(
     } else {
       Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
+        modifier = Modifier
+            .alpha(placeholderVisibilityAnimatedFloat)
       ) {
         PlaceholderThumbnailGrid()
-        val alpha = 0.9f
-        Surface(shape = MaterialTheme.shapes.large, modifier = Modifier.alpha(alpha)) {
-          Text(text = stringResource(R.string.nothing_here_yet), modifier = Modifier.padding(8.dp))
+        if(thumbnailUris?.isEmpty() != false){
+          val addArticleButtonAnimatedAlphaFloat by animateFloatAsState(
+            targetValue = if(editMode) 0.0f else 1.0f,
+            label = "add article alpha"
+          )
+          val buttonAlpha = 0.9f
+          if(addArticleButtonAnimatedAlphaFloat > 0.0f){
+            Button(
+              onClick = onClickEdit,
+              modifier = Modifier.alpha(buttonAlpha * addArticleButtonAnimatedAlphaFloat)
+            ){
+              Text(text = stringResource(R.string.add_an_article))
+            }
+          }
         }
       }
     }

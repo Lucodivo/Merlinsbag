@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,7 +78,6 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.component.NoopSearchBox
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
-import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.shimmerBrush
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
@@ -149,7 +149,7 @@ fun EnsemblesRoute(
       else navController.navigateToEnsembleDetail(ensemblesViewModel.onClickEnsemble(index))
     },
     onClickSettings = navController::navigateToSettings,
-    onClickActionButton = {
+    onClickAddEnsemble = {
       if(editMode) editMode = false
       else ensemblesViewModel.onClickAddEnsemble()
     },
@@ -196,7 +196,7 @@ fun EnsemblesScreen(
     onClickSettings: () -> Unit,
     onClickEnsemble: (index: Int) -> Unit,
     onLongPressEnsemble: (index: Int) -> Unit,
-    onClickActionButton: () -> Unit,
+    onClickAddEnsemble: () -> Unit,
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
     ensembleTitleError: Int?,
     onAlertDialogPositive: () -> Unit,
@@ -255,9 +255,20 @@ fun EnsemblesScreen(
           modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
         ) {
           EnsemblesOverlappingPlaceholderRowColumn(windowSizeClass = windowSizeClass)
-          val alpha = 0.9f
-          Surface(shape = MaterialTheme.shapes.large, modifier = Modifier.alpha(alpha)){
-            Text(text = stringResource(R.string.nothing_here_yet), modifier = Modifier.padding(8.dp))
+          if(lazyEnsembleThumbnails.isEmpty()){
+            val addEnsembleButtonAnimatedAlphaFloat by animateFloatAsState(
+              targetValue = if(showAddEnsembleDialog) 0.0f else 1.0f,
+              label = "add article alpha"
+            )
+            val buttonAlpha = 0.9f
+            if(addEnsembleButtonAnimatedAlphaFloat > 0.0f){
+              Button(
+                onClick = onClickAddEnsemble,
+                modifier = Modifier.alpha(buttonAlpha * addEnsembleButtonAnimatedAlphaFloat)
+              ){
+                Text(text = stringResource(R.string.add_an_ensemble))
+              }
+            }
           }
         }
       }
@@ -265,7 +276,7 @@ fun EnsemblesScreen(
     NoopBottomEndButtonContainer {
       EditEnsemblesExpandingActionButton(
         expanded = editMode,
-        onClickAddEnsemble = onClickActionButton,
+        onClickAddEnsemble = onClickAddEnsemble,
         onClickDeleteSelected = onClickDeleteSelected,
       )
     }
@@ -641,7 +652,7 @@ fun PreviewUtilEnsembleScreen(
     editMode = false,
     showDeleteEnsembleAlertDialog = false, selectedEnsembleIndices = emptySet(), showPlaceholder = showPlaceholder, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
     searchQuery = "Goth 2 Boss",
-    onClickEnsemble = {}, onLongPressEnsemble = {}, onClickActionButton = {},
+    onClickEnsemble = {}, onLongPressEnsemble = {}, onClickAddEnsemble = {},
     onClickSaveEnsemble = {}, ensembleTitleError = null, onClickSettings = {},
     onAlertDialogPositive = {}, onCloseAddEnsembleDialog = {}, onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onAlertDialogDismiss = {},
   )
