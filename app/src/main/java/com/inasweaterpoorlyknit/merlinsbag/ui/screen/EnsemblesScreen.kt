@@ -77,6 +77,7 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.component.NoopSearchBox
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
+import com.inasweaterpoorlyknit.core.ui.component.PlaceholderThumbnailGrid
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.shimmerBrush
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
@@ -249,10 +250,16 @@ fun EnsemblesScreen(
           modifier = Modifier.padding(horizontal = sidePadding)
         )
       } else {
-        EnsemblesOverlappingPlaceholderRowColumn(
-          windowSizeClass = windowSizeClass,
+        Box(
+          contentAlignment = Alignment.Center,
           modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
-        )
+        ) {
+          EnsemblesOverlappingPlaceholderRowColumn(windowSizeClass = windowSizeClass)
+          val alpha = 0.9f
+          Surface(shape = MaterialTheme.shapes.large, modifier = Modifier.alpha(alpha)){
+            Text(text = stringResource(R.string.nothing_here_yet), modifier = Modifier.padding(8.dp))
+          }
+        }
       }
     }
     NoopBottomEndButtonContainer {
@@ -542,10 +549,10 @@ private val drawablePlaceholders: List<Pair<Int, List<Int>>> =
       listOf(
         Pair(R.string.tops, listOf(*topDrawables, *topDrawables)),
         Pair(R.string.shoes, listOf(*shoeDrawables, *shoeDrawables)),
-        Pair(R.string.goth_2_boss, listOf(*bottomDrawables, *topDrawables, *shoeDrawables, *accessoryDrawables)),
-        Pair(R.string.road_warrior, thumbnails.slice(4..9)),
-        Pair(R.string.bowie_nite, thumbnails.slice(7..12)),
-        Pair(R.string.chrome_country, listOf(*accessoryDrawables, *accessoryDrawables))
+        Pair(R.string.goth, listOf(*bottomDrawables, *topDrawables, *shoeDrawables, *accessoryDrawables)),
+        Pair(R.string.hiking, thumbnails.slice(4..9)),
+        Pair(R.string.accessories, thumbnails.slice(7..12)),
+        Pair(R.string.vintage, listOf(*accessoryDrawables, *accessoryDrawables))
       )
     }
 

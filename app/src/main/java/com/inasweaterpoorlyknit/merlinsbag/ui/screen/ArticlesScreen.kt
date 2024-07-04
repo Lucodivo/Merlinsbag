@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDoc
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,11 +32,13 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -122,15 +128,15 @@ fun ArticlesRoute(
 
 @Composable
 fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-  NoopSimpleAlertDialog(
-    title = stringResource(id = R.string.delete_article),
-    text = stringResource(id = R.string.deleted_articles_unrecoverable),
-    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
-    onDismiss = onDismiss,
-    onConfirm = onConfirm,
-    confirmText = stringResource(id = R.string.delete),
-    cancelText = stringResource(id = R.string.cancel),
-  )
+    NoopSimpleAlertDialog(
+      title = stringResource(id = R.string.delete_article),
+      text = stringResource(id = R.string.deleted_articles_unrecoverable),
+      headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
+      onDismiss = onDismiss,
+      onConfirm = onConfirm,
+      confirmText = stringResource(id = R.string.delete),
+      cancelText = stringResource(id = R.string.cancel),
+    )
 
 @Composable
 fun ArticlesScreen(
@@ -163,15 +169,19 @@ fun ArticlesScreen(
   val endPadding = systemBarPaddingValues.calculateEndPadding(layoutDir)
   Column(
     verticalArrangement = Arrangement.Top,
-    modifier = Modifier.fillMaxSize().padding(start = startPadding, end = endPadding)
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(start = startPadding, end = endPadding)
   ) {
-    Spacer(modifier = Modifier.fillMaxWidth().height(systemBarPaddingValues.calculateTopPadding()))
+    Spacer(modifier = Modifier
+        .fillMaxWidth()
+        .height(systemBarPaddingValues.calculateTopPadding()))
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
       targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
       animationSpec = tween(durationMillis = 1000),
       label = "placeholder article grid visibility"
     )
-    if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null){
+    if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null) {
       SelectableStaggeredThumbnailGrid(
         selectable = editMode,
         onSelect = onClickArticle,
@@ -180,9 +190,16 @@ fun ArticlesScreen(
         selectedThumbnails = selectedThumbnails,
       )
     } else {
-      PlaceholderThumbnailGrid(
+      Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
-      )
+      ) {
+        PlaceholderThumbnailGrid()
+        val alpha = 0.9f
+        Surface(shape = MaterialTheme.shapes.large, modifier = Modifier.alpha(alpha)) {
+          Text(text = stringResource(R.string.nothing_here_yet), modifier = Modifier.padding(8.dp))
+        }
+      }
     }
   }
 
@@ -233,11 +250,12 @@ fun ArticlesScreen(
 fun PreviewUtilArticleScreen(
     editMode: Boolean = false,
     showDeleteArticlesAlert: Boolean = false,
+    thumbUris: LazyUriStrings? = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails: Set<Int> = emptySet(),
 ) = NoopTheme {
   ArticlesScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
-    thumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
+    thumbnailUris = thumbUris,
     selectedThumbnails = selectedThumbnails,
     editMode = editMode,
     showDeleteArticlesAlert = showDeleteArticlesAlert,
@@ -248,9 +266,8 @@ fun PreviewUtilArticleScreen(
   )
 }
 
-@Preview
-@Composable
-fun PreviewArticlesScreen() = PreviewUtilArticleScreen()
+@Preview @Composable fun PreviewArticlesScreen() = PreviewUtilArticleScreen()
+@Preview @Composable fun PreviewArticlesScreen_Empty() = PreviewUtilArticleScreen(thumbUris = LazyUriStrings.Empty)
 
 @Preview
 @Composable

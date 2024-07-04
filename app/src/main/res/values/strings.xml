@@ -148,4 +148,9 @@
     <string name="ensemble_successfully_added">Ensemble successfully added</string>
     <string name="top_ensembles">Top Ensembles</string>
     <string name="most_decorated_article">Most Decorated Article</string>
+    <string name="nothing_here_yet">Nothing Here Yet</string>
+    <string name="accessories">Accessories</string>
+    <string name="goth">Goth</string>
+    <string name="hiking">Hiking</string>
+    <string name="vintage">Vintage</string>
 </resources>
