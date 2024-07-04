@@ -1,30 +1,22 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui
 
-import android.graphics.Color
 import android.os.Bundle
-import android.view.Window
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.inasweaterpoorlyknit.core.model.DarkMode
+import androidx.lifecycle.lifecycleScope
+import com.inasweaterpoorlyknit.core.ml.encourageInstallSubjectSegmentationModel
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityUiState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity: ComponentActivity() {
@@ -39,6 +31,9 @@ class MainActivity: ComponentActivity() {
 
     var loading = true
     splashscreen.setKeepOnScreenCondition { loading }
+
+    val context = this
+    lifecycleScope.launch { encourageInstallSubjectSegmentationModel(context = context) }
 
     setContent {
       val appState = rememberNoopAppState(

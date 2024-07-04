@@ -45,6 +45,7 @@ Bugs:
     - If the user edits articles on the ArticleDetailScreen, leaves the app, and re-enters, the order of the articles will have changed and their place will not have been saved.
     - Passing indices instead of ids from a screen to it's associated ViewModel may be more buggy than simply passing ids.
         - The idea of using indices was that the UI doesn't need to know about a database ID, but maybe it is worth the trade?
+    - The ML Kit model does not actually install with the application or even after the application is installed. It seems to only attempt to install by either an attempted use or an explicit call to installation.
 Settings Screen:
     - Export All Data
 Aesthetics:

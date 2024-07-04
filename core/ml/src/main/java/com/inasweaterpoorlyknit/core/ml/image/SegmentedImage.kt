@@ -83,16 +83,27 @@ class SegmentedImage {
     subjectSegmenter.close()
   }
 
-  fun process(context: Context, uri: Uri, successCallback: (Boolean) -> Unit) {
-    Log.d("SegmentedImage", "Processing image: $uri")
-    val mlkitInputImage = InputImage.fromFilePath(context, uri)
-    process(mlkitInputImage, successCallback)
+  enum class ProcessSuccess {
+    SUCCESS,
+    FAILURE_MLKIT_MODULE_WAITING_TO_DOWNLOAD,
+    FAILURE_IMAGE_NOT_FOUND,
+    FAILURE_IMAGE_NOT_RECOGNIZED,
   }
 
-  fun process(mlkitInputImage: InputImage, successCallback: (Boolean) -> Unit) {
+  fun process(context: Context, uri: Uri, successCallback: (ProcessSuccess) -> Unit) {
+    Log.d("SegmentedImage", "Processing image: $uri")
+    try {
+      val mlkitInputImage = InputImage.fromFilePath(context, uri)
+      process(mlkitInputImage, successCallback)
+    } catch(e: Exception){
+      successCallback(ProcessSuccess.FAILURE_IMAGE_NOT_FOUND)
+    }
+  }
+
+  fun process(mlkitInputImage: InputImage, successCallback: (ProcessSuccess) -> Unit) {
     if(mlkitInputImage.bitmapInternal == null) {
       Log.e("SegmentedImage", "MLKit InputImage did not contain a bitmap")
-      successCallback(false)
+      successCallback(ProcessSuccess.FAILURE_IMAGE_NOT_RECOGNIZED)
       return
     }
 
@@ -112,9 +123,10 @@ class SegmentedImage {
         subjectIndex = 0
         prepareSubjectBitmap()
       }
-      successCallback(true)
-    }.addOnFailureListener {
-      successCallback(false)
+      successCallback(ProcessSuccess.SUCCESS)
+    }.addOnFailureListener { exception ->
+      Log.e("SegmentedImage", "ML Kit failed to process image - ${exception.message}")
+      successCallback(ProcessSuccess.FAILURE_MLKIT_MODULE_WAITING_TO_DOWNLOAD)
     }
   }
 

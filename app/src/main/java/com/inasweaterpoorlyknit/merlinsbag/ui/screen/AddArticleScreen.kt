@@ -203,12 +203,12 @@ fun AddArticleRoute(
     factory.create(imageUriStringList)
   }
 
-  addArticleViewModel.finished.value.getContentIfNotHandled()?.let {
-    navController.popBackStack()
+  addArticleViewModel.userFacingError.value.getContentIfNotHandled()?.let { msg ->
+    Toast(msg = msg)
   }
 
-  addArticleViewModel.noSubjectFound.value.getContentIfNotHandled()?.let {
-    Toast(msg = R.string.no_subject_found)
+  addArticleViewModel.finished.value.getContentIfNotHandled()?.let {
+    navController.popBackStack()
   }
 
   val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()

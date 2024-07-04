@@ -5,18 +5,16 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.tracing.Trace.beginAsyncSection
-import androidx.tracing.Trace.beginSection
-import androidx.tracing.Trace.endAsyncSection
-import androidx.tracing.trace
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.profiling.Timer
 import com.inasweaterpoorlyknit.core.ml.image.SegmentedImage
+import com.inasweaterpoorlyknit.merlinsbag.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -50,7 +48,7 @@ class AddArticleViewModel @AssistedInject constructor(
   val processedBitmap = mutableStateOf<Bitmap?>(null)
   val rotation = mutableFloatStateOf(rotations[rotationIndex])
   val finished = mutableStateOf(Event<Unit>(null))
-  val noSubjectFound = mutableStateOf(Event<Unit>(null))
+  val userFacingError = mutableStateOf(Event<Int>(null))
 
   private val segmentedImage = SegmentedImage()
 
@@ -65,6 +63,10 @@ class AddArticleViewModel @AssistedInject constructor(
 
   private fun processNextImage() {
     processingImageIndex += 1
+    fun error(@StringRes msg: Int) {
+      userFacingError.value = Event(msg)
+      processNextImage()
+    }
     if(processingImageIndex > imageUriStrings.lastIndex) {
       finished.value = Event(Unit)
     } else {
@@ -73,22 +75,31 @@ class AddArticleViewModel @AssistedInject constructor(
       rotation.floatValue = rotations[rotationIndex]
       processing.value = true
       viewModelScope.launch(Dispatchers.Default) {
-        Uri.parse(imageUriStrings[processingImageIndex])?.let { imageUri ->
+        val imageUri = Uri.parse(imageUriStrings[processingImageIndex])
+        if(imageUri == null) {
+          error(R.string.image_not_found)
+        } else {
           try {
             segmentedImage.process(application, imageUri) { success ->
-              if(success) {
-                if(segmentedImage.subjectsFound) {
-                  refreshProcessedBitmap()
-                } else {
-                  noSubjectFound.value = Event(Unit)
-                  processNextImage()
+              when(success){
+                SegmentedImage.ProcessSuccess.SUCCESS -> {
+                  if(segmentedImage.subjectsFound) refreshProcessedBitmap()
+                  else error(R.string.no_subject_found)
                 }
-              } else {
-                Log.e("processImage()", "ML Kit failed to process image")
+                SegmentedImage.ProcessSuccess.FAILURE_MLKIT_MODULE_WAITING_TO_DOWNLOAD -> {
+                  error(R.string.configuring_try_again_soon)
+                }
+                SegmentedImage.ProcessSuccess.FAILURE_IMAGE_NOT_FOUND -> {
+                  error(R.string.image_not_found)
+                }
+                SegmentedImage.ProcessSuccess.FAILURE_IMAGE_NOT_RECOGNIZED -> {
+                  error(R.string.image_not_recognized)
+                }
               }
             }
           } catch(e: IOException) {
             Log.e("processImage()", "ML Kit failed to open image - ${e.message}")
+            error(R.string.image_not_found)
           }
         }
       }

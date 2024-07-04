@@ -77,6 +77,7 @@ fun CameraRoute(
     },
   )
 
+  // TODO: Not a perfect system. If backstack popped too quickly, permissions granted may not have changed in value.
   LaunchedEffect(permissionsGranted) {
     if(!permissionsGranted) cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
   }
