@@ -55,3 +55,13 @@ data class EnsembleArticleThumbnails(
   )
   val articles: List<ArticleWithThumbnails>,
 )
+
+data class EnsembleCount(
+    val title: String,
+    val count: Long,
+)
+
+data class ArticleCount(
+    val id: String,
+    val count: Long,
+)

@@ -146,4 +146,6 @@
     <string name="bar_chart">Bar chart</string>
     <string name="article_count">Article Count</string>
     <string name="ensemble_successfully_added">Ensemble successfully added</string>
+    <string name="top_ensembles">Top Ensembles</string>
+    <string name="most_decorated_article">Most Decorated Article</string>
 </resources>

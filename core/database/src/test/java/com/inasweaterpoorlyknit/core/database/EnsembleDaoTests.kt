@@ -158,4 +158,40 @@ class EnsembleDaoTests: DatabaseTests() {
     ensembles3.forEachIndexed{ i, it -> assertEquals(it.title, ensemblesByArticle3[i].title) }
     ensembles4.forEachIndexed{ i, it -> assertEquals(it.title, ensemblesByArticle4[i].title) }
   }
+
+  @Test
+  fun getMostPopularEnsemble() = runBlocking(Dispatchers.IO) {
+    val ensembles = Array(3){ createEnsembleEntity(title = "interesting_title$it") }.sortedBy { it.title }.toTypedArray()
+    val popularCount = 1
+    ensembles.forEachIndexed { index, ensemble ->
+      val articles = createArticleEntity(index + 1)
+      articleDao.insertArticles(*articles)
+      ensembleDao.insertEnsembles(ensemble)
+      ensembleDao.insertArticleEnsemble(*articles.map { EnsembleArticleEntity(ensembleId = ensemble.id, articleId = it.id) }.toTypedArray())
+    }
+
+    val mostPopularEnsemble = ensembleDao.getMostPopularEnsembles(popularCount).first()
+
+    assertEquals(popularCount, mostPopularEnsemble.size)
+    assertEquals(ensembles.last().title, mostPopularEnsemble.first().title)
+    assertEquals(ensembles.size.toLong(), mostPopularEnsemble.first().count)
+  }
+
+  @Test
+  fun getMostPopularArticle() = runBlocking(Dispatchers.IO) {
+    val articles = createArticleEntity(3).sortedBy { it.id }.toTypedArray()
+    val popularCount = 1
+    articles.forEachIndexed { index, article ->
+      val ensembles = createEnsembleEntity(index + 1)
+      articleDao.insertArticles(article)
+      ensembleDao.insertEnsembles(*ensembles)
+      ensembleDao.insertArticleEnsemble(*ensembles.map { EnsembleArticleEntity(ensembleId = it.id, articleId = article.id) }.toTypedArray())
+    }
+
+    val mostPopularArticle = ensembleDao.getMostPopularArticles(popularCount).first()
+
+    assertEquals(popularCount, mostPopularArticle.size)
+    assertEquals(articles.last().id, mostPopularArticle.first().id)
+    assertEquals(articles.size.toLong(), mostPopularArticle.first().count)
+  }
 }

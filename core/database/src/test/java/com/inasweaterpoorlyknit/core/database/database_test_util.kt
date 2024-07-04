@@ -14,7 +14,7 @@ fun createCounterString(count: Int) = Array(count){ Counter.next().toString() }
 fun createArticleEntity(id: String = createCounterString()) = ArticleEntity(id = id, created = 0, modified = 0)
 fun createArticleEntity(count: Int) = Array(count){ createArticleEntity() }
 
-fun createEnsembleEntity(id: String = createCounterString()) = EnsembleEntity(id = id, title = id, created = 0, modified = 0)
+fun createEnsembleEntity(id: String = createCounterString(), title: String = id) = EnsembleEntity(id = id, title = title, created = 0, modified = 0)
 fun createEnsembleEntity(count: Int) = Array(count){ createEnsembleEntity() }
 
 fun createArticleImageEntity(ArticleId: String = randUUIDString()) = ArticleImageEntity(

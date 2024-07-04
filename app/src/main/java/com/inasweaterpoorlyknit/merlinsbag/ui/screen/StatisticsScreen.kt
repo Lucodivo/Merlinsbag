@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,6 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.database.model.EnsembleCount
+import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
 
@@ -45,19 +46,21 @@ fun StatisticsRoute(
   StatisticsScreen(
     articleCount = statisticsUiState.articleCount,
     ensembleCount = statisticsUiState.ensembleCount,
+    popularEnsembles = statisticsUiState.topEnsembles,
+    topArticleDecorationCount = statisticsUiState.topArticleDecorationCount,
   )
 }
 
 @Composable
 fun StatisticsRow(
-    @StringRes title: Int,
-    value: String,
+    text: String,
+    modifier: Modifier = Modifier,
 ){
   Row(
     horizontalArrangement = Arrangement.SpaceBetween,
-    modifier = Modifier.fillMaxWidth()
+    modifier = modifier.fillMaxWidth()
   ){
-    Text(text = "${stringResource(title)}: $value")
+    Text(text = text)
   }
 }
 
@@ -66,9 +69,12 @@ fun StatisticsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     articleCount: Int,
     ensembleCount: Int,
+    popularEnsembles: List<EnsembleCount>,
+    topArticleDecorationCount: Long,
 ){
   val layoutDir = LocalLayoutDirection.current
   val padding = 16.dp
+  val popularEnsemblesModifier = Modifier.padding(start = 32.dp)
   LazyColumn(
     modifier = Modifier.fillMaxSize().padding(
       start = systemBarPaddingValues.calculateStartPadding(layoutDir) + padding,
@@ -76,17 +82,44 @@ fun StatisticsScreen(
     ),
   ) {
     item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding() + padding)) }
-    item { StatisticsRow(R.string.article_count, articleCount.toString()) }
-    item { StatisticsRow(R.string.ensemble_count, ensembleCount.toString()) }
+    item { StatisticsRow("${stringResource(R.string.article_count)}: $articleCount") }
+    item { StatisticsRow("${stringResource(R.string.ensemble_count)}: $ensembleCount") }
+    item { StatisticsRow("${stringResource(R.string.most_decorated_article)}: $topArticleDecorationCount") }
+    item { StatisticsRow("${stringResource(R.string.top_ensembles)}:") }
+    if(popularEnsembles.isNotEmpty()){
+      popularEnsembles.forEach { popularEnsemble ->
+        item { StatisticsRow("${popularEnsemble.title}: ${popularEnsemble.count}", modifier = popularEnsemblesModifier) }
+      }
+    } else {
+      item { StatisticsRow("[${stringResource(R.string.no_ensembles_available)}]", modifier = popularEnsemblesModifier) }
+    }
     item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding() + padding)) }
   }
 }
 
 //region COMPOSABLE PREVIEWS
+@Composable
+fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleCount>) = NoopTheme {
+  StatisticsScreen(
+    articleCount = 12_345,
+    ensembleCount = 67_890,
+    popularEnsembles = popularEnsembles,
+    topArticleDecorationCount = 15
+  )
+}
+
+
 @Preview
 @Composable
-fun PreviewStatisticsScreen() = StatisticsScreen(
-  articleCount = 12_345,
-  ensembleCount = 67_890,
-)
+fun PreviewStatisticsScreen() = PreviewUtilStatisticsScreen(
+    popularEnsembles = listOf(
+      EnsembleCount(title = "Goth 2 Boss", 12),
+      EnsembleCount(title = "Hiking", 8),
+      EnsembleCount(title = "Vinyl", 4),
+    ),
+  )
+
+@Preview
+@Composable
+fun PreviewStatisticsScreen_NoEnsembleArticles() = PreviewUtilStatisticsScreen(popularEnsembles = emptyList())
 //endregion

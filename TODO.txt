@@ -21,6 +21,9 @@ Multiple Form Factor Support:
     - Ensembles List / Ensemble Detail for tablets
 Articles:
     - thumbnails with random "shimmer"/"rotation"
+    - multiple select and add to ensembles
+        - needs to also be removed
+        - might not be worth as valuable as you can get away with similar functionality on the ensemble detail screen
 App-wide UI:
     - Explicit to Screen animations
 Tooling:
@@ -40,6 +43,8 @@ Bugs:
         - Reproduce: Type one random character in search bar. Sometimes show unrelated results. Have seen unrelated results on pairs of 2 characters.
         - Maybe expected due to efficient imperfect hashing?
     - If the user edits articles on the ArticleDetailScreen, leaves the app, and re-enters, the order of the articles will have changed and their place will not have been saved.
+    - Passing indices instead of ids from a screen to it's associated ViewModel may be more buggy than simply passing ids.
+        - The idea of using indices was that the UI doesn't need to know about a database ID, but maybe it is worth the trade?
 Settings Screen:
     - Export All Data
 Aesthetics:

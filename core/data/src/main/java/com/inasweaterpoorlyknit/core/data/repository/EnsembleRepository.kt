@@ -7,8 +7,10 @@ import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
+import com.inasweaterpoorlyknit.core.database.model.ArticleCount
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
+import com.inasweaterpoorlyknit.core.database.model.EnsembleCount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -38,6 +40,8 @@ class EnsembleRepository(
   fun getEnsembleArticleThumbnails(ensembleId: String) = ensembleDao.getEnsembleArticleThumbnails(ensembleId).map{ LazyArticleThumbnails(articleFilesDirStr(context), it) }
   fun getEnsemble(ensembleId: String): Flow<Ensemble> = ensembleDao.getEnsemble(ensembleId)
   fun getEnsemblesByArticle(articleId: String): Flow<List<Ensemble>> = ensembleDao.getEnsemblesByArticle(articleId)
+  fun getMostPopularEnsembles(count: Int): Flow<List<EnsembleCount>> = ensembleDao.getMostPopularEnsembles(count)
+  fun getMostPopularArticles(count: Int): Flow<List<ArticleCount>> = ensembleDao.getMostPopularArticles(count)
   fun insertEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(title, articleIds)
   fun deleteArticlesFromEnsemble(ensembleId: String, articleIds: List<String>) {
     ensembleDao.deleteArticleEnsemblesFromEnsemble(ensembleId = ensembleId, articleIds = articleIds)
