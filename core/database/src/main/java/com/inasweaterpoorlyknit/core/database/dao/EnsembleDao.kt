@@ -2,6 +2,7 @@ package com.inasweaterpoorlyknit.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.inasweaterpoorlyknit.core.database.model.ArticleCount
@@ -17,7 +18,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface EnsembleDao {
   @Insert fun insertEnsembles(vararg ensembleEntity: EnsembleEntity)
-  @Insert fun insertArticleEnsemble(vararg ensembleArticleEntity: EnsembleArticleEntity)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  fun insertArticleEnsemble(vararg ensembleArticleEntity: EnsembleArticleEntity)
   @Transaction fun insertEnsembleWithArticles(title: String, articleIds: List<String>) {
     val created = generateTime()
     val ensemble = EnsembleEntity(id = generateId(), title = title, created = created, modified = created)

@@ -194,4 +194,21 @@ class EnsembleDaoTests: DatabaseTests() {
     assertEquals(articles.last().id, mostPopularArticle.first().id)
     assertEquals(articles.size.toLong(), mostPopularArticle.first().count)
   }
+
+  @Test
+  fun insertEnsembleArticle() = runBlocking(Dispatchers.IO) {
+    val article = createArticleEntity()
+    val ensemble = createEnsembleEntity()
+    val articleEnsemble = EnsembleArticleEntity(ensembleId = ensemble.id, articleId = article.id)
+    articleDao.insertArticles(article)
+    ensembleDao.insertEnsembles(ensemble)
+
+    ensembleDao.insertArticleEnsemble(articleEnsemble)
+    ensembleDao.insertArticleEnsemble(articleEnsemble)
+
+    val ensembleArticleEntities = ensembleDao.getEnsemblesByArticle(article.id).first()
+    assertEquals(1, ensembleArticleEntities.size)
+    assertEquals(ensemble.id, ensembleArticleEntities.first().id)
+    assertEquals(ensemble.title, ensembleArticleEntities.first().title)
+  }
 }
