@@ -113,9 +113,9 @@ fun SelectableStaggeredThumbnailGrid(
             )
             .padding(staggeredGridItemPadding)
       ) {
-        val uriString = thumbnailUris.getUriString(thumbnailGridItemIndex)
+        val uriString = thumbnailUris.getUriStrings(thumbnailGridItemIndex)
         SelectableNoopImage(
-          uriString = uriString,
+          uriString = uriString.first(), // TODO: Animate between items?
           contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
           selected = selectedThumbnails.contains(thumbnailGridItemIndex),
           selectable = selectable,

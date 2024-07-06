@@ -401,13 +401,13 @@ fun AddArticlesDialog(
       ) {
         val padding = 10.dp
         items(count = articleThumbnailUris.size) { articleIndex ->
-          val addArticleThumbnailUri = articleThumbnailUris.getUriString(articleIndex)
+          val addArticleThumbnailUri = articleThumbnailUris.getUriStrings(articleIndex)
           val selected = selectedArticleIndices.contains(articleIndex)
           Box(contentAlignment = Alignment.Center) {
             SelectableNoopImage(
               selectable = true,
               selected = selected,
-              uriString = addArticleThumbnailUri,
+              uriString = addArticleThumbnailUri.first(), // TODO: Animate between thumbnails?
               contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                   .padding(padding)

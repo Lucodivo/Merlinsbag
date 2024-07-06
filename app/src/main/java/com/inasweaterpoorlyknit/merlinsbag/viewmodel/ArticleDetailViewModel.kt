@@ -5,11 +5,11 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
+import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
+import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -55,7 +55,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
     ): ArticleDetailViewModel
   }
 
-  private var cachedArticlesWithFullImages: LazyArticleFullImages = LazyArticleFullImages.Empty
+  private var cachedArticlesWithFullImages: LazyArticlesWithImages = LazyArticlesWithImages.Empty
   private var cachedArticleEnsembleIdSet: Set<String> = emptySet()
   private var cachedArticleEnsembles: List<Ensemble> = emptyList()
   private var cachedAllEnsembles: List<Ensemble> = emptyList()
@@ -83,11 +83,11 @@ class ArticleDetailViewModel @AssistedInject constructor(
     }
   }
 
-  fun exportArticle(index: Int) {
-    val articleId = cachedArticlesWithFullImages.getArticleId(index)
+  fun exportArticle(articleIndex: Int, imageIndex: Int) {
+    val imageUri = cachedArticlesWithFullImages.lazyFullImageUris.getUriStrings(articleIndex)[imageIndex]
     viewModelScope.launch(Dispatchers.Default) {
-      val exportedImageUri = articleRepository.exportArticle(articleId)
-      exportedImageUri?.let { _exportedImageUri.emit(Pair(index, it)) }
+      val exportedImageUri = articleRepository.exportImage(imageUri)
+      exportedImageUri?.let { _exportedImageUri.emit(Pair(articleIndex, it)) }
     }
   }
 
@@ -127,9 +127,9 @@ class ArticleDetailViewModel @AssistedInject constructor(
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
       )
 
-  val articleLazyUriStrings: StateFlow<LazyUriStrings> =
+  val lazyArticleFilenames: StateFlow<LazyFilenames> =
       combine(
-        articleRepository.getArticlesWithFullImages(ensembleId)
+        articleRepository.getArticlesWithImages(ensembleId)
                 // A constantly updating article set in the ArticleDetailScreen is a bad user experience
                 // An especially annoying thing about a constantly updating list is that articles and ensembles are both arranged by last modified.
                 // Sorting by modified is is considered to be a great user experience in general and will not be changed.
@@ -145,10 +145,9 @@ class ArticleDetailViewModel @AssistedInject constructor(
         val (removedIndex, removedId) = removedArticleIndexWithId
         if(removedIndex >= 0 && removedIndex <= images.size && images.getArticleId(removedIndex) == removedId) images.removeAt(removedIndex)
         images
-      }
-      .stateIn(
+      }.stateIn(
         scope = viewModelScope,
-        initialValue = LazyUriStrings.Empty,
+        initialValue = LazyFilenames.Empty,
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
       )
 

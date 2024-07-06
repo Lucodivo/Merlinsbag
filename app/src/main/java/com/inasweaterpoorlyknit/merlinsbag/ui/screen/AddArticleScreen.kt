@@ -213,13 +213,13 @@ fun AddArticleScreen(
       ) {
         val padding = 10.dp
         items(count = attachArticleThumbnails.size) { articleIndex ->
-          val articleThumbnailUriString = attachArticleThumbnails.getUriString(articleIndex)
+          val articleThumbnailUriString = attachArticleThumbnails.getUriStrings(articleIndex)
           Box(contentAlignment = Alignment.Center) {
             val selected = articleIndex == articleAttachmentIndex
             SelectableNoopImage(
               selectable = true,
               selected = selected,
-              uriString = articleThumbnailUriString,
+              uriString = articleThumbnailUriString.first(), // TODO: animate between thumbnails?
               contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                   .padding(padding)

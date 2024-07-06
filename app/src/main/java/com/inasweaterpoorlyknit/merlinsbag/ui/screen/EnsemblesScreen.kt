@@ -368,13 +368,13 @@ private fun AddEnsembleDialog(
       ) {
         val padding = 10.dp
         items(count = articleThumbnails.size) { articleIndex ->
-          val articleThumbnailUriString = articleThumbnails.getUriString(articleIndex)
+          val articleThumbnailUriString = articleThumbnails.getUriStrings(articleIndex)
           Box(contentAlignment = Alignment.Center) {
             val (selected, setSelected) = remember { mutableStateOf(selectedArticleIndices.contains(articleIndex)) }
             SelectableNoopImage(
               selectable = true,
               selected = selected,
-              uriString = articleThumbnailUriString,
+              uriString = articleThumbnailUriString.first(), // TODO: Animate between thumbnails?
               contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                   .padding(padding)
@@ -454,7 +454,7 @@ fun EnsembleOverlappingImageRow(
         ) {
           repeat(lazyUriStrings.size) { index ->
             NoopImage(
-              uriString = lazyUriStrings.getUriString(index),
+              uriString = lazyUriStrings.getUriStrings(index).first(), // TODO: Animate between thumbnails?
               contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier.sizeIn(maxWidth = maxThumbnailSize, maxHeight = maxThumbnailSize)
             )
@@ -630,9 +630,7 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
           if(index == 3 || index == 4) "" else "Row ${index + 1}",
           object: LazyUriStrings {
             override val size: Int = thumbnailUriStrings.size
-            private val articleThumbnailPaths: List<String> = thumbnailUriStrings
-            override fun getUriString(index: Int): String = articleThumbnailPaths[index]
-            override fun removeAt(removedIndex: Int) {}
+            override fun getUriStrings(index: Int): List<String> = listOf(thumbnailUriStrings[index])
           }
         )
       }

@@ -60,7 +60,10 @@ Performance:
                 - Tracing/System.nanoTime() shows that Bitmap.compress() is taking ~3.5-5.1s (depends on the image)
                 - Reduces to ~.5s by changing compression from WebP lossless to WebP lossy 100% quality
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
+    - EnsemblesScreen
+        - Get all article thumbnails with each ensemble using indices
 QoL:
+    - Order articles by creation date instead of modified?
 
 // Unknowns
 Aesthetic Questions:

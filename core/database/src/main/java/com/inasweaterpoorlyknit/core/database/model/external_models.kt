@@ -22,11 +22,30 @@ data class ThumbnailFilename(
   @ColumnInfo("filename_thumb") val filenameThumb: String,
 )
 
-data class ArticleWithThumbnails(
-  @ColumnInfo("article_id") val articleId: String,
-  @Relation(parentColumn = "article_id", entityColumn = "article_id", entity = ArticleImageEntity::class)
+interface ArticleThumbnails {
+  val articleId: String
   val thumbnailPaths: List<ThumbnailFilename>
-)
+}
+
+data class ArticleWithThumbnails(
+  @ColumnInfo("article_id") override val articleId: String,
+  @Relation(
+    parentColumn = "article_id",
+    entityColumn = "article_id",
+    entity = ArticleImageEntity::class
+  )
+  override val thumbnailPaths: List<ThumbnailFilename>
+): ArticleThumbnails
+
+data class EnsembleArticleWithThumbnails(
+    @ColumnInfo("id") override val articleId: String,
+    @Relation(
+      parentColumn = "id",
+      entityColumn = "article_id",
+      entity = ArticleImageEntity::class
+    )
+    override val thumbnailPaths: List<ThumbnailFilename>
+): ArticleThumbnails
 
 data class ArticleWithImages(
   @ColumnInfo("article_id") val articleId: String,
@@ -45,15 +64,15 @@ data class EnsembleArticleThumbnails(
   @ColumnInfo(name = "ensemble_title") val ensembleTitle: String,
   @Relation(
     parentColumn = "ensemble_id",
-    entityColumn = "article_id",
+    entityColumn = "id",
     associateBy = Junction(
       value = EnsembleArticleEntity::class,
       parentColumn = "ensemble_id",
       entityColumn = "article_id",
     ),
-    entity = ArticleImageEntity::class,
+    entity = ArticleEntity::class,
   )
-  val articles: List<ArticleWithThumbnails>,
+  val articles: List<EnsembleArticleWithThumbnails>,
 )
 
 data class EnsembleCount(
