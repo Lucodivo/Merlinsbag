@@ -40,35 +40,35 @@ interface ArticleDao {
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article 
-        ORDER BY article.modified DESC""")
+        ORDER BY article.created DESC""")
   fun getAllArticlesWithThumbnails(): Flow<List<ArticleWithThumbnails>>
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article 
-        ORDER BY article.modified DESC""")
+        ORDER BY article.created DESC""")
   fun getAllArticlesWithFullImages(): Flow<List<ArticleWithFullImages>>
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article
-        ORDER BY article.modified DESC""")
+        ORDER BY article.created DESC""")
   fun getAllArticlesWithImages(): Flow<List<ArticleWithImages>>
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article
         WHERE article.id IN (:articleIds)
-        ORDER BY article.modified DESC""")
+        ORDER BY article.created DESC""")
   fun getArticlesWithThumbnails(articleIds: List<String>): Flow<List<ArticleWithThumbnails>>
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article
         WHERE article.id IN (:articleIds)
-        ORDER BY article.modified DESC""")
+        ORDER BY article.created DESC""")
   fun getArticlesWithImages(articleIds: List<String>): Flow<List<ArticleWithImages>>
 
   @Transaction @Query(
     """SELECT article.id as article_id FROM article
         WHERE article.id = :articleId
-        ORDER BY article.modified DESC""")
+        ORDER BY article.created DESC""")
   fun getArticleFilenames(articleId: String): Flow<ArticleWithImages>
 
   @Query("""SELECT COUNT(id) FROM article""")

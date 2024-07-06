@@ -15,6 +15,8 @@ Ensembles:
 Features:
     - Collage
     - Share!
+    - App shortcut to camera
+    - Hook for sharing from camera roll to Merlinsbag
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - NavigationRail [COMPLETED]
@@ -62,8 +64,6 @@ Performance:
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
     - EnsemblesScreen
         - Get all article thumbnails with each ensemble using indices
-QoL:
-    - Order articles by creation date instead of modified?
 
 // Unknowns
 Aesthetic Questions:

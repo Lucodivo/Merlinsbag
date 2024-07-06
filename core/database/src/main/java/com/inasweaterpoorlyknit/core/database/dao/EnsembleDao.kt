@@ -57,21 +57,24 @@ interface EnsembleDao {
     """SELECT ensemble_article.article_id as article_id 
       FROM ensemble_article 
       JOIN article ON article.id = article_id
-      WHERE ensemble_article.ensemble_id = :ensembleId""")
+      WHERE ensemble_article.ensemble_id = :ensembleId
+      ORDER BY article.created DESC""")
   fun getEnsembleArticleThumbnails(ensembleId: String): Flow<List<ArticleWithThumbnails>>
 
   @Transaction @Query(
     """SELECT ensemble_article.article_id as article_id 
       FROM ensemble_article 
       JOIN article ON article.id = article_id
-      WHERE ensemble_article.ensemble_id = :ensembleId""")
+      WHERE ensemble_article.ensemble_id = :ensembleId
+      ORDER BY article.created DESC""")
   fun getEnsembleArticleFullImages(ensembleId: String): Flow<List<ArticleWithFullImages>>
 
   @Transaction @Query(
     """SELECT ensemble_article.article_id as article_id 
       FROM ensemble_article 
       JOIN article ON article.id = article_id
-      WHERE ensemble_article.ensemble_id = :ensembleId""")
+      WHERE ensemble_article.ensemble_id = :ensembleId
+      ORDER BY article.created DESC""")
   fun getEnsembleArticleWithImages(ensembleId: String): Flow<List<ArticleWithImages>>
 
   @Query(
@@ -83,7 +86,7 @@ interface EnsembleDao {
   @Transaction @Query(
     """SELECT ensemble.id as ensemble_id, ensemble.title as ensemble_title 
        FROM ensemble
-       ORDER BY modified DESC """)
+       ORDER BY ensemble.modified DESC """)
   fun getAllEnsembleArticleThumbnails(): Flow<List<EnsembleArticleThumbnails>>
 
   @Transaction @Query(
@@ -91,7 +94,7 @@ interface EnsembleDao {
        FROM ensemble
        JOIN ensemble_fts ON ensemble.id = ensemble_fts.id
        WHERE ensemble_fts MATCH :query
-       ORDER BY modified DESC """)
+       ORDER BY ensemble.modified DESC """)
   fun searchEnsembleArticleThumbnails(query: String): Flow<List<EnsembleArticleThumbnails>>
 
   @Query("""SELECT ensemble.id, ensemble.title 
@@ -114,7 +117,7 @@ interface EnsembleDao {
        FROM ensemble
        JOIN ensemble_fts ON ensemble.id = ensemble_fts.id
        WHERE ensemble_fts MATCH :query
-       ORDER BY modified DESC """)
+       ORDER BY ensemble.modified DESC """)
   fun searchEnsemble(query: String): Flow<List<Ensemble>>
 
   @Query("""SELECT EXISTS(SELECT 1 FROM ensemble WHERE title = :title)""")
