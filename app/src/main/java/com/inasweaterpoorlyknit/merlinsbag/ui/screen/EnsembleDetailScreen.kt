@@ -276,8 +276,13 @@ fun EnsembleDetailScreen(
     Column(
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier
+          .padding(
+            top = systemBarTopPadding,
+            start = systemBarStartPadding,
+            end = systemBarEndPadding,
+          )
     ) {
-      Spacer(modifier = Modifier.height(systemBarTopPadding))
       val titleRowInteractionSource = remember { MutableInteractionSource() }
       val outsideKeyboardRowInteractionSource = remember { MutableInteractionSource() }
       Box(
