@@ -16,7 +16,7 @@ import com.inasweaterpoorlyknit.core.ui.R
   Edit user_preferences.proto to add a new enum for the new font family
   Use the same enum order in user_preferences.proto to edit com.inasweaterpoorlyknit.core.model.Typography enum
   Add option in SettingsScreen.kt
-  Add option in Theme.kt
+  Add option in NoopTheme.kt
 
   ** ENUM ORDER MATTERS AS ORDINAL VALUES ARE DEPENDED ON WHEN TRANSLATING BETWEEN ENUMS **
  */

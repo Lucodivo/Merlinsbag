@@ -30,7 +30,7 @@ App-wide UI:
 Tooling:
     - UI Catalog
 Export:
-    - It seems like exporting image as a PNG is large (5MB+ per article in some cases!), investigate lowering this value.
+    - It seems like exporting image as a PNG is large (9.1MB+ for a 2650x2645 record!), investigate lowering this value.
     - Loading indicator? Or is disabled export button enough?
 Bugs:
     - Out of Memory (OOM) crash when processing an image in AddArticleScreen

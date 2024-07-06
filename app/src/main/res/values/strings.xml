@@ -161,4 +161,7 @@
     <string name="error_message_configuring_try_again_soon">Error Message: Configuring… Try again soon.</string>
     <string name="ml_model_must_download">Merlinsbag must download additional code after the application has been installed. This code is necessary for cutting articles out of photographs. An internet connection is required to resolve this issue. No actions are required from the user, aside from waiting for the download to complete. It is a one-time download of about 35MB.</string>
     <string name="messages">Messages</string>
+    <string name="attachment">Attachment</string>
+    <string name="attach_to">Attach To...</string>
+    <string name="article">Article</string>
 </resources>

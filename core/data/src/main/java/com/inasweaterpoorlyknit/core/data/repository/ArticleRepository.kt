@@ -15,6 +15,8 @@ import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
+import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -33,15 +35,33 @@ class ArticleRepository(
   // TODO: Remove. Used in testing only.
   fun insertArticle(fullImageUri: String, thumbnailImageUri: String) = articleDao.insertArticle(fullImageUri, thumbnailImageUri)
 
-  fun insertArticle(bitmap: Bitmap) {
+  private fun saveBitmaps(bitmap: Bitmap): ImageFilenames {
     val articleFilesDir = articleFilesDir(context).apply { mkdirs() }
     val thumbnailBitmapToSave = bitmap.toThumbnail()
     val filenameBase = timestampFileName()
-    val fullImageFilename = "${filenameBase}_full.webp"
-    val thumbnailFilename = "${filenameBase}_thumb.webp"
-    saveBitmap(articleFilesDir, fullImageFilename, bitmap)
-    saveBitmap(articleFilesDir, thumbnailFilename, thumbnailBitmapToSave)
-    articleDao.insertArticle(fullImageFilename, thumbnailFilename)
+    val imageFilenames = ImageFilenames(
+      filename = "${filenameBase}_full.webp",
+      filenameThumb = "${filenameBase}_thumb.webp",
+    )
+    saveBitmap(articleFilesDir, imageFilenames.filename, bitmap)
+    saveBitmap(articleFilesDir, imageFilenames.filenameThumb, thumbnailBitmapToSave)
+    return imageFilenames
+  }
+
+  fun insertArticle(bitmap: Bitmap) {
+    val filenames = saveBitmaps(bitmap)
+    articleDao.insertArticle(filenames.filename, filenames.filenameThumb)
+  }
+
+  fun insertArticleImage(bitmap: Bitmap, articleId: String){
+    val filenames = saveBitmaps(bitmap)
+    articleDao.insertArticleImages(
+      ArticleImageEntity(
+        articleId = articleId,
+        filename = filenames.filename,
+        filenameThumb = filenames.filenameThumb,
+      )
+    )
   }
 
   suspend fun deleteArticles(articleIds: List<String>) {
