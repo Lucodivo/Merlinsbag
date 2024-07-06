@@ -312,6 +312,9 @@ fun ArticleDetailScreen(
   val systemBarStartPadding = systemBarPaddingValues.calculateStartPadding(layoutDir)
   val systemBarEndPadding = systemBarPaddingValues.calculateEndPadding(layoutDir)
   val articleIndex = pagerState.currentPage
+  // Index may be out of bounds is the Pager has yet to adjust to the new size after a deletion
+  val showAltThumbnails = articleIndex < articlesWithImages.size && articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size > 1
+
   if(articlesWithImages.isNotEmpty()){
     HorizontalPager(
       state = pagerState,
@@ -366,7 +369,7 @@ fun ArticleDetailScreen(
     ){
       Column {
         ensembleChips()
-        if(articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size > 1){
+        if(showAltThumbnails){
           LazyRow(
             modifier = Modifier.fillMaxWidth()
           ) {
@@ -401,7 +404,7 @@ fun ArticleDetailScreen(
     ){
       ensembleChips()
     }
-    if(articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size > 1){
+    if(showAltThumbnails){
       Box(
         contentAlignment = Alignment.BottomStart,
         modifier = boxModifier

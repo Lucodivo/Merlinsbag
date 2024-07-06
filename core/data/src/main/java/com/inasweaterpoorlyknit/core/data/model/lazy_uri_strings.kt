@@ -55,7 +55,6 @@ class LazyArticlesWithImages(
 ): LazyFilenames {
   private val articleWithImages = articlesWithImages.toMutableList()
   fun getArticleId(index: Int) = articleWithImages[index].articleId
-  fun removeAt(removedIndex: Int) { articleWithImages.removeAt(removedIndex) }
 
   override val size get() = articleWithImages.size
   override val lazyFullImageUris: LazyUriStrings = object: LazyUriStrings {
