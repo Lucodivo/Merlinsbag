@@ -96,6 +96,8 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
 
+const val thumbnailAndEnsembleHiddenPercent = 0.98f
+
 const val ARTICLE_INDEX_ARG = "articleIndex"
 const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
 const val ARTICLE_DETAIL_ROUTE = "$ARTICLE_DETAIL_ROUTE_BASE?$ARTICLE_INDEX_ARG={$ARTICLE_INDEX_ARG}?$ENSEMBLE_ID_ARG={$ENSEMBLE_ID_ARG}"
@@ -134,6 +136,7 @@ fun ArticleDetailRoute(
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
   val newlyAddedEnsembles = remember { mutableStateMapOf<String, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
+  var thumbnailAltsListState by remember { mutableStateOf(LazyListState()) }
   val articleImageIndices = remember(lazyArticleFilenames) { mutableStateListOf(*Array(lazyArticleFilenames.size){0}) }
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
   val userSearch = remember { mutableStateOf("") }
@@ -178,6 +181,7 @@ fun ArticleDetailRoute(
     snapshotFlow { pagerState.currentPage }.collect { page ->
       articleDetailViewModel.onArticleFocus(page)
       ensembleListState = LazyListState()
+      thumbnailAltsListState = LazyListState()
       selectedEnsembles.clear()
       if(userSearch.value.isNotEmpty()) {
         articleDetailViewModel.searchEnsembles("")
@@ -193,6 +197,7 @@ fun ArticleDetailRoute(
     pagerState = pagerState,
     articleImageIndices = articleImageIndices,
     ensembleListState = ensembleListState,
+    thumbnailsAltsListState = thumbnailAltsListState,
     selectedEnsembles = selectedEnsembles.keys,
     editMode = editMode,
     exportingEnabled = !articleBeingExported.containsKey(pagerState.currentPage),
@@ -286,6 +291,7 @@ fun ArticleDetailScreen(
     onDismissDeleteDialog: () -> Unit,
     onThumbnailClick: (index: Int) -> Unit,
     ensembleListState: LazyListState,
+    thumbnailsAltsListState: LazyListState,
     onConfirmRemoveFromEnsemblesDialog: () -> Unit,
     onDismissRemoveFromEnsemblesDialog: () -> Unit,
     onDismissPermissionsDialog: () -> Unit,
@@ -370,9 +376,7 @@ fun ArticleDetailScreen(
       Column {
         ensembleChips()
         if(showAltThumbnails){
-          LazyRow(
-            modifier = Modifier.fillMaxWidth()
-          ) {
+          LazyRow(state = thumbnailsAltsListState, modifier = Modifier.fillMaxWidth()) {
             val thumbnailUris = articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex)
             item{ Spacer(modifier = Modifier.width(8.dp)) }
             items(count = thumbnailUris.size) { thumbnailIndex ->
@@ -384,7 +388,7 @@ fun ArticleDetailScreen(
                     .clickable { onThumbnailClick(thumbnailIndex) }
               )
             }
-            item{ Spacer(modifier = Modifier.fillParentMaxWidth(0.95f)) }
+            item{ Spacer(modifier = Modifier.fillParentMaxWidth(thumbnailAndEnsembleHiddenPercent)) }
           }
         } else {
           Spacer(modifier = Modifier.height(thumbnailSize))
@@ -411,6 +415,7 @@ fun ArticleDetailScreen(
       ){
         LazyColumn (
           reverseLayout = true,
+          state = thumbnailsAltsListState,
           modifier = Modifier.fillMaxHeight()
         ) {
           val thumbnailUris = articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex)
@@ -424,7 +429,7 @@ fun ArticleDetailScreen(
                   .clickable { onThumbnailClick(thumbnailIndex) }
             )
           }
-          item{ Spacer(modifier = Modifier.fillParentMaxHeight(0.95f)) }
+          item{ Spacer(modifier = Modifier.fillParentMaxHeight(thumbnailAndEnsembleHiddenPercent)) }
         }
 
       }
@@ -514,7 +519,7 @@ fun EnsembleLazyChips(
     if(compactWidth) {
       LazyRow(state = ensembleListState) {
         items()
-        item { Spacer(modifier = Modifier.fillParentMaxWidth(0.95f)) }
+        item { Spacer(modifier = Modifier.fillParentMaxWidth(thumbnailAndEnsembleHiddenPercent)) }
       }
     } else {
       LazyColumn(
@@ -524,7 +529,7 @@ fun EnsembleLazyChips(
       ) {
         item { Spacer(modifier = Modifier.height(topPadding)) }
         items()
-        item { Spacer(modifier = Modifier.fillParentMaxHeight(0.95f)) }
+        item { Spacer(modifier = Modifier.fillParentMaxHeight(thumbnailAndEnsembleHiddenPercent)) }
       }
     }
 }
@@ -769,8 +774,10 @@ fun PreviewUtilArticleDetailScreen(
       ensemblesToAdd = addEnsembles,
       ensemblesSearchQuery = "Goth 2 Boss",
       searchQueryUniqueTitle = true,
+      ensembleListState = rememberLazyListState(),
+      thumbnailsAltsListState = rememberLazyListState(),
       onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
-      onClickAddToEnsemble = {}, onDismissDeleteDialog = {}, ensembleListState = rememberLazyListState(), onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
+      onClickAddToEnsemble = {}, onDismissDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
       onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = selectedEnsembles,
       addNewEnsemble = {}, onCloseAddToEnsembleDialog = {}, addArticleToEnsemble = {},
       onSearchQueryUpdateAddToEnsembles = {}, newlyAddedEnsembles = emptySet(), onConfirmDeleteDialog = {}, onThumbnailClick = {},
