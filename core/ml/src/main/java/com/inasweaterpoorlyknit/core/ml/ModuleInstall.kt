@@ -1,14 +1,9 @@
 package com.inasweaterpoorlyknit.core.ml
 
 import android.content.Context
-import android.print.PrintJobInfo.STATE_CANCELED
-import android.print.PrintJobInfo.STATE_COMPLETED
-import android.print.PrintJobInfo.STATE_FAILED
 import android.util.Log
-import com.google.android.gms.common.moduleinstall.InstallStatusListener
 import com.google.android.gms.common.moduleinstall.ModuleInstall
 import com.google.android.gms.common.moduleinstall.ModuleInstallRequest
-import com.google.android.gms.common.moduleinstall.ModuleInstallStatusUpdate
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
 

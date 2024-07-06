@@ -4,8 +4,8 @@ import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
-import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.core.model.Typography
+import com.inasweaterpoorlyknit.core.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
 class UserPreferencesRepository(

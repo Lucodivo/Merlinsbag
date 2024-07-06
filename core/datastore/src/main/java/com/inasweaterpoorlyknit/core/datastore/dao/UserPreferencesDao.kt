@@ -4,8 +4,8 @@ import androidx.datastore.core.DataStore
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
-import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.core.model.Typography
+import com.inasweaterpoorlyknit.core.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import com.inasweaterpoorlyknit.merlinsbag.ColorPalette as ColorPaletteDataStore

@@ -1,8 +1,8 @@
 package com.inasweaterpoorlyknit.core.data.model
 
+import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithFullImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
-import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 

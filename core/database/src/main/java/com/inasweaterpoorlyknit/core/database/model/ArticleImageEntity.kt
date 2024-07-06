@@ -5,7 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.inasweaterpoorlyknit.core.database.dao.generateId
-import java.util.UUID
 
 @Entity(tableName = "article_image",
   foreignKeys = [

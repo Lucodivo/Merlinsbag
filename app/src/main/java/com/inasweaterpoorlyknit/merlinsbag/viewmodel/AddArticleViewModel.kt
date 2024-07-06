@@ -10,10 +10,10 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.profiling.Timer
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.ml.image.SegmentedImage
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R

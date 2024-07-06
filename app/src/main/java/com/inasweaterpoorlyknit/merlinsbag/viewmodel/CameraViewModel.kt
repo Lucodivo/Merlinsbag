@@ -6,10 +6,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
-import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.timestampFileName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File

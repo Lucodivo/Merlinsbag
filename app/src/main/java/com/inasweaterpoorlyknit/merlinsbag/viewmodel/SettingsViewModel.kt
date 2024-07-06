@@ -7,8 +7,8 @@ import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
-import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.core.model.Typography
+import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

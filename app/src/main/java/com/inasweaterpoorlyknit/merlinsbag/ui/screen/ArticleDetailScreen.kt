@@ -5,7 +5,6 @@ package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 import android.Manifest.permission
 import android.app.PendingIntent
 import android.content.Intent
-import android.graphics.Paint.Align
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -60,7 +59,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
