@@ -5,12 +5,14 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.annotation.StringRes
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -92,3 +94,27 @@ class SettingsLauncher private constructor(
 
 @Composable
 fun rememberSettingsLauncher() = SettingsLauncher.create()
+
+interface Launcher {
+  fun launch()
+}
+
+@Composable
+fun rememberPhotoAlbumLauncher(
+    onResult: (uris: List<Uri>) -> Unit,
+) = object: Launcher {
+  val launcherForActivityResult = rememberLauncherForActivityResult(
+    contract = object: OpenMultipleDocuments() {
+      override fun createIntent(context: Context, input: Array<String>): Intent {
+        return super.createIntent(context, input)
+            .apply { addCategory(Intent.CATEGORY_OPENABLE) }
+      }
+    },
+    onResult = { uris ->
+      if(uris.isEmpty()) Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+      onResult(uris)
+    },
+  )
+
+  override fun launch() = launcherForActivityResult.launch(arrayOf("image/*"))
+}

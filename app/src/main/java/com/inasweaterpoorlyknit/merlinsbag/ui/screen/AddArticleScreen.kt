@@ -47,6 +47,7 @@ import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
+import com.inasweaterpoorlyknit.core.ui.LandscapePreview
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopIconButton
@@ -64,14 +65,16 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.AddArticleViewModel
 
 const val IMAGE_URI_STRING_LIST_ARG = "imageUriStringArray"
+const val ARTICLE_ID_ARG = "articleId"
 const val ADD_ARTICLES_BASE = "add_articles_route"
-const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG={$IMAGE_URI_STRING_LIST_ARG}"
+const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG={$IMAGE_URI_STRING_LIST_ARG}?$ARTICLE_ID_ARG={$ARTICLE_ID_ARG}"
 
 fun NavController.navigateToAddArticle(
     uriStringArray: List<String>,
+    articleId: String? = null,
     navOptions: NavOptions? = null,
 ) {
-  val route = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG=${uriStringArray.joinToString(",")}"
+  val route = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG=${uriStringArray.joinToString(",")}?$ARTICLE_ID_ARG=$articleId"
   navigate(route, navOptions)
 }
 
@@ -79,24 +82,18 @@ fun NavController.navigateToAddArticle(
 fun AddArticleRoute(
     navController: NavController,
     imageUriStringList: List<String>,
+    articleId: String? = null,
     windowSizeClass: WindowSizeClass,
 ) {
   val addArticleViewModel = hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
-    factory.create(imageUriStringList)
+    factory.create(imageUriStringList, articleId)
   }
 
-  addArticleViewModel.userFacingError.value.getContentIfNotHandled()?.let { msg ->
-    Toast(msg = msg)
-  }
-
-  addArticleViewModel.finished.value.getContentIfNotHandled()?.let {
-    navController.popBackStack()
-  }
+  addArticleViewModel.userFacingError.value.getContentIfNotHandled()?.let { msg -> Toast(msg = msg) }
+  addArticleViewModel.finished.value.getContentIfNotHandled()?.let { navController.popBackStack() }
 
   val attachArticleThumbnails = addArticleViewModel.attachArticleThumbnails.collectAsStateWithLifecycle()
-
   val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
-
   var showDiscardAlertDialog by remember { mutableStateOf(false) }
   var showAttachDialog by remember { mutableStateOf(false) }
 
@@ -108,13 +105,13 @@ fun AddArticleRoute(
     imageRotation = addArticleViewModel.rotation.floatValue,
     articleAttachmentIndex = addArticleViewModel.attachArticleIndex.value,
     attachArticleThumbnails = attachArticleThumbnails.value,
+    attachToArticleEnabled = addArticleViewModel.attachToArticleEnabled,
     onNarrowFocusClick = addArticleViewModel::onFocusClicked,
     onBroadenFocusClick = addArticleViewModel::onWidenClicked,
     onRotateCW = addArticleViewModel::onRotateCW,
     onRotateCCW = addArticleViewModel::onRotateCCW,
     onDiscard = { showDiscardAlertDialog = true },
     onSave = addArticleViewModel::onSave,
-    onAttach = { showAttachDialog = true },
     showDiscardAlertDialog = showDiscardAlertDialog,
     onDismissDiscardDialog = { showDiscardAlertDialog = false },
     onConfirmDiscardDialog = {
@@ -122,6 +119,7 @@ fun AddArticleRoute(
       showDiscardAlertDialog = false
     },
     showAttachDialog = showAttachDialog,
+    onAttach = { showAttachDialog = true },
     onDismissAttachDialog = {
       showAttachDialog = false
     },
@@ -138,7 +136,7 @@ fun AddArticleScreen(
     processedImage: Bitmap?,
     imageRotation: Float,
     attachArticleThumbnails: LazyUriStrings,
-    attachToArticle: (Int) -> Unit,
+    attachToArticleEnabled: Boolean,
     articleAttachmentIndex: Int?,
     onBroadenFocusClick: () -> Unit,
     onRotateCW: () -> Unit,
@@ -153,6 +151,7 @@ fun AddArticleScreen(
     onDismissAttachDialog: () -> Unit,
     onNarrowFocusClick: () -> Unit,
     removeAttachedArticle: () -> Unit,
+    attachToArticle: (Int) -> Unit,
 ) {
   val landscape: Boolean = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
   val image: @Composable () -> Unit = {
@@ -167,6 +166,7 @@ fun AddArticleScreen(
       windowSizeClass = windowSizeClass,
       landscape = landscape,
       processing = processing,
+      attachEnabled = attachToArticleEnabled,
       onNarrowFocusClick = onNarrowFocusClick,
       onBroadenFocusClick = onBroadenFocusClick,
       onRotateCW = onRotateCW,
@@ -271,13 +271,14 @@ fun AddArticleControls(
     windowSizeClass: WindowSizeClass,
     landscape: Boolean = true,
     processing: Boolean = true,
-    onNarrowFocusClick: () -> Unit,
+    attachEnabled: Boolean,
     onBroadenFocusClick: () -> Unit,
     onRotateCW: () -> Unit,
     onRotateCCW: () -> Unit,
     onDiscard: () -> Unit,
     onSave: () -> Unit,
     onAttach: () -> Unit,
+    onNarrowFocusClick: () -> Unit,
 ) {
   val compactWidth = windowSizeClass.compactWidth()
   Column(
@@ -297,14 +298,23 @@ fun AddArticleControls(
         NoopIconButton(iconData = IconData(NoopIcons.RotateCCW, stringResource(R.string.rotate_ccw)), onClick = onRotateCCW, enabled = !processing, modifier = buttonModifier)
         NoopIconButton(iconData = IconData(NoopIcons.RotateCW, stringResource(R.string.rotate_cw)), onClick = onRotateCW, enabled = !processing, modifier = buttonModifier)
       }
-      Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        NoopIconButton(iconData = IconData(NoopIcons.Delete, stringResource(R.string.delete)), onClick = onDiscard, enabled = !processing, modifier = buttonModifier)
-        NoopIconButton(iconData = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to)), onClick = onAttach, enabled = !processing, modifier = buttonModifier)
-      }
-      Row(horizontalArrangement = Arrangement.SpaceBetween) {
-        NoopIconButton(iconData = IconData(NoopIcons.Check, stringResource(R.string.save)), onClick = onSave, enabled = !processing, modifier = buttonModifier.fillMaxWidth())
+      if(attachEnabled){
+        Row(
+          horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+          NoopIconButton(iconData = IconData(NoopIcons.Delete, stringResource(R.string.delete)), onClick = onDiscard, enabled = !processing, modifier = buttonModifier)
+          NoopIconButton(iconData = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to)), onClick = onAttach, enabled = !processing, modifier = buttonModifier)
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+          NoopIconButton(iconData = IconData(NoopIcons.Check, stringResource(R.string.save)), onClick = onSave, enabled = !processing, modifier = buttonModifier.fillMaxWidth())
+        }
+      } else {
+        Row(
+          horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+          NoopIconButton(iconData = IconData(NoopIcons.Delete, stringResource(R.string.delete)), onClick = onDiscard, enabled = !processing, modifier = buttonModifier)
+          NoopIconButton(iconData = IconData(NoopIcons.Check, stringResource(R.string.save)), onClick = onSave, enabled = !processing, modifier = buttonModifier.fillMaxWidth())
+        }
       }
     } else { // portrait
       val buttonRowModifier = if(compactWidth) Modifier.fillMaxWidth() else Modifier.wrapContentSize()
@@ -317,8 +327,8 @@ fun AddArticleControls(
       }
       Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
         NoopIconButton(iconData = IconData(NoopIcons.Delete, stringResource(R.string.delete)), onClick = onDiscard, enabled = !processing, modifier = portraitButtonModifier)
-        NoopIconButton(iconData = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to)), onClick = onAttach, enabled = !processing, modifier = portraitButtonModifier)
-        NoopIconButton(iconData = IconData(NoopIcons.Check, stringResource(R.string.save)), onClick = onSave, enabled = !processing, modifier = portraitButtonModifier)
+        if(attachEnabled) NoopIconButton(iconData = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to)), onClick = onAttach, enabled = !processing, modifier = portraitButtonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.Check, stringResource(R.string.save)), onClick = onSave, enabled = !processing, modifier = buttonModifier.weight(if(attachEnabled) 2f else 3f))
       }
     }
   }
@@ -338,23 +348,29 @@ fun DiscardAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
 
 //region COMPOSABLE PREVIEWS
 @Composable
-fun PreviewUtilAddArticleScreen(showDiscardAlertDialog: Boolean = false, showAttachDialog: Boolean = false) = NoopTheme(darkMode = DarkMode.DARK) {
+fun PreviewUtilAddArticleScreen(
+    showDiscardAlertDialog: Boolean = false,
+    showAttachDialog: Boolean = false,
+    attachToArticleEnabled: Boolean = true,
+) = NoopTheme(darkMode = DarkMode.DARK) {
   AddArticleScreen(
     systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues(),
     windowSizeClass = currentWindowAdaptiveInfo(),
     processing = false,
     processedImage = previewAssetBitmap(filename = composePreviewArticleAsset),
     imageRotation = 270.0f,
-    showDiscardAlertDialog = showDiscardAlertDialog,
-    showAttachDialog = showAttachDialog,
     attachArticleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
+    attachToArticleEnabled = attachToArticleEnabled,
     articleAttachmentIndex = 2,
-    onNarrowFocusClick = {}, onBroadenFocusClick = {}, onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {},
-    onDismissDiscardDialog = {}, onConfirmDiscardDialog = {}, onAttach = {}, onDismissAttachDialog = {}, attachToArticle = {}, removeAttachedArticle = {}
+    onBroadenFocusClick = {},
+    onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {}, onAttach = {}, showAttachDialog = showAttachDialog,
+    showDiscardAlertDialog = showDiscardAlertDialog, onDismissDiscardDialog = {}, onConfirmDiscardDialog = {}, onDismissAttachDialog = {}, onNarrowFocusClick = {}, removeAttachedArticle = {}, attachToArticle = {}
   )
 }
 
 @DevicePreviews @Composable fun PreviewAddArticleScreen() = PreviewUtilAddArticleScreen()
 @Preview @Composable fun PreviewAddArticleScreen_discardAlertDialog() = PreviewUtilAddArticleScreen(showDiscardAlertDialog = true)
 @Preview @Composable fun PreviewAddArticleScreen_attachToDialog() = PreviewUtilAddArticleScreen(showAttachDialog = true)
+@Preview @Composable fun PreviewAddArticleScreen_attachToArticleDisabled() = PreviewUtilAddArticleScreen(attachToArticleEnabled = false)
+@LandscapePreview @Composable fun PreviewAddArticleScreen_attachToArticleDisabled_landscape() = PreviewUtilAddArticleScreen(attachToArticleEnabled = false)
 //endregion

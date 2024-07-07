@@ -164,4 +164,6 @@
     <string name="attachment">Attachment</string>
     <string name="attach_to">Attach To...</string>
     <string name="article">Article</string>
+    <string name="add_photo_from_photo_album_to_article">Add photo from photo album to article</string>
+    <string name="add_photo_from_camera_to_article">Add photo from camera to article</string>
 </resources>

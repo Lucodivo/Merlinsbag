@@ -33,6 +33,7 @@ import java.io.IOException
 @HiltViewModel(assistedFactory = AddArticleViewModel.AddArticleViewModelFactory::class)
 class AddArticleViewModel @AssistedInject constructor(
     @Assisted("imageUriStrings") private val imageUriStrings: List<String>,
+    @Assisted("articleId") private val articleId: String?,
     private val application: Application,
     private val articleRepository: ArticleRepository,
 ): ViewModel() {
@@ -41,6 +42,7 @@ class AddArticleViewModel @AssistedInject constructor(
   interface AddArticleViewModelFactory {
     fun create(
         @Assisted("imageUriStrings") uriImageStrings: List<String>,
+        @Assisted("articleId") articleId: String?,
     ): AddArticleViewModel
   }
 
@@ -57,6 +59,7 @@ class AddArticleViewModel @AssistedInject constructor(
   val finished = mutableStateOf(Event<Unit>(null))
   val userFacingError = mutableStateOf(Event<Int>(null))
   val attachArticleIndex = mutableStateOf<Int?>(null)
+  val attachToArticleEnabled = articleId == null
 
   private val segmentedImage = SegmentedImage()
   private var attachArticleThumbnailsCache: LazyArticleThumbnails? = null
@@ -189,7 +192,7 @@ class AddArticleViewModel @AssistedInject constructor(
     val attachmentArticleIndex = attachArticleIndex.value
     val attachmentArticleId = if(attachmentArticleIndex != null){
       attachArticleThumbnailsCache?.getArticleId(attachmentArticleIndex)
-    } else null
+    } else articleId
     viewModelScope.launch(Dispatchers.Default) {
       nextSubject()
       if(attachmentArticleId == null) articleRepository.insertArticle(bitmapToSave) else articleRepository.insertArticleImage(bitmapToSave, attachmentArticleId)

@@ -64,6 +64,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
   val articleExported: SharedFlow<Pair<Int, Uri>> = _exportedImageUri
 
   private val _articleId = MutableSharedFlow<String>()
+  var articleId: String? = null
 
   private val _removedArticleIndexWithId = MutableSharedFlow<Pair<Int, String>>(replay = 1).apply { tryEmit(Pair(-1,"")) }
 
@@ -72,7 +73,11 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onArticleFocus(index: Int) = viewModelScope.launch {
     articleIndex = index
-    if(index < cachedArticlesWithFullImages.size) _articleId.emit(cachedArticlesWithFullImages.getArticleId(index))
+    if(index < cachedArticlesWithFullImages.size) {
+      val id = cachedArticlesWithFullImages.getArticleId(index)
+      articleId = id
+      _articleId.emit(id)
+    }
   }
 
   fun deleteArticle(index: Int) {
@@ -130,7 +135,9 @@ class ArticleDetailViewModel @AssistedInject constructor(
   val lazyArticleFilenames: StateFlow<LazyFilenames> = articleRepository.getArticlesWithImages(ensembleId)
       .onEach { images ->
         cachedArticlesWithFullImages = images
-        if(articleIndex < images.size) _articleId.emit(images.getArticleId(articleIndex))
+        val id = images.getArticleId(articleIndex)
+        articleId = id
+        if(articleIndex < images.size) _articleId.emit(id)
       }.stateIn(
         scope = viewModelScope,
         initialValue = LazyFilenames.Empty,
