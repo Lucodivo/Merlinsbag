@@ -219,7 +219,7 @@ fun ArticleDetailRoute(
     onClickExport = { exportWithPermissionsCheckLauncher.launch(REQUIRED_STORAGE_PERMISSIONS) },
     onClickAddPhotoFromAlbum = photoAlbumLauncher::launch,
     onClickAddPhotoFromCamera = {
-      navController.navigateToCamera()
+      navController.navigateToCamera(articleId = articleDetailViewModel.articleId)
     },
     onClickDelete = { showDeleteArticleAlertDialog = true },
     onDismissDeleteDialog = { showDeleteArticleAlertDialog = false },

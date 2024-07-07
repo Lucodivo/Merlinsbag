@@ -60,7 +60,19 @@ fun NoopNavHost(
     composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
     composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController) }
-    composable(route = CAMERA_ROUTE) { CameraRoute(navController = navController) }
+    composable(
+      route = CAMERA_ROUTE,
+      arguments = listOf(
+        navArgument(ARTICLE_ID_ARG) {
+          nullable = true
+          defaultValue = null
+          type = NavType.StringType
+        },
+      ),
+    ) { navBackStackEntry ->
+      val articleIdArg = navBackStackEntry.arguments!!.getString(ARTICLE_ID_ARG)
+      CameraRoute(articleId = articleIdArg, navController = navController)
+    }
     composable(route = TIPS_AND_INFO_ROUTE) { TipsAndInfoRoute(navController = navController) }
     composable(route = STATISTICS_ROUTE) { StatisticsRoute(navController = navController) }
     composable(
