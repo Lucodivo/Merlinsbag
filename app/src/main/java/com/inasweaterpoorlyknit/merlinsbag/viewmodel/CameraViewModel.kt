@@ -17,7 +17,7 @@ import javax.inject.Inject
 class CameraViewModel @Inject constructor(): ViewModel() {
   var takePictureUri: Uri? = null
 
-  fun onTakePicture(context: Context) {
+  fun onTakePicture(context: Context): Uri? {
     val pictureFilename = "${timestampFileName()}.jpg"
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       val contentResolver = context.contentResolver
@@ -33,6 +33,7 @@ class CameraViewModel @Inject constructor(): ViewModel() {
       val publicPictureFile = File(publicPicturesDir, pictureFilename)
       takePictureUri = publicPictureFile.toUri()
     }
+    return takePictureUri
   }
 
   fun pictureTaken(taken: Boolean, context: Context) {
@@ -40,6 +41,5 @@ class CameraViewModel @Inject constructor(): ViewModel() {
       val contentResolver = context.contentResolver
       takePictureUri?.let { contentResolver.delete(it, null, null) }
     }
-    takePictureUri = null
   }
 }
