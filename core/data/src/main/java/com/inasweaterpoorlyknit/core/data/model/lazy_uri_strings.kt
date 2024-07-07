@@ -53,7 +53,7 @@ class LazyArticlesWithImages(
     val directory: String,
     articlesWithImages: List<ArticleWithImages>
 ): LazyFilenames {
-  private val articleWithImages = articlesWithImages.toMutableList()
+  val articleWithImages = articlesWithImages.toMutableList()
   fun getArticleId(index: Int) = articleWithImages[index].articleId
 
   override val size get() = articleWithImages.size

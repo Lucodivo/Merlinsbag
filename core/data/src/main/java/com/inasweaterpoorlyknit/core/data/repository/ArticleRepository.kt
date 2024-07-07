@@ -66,6 +66,8 @@ class ArticleRepository(
     )
   }
 
+  fun deleteArticleImages(articleImageFilenamesThumb: List<String>) = articleDao.deleteArticleImages(articleImageFilenamesThumb)
+
   suspend fun deleteArticles(articleIds: List<String>) {
     val articleFilesDir = articleFilesDir(context)
     val articlesWithImages = articleDao.getArticlesWithImages(articleIds).first()
@@ -79,7 +81,7 @@ class ArticleRepository(
   }
   suspend fun deleteArticle(articleId: String) = deleteArticles(listOf(articleId))
 
-  suspend fun exportImage(imageUri: String): Uri? {
+  fun exportImage(imageUri: String): Uri? {
     val bitmapToExport = BitmapFactory.decodeFile(imageUri)
 
     val exportFilname = imageUri.replace(".webp", ".png")

@@ -191,6 +191,7 @@ class AddArticleViewModel @AssistedInject constructor(
     )
     val attachmentArticleIndex = attachArticleIndex.value
     val attachmentArticleId = if(attachmentArticleIndex != null){
+      attachArticleIndex.value = null
       attachArticleThumbnailsCache?.getArticleId(attachmentArticleIndex)
     } else articleId
     viewModelScope.launch(Dispatchers.Default) {

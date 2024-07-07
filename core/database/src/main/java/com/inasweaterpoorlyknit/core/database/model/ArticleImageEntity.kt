@@ -3,6 +3,7 @@ package com.inasweaterpoorlyknit.core.database.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.inasweaterpoorlyknit.core.database.dao.generateId
 
@@ -14,7 +15,8 @@ import com.inasweaterpoorlyknit.core.database.dao.generateId
       childColumns = arrayOf("article_id"),
       onDelete = ForeignKey.CASCADE,
       deferred = true
-    )]
+    )],
+  indices = [Index(value = ["filename_thumb"])],
 )
 data class ArticleImageEntity(
     @PrimaryKey

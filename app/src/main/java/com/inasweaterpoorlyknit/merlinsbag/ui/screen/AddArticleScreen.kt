@@ -111,7 +111,10 @@ fun AddArticleRoute(
     onRotateCW = addArticleViewModel::onRotateCW,
     onRotateCCW = addArticleViewModel::onRotateCCW,
     onDiscard = { showDiscardAlertDialog = true },
-    onSave = addArticleViewModel::onSave,
+    onSave = {
+      addArticleViewModel.onSave()
+      showAttachDialog = false
+    },
     showDiscardAlertDialog = showDiscardAlertDialog,
     onDismissDiscardDialog = { showDiscardAlertDialog = false },
     onConfirmDiscardDialog = {

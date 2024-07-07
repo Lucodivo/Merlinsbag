@@ -121,6 +121,15 @@ class ArticleDetailViewModel @AssistedInject constructor(
     ensembleRepository.addEnsemblesToArticle(articleId = cachedArticlesWithFullImages.getArticleId(articleIndex), ensembleIds = listOf(ensembleId))
   }
 
+  fun removeImages(articleIndex: Int, articleImageIndices: List<Int>) {
+    val articleImageFilenamesThumb = articleImageIndices.map {
+      cachedArticlesWithFullImages.articleWithImages[articleIndex].imagePaths[it].filenameThumb
+    }
+    viewModelScope.launch(Dispatchers.IO) {
+      articleRepository.deleteArticleImages(articleImageFilenamesThumb)
+    }
+  }
+
   val filter: StateFlow<String> = if(ensembleId != null) {
     ensembleRepository.getEnsemble(ensembleId)
   } else {
@@ -135,9 +144,12 @@ class ArticleDetailViewModel @AssistedInject constructor(
   val lazyArticleFilenames: StateFlow<LazyFilenames> = articleRepository.getArticlesWithImages(ensembleId)
       .onEach { images ->
         cachedArticlesWithFullImages = images
-        val id = images.getArticleId(articleIndex)
-        articleId = id
-        if(articleIndex < images.size) _articleId.emit(id)
+        // Note: If deleting the last article in the list, it can cause the articleIndex to be out of bounds
+        if(articleIndex < images.size){
+          val id = images.getArticleId(articleIndex)
+          articleId = id
+          if(articleIndex < images.size) _articleId.emit(id)
+        }
       }.stateIn(
         scope = viewModelScope,
         initialValue = LazyFilenames.Empty,

@@ -38,6 +38,9 @@ interface ArticleDao {
   @Query("""DELETE FROM article""")
   fun deleteAllArticles()
 
+  @Query("""DELETE FROM article_image WHERE filename_thumb IN (:filenamesThumb)""")
+  fun deleteArticleImages(filenamesThumb: List<String>)
+
   @Transaction @Query(
     """SELECT article.id as article_id FROM article 
         ORDER BY article.created DESC""")
