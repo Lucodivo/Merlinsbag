@@ -67,6 +67,7 @@ fun CameraRoute(
           articleId = articleId,
         ) else {
           Log.e("GetContent ActivityResultContract", "Temp camera picture URI was null after picture was taken")
+          context.toast(R.string.sorry_try_again)
         }
       } else {
         navController.popBackStack()
