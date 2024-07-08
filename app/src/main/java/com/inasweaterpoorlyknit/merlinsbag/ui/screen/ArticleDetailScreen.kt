@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalFoundationApi::class)
+// NOTE: The above is for combinedClickable which gives us an easy way to determine long presses
 
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
@@ -13,6 +14,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,12 +22,15 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -49,6 +54,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,20 +69,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
-import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
+import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
-import com.inasweaterpoorlyknit.core.ui.COMPOSE_ID
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.allTestFullResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.allTestThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.component.IconButtonData
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomEndButtonContainer
@@ -85,12 +91,14 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopExpandingIconButton
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.component.NoopSearchBox
 import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
+import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
-import com.inasweaterpoorlyknit.core.ui.repeatedFullResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
+
+const val thumbnailAndEnsembleHiddenPercent = 0.98f
 
 const val ARTICLE_INDEX_ARG = "articleIndex"
 const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
@@ -121,28 +129,38 @@ fun ArticleDetailRoute(
       }
   val settingsLauncher = rememberSettingsLauncher()
   val ensembleUiState by articleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
-  val lazyArticleImagesUris by articleDetailViewModel.articleLazyUriStrings.collectAsStateWithLifecycle()
+  val lazyArticleFilenames by articleDetailViewModel.lazyArticleFilenames.collectAsStateWithLifecycle()
   var editMode by remember { mutableStateOf(false) }
   var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
   var showPermissionsAlertDialog by remember { mutableStateOf(false) }
   var showRemoveFromEnsemblesAlertDialog by remember { mutableStateOf(false) }
+  var showRemoveImagesAlertDialog by remember { mutableStateOf(false) }
   var showAddToEnsemblesDialog by remember { mutableStateOf(false) }
   val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
+  val selectedThumbnails = remember { mutableStateMapOf<Int, Unit>() }
   val newlyAddedEnsembles = remember { mutableStateMapOf<String, Unit>() }
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
+  var thumbnailAltsListState by remember { mutableStateOf(LazyListState()) }
+  val articleImageIndices = remember(lazyArticleFilenames) { mutableStateListOf(*Array(lazyArticleFilenames.size) { 0 }) }
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
   val userSearch = remember { mutableStateOf("") }
   val pagerState = rememberPagerState(
     initialPage = articleIndex,
     initialPageOffsetFraction = 0.0f,
-    pageCount = { lazyArticleImagesUris.size },
+    pageCount = { lazyArticleFilenames.size },
   )
   val articleBeingExported = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+  val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris ->
+    if(uris.isNotEmpty()) navController.navigateToAddArticle(
+      uriStringArray = uris.map { navigationSafeUriStringEncode(it) },
+      articleId = articleDetailViewModel.articleId
+    )
+  }
   val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
     onPermissionsGranted = {
       val index = pagerState.currentPage
       articleBeingExported[index] = Unit
-      articleDetailViewModel.exportArticle(index)
+      articleDetailViewModel.exportArticle(index, articleImageIndices[index])
     },
     onPermissionDenied = { navController.context.toast(R.string.storage_permissions_required) },
     onNeverAskAgain = { showPermissionsAlertDialog = true },
@@ -173,7 +191,9 @@ fun ArticleDetailRoute(
     snapshotFlow { pagerState.currentPage }.collect { page ->
       articleDetailViewModel.onArticleFocus(page)
       ensembleListState = LazyListState()
+      thumbnailAltsListState = LazyListState()
       selectedEnsembles.clear()
+      selectedThumbnails.clear()
       if(userSearch.value.isNotEmpty()) {
         articleDetailViewModel.searchEnsembles("")
         userSearch.value = ""
@@ -183,35 +203,64 @@ fun ArticleDetailRoute(
   ArticleDetailScreen(
     windowSizeClass = windowSizeClass,
     filter = filter,
-    articlesWithImages = lazyArticleImagesUris,
+    articlesWithImages = lazyArticleFilenames,
     articleEnsembleTitles = ensembleUiState.articleEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
     pagerState = pagerState,
+    articleImageIndices = articleImageIndices,
     ensembleListState = ensembleListState,
+    thumbnailsAltsListState = thumbnailAltsListState,
     selectedEnsembles = selectedEnsembles.keys,
+    selectedImages = selectedThumbnails.keys,
     editMode = editMode,
     exportingEnabled = !articleBeingExported.containsKey(pagerState.currentPage),
     showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
     showPermissionsAlertDialog = showPermissionsAlertDialog,
     showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
+    showRemoveImagesAlertDialog = showRemoveImagesAlertDialog,
     showAddToEnsembleDialog = showAddToEnsemblesDialog,
     onClickEdit = {
       if(editMode) selectedEnsembles.clear()
       editMode = !editMode
     },
     onClickExport = { exportWithPermissionsCheckLauncher.launch(REQUIRED_STORAGE_PERMISSIONS) },
+    onClickAddPhotoFromAlbum = photoAlbumLauncher::launch,
+    onClickAddPhotoFromCamera = {
+      navController.navigateToCamera(articleId = articleDetailViewModel.articleId)
+    },
     onClickDelete = { showDeleteArticleAlertDialog = true },
     onDismissDeleteDialog = { showDeleteArticleAlertDialog = false },
     onConfirmDeleteDialog = {
       showDeleteArticleAlertDialog = false
-      if(pagerState.pageCount == 1) navController.popBackStack()
+      if(lazyArticleFilenames.size == 1) navController.popBackStack()
       articleDetailViewModel.deleteArticle(pagerState.currentPage)
+      selectedEnsembles.clear()
+      selectedThumbnails.clear()
     },
     onDismissRemoveFromEnsemblesDialog = { showRemoveFromEnsemblesAlertDialog = false },
     onConfirmRemoveFromEnsemblesDialog = {
-      articleDetailViewModel.removeArticleEnsembles(pagerState.currentPage, selectedEnsembles.keys.toList())
+      val selectedEnsembleIndices = selectedEnsembles.keys.toList()
       selectedEnsembles.clear()
       showRemoveFromEnsemblesAlertDialog = false
       ensembleListState = LazyListState()
+      articleDetailViewModel.removeArticleEnsembles(pagerState.currentPage, selectedEnsembleIndices)
+    },
+    onClickThumbnail = { index ->
+      if(editMode) {
+        if(selectedEnsembles.isNotEmpty()) selectedEnsembles.clear()
+        if(selectedThumbnails.containsKey(index)) selectedThumbnails.remove(index)
+        else selectedThumbnails[index] = Unit
+      }
+      articleImageIndices[pagerState.currentPage] = index
+    },
+    onLongPressThumbnail = { index ->
+      if(selectedEnsembles.isNotEmpty()) selectedEnsembles.clear()
+      if(!editMode) {
+        selectedThumbnails.clear()
+        editMode = true
+      }
+      if(selectedThumbnails.containsKey(index)) selectedThumbnails.remove(index)
+      else selectedThumbnails[index] = Unit
+      articleImageIndices[pagerState.currentPage] = index
     },
     onDismissPermissionsDialog = { showPermissionsAlertDialog = false },
     onConfirmPermissionsDialog = {
@@ -220,11 +269,13 @@ fun ArticleDetailRoute(
     },
     onClickEnsemble = {
       if(editMode) {
+        if(selectedThumbnails.isNotEmpty()) selectedThumbnails.clear()
         if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
         else selectedEnsembles[it] = Unit
       } else navController.navigateToEnsembleDetail(ensembleUiState.articleEnsembles[it].id)
     },
     onLongPressEnsemble = {
+      if(selectedThumbnails.isNotEmpty()) selectedThumbnails.clear()
       if(!editMode) {
         selectedEnsembles.clear()
         editMode = true
@@ -233,7 +284,19 @@ fun ArticleDetailRoute(
       else selectedEnsembles[it] = Unit
     },
     onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
-    onClickCancelEnsemblesSelection = { selectedEnsembles.clear() },
+    onClickRemoveImages = { showRemoveImagesAlertDialog = true },
+    onDismissRemoveImagesDialog = { showRemoveImagesAlertDialog = false },
+    onConfirmRemoveImagesDialog = {
+      val selectedThumbnailIndices = selectedThumbnails.keys.toList()
+      selectedThumbnails.clear()
+      showRemoveImagesAlertDialog = false
+      thumbnailAltsListState = LazyListState()
+      articleDetailViewModel.removeImages(pagerState.currentPage, selectedThumbnailIndices)
+    },
+    onClickCancelEnsemblesSelection = {
+      selectedEnsembles.clear()
+      selectedThumbnails.clear()
+    },
     onClickAddToEnsemble = { showAddToEnsemblesDialog = true },
     addNewEnsemble = {
       articleDetailViewModel.addArticleToNewEnsemble(pagerState.currentPage, it)
@@ -264,31 +327,37 @@ fun ArticleDetailScreen(
     filter: String,
     articleEnsembleTitles: List<String>,
     pagerState: PagerState,
-    ensembleListState: LazyListState,
-    articlesWithImages: LazyUriStrings,
+    articleImageIndices: List<Int>,
+    articlesWithImages: LazyFilenames,
     editMode: Boolean,
     showDeleteArticleAlertDialog: Boolean,
     showPermissionsAlertDialog: Boolean,
     showRemoveFromEnsemblesAlertDialog: Boolean,
     showAddToEnsembleDialog: Boolean,
-    onClickExport: () -> Unit,
+    showRemoveImagesAlertDialog: Boolean,
     onClickDelete: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
     onClickCancelEnsemblesSelection: () -> Unit,
     onClickAddToEnsemble: () -> Unit,
-    onDismissDeleteDialog: () -> Unit,
-    onConfirmDeleteDialog: () -> Unit,
+    onClickAddPhotoFromAlbum: () -> Unit,
+    onClickAddPhotoFromCamera: () -> Unit,
+    onClickRemoveImages: () -> Unit,
+    onClickThumbnail: (index: Int) -> Unit,
+    onLongPressThumbnail: (index: Int) -> Unit,
+    ensembleListState: LazyListState,
+    thumbnailsAltsListState: LazyListState,
     onConfirmRemoveFromEnsemblesDialog: () -> Unit,
     onDismissRemoveFromEnsemblesDialog: () -> Unit,
     onDismissPermissionsDialog: () -> Unit,
     onConfirmPermissionsDialog: () -> Unit,
-    modifier: Modifier = Modifier,
-    onClickEnsemble: (index: Int) -> Unit,
+    onDismissDeleteDialog: () -> Unit,
+    onDismissRemoveImagesDialog: () -> Unit,
+    onConfirmRemoveImagesDialog: () -> Unit,
     onLongPressEnsemble: (index: Int) -> Unit,
-    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     exportingEnabled: Boolean,
     onClickEdit: () -> Unit,
     selectedEnsembles: Set<Int>,
+    selectedImages: Set<Int>,
     ensemblesToAdd: List<Ensemble>,
     addNewEnsemble: (String) -> Unit,
     onCloseAddToEnsembleDialog: () -> Unit,
@@ -297,21 +366,36 @@ fun ArticleDetailScreen(
     searchQueryUniqueTitle: Boolean,
     onSearchQueryUpdateAddToEnsembles: (String) -> Unit,
     newlyAddedEnsembles: Set<String>,
+    onConfirmDeleteDialog: () -> Unit,
+    onClickEnsemble: (index: Int) -> Unit,
+    modifier: Modifier = Modifier,
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
+    onClickExport: () -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
   val systemBarTopPadding = systemBarPaddingValues.calculateTopPadding()
-  HorizontalPager(
-    state = pagerState,
-    verticalAlignment = Alignment.Bottom,
-    modifier = Modifier.sizeIn(minHeight = ButtonDefaults.MinHeight)
-  ) { page ->
-    NoopImage(
-      uriString = articlesWithImages.getUriString(page),
-      contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
-      modifier = modifier
-          .fillMaxSize()
-          .padding(16.dp),
-    )
+  val systemBarStartPadding = systemBarPaddingValues.calculateStartPadding(layoutDir)
+  val systemBarEndPadding = systemBarPaddingValues.calculateEndPadding(layoutDir)
+  val articleIndex = pagerState.currentPage
+  // Index may be out of bounds is the Pager has yet to adjust to the new size after a deletion
+  val showAltThumbnails = articleIndex < articlesWithImages.size && articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size > 1
+
+  if(articlesWithImages.isNotEmpty()) {
+    HorizontalPager(
+      state = pagerState,
+      verticalAlignment = Alignment.Bottom,
+      modifier = Modifier.sizeIn(minHeight = ButtonDefaults.MinHeight)
+    ) { page ->
+      val imageUris = articlesWithImages.lazyFullImageUris.getUriStrings(page)
+      val imageIndex = articleImageIndices[page]
+      NoopImage(
+        uriString = imageUris[imageIndex],
+        contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+      )
+    }
   }
   val compactWidth = windowSizeClass.compactWidth()
   val iconModifier = Modifier.padding(start = if(compactWidth) 0.dp else 16.dp, end = 4.dp)
@@ -328,81 +412,128 @@ fun ArticleDetailScreen(
       }
     }
   }
-  val chipHeight = InputChipDefaults.Height
-  Box(
-    contentAlignment = if(compactWidth) Alignment.BottomStart else Alignment.TopEnd,
-    modifier = Modifier.fillMaxSize()
-  ) {
-    val items: LazyListScope.() -> Unit = {
-      items(articleEnsembleTitles.size) { i ->
-        val inputChipInteractionSource = remember { MutableInteractionSource() }
-        Box(
-          contentAlignment = Alignment.CenterStart,
-          modifier = Modifier
-              .padding(horizontal = 2.dp)
-              .height(chipHeight + 8.dp)
-        ) {
-          val selected = selectedEnsembles.contains(i)
-          InputChip(
-            selected = selected,
-            label = { Text(text = articleEnsembleTitles[i]) },
-            leadingIcon = {
-              if(editMode) {
-                if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selected))
-                else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selectable))
-              } else {
-                Icon(imageVector = NoopIcons.ensembles(), contentDescription = stringResource(R.string.hashtag))
-              }
-            },
-            onClick = {},
-            interactionSource = inputChipInteractionSource,
-            modifier = Modifier.height(InputChipDefaults.Height)
-          )
-          Box(
-            modifier = Modifier
-                .matchParentSize()
-                .combinedClickable(
-                  onLongClick = { onLongPressEnsemble(i) },
-                  onClick = { onClickEnsemble(i) },
-                  interactionSource = inputChipInteractionSource,
-                  indication = null,
-                )
-          )
+  val ensembleChips: @Composable () -> Unit = {
+    EnsembleLazyChips(
+      compactWidth = compactWidth,
+      editMode = editMode,
+      onLongPressEnsemble = onLongPressEnsemble,
+      onClickEnsemble = onClickEnsemble,
+      ensembleListState = ensembleListState,
+      articleEnsembleTitles = articleEnsembleTitles,
+      selectedEnsembles = selectedEnsembles,
+      topPadding = systemBarTopPadding,
+    )
+  }
+
+  val thumbnailSize = ButtonDefaults.MinHeight
+  if(compactWidth) {
+    Box(
+      contentAlignment = Alignment.BottomStart,
+      modifier = Modifier
+          .fillMaxSize()
+    ) {
+      Column {
+        ensembleChips()
+        if(showAltThumbnails) {
+          LazyRow(state = thumbnailsAltsListState, modifier = Modifier.fillMaxWidth()) {
+            val thumbnailUris = articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex)
+            item { Spacer(modifier = Modifier.width(8.dp)) }
+            items(count = thumbnailUris.size) { thumbnailIndex ->
+              SelectableNoopImage(
+                uriString = thumbnailUris[thumbnailIndex],
+                contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+                selected = selectedImages.contains(thumbnailIndex),
+                selectable = editMode,
+                modifier = Modifier
+                    .size(thumbnailSize)
+                    .combinedClickable(
+                      onClick = { onClickThumbnail(thumbnailIndex) },
+                      onLongClick = { onLongPressThumbnail(thumbnailIndex) }
+                    )
+              )
+            }
+            item { Spacer(modifier = Modifier.fillParentMaxWidth(thumbnailAndEnsembleHiddenPercent)) }
+          }
+        } else {
+          Spacer(modifier = Modifier.height(thumbnailSize))
         }
       }
     }
-    if(compactWidth) {
-      LazyRow(state = ensembleListState) {
-        items()
-        item { Spacer(modifier = Modifier.fillParentMaxWidth(0.90f)) }
-      }
-    } else {
-      LazyColumn(state = ensembleListState, horizontalAlignment = Alignment.End) {
-        item { Spacer(modifier = Modifier.height(systemBarTopPadding)) }
-        items()
-        item { Spacer(modifier = Modifier.fillParentMaxHeight(0.90f)) }
+  } else {
+    val boxModifier = Modifier
+        .fillMaxSize()
+        .padding(
+          start = systemBarStartPadding,
+          end = systemBarEndPadding,
+        )
+    Box(
+      contentAlignment = Alignment.TopEnd,
+      modifier = boxModifier
+    ) {
+      ensembleChips()
+    }
+    if(showAltThumbnails) {
+      Box(
+        contentAlignment = Alignment.BottomStart,
+        modifier = boxModifier
+      ) {
+        LazyColumn(
+          reverseLayout = true,
+          state = thumbnailsAltsListState,
+          modifier = Modifier.fillMaxHeight()
+        ) {
+          val thumbnailUris = articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex)
+          item { Spacer(modifier = Modifier.height(8.dp)) }
+          items(count = thumbnailUris.size) { thumbnailIndex ->
+            SelectableNoopImage(
+              uriString = thumbnailUris[thumbnailIndex],
+              contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+              selected = selectedImages.contains(thumbnailIndex),
+              selectable = editMode,
+              modifier = Modifier
+                  .size(ButtonDefaults.MinHeight)
+                  .combinedClickable(
+                    onClick = { onClickThumbnail(thumbnailIndex) },
+                    onLongClick = { onLongPressThumbnail(thumbnailIndex) }
+                  )
+            )
+          }
+          item { Spacer(modifier = Modifier.fillParentMaxHeight(thumbnailAndEnsembleHiddenPercent)) }
+        }
+
       }
     }
   }
+  val controlMode = if(!editMode) {
+    ArticleDetailScreenControlsMode.MINIMIZED
+  } else if(selectedEnsembles.isNotEmpty()){
+    ArticleDetailScreenControlsMode.EDIT_ENSEMBLES
+  } else if(selectedImages.isNotEmpty()){
+    val thumbnailCount = if(articleIndex < articlesWithImages.size) articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size else 0
+    if(selectedImages.size == thumbnailCount) ArticleDetailScreenControlsMode.DELETE_ARTICLE
+    else ArticleDetailScreenControlsMode.EDIT_IMAGES
+  } else ArticleDetailScreenControlsMode.EDIT_ARTICLE
   FloatingActionButtonDetailScreen(
-    expanded = editMode,
+    mode = controlMode,
     exportingEnabled = exportingEnabled,
-    removeEnsemblesEnabled = selectedEnsembles.isNotEmpty(),
     onClickEdit = onClickEdit,
     onClickDelete = onClickDelete,
     onClickExport = onClickExport,
     onClickRemoveEnsembles = onClickRemoveEnsembles,
-    onClickCancelEnsemblesSelection = onClickCancelEnsemblesSelection,
+    onClickRemoveImages = onClickRemoveImages,
+    onClickCancelSelection = onClickCancelEnsemblesSelection,
     onClickAddToEnsemble = onClickAddToEnsemble,
+    onClickAddPhotoFromAlbum = onClickAddPhotoFromAlbum,
+    onClickAddPhotoFromCamera = onClickAddPhotoFromCamera,
     modifier = Modifier.padding(
-      start = systemBarPaddingValues.calculateStartPadding(layoutDir),
-      end = systemBarPaddingValues.calculateEndPadding(layoutDir),
-      bottom = if(compactWidth) InputChipDefaults.Height else 0.dp,
+      start = systemBarStartPadding,
+      end = systemBarEndPadding,
     ),
   )
-  if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
+  if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(fromDeletingAllImages = controlMode == ArticleDetailScreenControlsMode.DELETE_ARTICLE, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
   if(showPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
   if(showRemoveFromEnsemblesAlertDialog) RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
+  if(showRemoveImagesAlertDialog) RemoveImagesAlertDialog(onDismiss = onDismissRemoveImagesDialog, onConfirm = onConfirmRemoveImagesDialog)
   AddToEnsembleDialog(
     visible = showAddToEnsembleDialog,
     userSearch = ensemblesSearchQuery,
@@ -417,64 +548,181 @@ fun ArticleDetailScreen(
 }
 
 @Composable
+fun EnsembleLazyChips(
+    compactWidth: Boolean,
+    editMode: Boolean,
+    articleEnsembleTitles: List<String>,
+    selectedEnsembles: Set<Int>,
+    onLongPressEnsemble: (index: Int) -> Unit,
+    onClickEnsemble: (index: Int) -> Unit,
+    ensembleListState: LazyListState,
+    topPadding: Dp,
+) {
+  val chipHeight = InputChipDefaults.Height
+  val items: LazyListScope.() -> Unit = {
+    items(articleEnsembleTitles.size) { i ->
+      val inputChipInteractionSource = remember { MutableInteractionSource() }
+      Box(
+        contentAlignment = Alignment.CenterStart,
+        modifier = Modifier
+            .padding(horizontal = 2.dp)
+            .height(chipHeight + 8.dp)
+      ) {
+        val selected = selectedEnsembles.contains(i)
+        InputChip(
+          selected = selected,
+          label = { Text(text = articleEnsembleTitles[i], maxLines = 1, overflow = TextOverflow.Ellipsis) },
+          leadingIcon = {
+            if(editMode) {
+              if(selected) Icon(imageVector = NoopIcons.SelectedIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selected))
+              else Icon(imageVector = NoopIcons.SelectableIndicator, contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selectable))
+            } else {
+              Icon(imageVector = NoopIcons.ensembles(), contentDescription = stringResource(R.string.hashtag))
+            }
+          },
+          onClick = {},
+          interactionSource = inputChipInteractionSource,
+          modifier = Modifier.height(InputChipDefaults.Height)
+        )
+        Box(
+          modifier = Modifier
+              .matchParentSize()
+              .combinedClickable(
+                onLongClick = { onLongPressEnsemble(i) },
+                onClick = { onClickEnsemble(i) },
+                interactionSource = inputChipInteractionSource,
+                indication = null,
+              )
+        )
+      }
+    }
+  }
+  if(compactWidth) {
+    LazyRow(state = ensembleListState) {
+      items()
+      item { Spacer(modifier = Modifier.fillParentMaxWidth(thumbnailAndEnsembleHiddenPercent)) }
+    }
+  } else {
+    LazyColumn(
+      state = ensembleListState,
+      horizontalAlignment = Alignment.End,
+      modifier = Modifier.sizeIn(maxWidth = 200.dp)
+    ) {
+      item { Spacer(modifier = Modifier.height(topPadding)) }
+      items()
+      item { Spacer(modifier = Modifier.fillParentMaxHeight(thumbnailAndEnsembleHiddenPercent)) }
+    }
+  }
+}
+
+enum class ArticleDetailScreenControlsMode {
+  MINIMIZED,
+  EDIT_ARTICLE,
+  EDIT_ENSEMBLES,
+  EDIT_IMAGES,
+  DELETE_ARTICLE,
+}
+
+@Composable
 fun FloatingActionButtonDetailScreen(
-    expanded: Boolean,
+    mode: ArticleDetailScreenControlsMode,
     exportingEnabled: Boolean,
-    removeEnsemblesEnabled: Boolean,
     onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
     onClickExport: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
-    onClickCancelEnsemblesSelection: () -> Unit,
+    onClickRemoveImages: () -> Unit,
+    onClickCancelSelection: () -> Unit,
     onClickAddToEnsemble: () -> Unit,
+    onClickAddPhotoFromAlbum: () -> Unit,
+    onClickAddPhotoFromCamera: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+  val expanded = mode != ArticleDetailScreenControlsMode.MINIMIZED
   NoopBottomEndButtonContainer(extraPadding = PaddingValues(bottom = 4.dp, end = 8.dp), modifier = modifier) {
     NoopExpandingIconButton(
       expanded = expanded,
       collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
       expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       onClick = onClickEdit,
-      verticalExpandedButtons = if(removeEnsemblesEnabled) listOf(
+      verticalExpandedButtons = if(mode == ArticleDetailScreenControlsMode.EDIT_ENSEMBLES) listOf(
         IconButtonData(
           icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_ensembles)),
-          onClick = onClickCancelEnsemblesSelection
+          onClick = onClickCancelSelection
         ),
         IconButtonData(
           icon = IconData(NoopIcons.attachmentRemove(), stringResource(R.string.remove_article_from_selected_ensembles)),
           onClick = onClickRemoveEnsembles,
         ),
-      ) else listOf(
-        IconButtonData(
-          icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
-          onClick = { onClickDelete() }
-        ),
-        IconButtonData(
-          icon = IconData(NoopIcons.Download, stringResource(R.string.export_article_image)),
-          onClick = onClickExport,
-          enabled = exportingEnabled,
-        ),
-        IconButtonData(
-          icon = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to_ensembles)),
-          onClick = { onClickAddToEnsemble() }
-        ),
-      ),
+      ) else if(mode == ArticleDetailScreenControlsMode.EDIT_IMAGES) {
+        listOf(
+          IconButtonData(
+            icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
+            onClick = onClickCancelSelection
+          ),
+          IconButtonData(
+            icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_selected_images_from_article)),
+            onClick = onClickRemoveImages
+          )
+        )
+      } else if(mode == ArticleDetailScreenControlsMode.DELETE_ARTICLE){
+        listOf(
+          IconButtonData(
+            icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
+            onClick = onClickCancelSelection
+          ),
+          IconButtonData(
+            icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
+            onClick = onClickDelete
+          )
+        )
+      } else {
+        listOf(
+          IconButtonData(
+            icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
+            onClick = onClickDelete
+          ),
+          IconButtonData(
+            icon = IconData(NoopIcons.Download, stringResource(R.string.export_article_image)),
+            onClick = onClickExport,
+            enabled = exportingEnabled,
+          ),
+          IconButtonData(
+            icon = IconData(NoopIcons.AddPhotoAlbum, stringResource(R.string.add_photo_from_photo_album_to_article)),
+            onClick = onClickAddPhotoFromAlbum,
+          ),
+          IconButtonData(
+            icon = IconData(NoopIcons.AddPhotoCamera, stringResource(R.string.add_photo_from_camera_to_article)),
+            onClick = onClickAddPhotoFromCamera
+          ),
+          IconButtonData(
+            icon = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to_ensembles)),
+            onClick = onClickAddToEnsemble
+          ),
+        )
+      },
       horizontalExpandedButtons = listOf(),
     )
   }
 }
 
 @Composable
-fun DeleteArticleAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-    NoopSimpleAlertDialog(
-      title = stringResource(id = R.string.delete_article),
-      text = stringResource(id = R.string.deleted_articles_unrecoverable),
-      headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
-      onDismiss = onDismiss,
-      onConfirm = onConfirm,
-      confirmText = stringResource(id = R.string.delete),
-      cancelText = stringResource(id = R.string.cancel),
-    )
+fun DeleteArticleAlertDialog(
+    fromDeletingAllImages: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+  val text = "${if(fromDeletingAllImages){stringResource(id = R.string.an_article_cannot_exist_without_an_image)}else{""}}${stringResource (id = R.string.deleted_articles_unrecoverable)}"
+  NoopSimpleAlertDialog(
+    title = stringResource(id = R.string.delete_article),
+    text = text,
+    headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
+    onDismiss = onDismiss,
+    onConfirm = onConfirm,
+    confirmText = stringResource(id = R.string.delete),
+    cancelText = stringResource(id = R.string.cancel),
+  )
+}
 
 @Composable
 fun RemoveFromEnsemblesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
@@ -485,6 +733,17 @@ fun RemoveFromEnsemblesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit)
       onDismiss = onDismiss,
       onConfirm = onConfirm,
       confirmText = stringResource(id = R.string.remove),
+      cancelText = stringResource(id = R.string.cancel),
+    )
+@Composable
+fun RemoveImagesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+    NoopSimpleAlertDialog(
+      title = stringResource(id = R.string.remove_images),
+      text = stringResource(id = R.string.deleted_images_unrecoverable),
+      headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
+      onDismiss = onDismiss,
+      onConfirm = onConfirm,
+      confirmText = stringResource(id = R.string.delete),
       cancelText = stringResource(id = R.string.cancel),
     )
 
@@ -562,7 +821,7 @@ private fun AddToEnsembleDialog(
     ) {
       val newEnsembleChipInteractionSource = remember { MutableInteractionSource() }
       val searchQueryHasRecentlyBeenAdded = newlyAddedEnsembles.contains(userSearch)
-      Box{
+      Box {
         InputChip(
           selected = searchQueryUniqueTitle,
           label = {
@@ -616,42 +875,58 @@ fun PreviewUtilArticleDetailScreen(
     showDeleteArticleAlertDialog: Boolean = false,
     showPermissionsAlertDialog: Boolean = false,
     showRemoveFromEnsemblesAlertDialog: Boolean = false,
+    showRemoveImagesAlertDialog: Boolean = false,
     showAddToEnsembleDialog: Boolean = false,
     selectedEnsembles: Set<Int> = emptySet(),
     addEnsembles: List<Ensemble> = emptyList(),
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
-  val articlesWithImages = LazyArticleThumbnails(
-    directory = "",
-    articleThumbnailPaths = listOf(
-      ArticleWithThumbnails(
-        articleId = COMPOSE_ID,
-        thumbnailPaths = listOf(
-          ThumbnailFilename(
-            filenameThumb = repeatedFullResourceIdsAsStrings[0],
-          ),
-        ),
-      )
-    )
-  )
+  val articlesWithImages = object: LazyFilenames {
+    val fullImageUris = allTestFullResourceIdsAsStrings
+    val thumbImageUris = allTestThumbnailResourceIdsAsStrings
+    override val lazyFullImageUris: LazyUriStrings
+      get() = object: LazyUriStrings {
+        override val size: Int get() = fullImageUris.size
+        override fun getUriStrings(index: Int): List<String> {
+          return fullImageUris.toList()
+        }
+      }
+    override val lazyThumbImageUris: LazyUriStrings
+      get() = object: LazyUriStrings {
+        override val size: Int get() = thumbImageUris.size
+        override fun getUriStrings(index: Int): List<String> {
+          return thumbImageUris.toList()
+        }
+      }
+    override val size: Int = 1
+
+  }
   Surface {
     ArticleDetailScreen(
       windowSizeClass = currentWindowAdaptiveInfo(),
       filter = filter,
       articleEnsembleTitles = listOf("Road Warrior", "Goth 2 Boss", "John Prine", "Townes Van Zandt", "Deafheaven"),
       pagerState = rememberPagerState(initialPage = 0, pageCount = { articlesWithImages.size }),
-      ensembleListState = rememberLazyListState(),
+      articleImageIndices = listOf(0),
       articlesWithImages = articlesWithImages,
       editMode = floatingActionButtonExpanded,
       showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
       showPermissionsAlertDialog = showPermissionsAlertDialog,
       showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
-      showAddToEnsembleDialog = showAddToEnsembleDialog, onClickExport = {}, onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {},
-      onClickAddToEnsemble = {}, onDismissDeleteDialog = {}, onConfirmDeleteDialog = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {},
-      onDismissPermissionsDialog = {}, onConfirmPermissionsDialog = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, exportingEnabled = true, onClickEdit = {}, selectedEnsembles = selectedEnsembles,
-      ensemblesToAdd = addEnsembles, addNewEnsemble = {}, onCloseAddToEnsembleDialog = {}, addArticleToEnsemble = {},
-      ensemblesSearchQuery = "Goth 2 Boss",
-      searchQueryUniqueTitle = true,
-      onSearchQueryUpdateAddToEnsembles = {}, newlyAddedEnsembles = emptySet(),
+      showAddToEnsembleDialog = showAddToEnsembleDialog,
+      showRemoveImagesAlertDialog = showRemoveImagesAlertDialog,
+      onClickDelete = {},
+      onClickRemoveEnsembles = {},
+      onClickCancelEnsemblesSelection = {},
+      onClickAddToEnsemble = {},
+      onClickAddPhotoFromAlbum = {},
+      onClickAddPhotoFromCamera = {},
+      onClickRemoveImages = {}, onClickThumbnail = {}, onLongPressThumbnail = {}, ensembleListState = rememberLazyListState(),
+      thumbnailsAltsListState = rememberLazyListState(), onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {}, onDismissPermissionsDialog = {},
+      onConfirmPermissionsDialog = {}, onDismissDeleteDialog = {}, onDismissRemoveImagesDialog = {}, onConfirmRemoveImagesDialog = {}, onLongPressEnsemble = {}, exportingEnabled = true,
+      onClickEdit = {}, selectedEnsembles = selectedEnsembles, selectedImages = setOf(0), ensemblesToAdd = addEnsembles, addNewEnsemble = {},
+      onCloseAddToEnsembleDialog = {}, addArticleToEnsemble = {}, ensemblesSearchQuery = "Goth 2 Boss", searchQueryUniqueTitle = true, onSearchQueryUpdateAddToEnsembles = {}, newlyAddedEnsembles = emptySet(), onConfirmDeleteDialog = {},
+      onClickEnsemble = {},
+      onClickExport = {},
     )
   }
 }

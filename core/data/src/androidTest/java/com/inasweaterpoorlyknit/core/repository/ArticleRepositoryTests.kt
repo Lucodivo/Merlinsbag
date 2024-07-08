@@ -59,15 +59,15 @@ class ArticleRepositoryTests {
         val articlesWithFullImages: LazyArticleFullImages
         runBlocking {
             articlesWithThumbnails = articleRepository.getAllArticlesWithThumbnails().first()
-            articlesWithFullImages = articleRepository.getAllArticlesWithFullImages().first()
+            articlesWithFullImages = articleRepository.getArticlesWithFullImages().first()
         }
 
         // assert
-        assertEquals("articles not properly inserted and retreived", fullImageUris.size, articlesWithThumbnails.size)
+        assertEquals("articles not properly inserted and retrieved", fullImageUris.size, articlesWithThumbnails.size)
         // NOTE: Ordered by newest insertion first (modified_by)
-        assertEquals("$articleDirectory/${fullImageUris[0]}", articlesWithFullImages.getUriString(1))
-        assertEquals("$articleDirectory/${thumbnailImageUris[0]}", articlesWithThumbnails.getUriString(1))
-        assertEquals("$articleDirectory/${fullImageUris[1]}", articlesWithFullImages.getUriString(0))
-        assertEquals("$articleDirectory/${thumbnailImageUris[1]}", articlesWithThumbnails.getUriString(0))
+        assertEquals("$articleDirectory${fullImageUris[0]}", articlesWithFullImages.getUriStrings(1)[0])
+        assertEquals("$articleDirectory${thumbnailImageUris[0]}", articlesWithThumbnails.getUriStrings(1)[0])
+        assertEquals("$articleDirectory${fullImageUris[1]}", articlesWithFullImages.getUriStrings(0)[0])
+        assertEquals("$articleDirectory${thumbnailImageUris[1]}", articlesWithThumbnails.getUriStrings(0)[0])
     }
 }

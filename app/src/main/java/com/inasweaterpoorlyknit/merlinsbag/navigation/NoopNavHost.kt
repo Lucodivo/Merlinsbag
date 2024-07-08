@@ -11,6 +11,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.NoopAppState
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLE_DETAIL_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLE_ID_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLE_INDEX_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.AddArticleRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailRoute
@@ -59,7 +60,19 @@ fun NoopNavHost(
     composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
     composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
     composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController) }
-    composable(route = CAMERA_ROUTE) { CameraRoute(navController = navController) }
+    composable(
+      route = CAMERA_ROUTE,
+      arguments = listOf(
+        navArgument(ARTICLE_ID_ARG) {
+          nullable = true
+          defaultValue = null
+          type = NavType.StringType
+        },
+      ),
+    ) { navBackStackEntry ->
+      val articleIdArg = navBackStackEntry.arguments!!.getString(ARTICLE_ID_ARG)
+      CameraRoute(articleId = articleIdArg, navController = navController)
+    }
     composable(route = TIPS_AND_INFO_ROUTE) { TipsAndInfoRoute(navController = navController) }
     composable(route = STATISTICS_ROUTE) { StatisticsRoute(navController = navController) }
     composable(
@@ -104,13 +117,21 @@ fun NoopNavHost(
           nullable = false
           type = NavType.StringType
         },
+        navArgument(ARTICLE_ID_ARG) {
+          nullable = true
+          defaultValue = null
+          type = NavType.StringType
+        },
       ),
     ) { navBackStackEntry ->
-      val imageUriStringListArg = navBackStackEntry.arguments!!.getString(IMAGE_URI_STRING_LIST_ARG)!!
+      val args = navBackStackEntry.arguments!!
+      val imageUriStringListArg = args.getString(IMAGE_URI_STRING_LIST_ARG)!!
       val imageUriStringList = imageUriStringListArg.split(",").map { navigationSafeUriStringDecode(it) }
+      val articleIdArg = args.getString(ARTICLE_ID_ARG)
       AddArticleRoute(
         navController = navController,
         imageUriStringList = imageUriStringList,
+        articleId = articleIdArg,
         windowSizeClass = appState.windowSizeClass,
       )
     }

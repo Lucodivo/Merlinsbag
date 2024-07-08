@@ -6,10 +6,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
-import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.timestampFileName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
@@ -19,7 +17,7 @@ import javax.inject.Inject
 class CameraViewModel @Inject constructor(): ViewModel() {
   var takePictureUri: Uri? = null
 
-  fun onTakePicture(context: Context) {
+  fun onTakePicture(context: Context): Uri? {
     val pictureFilename = "${timestampFileName()}.jpg"
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       val contentResolver = context.contentResolver
@@ -35,6 +33,7 @@ class CameraViewModel @Inject constructor(): ViewModel() {
       val publicPictureFile = File(publicPicturesDir, pictureFilename)
       takePictureUri = publicPictureFile.toUri()
     }
+    return takePictureUri
   }
 
   fun pictureTaken(taken: Boolean, context: Context) {
@@ -42,6 +41,5 @@ class CameraViewModel @Inject constructor(): ViewModel() {
       val contentResolver = context.contentResolver
       takePictureUri?.let { contentResolver.delete(it, null, null) }
     }
-    takePictureUri = null
   }
 }

@@ -10,22 +10,30 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.profiling.Timer
+import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.ml.image.SegmentedImage
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 
 @HiltViewModel(assistedFactory = AddArticleViewModel.AddArticleViewModelFactory::class)
 class AddArticleViewModel @AssistedInject constructor(
     @Assisted("imageUriStrings") private val imageUriStrings: List<String>,
+    @Assisted("articleId") private val articleId: String?,
     private val application: Application,
     private val articleRepository: ArticleRepository,
 ): ViewModel() {
@@ -34,6 +42,7 @@ class AddArticleViewModel @AssistedInject constructor(
   interface AddArticleViewModelFactory {
     fun create(
         @Assisted("imageUriStrings") uriImageStrings: List<String>,
+        @Assisted("articleId") articleId: String?,
     ): AddArticleViewModel
   }
 
@@ -49,12 +58,26 @@ class AddArticleViewModel @AssistedInject constructor(
   val rotation = mutableFloatStateOf(rotations[rotationIndex])
   val finished = mutableStateOf(Event<Unit>(null))
   val userFacingError = mutableStateOf(Event<Int>(null))
+  val attachArticleIndex = mutableStateOf<Int?>(null)
+  val attachToArticleEnabled = articleId == null
 
   private val segmentedImage = SegmentedImage()
+  private var attachArticleThumbnailsCache: LazyArticleThumbnails? = null
+
+  val attachArticleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
+      .onEach { this.attachArticleThumbnailsCache = it }
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+        initialValue = LazyUriStrings.Empty
+      )
 
   init {
     processNextImage()
   }
+
+  fun removeAttachedArticle() { attachArticleIndex.value = null }
+  fun addAttachedArticle(articleIndex: Int) { attachArticleIndex.value = articleIndex }
 
   override fun onCleared() {
     super.onCleared()
@@ -152,7 +175,7 @@ class AddArticleViewModel @AssistedInject constructor(
     }
   }
 
-  fun onSave() = viewModelScope.launch(Dispatchers.Default) {
+  fun onSave() {
     val stopWatch = Timer()
     lateinit var bitmapToSave: Bitmap
     val rotationMatrix = Matrix()
@@ -166,8 +189,15 @@ class AddArticleViewModel @AssistedInject constructor(
       rotationMatrix,
       false // e.g. bilinear filtering of source
     )
-    nextSubject()
-    articleRepository.insertArticle(bitmapToSave)
-    stopWatch.logElapsed("AddArticleViewModel", "Save article time")
+    val attachmentArticleIndex = attachArticleIndex.value
+    val attachmentArticleId = if(attachmentArticleIndex != null){
+      attachArticleIndex.value = null
+      attachArticleThumbnailsCache?.getArticleId(attachmentArticleIndex)
+    } else articleId
+    viewModelScope.launch(Dispatchers.Default) {
+      nextSubject()
+      if(attachmentArticleId == null) articleRepository.insertArticle(bitmapToSave) else articleRepository.insertArticleImage(bitmapToSave, attachmentArticleId)
+      stopWatch.logElapsed("AddArticleViewModel", "Save article time")
+    }
   }
 }

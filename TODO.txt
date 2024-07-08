@@ -15,6 +15,8 @@ Ensembles:
 Features:
     - Collage
     - Share!
+    - App shortcut to camera
+    - Hook for sharing from camera roll to Merlinsbag
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - NavigationRail [COMPLETED]
@@ -30,7 +32,7 @@ App-wide UI:
 Tooling:
     - UI Catalog
 Export:
-    - It seems like exporting image as a PNG is large (5MB+ per article in some cases!), investigate lowering this value.
+    - It seems like exporting image as a PNG is large (9.1MB+ for a 2650x2645 record!), investigate lowering this value.
     - Loading indicator? Or is disabled export button enough?
 Bugs:
     - Out of Memory (OOM) crash when processing an image in AddArticleScreen
@@ -47,6 +49,15 @@ Bugs:
     - Passing indices instead of ids from a screen to it's associated ViewModel may be more buggy than simply passing ids.
         - The idea of using indices was that the UI doesn't need to know about a database ID, but maybe it is worth the trade?
     - The ML Kit model does not actually install with the application or even after the application is installed. It seems to only attempt to install by either an attempted use or an explicit call to installation.
+    - Error with little effect in AddArticleScreen
+        - The following error occurs twice EVERY time:
+            Failed to get service from broker. java.lang.SecurityException: Unknown calling package name 'com.google.android.gms'.
+        - One lead is to see if the problem exists in the ML Kit vision-quickstart project:
+            https://github.com/googlesamples/mlkit/blob/master/android/vision-quickstart
+            - answer might lie in the AndroidManifest.xml?
+QoL:
+    - Preserve backstack between top level destinations
+
 Settings Screen:
     - Export All Data
 Aesthetics:
@@ -60,7 +71,8 @@ Performance:
                 - Tracing/System.nanoTime() shows that Bitmap.compress() is taking ~3.5-5.1s (depends on the image)
                 - Reduces to ~.5s by changing compression from WebP lossless to WebP lossy 100% quality
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
-QoL:
+    - EnsemblesScreen
+        - Get all article thumbnails with each ensemble using indices
 
 // Unknowns
 Aesthetic Questions:

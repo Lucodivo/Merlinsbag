@@ -77,7 +77,6 @@ fun NoopApp(
         if(!compactWidth){
           item(
             icon = { Icon(NoopIcons.Settings, stringResource(R.string.cog)) },
-            label = { Text(stringResource(R.string.settings)) },
             selected = false,
             onClick = { appState.navController.navigateToSettings() }
           )
@@ -86,7 +85,7 @@ fun NoopApp(
           val selected = it == currentDestination
           item(
             icon = if(selected) it.selectedIcon else it.unselectedIcon,
-            label = { Text(stringResource(it.label)) },
+            label = if(compactWidth) {{ Text(stringResource(it.label)) }} else null,
             selected = selected,
             onClick = {
               appState.navController.navigateToNavUiDestination(currentDestination, it)

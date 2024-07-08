@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +25,8 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.CameraViewModel
 
-const val CAMERA_ROUTE = "camera_route"
+const val CAMERA_ROUTE_BASE = "camera_route"
+const val CAMERA_ROUTE = "$CAMERA_ROUTE_BASE?$ARTICLE_ID_ARG={$ARTICLE_ID_ARG}"
 
 val additionalCameraPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_CAMERA_PERMISSIONS =
@@ -36,16 +36,22 @@ private val REQUIRED_CAMERA_PERMISSIONS =
       arrayOf(permission.CAMERA)
     }
 
-fun NavController.navigateToCamera(navOptions: NavOptions? = null) = navigate(CAMERA_ROUTE, navOptions)
+fun NavController.navigateToCamera(
+    articleId: String? = null,
+    navOptions: NavOptions? = null
+) {
+  val route = "$CAMERA_ROUTE_BASE?$ARTICLE_ID_ARG=$articleId"
+  navigate(route, navOptions)
+}
 
 @Composable
 fun CameraRoute(
+    articleId: String? = null,
     navController: NavController,
     cameraViewModel: CameraViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
 
-  var permissionsGranted by remember { mutableStateOf(false) }
   var showPermissionsAlert by remember { mutableStateOf(false) }
 
   val appSettingsLauncher = rememberSettingsLauncher()
@@ -56,8 +62,13 @@ fun CameraRoute(
       val cameraPictureUri = cameraViewModel.takePictureUri
       cameraViewModel.pictureTaken(success, context)
       if(success) {
-        if(cameraPictureUri != null) navController.navigateToAddArticle(listOf(navigationSafeUriStringEncode(cameraPictureUri)))
-        else Log.e("GetContent ActivityResultContract", "Camera picture URI was null")
+        if(cameraPictureUri != null) navController.navigateToAddArticle(
+          uriStringArray = listOf(navigationSafeUriStringEncode(cameraPictureUri)),
+          articleId = articleId,
+        ) else {
+          Log.e("GetContent ActivityResultContract", "Temp camera picture URI was null after picture was taken")
+          context.toast(R.string.sorry_try_again)
+        }
       } else {
         navController.popBackStack()
       }
@@ -65,8 +76,13 @@ fun CameraRoute(
 
   val cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
     onPermissionsGranted = {
-      cameraViewModel.onTakePicture(context)
-      permissionsGranted = true
+      val uri = cameraViewModel.onTakePicture(context)
+      if(uri != null) {
+        takePictureLauncher.launch(uri)
+      } else {
+        Log.e("GetContent ActivityResultContract", "Temp camera picture URI was returned as null at generation")
+        navController.popBackStack()
+      }
     },
     onPermissionDenied = {
       navController.context.toast(R.string.camera_permission_required)
@@ -78,13 +94,11 @@ fun CameraRoute(
   )
 
   // TODO: Not a perfect system. If backstack popped too quickly, permissions granted may not have changed in value.
-  LaunchedEffect(permissionsGranted) {
-    if(!permissionsGranted) cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
+  LaunchedEffect(Unit) {
+    cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
   }
 
   LaunchedEffect(cameraViewModel.takePictureUri) {
-    val uri = cameraViewModel.takePictureUri
-    if(uri != null) takePictureLauncher.launch(uri)
   }
 
   if(showPermissionsAlert) {

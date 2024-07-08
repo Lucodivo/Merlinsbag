@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -276,8 +275,13 @@ fun EnsembleDetailScreen(
     Column(
       verticalArrangement = Arrangement.Top,
       horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier
+          .padding(
+            top = systemBarTopPadding,
+            start = systemBarStartPadding,
+            end = systemBarEndPadding,
+          )
     ) {
-      Spacer(modifier = Modifier.height(systemBarTopPadding))
       val titleRowInteractionSource = remember { MutableInteractionSource() }
       val outsideKeyboardRowInteractionSource = remember { MutableInteractionSource() }
       Box(
@@ -396,13 +400,13 @@ fun AddArticlesDialog(
       ) {
         val padding = 10.dp
         items(count = articleThumbnailUris.size) { articleIndex ->
-          val addArticleThumbnailUri = articleThumbnailUris.getUriString(articleIndex)
+          val addArticleThumbnailUri = articleThumbnailUris.getUriStrings(articleIndex)
           val selected = selectedArticleIndices.contains(articleIndex)
           Box(contentAlignment = Alignment.Center) {
             SelectableNoopImage(
               selectable = true,
               selected = selected,
-              uriString = addArticleThumbnailUri,
+              uriString = addArticleThumbnailUri.first(), // TODO: Animate between thumbnails?
               contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                   .padding(padding)

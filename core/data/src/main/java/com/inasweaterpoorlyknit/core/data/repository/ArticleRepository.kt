@@ -13,8 +13,12 @@ import androidx.core.graphics.scale
 import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
+import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -33,23 +37,43 @@ class ArticleRepository(
   // TODO: Remove. Used in testing only.
   fun insertArticle(fullImageUri: String, thumbnailImageUri: String) = articleDao.insertArticle(fullImageUri, thumbnailImageUri)
 
-  fun insertArticle(bitmap: Bitmap) {
+  private fun saveBitmaps(bitmap: Bitmap): ImageFilenames {
     val articleFilesDir = articleFilesDir(context).apply { mkdirs() }
     val thumbnailBitmapToSave = bitmap.toThumbnail()
     val filenameBase = timestampFileName()
-    val fullImageFilename = "${filenameBase}_full.webp"
-    val thumbnailFilename = "${filenameBase}_thumb.webp"
-    saveBitmap(articleFilesDir, fullImageFilename, bitmap)
-    saveBitmap(articleFilesDir, thumbnailFilename, thumbnailBitmapToSave)
-    articleDao.insertArticle(fullImageFilename, thumbnailFilename)
+    val imageFilenames = ImageFilenames(
+      filename = "${filenameBase}_full.webp",
+      filenameThumb = "${filenameBase}_thumb.webp",
+    )
+    saveBitmap(articleFilesDir, imageFilenames.filename, bitmap)
+    saveBitmap(articleFilesDir, imageFilenames.filenameThumb, thumbnailBitmapToSave)
+    return imageFilenames
   }
+
+  fun insertArticle(bitmap: Bitmap) {
+    val filenames = saveBitmaps(bitmap)
+    articleDao.insertArticle(filenames.filename, filenames.filenameThumb)
+  }
+
+  fun insertArticleImage(bitmap: Bitmap, articleId: String){
+    val filenames = saveBitmaps(bitmap)
+    articleDao.insertArticleImages(
+      ArticleImageEntity(
+        articleId = articleId,
+        filename = filenames.filename,
+        filenameThumb = filenames.filenameThumb,
+      )
+    )
+  }
+
+  fun deleteArticleImages(articleImageFilenamesThumb: List<String>) = articleDao.deleteArticleImages(articleImageFilenamesThumb)
 
   suspend fun deleteArticles(articleIds: List<String>) {
     val articleFilesDir = articleFilesDir(context)
-    val articleWithImages = articleDao.getArticlesWithImages(articleIds).first()
+    val articlesWithImages = articleDao.getArticlesWithImages(articleIds).first()
     articleDao.deleteArticles(articleIds)
-    articleWithImages.forEach { articleWithImage ->
-      articleWithImage.imagePaths.forEach { articleImage ->
+    articlesWithImages.forEach { articleWithImages ->
+      articleWithImages.imagePaths.forEach { articleImage ->
         if(!File(articleFilesDir, articleImage.filename).delete()) Log.e("ArticleRepository", "Failed to delete image ${articleImage.filename}")
         if(!File(articleFilesDir, articleImage.filenameThumb).delete()) Log.e("ArticleRepository", "Failed to delete thumbnail ${articleImage.filenameThumb}")
       }
@@ -57,13 +81,10 @@ class ArticleRepository(
   }
   suspend fun deleteArticle(articleId: String) = deleteArticles(listOf(articleId))
 
-  suspend fun exportArticle(articleId: String): Uri? {
-    val articleFilenames = articleDao.getArticleFilenames(articleId).first()
-    val articleFilename = articleFilenames.imagePaths[0].filename
-    val articleFile = File(articleFilesDir(context), articleFilename)
-    val bitmapToExport = BitmapFactory.decodeFile(articleFile.path)
+  fun exportImage(imageUri: String): Uri? {
+    val bitmapToExport = BitmapFactory.decodeFile(imageUri)
 
-    val exportFilname = articleFilename.replace(".webp", ".png")
+    val exportFilname = imageUri.replace(".webp", ".png")
 
     var exportUri: Uri? = null
     var success = false
@@ -95,7 +116,7 @@ class ArticleRepository(
         exportUri = Uri.fromFile(exportFile)
         success = true
       } catch(e: IOException){
-        Log.e("Export Article", "${e.message}\nFailed to copy article image to public directory: ${articleFile.path} -> ${exportFile.path}")
+        Log.e("Export Article", "${e.message}\nFailed to copy article image to public directory: $imageUri -> ${exportFile.path}")
       }
     }
 
@@ -104,9 +125,14 @@ class ArticleRepository(
 
   fun getCountArticles() = articleDao.getCountArticles()
   fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }
-  fun getAllArticlesWithFullImages() = articleDao.getAllArticlesWithFullImages().map { LazyArticleFullImages(articleFilesDirStr(context), it) }
-  fun getArticlesWithFullImages(ensembleId: String?) = if(ensembleId == null) getAllArticlesWithFullImages()
-                                                  else ensembleDao.getEnsembleArticleFullImages(ensembleId).map { LazyArticleFullImages(articleFilesDirStr(context), it) }
+  fun getArticlesWithFullImages(ensembleId: String? = null): Flow<LazyArticleFullImages> =
+      if(ensembleId == null) { articleDao.getAllArticlesWithFullImages() }
+      else { ensembleDao.getEnsembleArticleFullImages(ensembleId) }
+          .map { LazyArticleFullImages(articleFilesDirStr(context), it) }
+  fun getArticlesWithImages(ensembleId: String? = null): Flow<LazyArticlesWithImages> =
+      if(ensembleId == null) { articleDao.getAllArticlesWithImages() }
+      else { ensembleDao.getEnsembleArticleWithImages(ensembleId) }
+          .map { LazyArticlesWithImages(articleFilesDirStr(context), it) }
 }
 
 private fun Bitmap.toThumbnail(): Bitmap{

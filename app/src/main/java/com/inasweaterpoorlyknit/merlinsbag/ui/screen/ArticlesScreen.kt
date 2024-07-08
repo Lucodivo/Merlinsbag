@@ -1,10 +1,5 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
-import android.content.Context
-import android.content.Intent
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -73,15 +68,8 @@ fun ArticlesRoute(
   var editMode by remember { mutableStateOf(false) }
   val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
 
-  val photoAlbumLauncher = rememberLauncherForActivityResult(object: OpenMultipleDocuments() {
-    override fun createIntent(context: Context, input: Array<String>): Intent {
-      return super.createIntent(context, input)
-          .apply { addCategory(Intent.CATEGORY_OPENABLE) }
-    }
-  }) { uris ->
-    if(uris.isNotEmpty()) {
-      navController.navigateToAddArticle(uris.map { navigationSafeUriStringEncode(it) })
-    } else Log.i("GetContent ActivityResultContract", "Picture not returned from album")
+  val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris ->
+    if(uris.isNotEmpty()) navController.navigateToAddArticle(uris.map { navigationSafeUriStringEncode(it) })
   }
 
   ArticlesScreen(
@@ -106,7 +94,7 @@ fun ArticlesRoute(
       if(isItemSelected.contains(index)) isItemSelected.remove(index)
       else isItemSelected[index] = Unit
     },
-    onClickAddPhotoAlbum = { photoAlbumLauncher.launch(arrayOf("image/*")) },
+    onClickAddPhotoAlbum = photoAlbumLauncher::launch,
     onClickAddPhotoCamera = { navController.navigateToCamera() },
     onClickEdit = {
       editMode = !editMode

@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.DarkMode
+import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
@@ -43,7 +46,15 @@ fun TipsAndInfoScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
 ){
   val layoutDir = LocalLayoutDirection.current
+  val buttonIconModifier = Modifier.padding(end = 8.dp)
   @Composable fun spacer() = Spacer(modifier = Modifier.height(8.dp))
+  @Composable fun buttonIcon(
+      icon: ImageVector,
+      @StringRes description: Int,
+  ) = Row {
+      Icon(icon, REDUNDANT_CONTENT_DESCRIPTION, modifier = buttonIconModifier)
+      Text(text = stringResource(description))
+    }
   LazyColumn(modifier = Modifier
       .fillMaxSize()
       .padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir) + 16.dp, end = systemBarPaddingValues.calculateEndPadding(layoutDir) + 16.dp)
@@ -66,44 +77,27 @@ fun TipsAndInfoScreen(
       spacer()
     }
     item{
-      Text(text = stringResource(R.string.add_article_controls), fontSize = MaterialTheme.typography.titleLarge.fontSize)
+      Text(text = stringResource(R.string.button_icons), fontSize = MaterialTheme.typography.titleLarge.fontSize)
       spacer()
-    }
-    item {
-      Row {
-        Icon(NoopIcons.FocusNarrow, stringResource(R.string.tighten_article_crop_region))
-        Text(text = stringResource(R.string.tighten_the_cropping_area_around_the_article))
-      }
-    }
-    item {
-      Row {
-        Icon(NoopIcons.FocusBroaden, stringResource(R.string.loosen_article_crop_region))
-        Text(text = stringResource(R.string.broaden_the_cropping_area_around_the_article))
-      }
-    }
-    item {
-      Row {
-        Icon(NoopIcons.RotateCCW, stringResource(R.string.rotate_ccw))
-        Text(text = stringResource(R.string.rotate_the_article_counter_clockwise_by_90_degrees))
-      }
-    }
-    item {
-      Row {
-        Icon(NoopIcons.RotateCW, stringResource(R.string.rotate_cw))
-        Text(text = stringResource(R.string.rotate_the_article_clockwise_by_90_degrees))
-      }
-    }
-    item {
-      Row {
-        Icon(NoopIcons.Delete, stringResource(R.string.delete))
-        Text(text = stringResource(R.string.discard_the_article))
-      }
-    }
-    item {
-      Row {
-        Icon(NoopIcons.Check, stringResource(R.string.save))
-        Text(text = stringResource(R.string.confirm_catalog_the_article))
-      }
+      buttonIcon(NoopIcons.Items, R.string.articles)
+      buttonIcon(NoopIcons.ensembles(), R.string.ensembles)
+      buttonIcon(NoopIcons.Settings, R.string.settings)
+      buttonIcon(NoopIcons.Edit, R.string.edit)
+      buttonIcon(NoopIcons.Add, R.string.add)
+      buttonIcon(NoopIcons.AddPhotoAlbum, R.string.add_photo_from_device)
+      buttonIcon(NoopIcons.AddPhotoCamera, R.string.add_photo_from_camera)
+      buttonIcon(NoopIcons.FocusNarrow, R.string.tighten_cutout_region)
+      buttonIcon(NoopIcons.FocusBroaden, R.string.loosen_cutout_region)
+      buttonIcon(NoopIcons.RotateCCW, R.string.rotate_counterclockwise_90_degrees)
+      buttonIcon(NoopIcons.RotateCW, R.string.rotate_clockwise_90_degrees)
+      buttonIcon(NoopIcons.Check, R.string.confirm)
+      buttonIcon(NoopIcons.Delete, R.string.discard)
+      buttonIcon(NoopIcons.DeleteForever, R.string.delete)
+      buttonIcon(NoopIcons.Cancel, R.string.cancel_selections)
+      buttonIcon(NoopIcons.Remove, R.string.minimize_buttons)
+      buttonIcon(NoopIcons.Attachment, R.string.attach_article_ensemble_or_image)
+      buttonIcon(NoopIcons.attachmentRemove(), R.string.remove_attached_article_or_ensemble)
+      buttonIcon(NoopIcons.Download, R.string.export_image_to_device)
       spacer()
     }
     item {
@@ -129,6 +123,11 @@ fun TipsAndInfoScreen(
     item {
       Text(text = "\"${stringResource(R.string.configuring_try_again_soon)}\"", fontStyle = FontStyle.Italic)
       Text(text = stringResource(R.string.ml_model_must_download))
+      spacer()
+    }
+    item {
+      Text(text = "\"${stringResource(R.string.sorry_try_again)}\"", fontStyle = FontStyle.Italic)
+      Text(text = stringResource(R.string.article_extraction_is_hard_work))
       spacer()
     }
     item {

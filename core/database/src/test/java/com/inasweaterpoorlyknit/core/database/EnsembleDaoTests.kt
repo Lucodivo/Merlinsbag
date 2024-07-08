@@ -19,12 +19,16 @@ class EnsembleDaoTests: DatabaseTests() {
   fun insertEnsembleWithArticles() = runBlocking(Dispatchers.IO) {
     val articles = createArticleEntity(15)
     val articleIds = Array(articles.size){ articles[it].id }
-    val newArticleImages = Array(articles.size){ createArticleImageEntity(articleIds[it]) }
+    val newArticleImages = Array(articles.size){ index ->
+      Array(index + 1){
+        createArticleImageEntity(articleIds[index])
+      }
+    }
     val ensembleTitles = createCounterString(5)
     val ensembleArticles = Array(5){ articleIds.slice((0 + it) until (articles.lastIndex - it)) }
 
     articleDao.insertArticles(*articles)
-    articleDao.insertArticleImages(*newArticleImages)
+    newArticleImages.forEach { articleDao.insertArticleImages(*it) }
     ensembleTitles.forEachIndexed{i, it ->
       ensembleDao.insertEnsembleWithArticles(it, ensembleArticles[i])
     }
