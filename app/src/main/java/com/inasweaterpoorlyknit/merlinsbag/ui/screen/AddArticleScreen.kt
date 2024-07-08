@@ -292,8 +292,8 @@ fun AddArticleControls(
     val buttonModifier = Modifier.padding(3.dp)
     if(landscape) {
       Row(horizontalArrangement = Arrangement.SpaceBetween) {
-        NoopIconButton(iconData = IconData(NoopIcons.FocusNarrow, stringResource(R.string.tighten_article_crop_region)), onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier)
-        NoopIconButton(iconData = IconData(NoopIcons.FocusBroaden, stringResource(R.string.loosen_article_crop_region)), onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.FocusNarrow, stringResource(R.string.tighten_cutout_region)), onClick = onNarrowFocusClick, enabled = !processing, modifier = buttonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.FocusBroaden, stringResource(R.string.loosen_cutout_region)), onClick = onBroadenFocusClick, enabled = !processing, modifier = buttonModifier)
       }
       Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -324,8 +324,8 @@ fun AddArticleControls(
       val portraitButtonModifier = buttonModifier.weight(1f)
       Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {
         NoopIconButton(iconData = IconData(NoopIcons.RotateCCW, stringResource(R.string.rotate_ccw)), onClick = onRotateCCW, enabled = !processing, modifier = portraitButtonModifier)
-        NoopIconButton(iconData = IconData(NoopIcons.FocusNarrow, stringResource(R.string.tighten_article_crop_region)), onClick = onNarrowFocusClick, enabled = !processing, modifier = portraitButtonModifier)
-        NoopIconButton(iconData = IconData(NoopIcons.FocusBroaden, stringResource(R.string.loosen_article_crop_region)), onClick = onBroadenFocusClick, enabled = !processing, modifier = portraitButtonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.FocusNarrow, stringResource(R.string.tighten_cutout_region)), onClick = onNarrowFocusClick, enabled = !processing, modifier = portraitButtonModifier)
+        NoopIconButton(iconData = IconData(NoopIcons.FocusBroaden, stringResource(R.string.loosen_cutout_region)), onClick = onBroadenFocusClick, enabled = !processing, modifier = portraitButtonModifier)
         NoopIconButton(iconData = IconData(NoopIcons.RotateCW, stringResource(R.string.rotate_cw)), onClick = onRotateCW, enabled = !processing, modifier = portraitButtonModifier)
       }
       Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = buttonRowModifier) {

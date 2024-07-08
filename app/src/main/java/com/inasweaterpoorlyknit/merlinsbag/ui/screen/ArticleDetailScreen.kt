@@ -661,7 +661,7 @@ fun FloatingActionButtonDetailScreen(
             onClick = onClickCancelSelection
           ),
           IconButtonData(
-            icon = IconData(NoopIcons.Delete, stringResource(R.string.delete_selected_images_from_article)),
+            icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_selected_images_from_article)),
             onClick = onClickRemoveImages
           )
         )

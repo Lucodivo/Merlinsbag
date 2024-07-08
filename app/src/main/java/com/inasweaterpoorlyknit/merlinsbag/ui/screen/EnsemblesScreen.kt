@@ -305,7 +305,7 @@ private fun EditEnsemblesExpandingActionButton(
     expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
     onClick = onClickAddEnsemble,
     verticalExpandedButtons = listOf(
-      IconButtonData(IconData(NoopIcons.Delete, stringResource(R.string.delete_selected_ensembles))) { onClickDeleteSelected() },
+      IconButtonData(IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_selected_ensembles))) { onClickDeleteSelected() },
     )
   )
 }
