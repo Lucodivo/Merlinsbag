@@ -35,11 +35,15 @@ Export:
     - It seems like exporting image as a PNG is large (9.1MB+ for a 2650x2645 record!), investigate lowering this value.
     - Loading indicator? Or is disabled export button enough?
 Bugs:
-    - Out of Memory (OOM) crash when processing an image in AddArticleScreen
-        - stems from java.nio.HeapFloatBuffer when called in com.google.mlkit.vision.segmentation.subject.internal
-        - Seen when running application on an Motorola Z Play, 3GB RAM, API 26
-        - settings android:largeHeap="true" in manifest has slightly alleviated the problem
-        - could it be linked to the memory size of thumbnails on the articles screen?
+    - Out of Memory (OOM) crash (or silent PROCESS ENDED while app is in the background due to camera contract) when processing an image in AddArticleScreen
+        - Seen easily running application on an Motorola Z Play, 3GB RAM, API 26
+        - Silent PROCESS ENDED is easy to reproduce on Samsung Galazy A23 if you repeatedly take pictures to catalog articles (occurs within 2-7 attempts usually)
+        - OOM stems from java.nio.HeapFloatBuffer when called in com.google.mlkit.vision.segmentation.subject.internal
+        - Although com.inasweaterpoorlyknit.core.ml.image.SegmentedImage contains multiple bitmaps and large integer arrays, it seems like the bulk of memory is coming from native allocations from ML Kit
+            - Profiling has shown <150MB allocations on the Kotlin side and >1.3GB allocations on the native side
+                - Deallocations obviously matter, but 150MB is not going to cause an OOM exception
+                - This does *NOT* mean that SegmentedImage cannot or should not have it's memory optimized. But it is not the core issue.
+        - CacheManager::trimMemory(20) or similar logging messages can usually be seen before a crash
     - During screen transitions, the previous screen is still interactable?
         - UPDATE: Not able to reproduce outside of debug build. Will verify at some random point in future before bug is removed.
     - FTS is imperfect sometimes shows irrelevant results on first character
@@ -57,7 +61,7 @@ Bugs:
             - answer might lie in the AndroidManifest.xml?
 QoL:
     - Preserve backstack between top level destinations
-
+    - Avoid optimizing for clarity of thumbnail and simply shrink to the most convenient size
 Settings Screen:
     - Export All Data
 Aesthetics:
@@ -73,6 +77,20 @@ Performance:
             - In both the examples above, maybe compress on Default and *only* write to a file on IO
     - EnsemblesScreen
         - Get all article thumbnails with each ensemble using indices
+    - There is potential to highly reduce the storage and transferring of filenames from the database to UI
+        - thumbnails and full image both share the bulk of the filename with the only difference being the suffix "_full" and "_thumb"
+            - why store this name essentially twice?
+                - one reason is obviously the freedom to change these filenames in the future
+        - Filenames are generated from a timestamp. This timestamp could be a simple Long
+            - Very easy to pass around. However, requires that SimpleDateFormat().format() be run potentially everytime a photo is accessed and at least the first time.
+            - Not that wild to implement given the current LazyUriStrings implementation in this project
+        - Summary: There is the potential to store both the thumbnail and full image filenames as a single Long value in the database
+            - Benefits:
+                - less storage/mem space
+                - simplified transferring data being as simple as a Long or array of Longs
+            - Drawbacks:
+                - less flexibility for changing the naming scheme of files in the future
+                - there is a tradeoff of having to reconstruct a filename string at runtime which is bottlenecked by whatever the performance of SimpleDateFormat().format() is
 
 // Unknowns
 Aesthetic Questions:
