@@ -34,6 +34,10 @@ Tooling:
 Export:
     - It seems like exporting image as a PNG is large (9.1MB+ for a 2650x2645 record!), investigate lowering this value.
     - Loading indicator? Or is disabled export button enough?
+Compose Navigation:
+    - Enable a more robust back stack
+        - Ensure the proper navigation UI element is highlighted
+        - Ensure that back history is wiped on "Delete All Data"
 Bugs:
     - Out of Memory (OOM) crash (or silent PROCESS ENDED while app is in the background due to camera contract) when processing an image in AddArticleScreen
         - Seen easily running application on an Motorola Z Play, 3GB RAM, API 26

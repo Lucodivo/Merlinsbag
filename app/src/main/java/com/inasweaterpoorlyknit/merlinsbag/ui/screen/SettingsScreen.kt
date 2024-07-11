@@ -95,30 +95,21 @@ fun SettingsRoute(
 ) {
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
-  var showDeleteAllDataAlertDialog by remember { mutableStateOf(false) }
-  var expandedDarkModeMenu by remember { mutableStateOf(false) }
-  var expandedColorPaletteMenu by remember { mutableStateOf(false) }
-  var expandedHighContrastMenu by remember { mutableStateOf(false) }
-  var expandedTypographyMenu by remember { mutableStateOf(false) }
-  var clearCacheEnabled by remember { mutableStateOf(true) }
-  val userPreferences by settingsViewModel.userPreferences.collectAsState()
 
-  LaunchedEffect(settingsViewModel.cacheClearedTrigger) { settingsViewModel.cacheClearedTrigger.collect { context.toast(R.string.cache_cleared) } }
-
-  LaunchedEffect(settingsViewModel.allDataDeletedTrigger) {
-    settingsViewModel.allDataDeletedTrigger.collect {
-      context.toast(msg = context.getString(R.string.all_data_deleted))
-      navController.navigateToAppStartDestination()
-    }
+  settingsViewModel.cachePurged.getContentIfNotHandled()?.let { context.toast(R.string.cache_cleared) }
+  settingsViewModel.dataDeleted.getContentIfNotHandled()?.let {
+    context.toast(msg = context.getString(R.string.all_data_deleted))
+    navController.navigateToAppStartDestination()
   }
 
+  val userPreferences by settingsViewModel.userPreferences.collectAsState()
   SettingsScreen(
-    showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
-    expandDarkModeDropdownMenu = expandedDarkModeMenu,
-    expandColorPaletteDropdownMenu = expandedColorPaletteMenu,
-    expandHighContrastDropdownMenu = expandedHighContrastMenu,
-    expandTypographyDropdownMenu = expandedTypographyMenu,
-    clearCacheEnabled = clearCacheEnabled,
+    showDeleteAllDataAlertDialog = settingsViewModel.showDeleteAllDataAlertDialog,
+    expandDarkModeDropdownMenu = settingsViewModel.expandedDarkModeMenu,
+    expandColorPaletteDropdownMenu = settingsViewModel.expandedColorPaletteMenu,
+    expandHighContrastDropdownMenu = settingsViewModel.expandedHighContrastMenu,
+    expandTypographyDropdownMenu = settingsViewModel.expandedTypographyMenu,
+    clearCacheEnabled = settingsViewModel.clearCacheEnabled,
     darkMode = userPreferences.darkMode,
     colorPalette = userPreferences.colorPalette,
     highContrast = userPreferences.highContrast,
@@ -131,40 +122,22 @@ fun SettingsRoute(
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
     onClickTipsAndInfoPage = { navController.navigateToTipsAndInfo() },
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
-    onClickClearCache = {
-      clearCacheEnabled = false
-      settingsViewModel.clearCache()
-    },
-    onClickDeleteAllData = { showDeleteAllDataAlertDialog = true },
-    onDismissDeleteAllDataAlertDialog = { showDeleteAllDataAlertDialog = false },
-    onClickConfirmDeleteAllDataAlertDialog = {
-      showDeleteAllDataAlertDialog = false
-      settingsViewModel.deleteAllData()
-    },
-    onSelectDarkMode = { darkMode ->
-      settingsViewModel.setDarkMode(darkMode)
-      expandedDarkModeMenu = false
-    },
-    onClickDarkMode = { expandedDarkModeMenu = !expandedDarkModeMenu },
-    onDismissDarkMode = { expandedDarkModeMenu = false },
-    onSelectColorPalette = {
-      settingsViewModel.setColorPalette(it)
-      expandedColorPaletteMenu = false
-    },
-    onClickColorPalette = { expandedColorPaletteMenu = !expandedColorPaletteMenu },
-    onDismissColorPalette = { expandedColorPaletteMenu = false },
-    onSelectHighContrast = {
-      settingsViewModel.setHighContrast(it)
-      expandedHighContrastMenu = false
-    },
-    onDismissHighContrast = { expandedHighContrastMenu = false },
-    onClickHighContrast = { expandedHighContrastMenu = !expandedHighContrastMenu },
-    onSelectTypography = {
-      settingsViewModel.setTypography(it)
-      expandedTypographyMenu = false
-    },
-    onDismissTypography = { expandedTypographyMenu = false },
-    onClickTypography = { expandedTypographyMenu = !expandedTypographyMenu },
+    onClickClearCache = settingsViewModel::clearCache,
+    onClickDeleteAllData = settingsViewModel::onClickDeleteAllData,
+    onDismissDeleteAllDataAlertDialog = settingsViewModel::onDismissDeleteAllDataAlertDialog,
+    onClickConfirmDeleteAllDataAlertDialog = settingsViewModel::deleteAllData,
+    onSelectDarkMode = settingsViewModel::setDarkMode,
+    onClickDarkMode = settingsViewModel::onClickDarkMode,
+    onDismissDarkMode = settingsViewModel::onDismissDarkMode,
+    onSelectColorPalette = settingsViewModel::setColorPalette,
+    onClickColorPalette = settingsViewModel::onClickColorPalette,
+    onDismissColorPalette = settingsViewModel::onDismissColorPalette,
+    onSelectHighContrast = settingsViewModel::setHighContrast,
+    onDismissHighContrast = settingsViewModel::onDismissHighContrast,
+    onClickHighContrast = settingsViewModel::onClickHighContrast,
+    onSelectTypography = settingsViewModel::setTypography,
+    onDismissTypography = settingsViewModel::onDismissTypography,
+    onClickTypography = settingsViewModel::onClickTypography,
     onClickStatistics = navController::navigateToStatistics
   )
 }
