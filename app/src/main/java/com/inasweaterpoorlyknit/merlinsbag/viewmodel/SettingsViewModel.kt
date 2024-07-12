@@ -56,7 +56,6 @@ class SettingsViewModel @Inject constructor(
 
   fun onClickDeleteAllData() { showDeleteAllDataAlertDialog = true }
   fun onDismissDeleteAllDataAlertDialog() { showDeleteAllDataAlertDialog = false }
-
   fun deleteAllData() {
     showDeleteAllDataAlertDialog = false
     viewModelScope.launch(Dispatchers.IO) {
@@ -67,7 +66,6 @@ class SettingsViewModel @Inject constructor(
 
   fun onClickDarkMode() { expandedDarkModeMenu = !expandedDarkModeMenu }
   fun onDismissDarkMode() { expandedDarkModeMenu = false }
-
   fun setDarkMode(darkMode: DarkMode) {
     expandedDarkModeMenu = false
     viewModelScope.launch(Dispatchers.IO){
@@ -77,7 +75,6 @@ class SettingsViewModel @Inject constructor(
 
   fun onClickColorPalette() { expandedColorPaletteMenu = !expandedColorPaletteMenu }
   fun onDismissColorPalette() { expandedColorPaletteMenu = false }
-
   fun setColorPalette(colorPalette: ColorPalette) {
     expandedColorPaletteMenu = false
     viewModelScope.launch(Dispatchers.IO){
@@ -87,7 +84,6 @@ class SettingsViewModel @Inject constructor(
 
   fun onClickHighContrast() { expandedHighContrastMenu = !expandedHighContrastMenu }
   fun onDismissHighContrast() { expandedHighContrastMenu = false }
-
   fun setHighContrast(highContrast: HighContrast) {
     expandedHighContrastMenu = false
     viewModelScope.launch(Dispatchers.IO){
@@ -97,7 +93,6 @@ class SettingsViewModel @Inject constructor(
 
   fun onClickTypography() { expandedTypographyMenu = !expandedTypographyMenu }
   fun onDismissTypography() { expandedTypographyMenu = false }
-
   fun setTypography(typography: Typography) {
     expandedTypographyMenu = false
     viewModelScope.launch(Dispatchers.IO){

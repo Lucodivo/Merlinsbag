@@ -28,9 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -89,43 +86,33 @@ fun AddArticleRoute(
     factory.create(imageUriStringList, articleId)
   }
 
-  addArticleViewModel.userFacingError.value.getContentIfNotHandled()?.let { msg -> Toast(msg = msg) }
-  addArticleViewModel.finished.value.getContentIfNotHandled()?.let { navController.popBackStack() }
+  addArticleViewModel.imageProcessingError.getContentIfNotHandled()?.let { msg -> Toast(msg = msg) }
+  addArticleViewModel.finished.getContentIfNotHandled()?.let { navController.popBackStack() }
 
   val attachArticleThumbnails = addArticleViewModel.attachArticleThumbnails.collectAsStateWithLifecycle()
   val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
-  var showDiscardAlertDialog by remember { mutableStateOf(false) }
-  var showAttachDialog by remember { mutableStateOf(false) }
 
   AddArticleScreen(
     systemBarPaddingValues = systemBarPaddingValues,
     windowSizeClass = windowSizeClass,
-    processing = addArticleViewModel.processing.value,
-    processedImage = addArticleViewModel.processedBitmap.value,
-    imageRotation = addArticleViewModel.rotation.floatValue,
-    articleAttachmentIndex = addArticleViewModel.attachArticleIndex.value,
+    processing = addArticleViewModel.processing,
+    processedImage = addArticleViewModel.processedBitmap,
+    imageRotation = addArticleViewModel.rotation,
+    articleAttachmentIndex = addArticleViewModel.attachArticleIndex,
     attachArticleThumbnails = attachArticleThumbnails.value,
     attachToArticleEnabled = addArticleViewModel.attachToArticleEnabled,
     onNarrowFocusClick = addArticleViewModel::onFocusClicked,
     onBroadenFocusClick = addArticleViewModel::onWidenClicked,
     onRotateCW = addArticleViewModel::onRotateCW,
     onRotateCCW = addArticleViewModel::onRotateCCW,
-    onDiscard = { showDiscardAlertDialog = true },
-    onSave = {
-      addArticleViewModel.onSave()
-      showAttachDialog = false
-    },
-    showDiscardAlertDialog = showDiscardAlertDialog,
-    onDismissDiscardDialog = { showDiscardAlertDialog = false },
-    onConfirmDiscardDialog = {
-      addArticleViewModel.onDiscard()
-      showDiscardAlertDialog = false
-    },
-    showAttachDialog = showAttachDialog,
-    onAttach = { showAttachDialog = true },
-    onDismissAttachDialog = {
-      showAttachDialog = false
-    },
+    onDiscard = addArticleViewModel::onClickDiscard,
+    onSave = addArticleViewModel::onSave,
+    showDiscardAlertDialog = addArticleViewModel.showDiscardAlertDialog,
+    onDismissDiscardDialog = addArticleViewModel::onDismissDiscardDialog,
+    onConfirmDiscardDialog = addArticleViewModel::onDiscard,
+    showAttachDialog = addArticleViewModel.showAttachDialog,
+    onAttach = addArticleViewModel::onClickAttach,
+    onDismissAttachDialog = addArticleViewModel::onDismissAttachDialog,
     removeAttachedArticle = addArticleViewModel::removeAttachedArticle,
     attachToArticle = addArticleViewModel::addAttachedArticle,
   )

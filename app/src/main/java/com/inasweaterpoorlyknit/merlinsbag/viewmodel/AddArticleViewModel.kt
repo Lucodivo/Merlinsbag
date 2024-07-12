@@ -6,8 +6,10 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.StringRes
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.Event
@@ -53,12 +55,15 @@ class AddArticleViewModel @AssistedInject constructor(
   private var processingImageIndex = -1
   private var rotationIndex = 0
 
-  val processing = mutableStateOf(true)
-  val processedBitmap = mutableStateOf<Bitmap?>(null)
-  val rotation = mutableFloatStateOf(rotations[rotationIndex])
-  val finished = mutableStateOf(Event<Unit>(null))
-  val userFacingError = mutableStateOf(Event<Int>(null))
-  val attachArticleIndex = mutableStateOf<Int?>(null)
+  var processing by mutableStateOf(true)
+  var processedBitmap by mutableStateOf<Bitmap?>(null)
+  var rotation by mutableFloatStateOf(rotations[rotationIndex])
+  var finished by mutableStateOf(Event<Unit>(null))
+  var imageProcessingError by mutableStateOf(Event<Int>(null))
+  var attachArticleIndex by mutableStateOf<Int?>(null)
+  var showDiscardAlertDialog by mutableStateOf(false)
+  var showAttachDialog by mutableStateOf(false)
+
   val attachToArticleEnabled = articleId == null
 
   private val segmentedImage = SegmentedImage()
@@ -72,31 +77,89 @@ class AddArticleViewModel @AssistedInject constructor(
         initialValue = LazyUriStrings.Empty
       )
 
-  init {
-    processNextImage()
-  }
-
-  fun removeAttachedArticle() { attachArticleIndex.value = null }
-  fun addAttachedArticle(articleIndex: Int) { attachArticleIndex.value = articleIndex }
+  init { processNextImage() }
 
   override fun onCleared() {
     super.onCleared()
     segmentedImage.cleanup()
   }
 
+  fun removeAttachedArticle() { attachArticleIndex = null }
+  fun addAttachedArticle(articleIndex: Int) { attachArticleIndex = articleIndex }
+
+  fun onClickDiscard() { showDiscardAlertDialog = true }
+  fun onDismissDiscardDialog() { showDiscardAlertDialog = false }
+
+  fun onClickAttach() { showAttachDialog = true }
+  fun onDismissAttachDialog() { showAttachDialog = false }
+
+  fun onWidenClicked() {
+    processing = true
+    segmentedImage.decreaseThreshold()
+    refreshProcessedBitmap()
+  }
+
+  fun onFocusClicked() {
+    processing = true
+    segmentedImage.increaseThreshold()
+    refreshProcessedBitmap()
+  }
+
+  fun onRotateCW() {
+    rotationIndex = if(rotationIndex == rotations.lastIndex) 0 else rotationIndex + 1
+    rotation = rotations[rotationIndex]
+  }
+
+  fun onRotateCCW() {
+    rotationIndex = if(rotationIndex == 0) rotations.lastIndex else rotationIndex - 1
+    rotation = rotations[rotationIndex]
+  }
+
+  fun onDiscard() {
+    showDiscardAlertDialog = false
+    nextSubject()
+  }
+
+  fun onSave() {
+    showAttachDialog = false
+    val stopWatch = Timer()
+    lateinit var bitmapToSave: Bitmap
+    val rotationMatrix = Matrix()
+    rotationMatrix.postRotate(rotation)
+    bitmapToSave = Bitmap.createBitmap(
+      segmentedImage.subjectBitmap,
+      segmentedImage.subjectBoundingBox.minX,
+      segmentedImage.subjectBoundingBox.minY,
+      segmentedImage.subjectBoundingBox.width,
+      segmentedImage.subjectBoundingBox.height,
+      rotationMatrix,
+      false // e.g. bilinear filtering of source
+    )
+    val attachmentArticleIndex = attachArticleIndex
+    val attachmentArticleId = if(attachmentArticleIndex != null){
+      attachArticleIndex= null
+      attachArticleThumbnailsCache?.getArticleId(attachmentArticleIndex)
+    } else articleId
+    viewModelScope.launch(Dispatchers.Default) {
+      nextSubject()
+      if(attachmentArticleId == null) articleRepository.insertArticle(bitmapToSave) else articleRepository.insertArticleImage(bitmapToSave, attachmentArticleId)
+      stopWatch.logElapsed("AddArticleViewModel", "Save article time")
+    }
+  }
+
   private fun processNextImage() {
     processingImageIndex += 1
     fun error(@StringRes msg: Int) {
-      userFacingError.value = Event(msg)
+      imageProcessingError = Event(msg)
       processNextImage()
     }
     if(processingImageIndex > imageUriStrings.lastIndex) {
-      finished.value = Event(Unit)
+      finished = Event(Unit)
     } else {
-      processedBitmap.value = null
+      processedBitmap = null
       rotationIndex = 0
-      rotation.floatValue = rotations[rotationIndex]
-      processing.value = true
+      rotation = rotations[rotationIndex]
+      processing = true
       viewModelScope.launch(Dispatchers.Default) {
         val imageUri = Uri.parse(imageUriStrings[processingImageIndex])
         if(imageUri == null) {
@@ -135,69 +198,17 @@ class AddArticleViewModel @AssistedInject constructor(
     // reference but edited in-place. This causes 'equals()' to return true because the reference
     // is the same. Setting the value of the processed Bitmap to anything else before setting it to
     // our desired value forces it to actually emit our desired value in all circumstances.
-    processedBitmap.value = null
-    processedBitmap.value = segmentedImage.subjectBitmap
-    processing.value = false
+    processedBitmap = null
+    processedBitmap = segmentedImage.subjectBitmap
+    processing = false
   }
 
-  fun onWidenClicked() {
-    processing.value = true
-    segmentedImage.decreaseThreshold()
-    refreshProcessedBitmap()
-  }
-
-  fun onFocusClicked() {
-    processing.value = true
-    segmentedImage.increaseThreshold()
-    refreshProcessedBitmap()
-  }
-
-  fun onRotateCW() {
-    rotationIndex = if(rotationIndex == rotations.lastIndex) 0 else rotationIndex + 1
-    rotation.floatValue = rotations[rotationIndex]
-  }
-
-  fun onRotateCCW() {
-    rotationIndex = if(rotationIndex == 0) rotations.lastIndex else rotationIndex - 1
-    rotation.floatValue = rotations[rotationIndex]
-  }
-
-  fun onDiscard() {
-    nextSubject()
-  }
-
-  fun nextSubject() {
+  private fun nextSubject() {
     if(segmentedImage.subjectIndex == (segmentedImage.subjectCount - 1)) {
       processNextImage()
     } else {
       segmentedImage.nextSubject()
       refreshProcessedBitmap()
-    }
-  }
-
-  fun onSave() {
-    val stopWatch = Timer()
-    lateinit var bitmapToSave: Bitmap
-    val rotationMatrix = Matrix()
-    rotationMatrix.postRotate(rotation.floatValue)
-    bitmapToSave = Bitmap.createBitmap(
-      segmentedImage.subjectBitmap,
-      segmentedImage.subjectBoundingBox.minX,
-      segmentedImage.subjectBoundingBox.minY,
-      segmentedImage.subjectBoundingBox.width,
-      segmentedImage.subjectBoundingBox.height,
-      rotationMatrix,
-      false // e.g. bilinear filtering of source
-    )
-    val attachmentArticleIndex = attachArticleIndex.value
-    val attachmentArticleId = if(attachmentArticleIndex != null){
-      attachArticleIndex.value = null
-      attachArticleThumbnailsCache?.getArticleId(attachmentArticleIndex)
-    } else articleId
-    viewModelScope.launch(Dispatchers.Default) {
-      nextSubject()
-      if(attachmentArticleId == null) articleRepository.insertArticle(bitmapToSave) else articleRepository.insertArticleImage(bitmapToSave, attachmentArticleId)
-      stopWatch.logElapsed("AddArticleViewModel", "Save article time")
     }
   }
 }

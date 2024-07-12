@@ -109,9 +109,8 @@ private val REQUIRED_STORAGE_PERMISSIONS = if(storagePermissionsRequired) arrayO
 
 fun articleDetailRoute(articleIndex: Int, ensembleId: String? = null) = "${ARTICLE_DETAIL_ROUTE_BASE}?$ARTICLE_INDEX_ARG=$articleIndex?$ENSEMBLE_ID_ARG=$ensembleId"
 
-fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null) {
+fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null) =
   navigate(articleDetailRoute(articleIndex, ensembleId), navOptions)
-}
 
 @Composable
 fun ArticleDetailRoute(
