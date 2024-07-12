@@ -1,6 +1,12 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,11 +18,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -26,7 +39,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.database.model.EnsembleCount
+import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
+import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.allTestThumbnailResourceIdsAsStrings
+import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
@@ -45,9 +61,13 @@ fun StatisticsRoute(
   val statisticsUiState by statisticsViewModel.statisticsUiState.collectAsStateWithLifecycle()
   StatisticsScreen(
     articleCount = statisticsUiState.articleCount,
+    articleImageCount = statisticsUiState.articleImageCount,
     ensembleCount = statisticsUiState.ensembleCount,
     popularEnsembles = statisticsUiState.topEnsembles,
-    topArticleDecorationCount = statisticsUiState.topArticleDecorationCount,
+    topArticleMostEnsemblesCount = statisticsUiState.topArticleMostEnsemblesCount,
+    topArticleMostImagesUriStrings = if(statisticsUiState.topArticleMostImagesCount.size > 0) {
+      statisticsUiState.topArticleMostImagesCount.getUriStrings(0)
+    } else emptyList(),
   )
 }
 
@@ -68,13 +88,34 @@ fun StatisticsRow(
 fun StatisticsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     articleCount: Int,
+    articleImageCount: Int,
     ensembleCount: Int,
-    popularEnsembles: List<EnsembleCount>,
-    topArticleDecorationCount: Long,
+    popularEnsembles: List<EnsembleArticleCount>,
+    topArticleMostEnsemblesCount: Int,
+    topArticleMostImagesUriStrings: List<String>,
 ){
   val layoutDir = LocalLayoutDirection.current
   val padding = 16.dp
-  val popularEnsemblesModifier = Modifier.padding(start = 32.dp)
+  val sublistIndentation = 32.dp
+  val thumbnailSize = 100.dp
+  val subListModifier = Modifier.padding(start = sublistIndentation)
+  var animateTopImagesIndex by remember { mutableStateOf(false) }
+  val animateIndex = animateIntAsState(
+    targetValue =
+      if(!animateTopImagesIndex) 0
+      else if(topArticleMostImagesUriStrings.isNotEmpty()) topArticleMostImagesUriStrings.lastIndex
+      else 0,
+    label = "TopArticleMostImages",
+    animationSpec = repeatable(
+      iterations = Int.MAX_VALUE,
+      animation = tween(
+        durationMillis = 3000 * topArticleMostImagesUriStrings.size,
+        easing = LinearEasing
+      ),
+      repeatMode = RepeatMode.Restart
+    )
+  )
+  LaunchedEffect(Unit) { animateTopImagesIndex = true }
   LazyColumn(
     modifier = Modifier.fillMaxSize().padding(
       start = systemBarPaddingValues.calculateStartPadding(layoutDir) + padding,
@@ -83,15 +124,35 @@ fun StatisticsScreen(
   ) {
     item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding() + padding)) }
     item { StatisticsRow("${stringResource(R.string.article_count)}: $articleCount") }
+    item { StatisticsRow("${stringResource(R.string.article_image_count)}: $articleImageCount") }
     item { StatisticsRow("${stringResource(R.string.ensemble_count)}: $ensembleCount") }
-    item { StatisticsRow("${stringResource(R.string.most_decorated_article)}: $topArticleDecorationCount") }
+    item { StatisticsRow("${stringResource(R.string.top_articles)}:") }
+    item { StatisticsRow("${stringResource(R.string.most_ensembles)}: $topArticleMostEnsemblesCount", modifier = subListModifier) }
+    item { StatisticsRow("${stringResource(R.string.most_images)}: ${topArticleMostImagesUriStrings.size}", modifier = subListModifier) }
+    if(topArticleMostImagesUriStrings.isNotEmpty()){
+      item{
+        Box(
+          contentAlignment = Alignment.Center,
+          modifier = subListModifier
+            .padding(start = sublistIndentation)
+            .size(width = thumbnailSize, height = thumbnailSize)
+        ){
+          NoopImage(
+            uriString = topArticleMostImagesUriStrings[animateIndex.value],
+            contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+            modifier = Modifier
+                .sizeIn(maxWidth = thumbnailSize, maxHeight = thumbnailSize)
+          )
+        }
+      }
+    }
     item { StatisticsRow("${stringResource(R.string.top_ensembles)}:") }
     if(popularEnsembles.isNotEmpty()){
       popularEnsembles.forEach { popularEnsemble ->
-        item { StatisticsRow("${popularEnsemble.title}: ${popularEnsemble.count}", modifier = popularEnsemblesModifier) }
+        item { StatisticsRow("${popularEnsemble.title}: ${popularEnsemble.count}", modifier = subListModifier) }
       }
     } else {
-      item { StatisticsRow("[${stringResource(R.string.no_ensembles_available)}]", modifier = popularEnsemblesModifier) }
+      item { StatisticsRow("[${stringResource(R.string.no_ensembles_available)}]", modifier = subListModifier) }
     }
     item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding() + padding)) }
   }
@@ -99,12 +160,14 @@ fun StatisticsScreen(
 
 //region COMPOSABLE PREVIEWS
 @Composable
-fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleCount>) = NoopTheme {
+fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleArticleCount>) = NoopTheme {
   StatisticsScreen(
     articleCount = 12_345,
+    articleImageCount = 300_000,
     ensembleCount = 67_890,
     popularEnsembles = popularEnsembles,
-    topArticleDecorationCount = 15
+    topArticleMostEnsemblesCount = 15,
+    topArticleMostImagesUriStrings = allTestThumbnailResourceIdsAsStrings.toList(),
   )
 }
 
@@ -113,9 +176,9 @@ fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleCount>) = NoopThe
 @Composable
 fun PreviewStatisticsScreen() = PreviewUtilStatisticsScreen(
     popularEnsembles = listOf(
-      EnsembleCount(title = "Goth 2 Boss", 12),
-      EnsembleCount(title = "Hiking", 8),
-      EnsembleCount(title = "Vinyl", 4),
+      EnsembleArticleCount(title = "Goth 2 Boss", 12),
+      EnsembleArticleCount(title = "Hiking", 8),
+      EnsembleArticleCount(title = "Vinyl", 4),
     ),
   )
 

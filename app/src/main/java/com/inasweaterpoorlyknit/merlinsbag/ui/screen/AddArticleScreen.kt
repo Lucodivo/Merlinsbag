@@ -89,7 +89,7 @@ fun AddArticleRoute(
   addArticleViewModel.imageProcessingError.getContentIfNotHandled()?.let { msg -> Toast(msg = msg) }
   addArticleViewModel.finished.getContentIfNotHandled()?.let { navController.popBackStack() }
 
-  val attachArticleThumbnails = addArticleViewModel.attachArticleThumbnails.collectAsStateWithLifecycle()
+  val attachArticleThumbnails by addArticleViewModel.attachArticleThumbnails.collectAsStateWithLifecycle()
   val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
 
   AddArticleScreen(
@@ -99,7 +99,7 @@ fun AddArticleRoute(
     processedImage = addArticleViewModel.processedBitmap,
     imageRotation = addArticleViewModel.rotation,
     articleAttachmentIndex = addArticleViewModel.attachArticleIndex,
-    attachArticleThumbnails = attachArticleThumbnails.value,
+    attachArticleThumbnails = attachArticleThumbnails,
     attachToArticleEnabled = addArticleViewModel.attachToArticleEnabled,
     onNarrowFocusClick = addArticleViewModel::onFocusClicked,
     onBroadenFocusClick = addArticleViewModel::onWidenClicked,

@@ -5,14 +5,14 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.inasweaterpoorlyknit.core.database.model.ArticleCount
+import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleCount
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithFullImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
-import com.inasweaterpoorlyknit.core.database.model.EnsembleCount
+import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -131,14 +131,23 @@ interface EnsembleDao {
     ORDER BY count DESC
     LIMIT :maxCount
   """)
-  fun getMostPopularEnsembles(maxCount: Int): Flow<List<EnsembleCount>>
+  fun getMostPopularEnsembles(maxCount: Int): Flow<List<EnsembleArticleCount>>
 
   @Query("""
-    SELECT article_id as id, COUNT(*) as count
+    SELECT article_id, COUNT(*) as ensembleCount
     FROM ensemble_article 
     GROUP BY article_id
-    ORDER BY count DESC
+    ORDER BY ensembleCount DESC
     LIMIT :maxCount
   """)
-  fun getMostPopularArticles(maxCount: Int): Flow<List<ArticleCount>>
+  fun getMostPopularArticlesEnsembleCount(maxCount: Int): Flow<List<ArticleEnsembleCount>>
+
+  @Transaction @Query("""
+    SELECT article_id
+    FROM article_image 
+    GROUP BY article_id
+    ORDER BY COUNT(*) DESC
+    LIMIT :maxCount
+  """)
+  fun getMostPopularArticleThumbnails(maxCount: Int): Flow<List<ArticleWithThumbnails>>
 }

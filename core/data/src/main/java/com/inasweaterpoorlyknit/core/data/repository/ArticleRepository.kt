@@ -11,7 +11,6 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.graphics.scale
 import com.inasweaterpoorlyknit.core.common.timestampFileName
-import com.inasweaterpoorlyknit.core.data.model.LazyArticleFullImages
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
@@ -124,11 +123,8 @@ class ArticleRepository(
   }
 
   fun getCountArticles() = articleDao.getCountArticles()
+  fun getCountArticleImages() = articleDao.getCountArticles()
   fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }
-  fun getArticlesWithFullImages(ensembleId: String? = null): Flow<LazyArticleFullImages> =
-      if(ensembleId == null) { articleDao.getAllArticlesWithFullImages() }
-      else { ensembleDao.getEnsembleArticleFullImages(ensembleId) }
-          .map { LazyArticleFullImages(articleFilesDirStr(context), it) }
   fun getArticlesWithImages(ensembleId: String? = null): Flow<LazyArticlesWithImages> =
       if(ensembleId == null) { articleDao.getAllArticlesWithImages() }
       else { ensembleDao.getEnsembleArticleWithImages(ensembleId) }

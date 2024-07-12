@@ -146,7 +146,7 @@
     <string name="article_count">Article Count</string>
     <string name="ensemble_successfully_added">Ensemble successfully added</string>
     <string name="top_ensembles">Top Ensembles</string>
-    <string name="most_decorated_article">Most Decorated Article</string>
+    <string name="top_articles">Top Articles</string>
     <string name="nothing_here_yet">Nothing here yet</string>
     <string name="accessories">Accessories</string>
     <string name="goth">Goth</string>
@@ -182,4 +182,7 @@
     <string name="remove_attached_article_or_ensemble">Remove attached article/ensemble</string>
     <string name="attach_article_ensemble_or_image">Attach to article/ensemble</string>
     <string name="export_image_to_device">Export image to device</string>
+    <string name="most_ensembles">Most Ensembles</string>
+    <string name="most_images">Most Images</string>
+    <string name="article_image_count">Article Image Count</string>
 </resources>

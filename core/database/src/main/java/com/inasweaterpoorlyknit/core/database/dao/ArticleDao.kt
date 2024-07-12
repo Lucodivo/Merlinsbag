@@ -76,4 +76,11 @@ interface ArticleDao {
 
   @Query("""SELECT COUNT(id) FROM article""")
   fun getCountArticles(): Flow<Int>
+
+  @Query("""SELECT COUNT(id) FROM article_image""")
+  fun getCountArticleImages(): Flow<Int>
+
+  @Query("""SELECT article_image.filename_thumb FROM article_image
+            WHERE article_image.article_id = :articleId """)
+  fun getArticleThumbnails(articleId: String): Flow<List<String>>
 }

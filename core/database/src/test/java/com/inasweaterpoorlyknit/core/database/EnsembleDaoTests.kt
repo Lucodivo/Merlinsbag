@@ -192,10 +192,10 @@ class EnsembleDaoTests: DatabaseTests() {
       ensembleDao.insertArticleEnsemble(*ensembles.map { EnsembleArticleEntity(ensembleId = it.id, articleId = article.id) }.toTypedArray())
     }
 
-    val mostPopularArticle = ensembleDao.getMostPopularArticles(popularCount).first()
+    val mostPopularArticle = ensembleDao.getMostPopularArticlesEnsembleCount(popularCount).first()
 
     assertEquals(popularCount, mostPopularArticle.size)
-    assertEquals(articles.last().id, mostPopularArticle.first().id)
+    assertEquals(articles.last().id, mostPopularArticle.first().articleId)
     assertEquals(articles.size.toLong(), mostPopularArticle.first().count)
   }
 

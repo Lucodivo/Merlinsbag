@@ -6,16 +6,6 @@ import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 
-class LazyArticleFullImages(
-  val directory: String,
-  articleFullImagePaths: List<ArticleWithFullImages>
-): LazyUriStrings {
-  val paths = articleFullImagePaths.toMutableList()
-  override val size get() = paths.size
-  override fun getUriStrings(index: Int): List<String> =paths[index].fullImagePaths.map { "$directory${it.filename}" }
-  companion object { val Empty = LazyArticleFullImages("", mutableListOf()) }
-}
-
 class LazyArticleThumbnails(
   val directory: String,
   articleThumbnailPaths: List<ArticleThumbnails>

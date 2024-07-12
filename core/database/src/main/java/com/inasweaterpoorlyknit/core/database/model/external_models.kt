@@ -75,12 +75,18 @@ data class EnsembleArticleThumbnails(
   val articles: List<EnsembleArticleWithThumbnails>,
 )
 
-data class EnsembleCount(
+data class EnsembleArticleCount(
     val title: String,
     val count: Long,
 )
 
-data class ArticleCount(
-    val id: String,
-    val count: Long,
-)
+data class ArticleEnsembleCount(
+    val ensembleCount: Int,
+    @ColumnInfo(name = "article_id") override val articleId: String,
+    @Relation(
+      parentColumn = "article_id",
+      entityColumn = "article_id",
+      entity = ArticleImageEntity::class
+    )
+    override val thumbnailPaths: List<ThumbnailFilename>
+): ArticleThumbnails
