@@ -3,8 +3,12 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
 import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
@@ -18,7 +22,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -29,7 +32,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 
@@ -42,7 +44,7 @@ data class ArticleEnsembleUiState(
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
     @Assisted("ensembleId") private val ensembleId: String?,
-    @Assisted("articleIndex") private var articleIndex: Int,
+    @Assisted("articleIndex") var articleIndex: Int,
     val articleRepository: ArticleRepository,
     val ensembleRepository: EnsembleRepository,
 ): ViewModel() {
@@ -60,11 +62,10 @@ class ArticleDetailViewModel @AssistedInject constructor(
   private var cachedArticleEnsembles: List<Ensemble> = emptyList()
   private var cachedAllEnsembles: List<Ensemble> = emptyList()
 
-  private val _exportedImageUri = MutableSharedFlow<Pair<Int, Uri>>()
-  val articleExported: SharedFlow<Pair<Int, Uri>> = _exportedImageUri
+  var exportedImage by mutableStateOf(Event<Pair<Int, Uri>>(null))
+  var articleId by mutableStateOf<String?>(null)
 
   private val _articleId = MutableSharedFlow<String>()
-  var articleId: String? = null
 
   private val _removedArticleIndexWithId = MutableSharedFlow<Pair<Int, String>>(replay = 1).apply { tryEmit(Pair(-1,"")) }
 
@@ -92,7 +93,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
     val imageUri = cachedArticlesWithFullImages.lazyFullImageUris.getUriStrings(articleIndex)[imageIndex]
     viewModelScope.launch(Dispatchers.Default) {
       val exportedImageUri = articleRepository.exportImage(imageUri)
-      exportedImageUri?.let { _exportedImageUri.emit(Pair(articleIndex, it)) }
+      exportedImageUri?.let { exportedImage = Event(Pair(articleIndex, it)) }
     }
   }
 
@@ -158,9 +159,9 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   val ensembleUiState: StateFlow<ArticleEnsembleUiState> = combine(
     _articleId.flatMapLatest { ensembleRepository.getEnsemblesByArticle(it) }
-        .onEach {
-          cachedArticleEnsembles = it
-          cachedArticleEnsembleIdSet = it.map { it.id }.toSet()
+        .onEach { ensembles ->
+          cachedArticleEnsembles = ensembles
+          cachedArticleEnsembleIdSet = ensembles.map { it.id }.toSet()
         },
     _searchQuery.flatMapLatest {  searchQuery ->
       if(searchQuery.isEmpty()) { flowOf(Pair(emptyList(), false)) }

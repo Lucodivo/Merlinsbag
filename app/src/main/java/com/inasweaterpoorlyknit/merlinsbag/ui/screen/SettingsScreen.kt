@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -94,10 +95,14 @@ fun SettingsRoute(
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
 
-  settingsViewModel.cachePurged.getContentIfNotHandled()?.let { context.toast(R.string.cache_cleared) }
+  settingsViewModel.cachePurged.getContentIfNotHandled()?.let {
+    LaunchedEffect(Unit) { context.toast(R.string.cache_cleared) }
+  }
   settingsViewModel.dataDeleted.getContentIfNotHandled()?.let {
-    context.toast(msg = context.getString(R.string.all_data_deleted))
-    navController.navigateToAppStartDestination()
+    LaunchedEffect(Unit) {
+      context.toast(msg = context.getString(R.string.all_data_deleted))
+      navController.navigateToAppStartDestination()
+    }
   }
 
   val userPreferences by settingsViewModel.userPreferences.collectAsState()

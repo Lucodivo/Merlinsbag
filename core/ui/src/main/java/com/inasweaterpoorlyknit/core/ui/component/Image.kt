@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -60,38 +61,33 @@ fun NoopImage(
     modifier: Modifier = Modifier,
     crossFadeMs: Int = 300,
 ) {
-  val context = LocalContext.current
-  Box(
-    contentAlignment = Alignment.Center,
-    modifier = modifier
-  ) {
-    if(isComposePreview) {
-      Image(
-        painter = painterResource(id = uriString!!.toInt()),
-        contentDescription = contentDescription,
-      )
-      return
-    }
-
-    // Although images are all local to the device, Coil's AsyncImage is still useful as it pulls
-    // loading of images off the main thread but it also offers image caching and bitmap pooling
-    AsyncImage(
-      model = ImageRequest.Builder(LocalContext.current)
-          .data(uriString)
-          .crossfade(crossFadeMs)
-          .fallback(R.drawable.broken_image)
-          .error(R.drawable.broken_image)
-          .build(),
+  if(isComposePreview) {
+    Image(
+      painter = painterResource(id = uriString!!.toInt()),
       contentDescription = contentDescription,
+      modifier = modifier,
     )
+    return
   }
+
+  // Although images are all local to the device, Coil's AsyncImage is still useful as it pulls
+  // loading of images off the main thread but it also offers image caching and bitmap pooling
+  AsyncImage(
+    model = ImageRequest.Builder(LocalContext.current)
+        .data(uriString)
+        .crossfade(crossFadeMs)
+        .fallback(R.drawable.broken_image)
+        .error(R.drawable.broken_image)
+        .build(),
+    contentDescription = contentDescription,
+    modifier = modifier,
+    contentScale = ContentScale.Fit,
+  )
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun rememberImageBitmap(imageUriString: String): ImageBitmap? {
-  val context = LocalContext.current
-  val imageUri = Uri.parse(imageUriString)
   return try {
     val inputStream = File(imageUriString).inputStream()
     BitmapFactory.decodeStream(inputStream)?.asImageBitmap()
@@ -109,7 +105,10 @@ fun SelectableNoopImage(
     selectable: Boolean,
     modifier: Modifier = Modifier,
 ) {
-  Box(contentAlignment = Alignment.Center) {
+  Box(
+    contentAlignment = Alignment.Center,
+    modifier = modifier
+  ) {
     NoopImage(
       uriString = uriString,
       contentDescription = contentDescription,

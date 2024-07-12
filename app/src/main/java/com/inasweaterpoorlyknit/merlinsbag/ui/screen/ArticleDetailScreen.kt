@@ -129,6 +129,7 @@ fun ArticleDetailRoute(
   val settingsLauncher = rememberSettingsLauncher()
   val ensembleUiState by articleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   val lazyArticleFilenames by articleDetailViewModel.lazyArticleFilenames.collectAsStateWithLifecycle()
+  val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
   var editMode by remember { mutableStateOf(false) }
   var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
   var showPermissionsAlertDialog by remember { mutableStateOf(false) }
@@ -141,14 +142,13 @@ fun ArticleDetailRoute(
   var ensembleListState by remember { mutableStateOf(LazyListState()) }
   var thumbnailAltsListState by remember { mutableStateOf(LazyListState()) }
   val articleImageIndices = remember(lazyArticleFilenames) { mutableStateListOf(*Array(lazyArticleFilenames.size) { 0 }) }
-  val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
-  val userSearch = remember { mutableStateOf("") }
+  var userSearch by remember { mutableStateOf("") }
+  val articleBeingExported = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   val pagerState = rememberPagerState(
-    initialPage = articleIndex,
+    initialPage = articleDetailViewModel.articleIndex,
     initialPageOffsetFraction = 0.0f,
     pageCount = { lazyArticleFilenames.size },
   )
-  val articleBeingExported = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
   val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris ->
     if(uris.isNotEmpty()) navController.navigateToAddArticle(
       uriStringArray = uris.map { navigationSafeUriStringEncode(it) },
@@ -164,8 +164,9 @@ fun ArticleDetailRoute(
     onPermissionDenied = { navController.context.toast(R.string.storage_permissions_required) },
     onNeverAskAgain = { showPermissionsAlertDialog = true },
   )
-  LaunchedEffect(articleDetailViewModel.articleExported) {
-    articleDetailViewModel.articleExported.collect { (index, exportedImageUri) ->
+  LaunchedEffect(articleDetailViewModel.exportedImage) {
+    articleDetailViewModel.exportedImage.getContentIfNotHandled()?.let {
+      val (index, exportedImageUri) = it
       articleBeingExported.remove(index)
       when(snackbarHostState.showSnackbar(
         message = context.getString(R.string.image_exported),
@@ -193,9 +194,9 @@ fun ArticleDetailRoute(
       thumbnailAltsListState = LazyListState()
       selectedEnsembles.clear()
       selectedThumbnails.clear()
-      if(userSearch.value.isNotEmpty()) {
+      if(userSearch.isNotEmpty()) {
         articleDetailViewModel.searchEnsembles("")
-        userSearch.value = ""
+        userSearch = ""
       }
     }
   }
@@ -304,15 +305,15 @@ fun ArticleDetailRoute(
     addArticleToEnsemble = { articleDetailViewModel.addArticleToEnsemble(pagerState.currentPage, it) },
     onCloseAddToEnsembleDialog = {
       showAddToEnsemblesDialog = false
-      userSearch.value = ""
+      userSearch = ""
       articleDetailViewModel.searchEnsembles("")
       newlyAddedEnsembles.clear()
     },
     onSearchQueryUpdateAddToEnsembles = {
-      userSearch.value = it
+      userSearch = it
       articleDetailViewModel.searchEnsembles(it)
     },
-    ensemblesSearchQuery = userSearch.value,
+    ensemblesSearchQuery = userSearch,
     searchQueryUniqueTitle = ensembleUiState.searchIsUniqueTitle,
     ensemblesToAdd = ensembleUiState.searchEnsembles,
     newlyAddedEnsembles = newlyAddedEnsembles.keys,
@@ -509,7 +510,7 @@ fun ArticleDetailScreen(
     ArticleDetailScreenControlsMode.EDIT_ENSEMBLES
   } else if(selectedImages.isNotEmpty()){
     val thumbnailCount = if(articleIndex < articlesWithImages.size) articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size else 0
-    if(selectedImages.size == thumbnailCount) ArticleDetailScreenControlsMode.DELETE_ARTICLE
+    if(selectedImages.size == thumbnailCount) ArticleDetailScreenControlsMode.EDIT_ALL_IMAGES
     else ArticleDetailScreenControlsMode.EDIT_IMAGES
   } else ArticleDetailScreenControlsMode.EDIT_ARTICLE
   FloatingActionButtonDetailScreen(
@@ -529,7 +530,7 @@ fun ArticleDetailScreen(
       end = systemBarEndPadding,
     ),
   )
-  if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(fromDeletingAllImages = controlMode == ArticleDetailScreenControlsMode.DELETE_ARTICLE, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
+  if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(fromDeletingAllImages = controlMode == ArticleDetailScreenControlsMode.EDIT_ALL_IMAGES, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
   if(showPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
   if(showRemoveFromEnsemblesAlertDialog) RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
   if(showRemoveImagesAlertDialog) RemoveImagesAlertDialog(onDismiss = onDismissRemoveImagesDialog, onConfirm = onConfirmRemoveImagesDialog)
@@ -619,7 +620,7 @@ enum class ArticleDetailScreenControlsMode {
   EDIT_ARTICLE,
   EDIT_ENSEMBLES,
   EDIT_IMAGES,
-  DELETE_ARTICLE,
+  EDIT_ALL_IMAGES,
 }
 
 @Composable
@@ -644,61 +645,66 @@ fun FloatingActionButtonDetailScreen(
       collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
       expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       onClick = onClickEdit,
-      verticalExpandedButtons = if(mode == ArticleDetailScreenControlsMode.EDIT_ENSEMBLES) listOf(
-        IconButtonData(
-          icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_ensembles)),
-          onClick = onClickCancelSelection
-        ),
-        IconButtonData(
-          icon = IconData(NoopIcons.attachmentRemove(), stringResource(R.string.remove_article_from_selected_ensembles)),
-          onClick = onClickRemoveEnsembles,
-        ),
-      ) else if(mode == ArticleDetailScreenControlsMode.EDIT_IMAGES) {
-        listOf(
+      verticalExpandedButtons = when(mode) {
+        ArticleDetailScreenControlsMode.EDIT_ENSEMBLES -> listOf(
           IconButtonData(
-            icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
+            icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_ensembles)),
             onClick = onClickCancelSelection
           ),
           IconButtonData(
-            icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_selected_images_from_article)),
-            onClick = onClickRemoveImages
+            icon = IconData(NoopIcons.attachmentRemove(), stringResource(R.string.remove_article_from_selected_ensembles)),
+            onClick = onClickRemoveEnsembles,
+          ),
+        )
+        ArticleDetailScreenControlsMode.EDIT_IMAGES -> {
+          listOf(
+            IconButtonData(
+              icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
+              onClick = onClickCancelSelection
+            ),
+            IconButtonData(
+              icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_selected_images_from_article)),
+              onClick = onClickRemoveImages
+            )
           )
-        )
-      } else if(mode == ArticleDetailScreenControlsMode.DELETE_ARTICLE){
-        listOf(
-          IconButtonData(
-            icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
-            onClick = onClickCancelSelection
-          ),
-          IconButtonData(
-            icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
-            onClick = onClickDelete
+        }
+        ArticleDetailScreenControlsMode.EDIT_ALL_IMAGES -> {
+          listOf(
+            IconButtonData(
+              icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
+              onClick = onClickCancelSelection
+            ),
+            IconButtonData(
+              icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
+              onClick = onClickDelete
+            )
           )
-        )
-      } else {
-        listOf(
-          IconButtonData(
-            icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
-            onClick = onClickDelete
-          ),
-          IconButtonData(
-            icon = IconData(NoopIcons.Download, stringResource(R.string.export_article_image)),
-            onClick = onClickExport,
-            enabled = exportingEnabled,
-          ),
-          IconButtonData(
-            icon = IconData(NoopIcons.AddPhotoAlbum, stringResource(R.string.add_photo_from_photo_album_to_article)),
-            onClick = onClickAddPhotoFromAlbum,
-          ),
-          IconButtonData(
-            icon = IconData(NoopIcons.AddPhotoCamera, stringResource(R.string.add_photo_from_camera_to_article)),
-            onClick = onClickAddPhotoFromCamera
-          ),
-          IconButtonData(
-            icon = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to_ensembles)),
-            onClick = onClickAddToEnsemble
-          ),
-        )
+        }
+        else -> {
+          listOf(
+            IconButtonData(
+              icon = IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_article)),
+              onClick = onClickDelete
+            ),
+            IconButtonData(
+              icon = IconData(NoopIcons.Download, stringResource(R.string.export_article_image)),
+              onClick = onClickExport,
+              enabled = exportingEnabled,
+            ),
+            IconButtonData(
+              icon = IconData(NoopIcons.AddPhotoAlbum, stringResource(R.string.add_photo_from_photo_album_to_article)),
+              onClick = onClickAddPhotoFromAlbum,
+            ),
+            IconButtonData(
+              icon = IconData(NoopIcons.AddPhotoCamera, stringResource(R.string.add_photo_from_camera_to_article)),
+              onClick = onClickAddPhotoFromCamera
+            ),
+            IconButtonData(
+              icon = IconData(NoopIcons.Attachment, stringResource(R.string.attach_to_ensembles)),
+              onClick = onClickAddToEnsemble
+            ),
+          )
+        }
       },
       horizontalExpandedButtons = listOf(),
     )
@@ -913,19 +919,19 @@ fun PreviewUtilArticleDetailScreen(
       showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
       showAddToEnsembleDialog = showAddToEnsembleDialog,
       showRemoveImagesAlertDialog = showRemoveImagesAlertDialog,
-      onClickDelete = {},
-      onClickRemoveEnsembles = {},
-      onClickCancelEnsemblesSelection = {},
-      onClickAddToEnsemble = {},
-      onClickAddPhotoFromAlbum = {},
-      onClickAddPhotoFromCamera = {},
-      onClickRemoveImages = {}, onClickThumbnail = {}, onLongPressThumbnail = {}, ensembleListState = rememberLazyListState(),
-      thumbnailsAltsListState = rememberLazyListState(), onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {}, onDismissPermissionsDialog = {},
-      onConfirmPermissionsDialog = {}, onDismissDeleteDialog = {}, onDismissRemoveImagesDialog = {}, onConfirmRemoveImagesDialog = {}, onLongPressEnsemble = {}, exportingEnabled = true,
-      onClickEdit = {}, selectedEnsembles = selectedEnsembles, selectedImages = setOf(0), ensemblesToAdd = addEnsembles, addNewEnsemble = {},
-      onCloseAddToEnsembleDialog = {}, addArticleToEnsemble = {}, ensemblesSearchQuery = "Goth 2 Boss", searchQueryUniqueTitle = true, onSearchQueryUpdateAddToEnsembles = {}, newlyAddedEnsembles = emptySet(), onConfirmDeleteDialog = {},
-      onClickEnsemble = {},
-      onClickExport = {},
+      selectedEnsembles = selectedEnsembles,
+      ensemblesToAdd = addEnsembles,
+      exportingEnabled = true,
+      searchQueryUniqueTitle = true,
+      selectedImages = setOf(0),
+      ensemblesSearchQuery = "Goth 2 Boss",
+      newlyAddedEnsembles = emptySet(),
+      ensembleListState = rememberLazyListState(), thumbnailsAltsListState = rememberLazyListState(),
+      onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {}, onClickAddToEnsemble = {}, onClickAddPhotoFromAlbum = {}, onClickAddPhotoFromCamera = {},
+      onClickRemoveImages = {}, onClickThumbnail = {}, onLongPressThumbnail = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {}, onDismissPermissionsDialog = {},
+      onConfirmPermissionsDialog = {}, onDismissDeleteDialog = {}, onDismissRemoveImagesDialog = {}, onConfirmRemoveImagesDialog = {}, onLongPressEnsemble = {},
+      onClickEdit = {}, addNewEnsemble = {}, onCloseAddToEnsembleDialog = {}, addArticleToEnsemble = {},   onSearchQueryUpdateAddToEnsembles = {},  onConfirmDeleteDialog = {},
+      onClickEnsemble = {}, onClickExport = {},
     )
   }
 }

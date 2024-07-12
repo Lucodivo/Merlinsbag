@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -39,7 +40,9 @@ import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 
-val staggeredGridColumnMinWidth = 90.dp
+val staggeredGridColumnMinWidth = 90
+val staggeredGridColumnMinWidthDp = staggeredGridColumnMinWidth.dp
+val staggeredGridColumnMaxHeightDp = (staggeredGridColumnMinWidth.toFloat() * 1.5f).toInt().dp
 val staggeredGridItemPadding = 4.dp
 
 @Composable
@@ -60,7 +63,7 @@ fun PlaceholderThumbnailGrid(modifier: Modifier = Modifier){
                   drawContent()
                   drawRect(shimmerBrush, blendMode = BlendMode.SrcIn)
                 }
-                .sizeIn(maxHeight = staggeredGridColumnMinWidth),
+                .sizeIn(maxHeight = staggeredGridColumnMaxHeightDp),
           )
         }
       }
@@ -84,7 +87,7 @@ fun NoopVerticalStaggeredGrid(
   val staggeredGridState = rememberLazyStaggeredGridState()
   LazyVerticalStaggeredGrid(
     // typical dp width of a smart phone is 320dp-480dp
-    columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidth),
+    columns = StaggeredGridCells.Adaptive(minSize = staggeredGridColumnMinWidthDp),
     modifier = modifier.fillMaxSize(),
     state = staggeredGridState,
     verticalItemSpacing = staggeredGridItemPadding,
@@ -103,23 +106,20 @@ fun SelectableStaggeredThumbnailGrid(
 ) {
   NoopVerticalStaggeredGrid {
     items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
-      Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .combinedClickable(
-              onClick = { onSelect(thumbnailGridItemIndex) },
-              onLongClick = { onLongSelect(thumbnailGridItemIndex) }
-            )
-      ) {
         val uriString = thumbnailUris.getUriStrings(thumbnailGridItemIndex)
         SelectableNoopImage(
           uriString = uriString.first(), // TODO: Animate between items?
           contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
           selected = selectedThumbnails.contains(thumbnailGridItemIndex),
           selectable = selectable,
-          modifier = Modifier.sizeIn(maxHeight = staggeredGridColumnMinWidth),
+          modifier = Modifier
+              .combinedClickable(
+                onClick = { onSelect(thumbnailGridItemIndex) },
+                onLongClick = { onLongSelect(thumbnailGridItemIndex) }
+              )
+              .fillMaxWidth()
+              .sizeIn(maxHeight = staggeredGridColumnMaxHeightDp),
         )
-      }
     }
   }
 }
