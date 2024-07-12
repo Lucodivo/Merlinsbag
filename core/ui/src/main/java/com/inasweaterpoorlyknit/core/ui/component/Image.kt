@@ -58,6 +58,7 @@ fun NoopImage(
     uriString: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
+    crossFadeMs: Int = 300,
 ) {
   val context = LocalContext.current
   Box(
@@ -77,7 +78,7 @@ fun NoopImage(
     AsyncImage(
       model = ImageRequest.Builder(LocalContext.current)
           .data(uriString)
-          .crossfade(300)
+          .crossfade(crossFadeMs)
           .fallback(R.drawable.broken_image)
           .error(R.drawable.broken_image)
           .build(),

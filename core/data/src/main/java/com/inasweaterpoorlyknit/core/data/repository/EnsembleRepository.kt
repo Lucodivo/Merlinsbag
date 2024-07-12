@@ -7,7 +7,6 @@ import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleCount
-import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
@@ -21,7 +20,7 @@ class EnsembleRepository(
   private val ensembleDao: EnsembleDao,
   private val articleDao: ArticleDao,
 ) {
-  val directory = articleFilesDirStr(context)
+  val articleImagesDirStr = articleFilesDirStr(context)
 
   private fun EnsembleArticleThumbnails.toLazyEnsembleThumbnails() =
     LazyEnsembleThumbnails(
@@ -29,7 +28,7 @@ class EnsembleRepository(
         ensembleId,
         ensembleTitle
       ),
-      LazyArticleThumbnails(directory, articles)
+      LazyArticleThumbnails(articleImagesDirStr, articles)
     )
 
   fun getCountEnsembles(): Flow<Int> = ensembleDao.getCountEnsembles()
@@ -39,12 +38,16 @@ class EnsembleRepository(
       ensembleDao.getAllEnsembleArticleThumbnails().listMap { it.toLazyEnsembleThumbnails() }
   fun searchEnsembleArticleThumbnails(query: String): Flow<List<LazyEnsembleThumbnails>> =
       ensembleDao.searchEnsembleArticleThumbnails(query).listMap { it.toLazyEnsembleThumbnails() }
-  fun getEnsembleArticleThumbnails(ensembleId: String) = ensembleDao.getEnsembleArticleThumbnails(ensembleId).map{ LazyArticleThumbnails(directory, it) }
+  fun getEnsembleArticleThumbnails(ensembleId: String) = ensembleDao.getEnsembleArticleThumbnails(ensembleId).map{ LazyArticleThumbnails(articleImagesDirStr, it) }
   fun getEnsemble(ensembleId: String): Flow<Ensemble> = ensembleDao.getEnsemble(ensembleId)
   fun getEnsemblesByArticle(articleId: String): Flow<List<Ensemble>> = ensembleDao.getEnsemblesByArticle(articleId)
   fun getMostPopularEnsembles(count: Int): Flow<List<EnsembleArticleCount>> = ensembleDao.getMostPopularEnsembles(count)
-  fun getMostPopularArticlesEnsembleCount(count: Int): Flow<List<ArticleEnsembleCount>> = ensembleDao.getMostPopularArticlesEnsembleCount(count)
-  fun getMostPopularArticlesImageCount(count: Int): Flow<LazyUriStrings> = ensembleDao.getMostPopularArticleThumbnails(count).map{ LazyArticleThumbnails(directory, it) }
+  fun getMostPopularArticlesEnsembleCount(count: Int): Flow<Pair<List<Int>, LazyUriStrings>> = ensembleDao.getMostPopularArticlesEnsembleCount(count).map { articleEnsembleCounts ->
+    Pair(
+      articleEnsembleCounts.map { it.ensembleCount },
+      LazyArticleThumbnails(articleImagesDirStr, articleEnsembleCounts)
+    )
+  }
   fun insertEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(title, articleIds)
   fun deleteArticlesFromEnsemble(ensembleId: String, articleIds: List<String>) {
     ensembleDao.deleteArticleEnsemblesFromEnsemble(ensembleId = ensembleId, articleIds = articleIds)

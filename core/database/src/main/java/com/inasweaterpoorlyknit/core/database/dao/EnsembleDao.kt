@@ -141,13 +141,4 @@ interface EnsembleDao {
     LIMIT :maxCount
   """)
   fun getMostPopularArticlesEnsembleCount(maxCount: Int): Flow<List<ArticleEnsembleCount>>
-
-  @Transaction @Query("""
-    SELECT article_id
-    FROM article_image 
-    GROUP BY article_id
-    ORDER BY COUNT(*) DESC
-    LIMIT :maxCount
-  """)
-  fun getMostPopularArticleThumbnails(maxCount: Int): Flow<List<ArticleWithThumbnails>>
 }

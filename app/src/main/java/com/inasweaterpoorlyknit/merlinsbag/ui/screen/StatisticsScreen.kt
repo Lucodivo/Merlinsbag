@@ -58,16 +58,19 @@ fun StatisticsRoute(
     navController: NavController,
     statisticsViewModel: StatisticsViewModel = hiltViewModel(),
 ) {
-  val statisticsUiState by statisticsViewModel.statisticsUiState.collectAsStateWithLifecycle()
+  val articleCount by statisticsViewModel.articleCount.collectAsStateWithLifecycle()
+  val articleImageCount by statisticsViewModel.articleImagesCount.collectAsStateWithLifecycle()
+  val ensembleCount by statisticsViewModel.ensembleCount.collectAsStateWithLifecycle()
+  val popularEnsembles by statisticsViewModel.topEnsembles.collectAsStateWithLifecycle()
+  val topArticleMostEnsemblesCount by statisticsViewModel.topArticleMostEnsemblesCount.collectAsStateWithLifecycle()
+  val topArticleMostImagesUriStrings by statisticsViewModel.topArticleMostImagesCount.collectAsStateWithLifecycle()
   StatisticsScreen(
-    articleCount = statisticsUiState.articleCount,
-    articleImageCount = statisticsUiState.articleImageCount,
-    ensembleCount = statisticsUiState.ensembleCount,
-    popularEnsembles = statisticsUiState.topEnsembles,
-    topArticleMostEnsemblesCount = statisticsUiState.topArticleMostEnsemblesCount,
-    topArticleMostImagesUriStrings = if(statisticsUiState.topArticleMostImagesCount.size > 0) {
-      statisticsUiState.topArticleMostImagesCount.getUriStrings(0)
-    } else emptyList(),
+    articleCount = articleCount,
+    articleImageCount = articleImageCount,
+    ensembleCount = ensembleCount,
+    popularEnsembles = popularEnsembles,
+    topArticleMostEnsemblesCount = topArticleMostEnsemblesCount,
+    topArticleMostImagesUriStrings = topArticleMostImagesUriStrings,
   )
 }
 
@@ -85,37 +88,53 @@ fun StatisticsRow(
 }
 
 @Composable
-fun StatisticsScreen(
-    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    articleCount: Int,
-    articleImageCount: Int,
-    ensembleCount: Int,
-    popularEnsembles: List<EnsembleArticleCount>,
-    topArticleMostEnsemblesCount: Int,
-    topArticleMostImagesUriStrings: List<String>,
-){
-  val layoutDir = LocalLayoutDirection.current
-  val padding = 16.dp
-  val sublistIndentation = 32.dp
-  val thumbnailSize = 100.dp
-  val subListModifier = Modifier.padding(start = sublistIndentation)
+fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
+  val thumbnailSize = 80.dp
   var animateTopImagesIndex by remember { mutableStateOf(false) }
   val animateIndex = animateIntAsState(
     targetValue =
-      if(!animateTopImagesIndex) 0
-      else if(topArticleMostImagesUriStrings.isNotEmpty()) topArticleMostImagesUriStrings.lastIndex
-      else 0,
+    if(!animateTopImagesIndex) 0
+    else if(uriStrings.isNotEmpty()) uriStrings.lastIndex
+    else 0,
     label = "TopArticleMostImages",
     animationSpec = repeatable(
       iterations = Int.MAX_VALUE,
       animation = tween(
-        durationMillis = 3000 * topArticleMostImagesUriStrings.size,
+        durationMillis = 3000 * uriStrings.size,
         easing = LinearEasing
       ),
       repeatMode = RepeatMode.Restart
     )
   )
   LaunchedEffect(Unit) { animateTopImagesIndex = true }
+  Box(
+    contentAlignment = Alignment.Center,
+    modifier = modifier.size(width = thumbnailSize, height = thumbnailSize)
+  ){
+    NoopImage(
+      uriString = uriStrings[animateIndex.value],
+      contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+      crossFadeMs = 0,
+      modifier = Modifier
+          .sizeIn(maxWidth = thumbnailSize, maxHeight = thumbnailSize)
+    )
+  }
+}
+
+@Composable
+fun StatisticsScreen(
+    systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
+    articleCount: Int,
+    articleImageCount: Int,
+    ensembleCount: Int,
+    popularEnsembles: List<EnsembleArticleCount>,
+    topArticleMostEnsemblesCount: Pair<Int, List<String>>,
+    topArticleMostImagesUriStrings: List<String>,
+){
+  val layoutDir = LocalLayoutDirection.current
+  val padding = 16.dp
+  val sublistIndentation = 32.dp
+  val subListModifier = Modifier.padding(start = sublistIndentation)
   LazyColumn(
     modifier = Modifier.fillMaxSize().padding(
       start = systemBarPaddingValues.calculateStartPadding(layoutDir) + padding,
@@ -127,23 +146,22 @@ fun StatisticsScreen(
     item { StatisticsRow("${stringResource(R.string.article_image_count)}: $articleImageCount") }
     item { StatisticsRow("${stringResource(R.string.ensemble_count)}: $ensembleCount") }
     item { StatisticsRow("${stringResource(R.string.top_articles)}:") }
-    item { StatisticsRow("${stringResource(R.string.most_ensembles)}: $topArticleMostEnsemblesCount", modifier = subListModifier) }
+    item { StatisticsRow("${stringResource(R.string.most_ensembles)}: ${topArticleMostEnsemblesCount.first}", modifier = subListModifier) }
+    if(topArticleMostImagesUriStrings.isNotEmpty()){
+      item{
+        StatisticsSlideShow(
+          uriStrings = topArticleMostEnsemblesCount.second,
+          modifier = subListModifier.padding(start = sublistIndentation)
+        )
+      }
+    }
     item { StatisticsRow("${stringResource(R.string.most_images)}: ${topArticleMostImagesUriStrings.size}", modifier = subListModifier) }
     if(topArticleMostImagesUriStrings.isNotEmpty()){
       item{
-        Box(
-          contentAlignment = Alignment.Center,
-          modifier = subListModifier
-            .padding(start = sublistIndentation)
-            .size(width = thumbnailSize, height = thumbnailSize)
-        ){
-          NoopImage(
-            uriString = topArticleMostImagesUriStrings[animateIndex.value],
-            contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
-            modifier = Modifier
-                .sizeIn(maxWidth = thumbnailSize, maxHeight = thumbnailSize)
-          )
-        }
+        StatisticsSlideShow(
+          uriStrings = topArticleMostImagesUriStrings,
+          modifier = subListModifier.padding(start = sublistIndentation)
+        )
       }
     }
     item { StatisticsRow("${stringResource(R.string.top_ensembles)}:") }
@@ -154,7 +172,7 @@ fun StatisticsScreen(
     } else {
       item { StatisticsRow("[${stringResource(R.string.no_ensembles_available)}]", modifier = subListModifier) }
     }
-    item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding() + padding)) }
+    item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + padding)) }
   }
 }
 
@@ -166,7 +184,7 @@ fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleArticleCount>) = 
     articleImageCount = 300_000,
     ensembleCount = 67_890,
     popularEnsembles = popularEnsembles,
-    topArticleMostEnsemblesCount = 15,
+    topArticleMostEnsemblesCount = Pair(allTestThumbnailResourceIdsAsStrings.size, allTestThumbnailResourceIdsAsStrings.toList()),
     topArticleMostImagesUriStrings = allTestThumbnailResourceIdsAsStrings.toList(),
   )
 }

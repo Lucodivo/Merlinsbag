@@ -83,4 +83,13 @@ interface ArticleDao {
   @Query("""SELECT article_image.filename_thumb FROM article_image
             WHERE article_image.article_id = :articleId """)
   fun getArticleThumbnails(articleId: String): Flow<List<String>>
+
+  @Transaction @Query("""
+    SELECT article_id
+    FROM article_image 
+    GROUP BY article_id
+    ORDER BY COUNT(*) DESC
+    LIMIT :maxCount
+  """)
+  fun getMostPopularArticleThumbnails(maxCount: Int): Flow<List<ArticleWithThumbnails>>
 }

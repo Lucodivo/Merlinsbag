@@ -17,6 +17,7 @@ import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -123,7 +124,8 @@ class ArticleRepository(
   }
 
   fun getCountArticles() = articleDao.getCountArticles()
-  fun getCountArticleImages() = articleDao.getCountArticles()
+  fun getCountArticleImages() = articleDao.getCountArticleImages()
+  fun getMostPopularArticlesImageCount(count: Int): Flow<LazyUriStrings> = articleDao.getMostPopularArticleThumbnails(count).map{ LazyArticleThumbnails(articleFilesDirStr(context), it) }
   fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }
   fun getArticlesWithImages(ensembleId: String? = null): Flow<LazyArticlesWithImages> =
       if(ensembleId == null) { articleDao.getAllArticlesWithImages() }

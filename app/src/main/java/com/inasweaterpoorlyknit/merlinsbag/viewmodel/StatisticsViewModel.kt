@@ -2,6 +2,7 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleCount
@@ -10,18 +11,11 @@ import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-
-data class StatisticsUiState(
-    val ensembleCount: Int,
-    val articleCount: Int,
-    val articleImageCount: Int,
-    val topEnsembles: List<EnsembleArticleCount>,
-    val topArticleMostEnsemblesCount: Int,
-    val topArticleMostImagesCount: LazyUriStrings,
-)
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
@@ -33,32 +27,42 @@ class StatisticsViewModel @Inject constructor(
     const val TOP_ENSEMBLES_COUNT = 10
   }
 
-  val statisticsUiState = combine(
-    ensembleRepository.getCountEnsembles(),
-    articleRepository.getCountArticles(),
-    articleRepository.getCountArticleImages(),
-    ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT),
-    ensembleRepository.getMostPopularArticlesEnsembleCount(1),
-    ensembleRepository.getMostPopularArticlesImageCount(1),
-  ){
-    StatisticsUiState(
-      ensembleCount = it[0] as Int,
-      articleCount = it[1] as Int,
-      articleImageCount = it[2] as Int,
-      topEnsembles = it[3] as List<EnsembleArticleCount>,
-      topArticleMostEnsemblesCount = (it[4] as List<ArticleEnsembleCount>).firstOrNull()?.ensembleCount ?: 0,
-      topArticleMostImagesCount = it[5] as LazyUriStrings,
-    )
-  }.stateIn(
+  val ensembleCount: StateFlow<Int> = ensembleRepository.getCountEnsembles()
+      .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = StatisticsUiState(
-          ensembleCount = 0,
-          articleCount = 0,
-          articleImageCount = 0,
-          topEnsembles = emptyList(),
-          topArticleMostEnsemblesCount = 0,
-          topArticleMostImagesCount = LazyUriStrings.Empty,
-        ),
+        initialValue = 0,
       )
+  val articleCount: StateFlow<Int> = articleRepository.getCountArticles()
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+        initialValue = 0,
+      )
+  val articleImagesCount: StateFlow<Int> = articleRepository.getCountArticleImages()
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+        initialValue = 0,
+      )
+  val topEnsembles: StateFlow<List<EnsembleArticleCount>> = ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT)
+      .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+        initialValue = emptyList(),
+      )
+  val topArticleMostImagesCount: StateFlow<List<String>> = articleRepository.getMostPopularArticlesImageCount(1).map {
+    if(it.isEmpty()) emptyList() else it.getUriStrings(0)
+  }.stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+    initialValue = emptyList(),
+  )
+  val topArticleMostEnsemblesCount: StateFlow<Pair<Int, List<String>>> = ensembleRepository.getMostPopularArticlesEnsembleCount(1).map {
+    if(it.first.isEmpty() || it.second.isEmpty()) Pair(0, emptyList()) else Pair(it.first[0], it.second.getUriStrings(0))
+  }.stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+    initialValue = Pair(0, emptyList()),
+  )
 }
