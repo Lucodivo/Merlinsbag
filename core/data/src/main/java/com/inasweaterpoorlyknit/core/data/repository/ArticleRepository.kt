@@ -24,9 +24,11 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import kotlin.math.min
 
 val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
-val compressionQuality = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) 100 else 99
+val compressionQualityFull = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) 100 else 99
+val compressionQualityThumb = 70
 val exportFormat = Bitmap.CompressFormat.PNG
 
 class ArticleRepository(
@@ -45,8 +47,8 @@ class ArticleRepository(
       filename = "${filenameBase}_full.webp",
       filenameThumb = "${filenameBase}_thumb.webp",
     )
-    saveBitmap(articleFilesDir, imageFilenames.filename, bitmap)
-    saveBitmap(articleFilesDir, imageFilenames.filenameThumb, thumbnailBitmapToSave)
+    saveBitmap(articleFilesDir, imageFilenames.filename, bitmap, compressionQualityFull)
+    saveBitmap(articleFilesDir, imageFilenames.filenameThumb, thumbnailBitmapToSave, compressionQualityThumb)
     return imageFilenames
   }
 
@@ -134,16 +136,24 @@ class ArticleRepository(
 }
 
 private fun Bitmap.toThumbnail(): Bitmap{
-  var bitmapWidth = width
-  var bitmapHeight = height
-  while (bitmapWidth > 300 || bitmapHeight > 300) {
-    bitmapWidth /= 2
-    bitmapHeight /= 2
-  }
-  return scale(bitmapWidth, bitmapHeight)
+  val maxWidth = 300f
+  val maxHeight = 450f
+  val desiredWidthScale = maxWidth / width.toFloat()
+  val desiredHeightScale = maxHeight / height.toFloat()
+  val scale = min(desiredWidthScale, desiredHeightScale)
+  return if(scale < 1.0f){
+    val desiredWidth = (width * scale).toInt()
+    val desiredHeight = (height * scale).toInt()
+    scale(desiredWidth, desiredHeight)
+  } else this
 }
 
-private fun saveBitmap(directory: File, fileName: String, bitmap: Bitmap){
+private fun saveBitmap(
+    directory: File,
+    fileName: String,
+    bitmap: Bitmap,
+    compressionQuality: Int,
+){
   val imageFile = File(directory, fileName)
   FileOutputStream(imageFile).use { outStream ->
     bitmap.compress(compressionFormat, compressionQuality, outStream)
