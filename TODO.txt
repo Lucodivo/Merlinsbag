@@ -66,6 +66,7 @@ Bugs:
 QoL:
     - Preserve backstack between top level destinations
     - Avoid optimizing for clarity of thumbnail and simply shrink to the most convenient size
+    - Back press closes edit more (already implemented for ArticleDetailScreen)
 Settings Screen:
     - Export All Data
 Aesthetics:

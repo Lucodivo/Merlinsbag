@@ -54,11 +54,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -120,54 +116,45 @@ fun ArticleDetailRoute(
     filterEnsembleId: String?,
     windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier,
-) {
+){
   val context = LocalContext.current
   val articleDetailViewModel =
       hiltViewModel<ArticleDetailViewModel, ArticleDetailViewModel.ArticleDetailViewModelFactory> { factory ->
         factory.create(ensembleId = filterEnsembleId, articleIndex = articleIndex)
       }
+  BackHandler(enabled = true, onBack = articleDetailViewModel::onBack)
+
   val settingsLauncher = rememberSettingsLauncher()
   val ensembleUiState by articleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   val lazyArticleFilenames by articleDetailViewModel.lazyArticleFilenames.collectAsStateWithLifecycle()
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
-  var editMode by remember { mutableStateOf(false) }
-  var showDeleteArticleAlertDialog by remember { mutableStateOf(false) }
-  var showPermissionsAlertDialog by remember { mutableStateOf(false) }
-  var showRemoveFromEnsemblesAlertDialog by remember { mutableStateOf(false) }
-  var showRemoveImagesAlertDialog by remember { mutableStateOf(false) }
-  var showAddToEnsemblesDialog by remember { mutableStateOf(false) }
-  val selectedEnsembles = remember { mutableStateMapOf<Int, Unit>() }
-  val selectedThumbnails = remember { mutableStateMapOf<Int, Unit>() }
-  val newlyAddedEnsembles = remember { mutableStateMapOf<String, Unit>() }
-  var ensembleListState by remember { mutableStateOf(LazyListState()) }
-  var thumbnailAltsListState by remember { mutableStateOf(LazyListState()) }
-  val articleImageIndices = remember(lazyArticleFilenames) { mutableStateListOf(*Array(lazyArticleFilenames.size) { 0 }) }
-  var userSearch by remember { mutableStateOf("") }
-  val articleBeingExported = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
+
+  articleDetailViewModel.finished.getContentIfNotHandled()?.let{ navController.popBackStack() }
+  articleDetailViewModel.launchSettings.getContentIfNotHandled()?.let{ settingsLauncher.launch() }
+  articleDetailViewModel.navigateToCamera.getContentIfNotHandled()?.let{ navController.navigateToCamera(articleId = it)}
+  articleDetailViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navController.navigateToEnsembleDetail(ensembleId = it) }
+
   val pagerState = rememberPagerState(
     initialPage = articleDetailViewModel.articleIndex,
     initialPageOffsetFraction = 0.0f,
     pageCount = { lazyArticleFilenames.size },
   )
+
   val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris ->
     if(uris.isNotEmpty()) navController.navigateToAddArticle(
       uriStringArray = uris.map { navigationSafeUriStringEncode(it) },
       articleId = articleDetailViewModel.articleId
     )
   }
+
   val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
-    onPermissionsGranted = {
-      val index = pagerState.currentPage
-      articleBeingExported[index] = Unit
-      articleDetailViewModel.exportArticle(index, articleImageIndices[index])
-    },
+    onPermissionsGranted = articleDetailViewModel::onExportPermissionsGranted,
     onPermissionDenied = { navController.context.toast(R.string.storage_permissions_required) },
-    onNeverAskAgain = { showPermissionsAlertDialog = true },
+    onNeverAskAgain = articleDetailViewModel::neverAskExportPermissionAgain,
   )
+
   LaunchedEffect(articleDetailViewModel.exportedImage) {
-    articleDetailViewModel.exportedImage.getContentIfNotHandled()?.let {
-      val (index, exportedImageUri) = it
-      articleBeingExported.remove(index)
+    articleDetailViewModel.exportedImage.getContentIfNotHandled()?.let { exportedImageUri ->
       when(snackbarHostState.showSnackbar(
         message = context.getString(R.string.image_exported),
         actionLabel = context.getString(R.string.open),
@@ -187,136 +174,60 @@ fun ArticleDetailRoute(
       }
     }
   }
+
   LaunchedEffect(pagerState) {
-    snapshotFlow { pagerState.currentPage }.collect { page ->
-      articleDetailViewModel.onArticleFocus(page)
-      ensembleListState = LazyListState()
-      thumbnailAltsListState = LazyListState()
-      selectedEnsembles.clear()
-      selectedThumbnails.clear()
-      if(userSearch.isNotEmpty()) {
-        articleDetailViewModel.searchEnsembles("")
-        userSearch = ""
-      }
+    snapshotFlow { pagerState.currentPage }.collect {
+      i -> articleDetailViewModel.onArticleFocus(i)
     }
   }
+
   ArticleDetailScreen(
     windowSizeClass = windowSizeClass,
     filter = filter,
     articlesWithImages = lazyArticleFilenames,
     articleEnsembleTitles = ensembleUiState.articleEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
     pagerState = pagerState,
-    articleImageIndices = articleImageIndices,
-    ensembleListState = ensembleListState,
-    thumbnailsAltsListState = thumbnailAltsListState,
-    selectedEnsembles = selectedEnsembles.keys,
-    selectedImages = selectedThumbnails.keys,
-    editMode = editMode,
-    exportingEnabled = !articleBeingExported.containsKey(pagerState.currentPage),
-    showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
-    showPermissionsAlertDialog = showPermissionsAlertDialog,
-    showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
-    showRemoveImagesAlertDialog = showRemoveImagesAlertDialog,
-    showAddToEnsembleDialog = showAddToEnsemblesDialog,
-    onClickEdit = {
-      if(editMode) selectedEnsembles.clear()
-      editMode = !editMode
-    },
+    articleImageIndices = articleDetailViewModel.articleImageIndices,
+    ensembleListState = articleDetailViewModel.ensembleListState,
+    thumbnailsAltsListState = articleDetailViewModel.thumbnailAltsListState,
+    selectedEnsembles = articleDetailViewModel.selectedEnsembles,
+    selectedImages = articleDetailViewModel.selectedThumbnails,
+    editMode = articleDetailViewModel.editMode,
+    exportingEnabled = articleDetailViewModel.exportButtonEnabled,
+    showDeleteArticleAlertDialog = articleDetailViewModel.showDeleteArticleAlertDialog,
+    showExportPermissionsAlertDialog = articleDetailViewModel.showExportPermissionsAlertDialog,
+    showRemoveFromEnsemblesAlertDialog = articleDetailViewModel.showRemoveFromEnsemblesAlertDialog,
+    showRemoveImagesAlertDialog = articleDetailViewModel.showRemoveImagesAlertDialog,
+    showAddToEnsembleDialog = articleDetailViewModel.showAddToEnsemblesDialog,
+    onClickEdit = articleDetailViewModel::onClickEdit,
     onClickExport = { exportWithPermissionsCheckLauncher.launch(REQUIRED_STORAGE_PERMISSIONS) },
     onClickAddPhotoFromAlbum = photoAlbumLauncher::launch,
-    onClickAddPhotoFromCamera = {
-      navController.navigateToCamera(articleId = articleDetailViewModel.articleId)
-    },
-    onClickDelete = { showDeleteArticleAlertDialog = true },
-    onDismissDeleteDialog = { showDeleteArticleAlertDialog = false },
-    onConfirmDeleteDialog = {
-      showDeleteArticleAlertDialog = false
-      if(lazyArticleFilenames.size == 1) navController.popBackStack()
-      articleDetailViewModel.deleteArticle(pagerState.currentPage)
-      selectedEnsembles.clear()
-      selectedThumbnails.clear()
-    },
-    onDismissRemoveFromEnsemblesDialog = { showRemoveFromEnsemblesAlertDialog = false },
-    onConfirmRemoveFromEnsemblesDialog = {
-      val selectedEnsembleIndices = selectedEnsembles.keys.toList()
-      selectedEnsembles.clear()
-      showRemoveFromEnsemblesAlertDialog = false
-      ensembleListState = LazyListState()
-      articleDetailViewModel.removeArticleEnsembles(pagerState.currentPage, selectedEnsembleIndices)
-    },
-    onClickThumbnail = { index ->
-      if(editMode) {
-        if(selectedEnsembles.isNotEmpty()) selectedEnsembles.clear()
-        if(selectedThumbnails.containsKey(index)) selectedThumbnails.remove(index)
-        else selectedThumbnails[index] = Unit
-      }
-      articleImageIndices[pagerState.currentPage] = index
-    },
-    onLongPressThumbnail = { index ->
-      if(selectedEnsembles.isNotEmpty()) selectedEnsembles.clear()
-      if(!editMode) {
-        selectedThumbnails.clear()
-        editMode = true
-      }
-      if(selectedThumbnails.containsKey(index)) selectedThumbnails.remove(index)
-      else selectedThumbnails[index] = Unit
-      articleImageIndices[pagerState.currentPage] = index
-    },
-    onDismissPermissionsDialog = { showPermissionsAlertDialog = false },
-    onConfirmPermissionsDialog = {
-      showPermissionsAlertDialog = false
-      settingsLauncher.launch()
-    },
-    onClickEnsemble = {
-      if(editMode) {
-        if(selectedThumbnails.isNotEmpty()) selectedThumbnails.clear()
-        if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
-        else selectedEnsembles[it] = Unit
-      } else navController.navigateToEnsembleDetail(ensembleUiState.articleEnsembles[it].id)
-    },
-    onLongPressEnsemble = {
-      if(selectedThumbnails.isNotEmpty()) selectedThumbnails.clear()
-      if(!editMode) {
-        selectedEnsembles.clear()
-        editMode = true
-      }
-      if(selectedEnsembles.containsKey(it)) selectedEnsembles.remove(it)
-      else selectedEnsembles[it] = Unit
-    },
-    onClickRemoveEnsembles = { showRemoveFromEnsemblesAlertDialog = true },
-    onClickRemoveImages = { showRemoveImagesAlertDialog = true },
-    onDismissRemoveImagesDialog = { showRemoveImagesAlertDialog = false },
-    onConfirmRemoveImagesDialog = {
-      val selectedThumbnailIndices = selectedThumbnails.keys.toList()
-      selectedThumbnails.clear()
-      showRemoveImagesAlertDialog = false
-      thumbnailAltsListState = LazyListState()
-      articleDetailViewModel.removeImages(pagerState.currentPage, selectedThumbnailIndices)
-    },
-    onClickCancelEnsemblesSelection = {
-      selectedEnsembles.clear()
-      selectedThumbnails.clear()
-    },
-    onClickAddToEnsemble = { showAddToEnsemblesDialog = true },
-    addNewEnsemble = {
-      articleDetailViewModel.addArticleToNewEnsemble(pagerState.currentPage, it)
-      newlyAddedEnsembles[it] = Unit
-    },
-    addArticleToEnsemble = { articleDetailViewModel.addArticleToEnsemble(pagerState.currentPage, it) },
-    onCloseAddToEnsembleDialog = {
-      showAddToEnsemblesDialog = false
-      userSearch = ""
-      articleDetailViewModel.searchEnsembles("")
-      newlyAddedEnsembles.clear()
-    },
-    onSearchQueryUpdateAddToEnsembles = {
-      userSearch = it
-      articleDetailViewModel.searchEnsembles(it)
-    },
-    ensemblesSearchQuery = userSearch,
+    onClickAddPhotoFromCamera = articleDetailViewModel::onClickCamera,
+    onClickDelete = articleDetailViewModel::onClickDelete,
+    onDismissDeleteDialog = articleDetailViewModel::onDismissDeleteArticleDialog,
+    onConfirmDeleteDialog = articleDetailViewModel::onConfirmDeleteArticleDialog,
+    onDismissRemoveFromEnsemblesDialog = articleDetailViewModel::onDismissRemoveFromEnsemblesArticleDialog,
+    onConfirmRemoveFromEnsemblesDialog = articleDetailViewModel::onConfirmRemoveFromEnsemblesArticleDialog,
+    onClickThumbnail = articleDetailViewModel::onClickArticleThumbnail,
+    onLongPressThumbnail = articleDetailViewModel::onLongPressArticleThumbnail,
+    onDismissExportPermissionsDialog = articleDetailViewModel::onDismissExportPermissionsArticleDialog,
+    onConfirmExportPermissionsDialog = articleDetailViewModel::onConfirmExportPermissionsArticleDialog,
+    onClickEnsemble = articleDetailViewModel::onClickEnsemble,
+    onLongPressEnsemble = articleDetailViewModel::onLongPressEnsemble,
+    onClickRemoveEnsembles = articleDetailViewModel::onClickRemoveFromEnsembles,
+    onClickRemoveImages = articleDetailViewModel::onClickRemoveImages,
+    onDismissRemoveImagesDialog = articleDetailViewModel::onDismissRemoveImagesArticleDialog,
+    onConfirmRemoveImagesDialog = articleDetailViewModel::onConfirmRemoveImagesArticleDialog,
+    onClickCancelSelection = articleDetailViewModel::onClickCancelSelection,
+    onClickAddToEnsemble = articleDetailViewModel::onClickAddToEnsemble,
+    addNewEnsemble = articleDetailViewModel::addArticleToNewEnsemble,
+    addArticleToEnsemble = articleDetailViewModel::addArticleToEnsemble,
+    onCloseAddToEnsembleDialog = articleDetailViewModel::onCloseAddToEnsembleDialog,
+    onSearchQueryUpdateAddToEnsembles = articleDetailViewModel::searchEnsembles,
+    ensemblesSearchQuery = articleDetailViewModel.ensemblesSearchQuery,
     searchQueryUniqueTitle = ensembleUiState.searchIsUniqueTitle,
     ensemblesToAdd = ensembleUiState.searchEnsembles,
-    newlyAddedEnsembles = newlyAddedEnsembles.keys,
+    newlyAddedEnsembles = articleDetailViewModel.newlyAddedEnsembles,
     modifier = modifier,
   )
 }
@@ -331,13 +242,13 @@ fun ArticleDetailScreen(
     articlesWithImages: LazyFilenames,
     editMode: Boolean,
     showDeleteArticleAlertDialog: Boolean,
-    showPermissionsAlertDialog: Boolean,
+    showExportPermissionsAlertDialog: Boolean,
     showRemoveFromEnsemblesAlertDialog: Boolean,
     showAddToEnsembleDialog: Boolean,
     showRemoveImagesAlertDialog: Boolean,
     onClickDelete: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
-    onClickCancelEnsemblesSelection: () -> Unit,
+    onClickCancelSelection: () -> Unit,
     onClickAddToEnsemble: () -> Unit,
     onClickAddPhotoFromAlbum: () -> Unit,
     onClickAddPhotoFromCamera: () -> Unit,
@@ -348,8 +259,8 @@ fun ArticleDetailScreen(
     thumbnailsAltsListState: LazyListState,
     onConfirmRemoveFromEnsemblesDialog: () -> Unit,
     onDismissRemoveFromEnsemblesDialog: () -> Unit,
-    onDismissPermissionsDialog: () -> Unit,
-    onConfirmPermissionsDialog: () -> Unit,
+    onDismissExportPermissionsDialog: () -> Unit,
+    onConfirmExportPermissionsDialog: () -> Unit,
     onDismissDeleteDialog: () -> Unit,
     onDismissRemoveImagesDialog: () -> Unit,
     onConfirmRemoveImagesDialog: () -> Unit,
@@ -521,7 +432,7 @@ fun ArticleDetailScreen(
     onClickExport = onClickExport,
     onClickRemoveEnsembles = onClickRemoveEnsembles,
     onClickRemoveImages = onClickRemoveImages,
-    onClickCancelSelection = onClickCancelEnsemblesSelection,
+    onClickCancelSelection = onClickCancelSelection,
     onClickAddToEnsemble = onClickAddToEnsemble,
     onClickAddPhotoFromAlbum = onClickAddPhotoFromAlbum,
     onClickAddPhotoFromCamera = onClickAddPhotoFromCamera,
@@ -531,7 +442,7 @@ fun ArticleDetailScreen(
     ),
   )
   if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(fromDeletingAllImages = controlMode == ArticleDetailScreenControlsMode.EDIT_ALL_IMAGES, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
-  if(showPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissPermissionsDialog, onConfirm = onConfirmPermissionsDialog)
+  if(showExportPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissExportPermissionsDialog, onConfirm = onConfirmExportPermissionsDialog)
   if(showRemoveFromEnsemblesAlertDialog) RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
   if(showRemoveImagesAlertDialog) RemoveImagesAlertDialog(onDismiss = onDismissRemoveImagesDialog, onConfirm = onConfirmRemoveImagesDialog)
   AddToEnsembleDialog(
@@ -915,7 +826,7 @@ fun PreviewUtilArticleDetailScreen(
       articlesWithImages = articlesWithImages,
       editMode = floatingActionButtonExpanded,
       showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
-      showPermissionsAlertDialog = showPermissionsAlertDialog,
+      showExportPermissionsAlertDialog = showPermissionsAlertDialog,
       showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
       showAddToEnsembleDialog = showAddToEnsembleDialog,
       showRemoveImagesAlertDialog = showRemoveImagesAlertDialog,
@@ -927,9 +838,9 @@ fun PreviewUtilArticleDetailScreen(
       ensemblesSearchQuery = "Goth 2 Boss",
       newlyAddedEnsembles = emptySet(),
       ensembleListState = rememberLazyListState(), thumbnailsAltsListState = rememberLazyListState(),
-      onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelEnsemblesSelection = {}, onClickAddToEnsemble = {}, onClickAddPhotoFromAlbum = {}, onClickAddPhotoFromCamera = {},
-      onClickRemoveImages = {}, onClickThumbnail = {}, onLongPressThumbnail = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {}, onDismissPermissionsDialog = {},
-      onConfirmPermissionsDialog = {}, onDismissDeleteDialog = {}, onDismissRemoveImagesDialog = {}, onConfirmRemoveImagesDialog = {}, onLongPressEnsemble = {},
+      onClickDelete = {}, onClickRemoveEnsembles = {}, onClickCancelSelection = {}, onClickAddToEnsemble = {}, onClickAddPhotoFromAlbum = {}, onClickAddPhotoFromCamera = {},
+      onClickRemoveImages = {}, onClickThumbnail = {}, onLongPressThumbnail = {}, onConfirmRemoveFromEnsemblesDialog = {}, onDismissRemoveFromEnsemblesDialog = {}, onDismissExportPermissionsDialog = {},
+      onConfirmExportPermissionsDialog = {}, onDismissDeleteDialog = {}, onDismissRemoveImagesDialog = {}, onConfirmRemoveImagesDialog = {}, onLongPressEnsemble = {},
       onClickEdit = {}, addNewEnsemble = {}, onCloseAddToEnsembleDialog = {}, addArticleToEnsemble = {},   onSearchQueryUpdateAddToEnsembles = {},  onConfirmDeleteDialog = {},
       onClickEnsemble = {}, onClickExport = {},
     )
