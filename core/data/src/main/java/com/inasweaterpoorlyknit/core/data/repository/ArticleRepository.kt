@@ -28,7 +28,7 @@ import kotlin.math.min
 
 val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
 val compressionQualityFull = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) 100 else 99
-val compressionQualityThumb = 70
+const val compressionQualityThumb = 70
 val exportFormat = Bitmap.CompressFormat.PNG
 
 class ArticleRepository(
@@ -86,7 +86,7 @@ class ArticleRepository(
   fun exportImage(imageUri: String): Uri? {
     val bitmapToExport = BitmapFactory.decodeFile(imageUri)
 
-    val exportFilname = imageUri.replace(".webp", ".png")
+    val exportFilname = imageUri.replace(".webp", ".png").substringAfterLast("/")
 
     var exportUri: Uri? = null
     var success = false
