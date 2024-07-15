@@ -47,8 +47,6 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
 
-// TODO: Might serve better as a simple pop-up dialog. Depends how expanded the statistics get
-
 const val STATISTICS_ROUTE = "statistics_route"
 
 fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigate(STATISTICS_ROUTE, navOptions)

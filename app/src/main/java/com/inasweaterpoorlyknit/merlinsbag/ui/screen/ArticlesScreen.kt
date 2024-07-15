@@ -54,6 +54,12 @@ const val ARTICLES_ROUTE = "articles_route"
 
 fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ARTICLES_ROUTE, navOptions)
 
+enum class ArticlesScreenEditMode {
+  ENABLED_GENERAL,
+  ENABLED_SELECTED_ARTICLES,
+  DISABLED
+}
+
 @Composable
 fun ArticlesRoute(
     navController: NavController,
@@ -129,7 +135,7 @@ fun ArticlesScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
-    editMode: Boolean,
+    editMode: ArticlesScreenEditMode,
     showDeleteArticlesAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
     onLongPressArticle: (index: Int) -> Unit,
@@ -151,64 +157,92 @@ fun ArticlesScreen(
   }
 
   val layoutDir = LocalLayoutDirection.current
-  val startPadding = systemBarPaddingValues.calculateStartPadding(layoutDir)
-  val endPadding = systemBarPaddingValues.calculateEndPadding(layoutDir)
-  Column(
-    verticalArrangement = Arrangement.Top,
+  Box(
     modifier = Modifier
         .fillMaxSize()
-        .padding(start = startPadding, end = endPadding)
-  ) {
-    Spacer(modifier = Modifier
-        .fillMaxWidth()
-        .height(systemBarPaddingValues.calculateTopPadding()))
-    val placeholderVisibilityAnimatedFloat by animateFloatAsState(
-      targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
-      animationSpec = tween(durationMillis = 1000),
-      label = "placeholder article grid visibility"
-    )
-    if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null) {
-      SelectableStaggeredThumbnailGrid(
-        selectable = editMode,
-        onSelect = onClickArticle,
-        onLongSelect = onLongPressArticle,
-        thumbnailUris = thumbnailUris,
-        selectedThumbnails = selectedThumbnails,
+        .padding(
+          start = systemBarPaddingValues.calculateStartPadding(layoutDir),
+          end = systemBarPaddingValues.calculateEndPadding(layoutDir)
+        )
+  ){
+    Column(
+      verticalArrangement = Arrangement.Top,
+      modifier = Modifier.fillMaxSize()
+    ) {
+      Spacer(modifier = Modifier
+          .fillMaxWidth()
+          .height(systemBarPaddingValues.calculateTopPadding()))
+      val placeholderVisibilityAnimatedFloat by animateFloatAsState(
+        targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
+        animationSpec = tween(durationMillis = 1000),
+        label = "placeholder article grid visibility"
       )
-    } else {
-      Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .alpha(placeholderVisibilityAnimatedFloat)
-      ) {
-        PlaceholderThumbnailGrid()
-        if(thumbnailUris?.isEmpty() != false){
-          val addArticleButtonAnimatedAlphaFloat by animateFloatAsState(
-            targetValue = if(editMode) 0.0f else 1.0f,
-            label = "add article alpha"
-          )
-          val buttonAlpha = 0.9f
-          if(addArticleButtonAnimatedAlphaFloat > 0.0f){
-            Button(
-              onClick = onClickEdit,
-              modifier = Modifier.alpha(buttonAlpha * addArticleButtonAnimatedAlphaFloat)
-            ){
-              Text(text = stringResource(R.string.add_article))
+      if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null) {
+        SelectableStaggeredThumbnailGrid(
+          selectable = editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES,
+          onSelect = onClickArticle,
+          onLongSelect = onLongPressArticle,
+          thumbnailUris = thumbnailUris,
+          selectedThumbnails = selectedThumbnails,
+        )
+      } else {
+        Box(
+          contentAlignment = Alignment.Center,
+          modifier = Modifier
+              .alpha(placeholderVisibilityAnimatedFloat)
+        ) {
+          PlaceholderThumbnailGrid()
+          if(thumbnailUris?.isEmpty() != false){
+            val addArticleButtonAnimatedAlphaFloat by animateFloatAsState(
+              targetValue = if(editMode != ArticlesScreenEditMode.DISABLED) 0.0f else 1.0f,
+              label = "add article alpha"
+            )
+            val buttonAlpha = 0.9f
+            if(addArticleButtonAnimatedAlphaFloat > 0.0f){
+              Button(
+                onClick = onClickEdit,
+                modifier = Modifier.alpha(buttonAlpha * addArticleButtonAnimatedAlphaFloat)
+              ){
+                Text(text = stringResource(R.string.add_article))
+              }
             }
           }
         }
       }
     }
+    ArticlesButtonControls(
+      windowSizeClass = windowSizeClass,
+      editMode = editMode,
+      onClickClearSelection = onClickClearSelection,
+      onClickDelete = onClickDelete,
+      onClickAddPhotoAlbum = onClickAddPhotoAlbum,
+      onClickAddPhotoCamera = onClickAddPhotoCamera,
+      onClickSettings = onClickSettings,
+      onClickMinimizeButtonControl = onClickMinimizeButtonControl,
+      onClickEdit = onClickEdit,
+    )
   }
+}
 
-  val articlesAreSelected = selectedThumbnails.isNotEmpty()
-  NoopBottomEndButtonContainer(modifier = Modifier.padding(start = startPadding, end = endPadding)) {
-    val expanded = editMode
+@Composable
+fun ArticlesButtonControls(
+    windowSizeClass: WindowSizeClass,
+    editMode: ArticlesScreenEditMode,
+    onClickClearSelection: () -> Unit,
+    onClickDelete: () -> Unit,
+    onClickAddPhotoAlbum: () -> Unit,
+    onClickAddPhotoCamera: () -> Unit,
+    onClickSettings: () -> Unit,
+    onClickMinimizeButtonControl: () -> Unit,
+    onClickEdit: () -> Unit,
+){
+  NoopBottomEndButtonContainer {
+    val expanded = editMode != ArticlesScreenEditMode.DISABLED
     NoopExpandingIconButton(
       expanded = expanded,
       collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
       expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
-      verticalExpandedButtons = if(articlesAreSelected) {
+      verticalExpandedButtons = if(editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES) {
         listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_articles)),
@@ -231,7 +265,7 @@ fun ArticlesScreen(
           ),
         )
       },
-      horizontalExpandedButtons = if(!articlesAreSelected && windowSizeClass.compactWidth()) {
+      horizontalExpandedButtons = if(editMode == ArticlesScreenEditMode.ENABLED_GENERAL && windowSizeClass.compactWidth()) {
         listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Settings, contentDescription = stringResource(R.string.cog)),
@@ -247,7 +281,7 @@ fun ArticlesScreen(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilArticleScreen(
-    editMode: Boolean = false,
+    editMode: ArticlesScreenEditMode = ArticlesScreenEditMode.DISABLED,
     showDeleteArticlesAlert: Boolean = false,
     thumbUris: LazyUriStrings? = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails: Set<Int> = emptySet(),
@@ -271,7 +305,7 @@ fun PreviewUtilArticleScreen(
 @Composable
 fun PreviewArticlesScreen_editMode() = PreviewUtilArticleScreen(
   selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
-  editMode = true,
+  editMode = ArticlesScreenEditMode.ENABLED_GENERAL,
 )
 
 
@@ -279,7 +313,7 @@ fun PreviewArticlesScreen_editMode() = PreviewUtilArticleScreen(
 @Composable
 fun PreviewArticlesScreenWithDeleteArticlesAlert() = PreviewUtilArticleScreen(
   showDeleteArticlesAlert = true,
-  editMode = true,
+  editMode = ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES,
   selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
 )
 

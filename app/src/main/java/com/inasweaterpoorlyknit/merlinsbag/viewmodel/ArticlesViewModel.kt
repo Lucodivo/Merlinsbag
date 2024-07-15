@@ -11,6 +11,7 @@ import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesScreenEditMode
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringEncode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,7 @@ class ArticlesViewModel @Inject constructor(
   private lateinit var lazyArticleImagesCache: LazyArticleThumbnails
 
   var showDeleteArticlesAlert by mutableStateOf(false)
-  var editMode by mutableStateOf(false)
+  var editMode by mutableStateOf(ArticlesScreenEditMode.DISABLED)
 
   // TODO: No mutableStateSetOf ??
   val _selectedArticleIndices = mutableStateMapOf<Int, Unit>()
@@ -50,7 +51,7 @@ class ArticlesViewModel @Inject constructor(
       )
 
   fun onClickArticle(index: Int){
-    if(editMode) {
+    if(editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES) {
       if(_selectedArticleIndices.contains(index)) _selectedArticleIndices.remove(index)
       else _selectedArticleIndices[index] = Unit
     } else {
@@ -59,15 +60,18 @@ class ArticlesViewModel @Inject constructor(
   }
 
   fun onLongPressArticle(index: Int) {
-    if(!editMode) {
-      editMode = true
+    if(editMode != ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES) {
+      editMode = ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES
       _selectedArticleIndices.clear()
     }
     if(_selectedArticleIndices.contains(index)) _selectedArticleIndices.remove(index)
     else _selectedArticleIndices[index] = Unit
   }
 
-  fun onClickClearSelection() { _selectedArticleIndices.clear() }
+  fun onClickClearSelection() {
+    _selectedArticleIndices.clear()
+    editMode = ArticlesScreenEditMode.ENABLED_GENERAL
+  }
   fun onClickSettings(){ navigateToSettings = Event(Unit) }
   fun onClickAddPhotoCamera(){ navigateToCamera = Event(Unit) }
   fun onClickAddPhotoAlbum(){ launchPhotoAlbum = Event(Unit) }
@@ -75,9 +79,9 @@ class ArticlesViewModel @Inject constructor(
     if(uris.isNotEmpty()) navigateToAddArticle = Event(uris.map { navigationSafeUriStringEncode(it) })
   }
 
-  fun onClickEdit(){ editMode = true }
+  fun onClickEdit(){ editMode = ArticlesScreenEditMode.ENABLED_GENERAL }
   fun onClickMinimizeButtonControl(){
-    editMode = false
+    editMode = ArticlesScreenEditMode.DISABLED
     if(_selectedArticleIndices.isNotEmpty()) _selectedArticleIndices.clear()
   }
 
