@@ -17,6 +17,7 @@ import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenEditMode
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringEncode
 import dagger.assisted.Assisted
@@ -72,7 +73,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
   private val _articleBeingExported = mutableStateMapOf<Int, Unit>()
   private val _newlyAddedEnsembles = mutableStateMapOf<String, Unit>()
 
-  var editMode by mutableStateOf(false)
+  var editMode by mutableStateOf(ArticleDetailScreenEditMode.DISABLED)
   var showDeleteArticleAlertDialog by mutableStateOf(false)
   var showExportPermissionsAlertDialog by mutableStateOf(false)
   var showRemoveFromEnsemblesAlertDialog by mutableStateOf(false)
@@ -154,13 +155,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
     started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
   )
 
-  fun onClickEdit() {
-    if(editMode) {
-      _selectedEnsembles.clear()
-      _selectedThumbnails.clear()
-    }
-    editMode = !editMode
-  }
+  fun onClickEdit() { editMode = ArticleDetailScreenEditMode.ENABLED_GENERAL }
+  fun onClickMinimizeButtonControl() { editMode = ArticleDetailScreenEditMode.DISABLED }
   fun onClickCamera() { navigateToCamera = Event(articleId) }
 
   fun onClickAddToEnsemble() { showAddToEnsemblesDialog = true }
@@ -246,8 +242,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onClickArticleThumbnail(thumbnailIndex: Int) {
     articleImageIndices[articleIndex] = thumbnailIndex
-    if(_selectedEnsembles.isNotEmpty()) _selectedEnsembles.clear()
-    if(editMode) {
+    if(editMode == ArticleDetailScreenEditMode.ENABLED_SELECTED_THUMBNAILS || editMode == ArticleDetailScreenEditMode.ENABLED_ALL_THUMBNAILS) {
       if(_selectedThumbnails.containsKey(thumbnailIndex)) _selectedThumbnails.remove(thumbnailIndex)
       else _selectedThumbnails[thumbnailIndex] = Unit
     }
@@ -255,13 +250,16 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onLongPressArticleThumbnail(thumbnailIndex: Int) {
     articleImageIndices[articleIndex] = thumbnailIndex
-    if(_selectedEnsembles.isNotEmpty()) _selectedEnsembles.clear()
-    if(!editMode) {
-      editMode = true
-      _selectedThumbnails.clear()
+    if(editMode != ArticleDetailScreenEditMode.ENABLED_SELECTED_THUMBNAILS){
+      if(_selectedThumbnails.isNotEmpty()) _selectedThumbnails.clear()
     }
     if(_selectedThumbnails.containsKey(thumbnailIndex)) _selectedThumbnails.remove(thumbnailIndex)
     else _selectedThumbnails[thumbnailIndex] = Unit
+    if(_selectedThumbnails.size == cachedArticlesWithFullImages.size) {
+      editMode = ArticleDetailScreenEditMode.ENABLED_ALL_THUMBNAILS
+    } else if(editMode != ArticleDetailScreenEditMode.ENABLED_SELECTED_THUMBNAILS){
+      editMode = ArticleDetailScreenEditMode.ENABLED_SELECTED_THUMBNAILS
+    }
   }
 
   fun searchEnsembles(query: String) = viewModelScope.launch(Dispatchers.IO) {
@@ -286,30 +284,32 @@ class ArticleDetailViewModel @AssistedInject constructor(
   }
 
   fun onClickEnsemble(ensembleIndex: Int) {
-    if(editMode){
+    if(editMode == ArticleDetailScreenEditMode.ENABLED_SELECTED_ENSEMBLES){
       if(_selectedEnsembles.containsKey(ensembleIndex)) _selectedEnsembles.remove(ensembleIndex)
       else _selectedEnsembles[ensembleIndex] = Unit
-      if(_selectedThumbnails.isNotEmpty()) _selectedThumbnails.clear()
     } else navigateToEnsembleDetail = Event(cachedArticleEnsembles[ensembleIndex].id)
   }
 
   fun onLongPressEnsemble(ensembleIndex: Int) {
-    if(!editMode) {
-      _selectedEnsembles.clear()
-      editMode = true
+    if(editMode != ArticleDetailScreenEditMode.ENABLED_SELECTED_ENSEMBLES){
+      if(_selectedEnsembles.isNotEmpty()) _selectedEnsembles.clear()
+      editMode = ArticleDetailScreenEditMode.ENABLED_SELECTED_ENSEMBLES
     }
     if(_selectedEnsembles.containsKey(ensembleIndex)) _selectedEnsembles.remove(ensembleIndex)
     else _selectedEnsembles[ensembleIndex] = Unit
-    if(_selectedThumbnails.isNotEmpty()) _selectedThumbnails.clear()
   }
 
   fun onClickCancelSelection() {
-    _selectedEnsembles.clear()
-    _selectedThumbnails.clear()
+    if(editMode == ArticleDetailScreenEditMode.ENABLED_SELECTED_ENSEMBLES) {
+      if(_selectedEnsembles.isNotEmpty()) _selectedEnsembles.clear()
+    } else {
+      if(_selectedThumbnails.isNotEmpty()) _selectedThumbnails.clear()
+    }
+    editMode = ArticleDetailScreenEditMode.DISABLED
   }
 
   fun onBack() {
-    if(editMode) onClickEdit() else finished = Event(Unit)
+    if(editMode != ArticleDetailScreenEditMode.DISABLED) onClickMinimizeButtonControl() else finished = Event(Unit)
   }
 
   fun onPhotoAlbumResult(uris: List<Uri>) {

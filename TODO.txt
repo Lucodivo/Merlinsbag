@@ -57,7 +57,7 @@ Bugs:
     - Passing indices instead of ids from a screen to it's associated ViewModel may be more buggy than simply passing ids.
         - The idea of using indices was that the UI doesn't need to know about a database ID, but maybe it is worth the trade?
     - The ML Kit model does not actually install with the application or even after the application is installed. It seems to only attempt to install by either an attempted use or an explicit call to installation.
-    - Error with little effect in AddArticleScreen
+    - Error with no known ill effect in AddArticleScreen
         - The following error occurs twice EVERY time:
             Failed to get service from broker. java.lang.SecurityException: Unknown calling package name 'com.google.android.gms'.
         - One lead is to see if the problem exists in the ML Kit vision-quickstart project:
