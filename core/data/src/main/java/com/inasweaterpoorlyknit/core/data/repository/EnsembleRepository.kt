@@ -52,25 +52,21 @@ class EnsembleRepository(
   fun deleteArticlesFromEnsemble(ensembleId: String, articleIds: List<String>) {
     ensembleDao.deleteArticleEnsemblesFromEnsemble(ensembleId = ensembleId, articleIds = articleIds)
     ensembleDao.updateEnsemblesModified(ensembleIds = listOf(ensembleId))
-    articleDao.updateArticlesModified(articleIds = articleIds)
   }
   fun deleteEnsemblesFromArticle(articleId: String, ensembleIds: List<String>) {
     ensembleDao.deleteArticleEnsemblesFromArticle(articleId = articleId, ensembleIds = ensembleIds)
     ensembleDao.updateEnsemblesModified(ensembleIds = ensembleIds)
-    articleDao.updateArticlesModified(articleIds = listOf(articleId))
   }
   fun updateEnsemble(updatedEnsemble: Ensemble) = ensembleDao.updateEnsemble(updatedEnsemble)
   fun addArticlesToEnsemble(ensembleId: String, articleIds: List<String>) {
     val ensembleArticles = Array(articleIds.size){ EnsembleArticleEntity(ensembleId = ensembleId, articleId = articleIds[it]) }
     ensembleDao.insertArticleEnsemble(*ensembleArticles)
     ensembleDao.updateEnsemblesModified(ensembleIds = listOf(ensembleId))
-    articleDao.updateArticlesModified(articleIds = articleIds)
   }
   fun addEnsemblesToArticle(articleId: String, ensembleIds: List<String>) {
     val ensembleArticles = Array(ensembleIds.size){ EnsembleArticleEntity(ensembleId = ensembleIds[it], articleId = articleId) }
     ensembleDao.insertArticleEnsemble(*ensembleArticles)
     ensembleDao.updateEnsemblesModified(ensembleIds = ensembleIds)
-    articleDao.updateArticlesModified(articleIds = listOf(articleId))
   }
   fun deleteEnsemble(ensembleId: String) = ensembleDao.deleteEnsemble(ensembleId)
   fun deleteEnsembles(ensembleIds: List<String>) = ensembleDao.deleteEnsembles(ensembleIds)
