@@ -64,6 +64,7 @@ fun StatisticsRoute(
   val popularEnsembles by statisticsViewModel.topEnsembles.collectAsStateWithLifecycle()
   val topArticleMostEnsemblesCount by statisticsViewModel.topArticleMostEnsemblesCount.collectAsStateWithLifecycle()
   val topArticleMostImagesUriStrings by statisticsViewModel.topArticleMostImagesCount.collectAsStateWithLifecycle()
+
   StatisticsScreen(
     articleCount = articleCount,
     articleImageCount = articleImageCount,

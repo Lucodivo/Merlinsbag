@@ -6,18 +6,47 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.timestampFileName
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
-class CameraViewModel @Inject constructor(): ViewModel() {
+class CameraViewModel @Inject constructor(
+    @ApplicationContext val context: Context,
+): ViewModel() {
   var takePictureUri: Uri? = null
+  var pictureInProgress = false
 
-  fun onTakePicture(context: Context): Uri? {
+  var showPermissionsAlert by mutableStateOf(false)
+
+  var finished by mutableStateOf(Event<Unit>(null))
+  var launchSettings by mutableStateOf(Event<Unit>(null))
+
+  fun onNeverAskAgain() { showPermissionsAlert = true }
+  fun onDismissPermissionsAlert() {
+    showPermissionsAlert = false
+    finished = Event(Unit)
+  }
+  fun onConfirmPermissionsAlert() {
+    showPermissionsAlert = false
+    launchSettings = Event(Unit)
+    finished = Event(Unit)
+  }
+
+  fun onCameraPermissionsLaunch() {
+    pictureInProgress = true
+  }
+
+  fun onTakePicture(): Uri? {
+    pictureInProgress = true
     val pictureFilename = "${timestampFileName()}.jpg"
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       val contentResolver = context.contentResolver
@@ -36,10 +65,17 @@ class CameraViewModel @Inject constructor(): ViewModel() {
     return takePictureUri
   }
 
-  fun pictureTaken(taken: Boolean, context: Context) {
-    if(!taken && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      val contentResolver = context.contentResolver
-      takePictureUri?.let { contentResolver.delete(it, null, null) }
+  fun onPictureTaken(taken: Boolean) {
+    if(!taken){
+      if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+        val contentResolver = context.contentResolver
+        takePictureUri?.let { contentResolver.delete(it, null, null) }
+        takePictureUri = null
+      }
+      finished = Event(Unit)
+    } else {
+      takePictureUri = null
+      pictureInProgress = false
     }
   }
 }

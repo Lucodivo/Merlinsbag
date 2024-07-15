@@ -1,21 +1,24 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.Manifest.permission
+import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
@@ -52,15 +55,13 @@ fun CameraRoute(
 ) {
   val context = LocalContext.current
 
-  var showPermissionsAlert by remember { mutableStateOf(false) }
-
   val appSettingsLauncher = rememberSettingsLauncher()
 
   val takePictureLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.TakePicture(),
     onResult = { success ->
       val cameraPictureUri = cameraViewModel.takePictureUri
-      cameraViewModel.pictureTaken(success, context)
+      cameraViewModel.onPictureTaken(success)
       if(success) {
         if(cameraPictureUri != null) navController.navigateToAddArticle(
           uriStringArray = listOf(navigationSafeUriStringEncode(cameraPictureUri)),
@@ -69,14 +70,12 @@ fun CameraRoute(
           Log.e("GetContent ActivityResultContract", "Temp camera picture URI was null after picture was taken")
           context.toast(R.string.sorry_try_again)
         }
-      } else {
-        navController.popBackStack()
       }
     })
 
   val cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
     onPermissionsGranted = {
-      val uri = cameraViewModel.onTakePicture(context)
+      val uri = cameraViewModel.onTakePicture()
       if(uri != null) {
         takePictureLauncher.launch(uri)
       } else {
@@ -88,30 +87,32 @@ fun CameraRoute(
       navController.context.toast(R.string.camera_permission_required)
       navController.popBackStack()
     },
-    onNeverAskAgain = {
-      showPermissionsAlert = true
-    },
+    onNeverAskAgain = cameraViewModel::onNeverAskAgain,
   )
 
-  // TODO: Not a perfect system. If backstack popped too quickly, permissions granted may not have changed in value.
   LaunchedEffect(Unit) {
-    cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
+    if(!cameraViewModel.pictureInProgress) {
+      cameraViewModel.onCameraPermissionsLaunch()
+      cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
+    }
   }
 
-  LaunchedEffect(cameraViewModel.takePictureUri) {
+  LaunchedEffect(cameraViewModel.finished){
+    cameraViewModel.finished.getContentIfNotHandled()?.let {
+      navController.popBackStack()
+    }
   }
 
-  if(showPermissionsAlert) {
+  LaunchedEffect(cameraViewModel.launchSettings) {
+    cameraViewModel.launchSettings.getContentIfNotHandled()?.let {
+      appSettingsLauncher.launch()
+    }
+  }
+
+  if(cameraViewModel.showPermissionsAlert) {
     CameraPermissionsAlertDialog(
-      onDismiss = {
-        showPermissionsAlert = false
-        navController.popBackStack()
-      },
-      onConfirm = {
-        showPermissionsAlert = false
-        appSettingsLauncher.launch()
-        navController.popBackStack()
-      }
+      onDismiss = cameraViewModel::onDismissPermissionsAlert,
+      onConfirm = cameraViewModel::onConfirmPermissionsAlert,
     )
   }
 }
