@@ -1,21 +1,18 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
-import android.content.ContentValues
-import android.content.Context
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.net.toUri
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.Event
-import com.inasweaterpoorlyknit.core.common.timestampFileName
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringEncode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,57 +20,74 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class ArticlesViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
 ): ViewModel() {
+  private lateinit var lazyArticleImagesCache: LazyArticleThumbnails
 
-  private lateinit var lazyArticleImages: LazyArticleThumbnails
-  var takePictureUri: Uri? = null
+  var showDeleteArticlesAlert by mutableStateOf(false)
+  var editMode by mutableStateOf(false)
+
+  // TODO: No mutableStateSetOf ??
+  val _selectedArticleIndices = mutableStateMapOf<Int, Unit>()
+  val selectedArticleIndices = _selectedArticleIndices.keys
+
+  var navigateToArticleDetail by mutableStateOf(Event<Int>(null))
+  var navigateToCamera by mutableStateOf(Event<Unit>(null))
+  var navigateToSettings by mutableStateOf(Event<Unit>(null))
+  var navigateToAddArticle by mutableStateOf(Event<List<String>>(null))
+  var launchPhotoAlbum by mutableStateOf(Event<Unit>(null))
 
   val articleThumbnails: StateFlow<LazyUriStrings?> = articleRepository.getAllArticlesWithThumbnails()
-      .onEach { lazyArticleImages = it }
+      .onEach { lazyArticleImagesCache = it }
       .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
         initialValue = null,
       )
 
-  val launchCamera = mutableStateOf(Event<Uri>(null))
-
-  fun onDelete(articleIndices: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
-    val articleIds = List(articleIndices.size) { lazyArticleImages.getArticleId(articleIndices[it]) }
-    articleRepository.deleteArticles(articleIds)
-  }
-
-  fun onTakePicture(context: Context) {
-    val pictureFilename = "${timestampFileName()}.jpg"
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      val contentResolver = context.contentResolver
-      val contentValues = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, pictureFilename)
-        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM)
-        // TODO: Set as IS_PENDING before picture has been taken?
-      }
-      takePictureUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-      takePictureUri?.let { launchCamera.value = Event(takePictureUri) }
+  fun onClickArticle(index: Int){
+    if(editMode) {
+      if(_selectedArticleIndices.contains(index)) _selectedArticleIndices.remove(index)
+      else _selectedArticleIndices[index] = Unit
     } else {
-      val publicPicturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-      val publicPictureFile = File(publicPicturesDir, pictureFilename)
-      takePictureUri = publicPictureFile.toUri()
-      launchCamera.value = Event(takePictureUri)
+      navigateToArticleDetail = Event(index)
     }
   }
 
-  fun pictureTaken(taken: Boolean, context: Context) {
-    if(!taken && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      val contentResolver = context.contentResolver
-      takePictureUri?.let { contentResolver.delete(it, null, null) }
+  fun onLongPressArticle(index: Int) {
+    if(!editMode) {
+      editMode = true
+      _selectedArticleIndices.clear()
     }
-    takePictureUri = null
+    if(_selectedArticleIndices.contains(index)) _selectedArticleIndices.remove(index)
+    else _selectedArticleIndices[index] = Unit
   }
+
+  fun onClickClearSelection() { _selectedArticleIndices.clear() }
+  fun onClickSettings(){ navigateToSettings = Event(Unit) }
+  fun onClickAddPhotoCamera(){ navigateToCamera = Event(Unit) }
+  fun onClickAddPhotoAlbum(){ launchPhotoAlbum = Event(Unit) }
+  fun onPhotoAlbumResults(uris: List<Uri>){
+    if(uris.isNotEmpty()) navigateToAddArticle = Event(uris.map { navigationSafeUriStringEncode(it) })
+  }
+
+  fun onClickEdit(){ editMode = true }
+  fun onClickMinimizeButtonControl(){
+    editMode = false
+    if(_selectedArticleIndices.isNotEmpty()) _selectedArticleIndices.clear()
+  }
+
+  fun onClickDelete(){ showDeleteArticlesAlert = true  }
+  fun onDismissDeleteArticlesAlert() { showDeleteArticlesAlert = false }
+  fun onConfirmDeleteArticlesAlert() {
+    showDeleteArticlesAlert = false
+    val articleIds = _selectedArticleIndices.keys.map { lazyArticleImagesCache.getArticleId(it) }
+    _selectedArticleIndices.clear()
+    viewModelScope.launch(Dispatchers.IO) { articleRepository.deleteArticles(articleIds) }
+  }
+
 }

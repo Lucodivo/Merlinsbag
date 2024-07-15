@@ -21,11 +21,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -63,52 +60,54 @@ fun ArticlesRoute(
     windowSizeClass: WindowSizeClass,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
-  val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
-  var showDeleteArticlesAlert by remember { mutableStateOf(false) }
-  var editMode by remember { mutableStateOf(false) }
-  val isItemSelected = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
 
-  val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris ->
-    if(uris.isNotEmpty()) navController.navigateToAddArticle(uris.map { navigationSafeUriStringEncode(it) })
+  val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
+
+  val photoAlbumLauncher = rememberPhotoAlbumLauncher(onResult = articlesViewModel::onPhotoAlbumResults)
+
+  LaunchedEffect(articlesViewModel.navigateToArticleDetail){
+    articlesViewModel.navigateToArticleDetail.getContentIfNotHandled()?.let {
+      navController.navigateToArticleDetail(it)
+    }
+  }
+  LaunchedEffect(articlesViewModel.navigateToCamera){
+    articlesViewModel.navigateToCamera.getContentIfNotHandled()?.let {
+      navController.navigateToCamera()
+    }
+  }
+  LaunchedEffect(articlesViewModel.navigateToSettings){
+    articlesViewModel.navigateToSettings.getContentIfNotHandled()?.let {
+      navController.navigateToSettings()
+    }
+  }
+  LaunchedEffect(articlesViewModel.launchPhotoAlbum){
+    articlesViewModel.launchPhotoAlbum.getContentIfNotHandled()?.let {
+      photoAlbumLauncher.launch()
+    }
+  }
+  LaunchedEffect(articlesViewModel.navigateToAddArticle){
+    articlesViewModel.navigateToAddArticle.getContentIfNotHandled()?.let {
+      navController.navigateToAddArticle(it)
+    }
   }
 
   ArticlesScreen(
     windowSizeClass = windowSizeClass,
     thumbnailUris = articleThumbnails,
-    selectedThumbnails = isItemSelected.keys,
-    editMode = editMode,
-    showDeleteArticlesAlert = showDeleteArticlesAlert,
-    onClickArticle = { index ->
-      if(editMode) {
-        if(isItemSelected.contains(index)) isItemSelected.remove(index)
-        else isItemSelected[index] = Unit
-      } else {
-        navController.navigateToArticleDetail(index)
-      }
-    },
-    onLongPressArticle = { index ->
-      if(!editMode) {
-        editMode = true
-        isItemSelected.clear()
-      }
-      if(isItemSelected.contains(index)) isItemSelected.remove(index)
-      else isItemSelected[index] = Unit
-    },
-    onClickAddPhotoAlbum = photoAlbumLauncher::launch,
-    onClickAddPhotoCamera = { navController.navigateToCamera() },
-    onClickEdit = {
-      editMode = !editMode
-      if(editMode) isItemSelected.clear()
-    },
-    onClickDelete = { showDeleteArticlesAlert = true },
-    onClickSelectionCancel = isItemSelected::clear,
-    onClickSettings = { navController.navigateToSettings() },
-    onConfirmDeleteArticlesAlert = {
-      showDeleteArticlesAlert = false
-      articlesViewModel.onDelete(isItemSelected.keys.toList())
-      isItemSelected.clear()
-    },
-    onDismissDeleteArticlesAlert = { showDeleteArticlesAlert = false },
+    selectedThumbnails = articlesViewModel.selectedArticleIndices,
+    editMode = articlesViewModel.editMode,
+    showDeleteArticlesAlert = articlesViewModel.showDeleteArticlesAlert,
+    onClickArticle = articlesViewModel::onClickArticle,
+    onLongPressArticle = articlesViewModel::onLongPressArticle,
+    onClickAddPhotoAlbum = articlesViewModel::onClickAddPhotoAlbum,
+    onClickAddPhotoCamera = articlesViewModel::onClickAddPhotoCamera,
+    onClickEdit = articlesViewModel::onClickEdit,
+    onClickMinimizeButtonControl = articlesViewModel::onClickMinimizeButtonControl,
+    onClickDelete = articlesViewModel::onClickDelete,
+    onClickClearSelection = articlesViewModel::onClickClearSelection,
+    onClickSettings = articlesViewModel::onClickSettings,
+    onConfirmDeleteArticlesAlert = articlesViewModel::onConfirmDeleteArticlesAlert,
+    onDismissDeleteArticlesAlert = articlesViewModel::onDismissDeleteArticlesAlert,
   )
 }
 
@@ -137,8 +136,9 @@ fun ArticlesScreen(
     onClickAddPhotoAlbum: () -> Unit,
     onClickAddPhotoCamera: () -> Unit,
     onClickEdit: () -> Unit,
+    onClickMinimizeButtonControl: () -> Unit,
     onClickDelete: () -> Unit,
-    onClickSelectionCancel: () -> Unit,
+    onClickClearSelection: () -> Unit,
     onClickSettings: () -> Unit,
     onConfirmDeleteArticlesAlert: () -> Unit,
     onDismissDeleteArticlesAlert: () -> Unit,
@@ -203,15 +203,16 @@ fun ArticlesScreen(
 
   val articlesAreSelected = selectedThumbnails.isNotEmpty()
   NoopBottomEndButtonContainer(modifier = Modifier.padding(start = startPadding, end = endPadding)) {
+    val expanded = editMode
     NoopExpandingIconButton(
-      expanded = editMode,
+      expanded = expanded,
       collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
       expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       verticalExpandedButtons = if(articlesAreSelected) {
         listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_articles)),
-            onClick = onClickSelectionCancel
+            onClick = onClickClearSelection
           ),
           IconButtonData(
             icon = IconData(icon = NoopIcons.DeleteForever, contentDescription = stringResource(R.string.delete_selected_articles)),
@@ -238,7 +239,7 @@ fun ArticlesScreen(
           ),
         )
       } else emptyList(),
-      onClick = onClickEdit,
+      onClick = if(expanded) onClickMinimizeButtonControl else onClickEdit,
     )
   }
 }
@@ -259,8 +260,7 @@ fun PreviewUtilArticleScreen(
     showDeleteArticlesAlert = showDeleteArticlesAlert,
     onClickArticle = {}, onClickAddPhotoAlbum = {}, onClickAddPhotoCamera = {}, onClickEdit = {},
     onConfirmDeleteArticlesAlert = {}, onDismissDeleteArticlesAlert = {},
-    onClickDelete = {}, onClickSelectionCancel = {}, onClickSettings = {},
-    onLongPressArticle = {},
+    onClickDelete = {}, onClickClearSelection = {}, onClickSettings = {}, onLongPressArticle = {}, onClickMinimizeButtonControl = {},
   )
 }
 
