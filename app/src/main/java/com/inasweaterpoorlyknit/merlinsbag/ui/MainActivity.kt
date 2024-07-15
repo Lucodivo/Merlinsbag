@@ -39,9 +39,8 @@ class MainActivity: ComponentActivity() {
       val appState = rememberNoopAppState(
         windowSizeClass = calculateWindowSizeClass(this)
       )
-      val uiState by mainActivityViewModel.uiState.collectAsStateWithLifecycle()
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
-      if(loading && uiState !is MainActivityUiState.Loading) loading = false
+      if(loading && mainActivityViewModel.uiState !is MainActivityUiState.Loading) loading = false
 
       NoopTheme(
         darkMode = userPreferences.darkMode,

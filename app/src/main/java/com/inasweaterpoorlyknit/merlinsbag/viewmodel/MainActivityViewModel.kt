@@ -1,14 +1,15 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -23,11 +24,10 @@ class MainActivityViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository
 ): ViewModel() {
 
-  private val _uiState = MutableStateFlow<MainActivityUiState>(MainActivityUiState.Loading)
-  val uiState: StateFlow<MainActivityUiState> get() = _uiState
+  var uiState by mutableStateOf<MainActivityUiState>(MainActivityUiState.Loading)
 
   val userPreferences = userPreferencesRepository.userPreferences
-      .onEach { _uiState.value = MainActivityUiState.Success }
+      .onEach { uiState = MainActivityUiState.Success }
       .stateIn(
         scope = viewModelScope,
         initialValue = UserPreferences(
