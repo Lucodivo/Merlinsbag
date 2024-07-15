@@ -95,17 +95,21 @@ fun SettingsRoute(
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
 
-  settingsViewModel.cachePurged.getContentIfNotHandled()?.let {
-    LaunchedEffect(Unit) { context.toast(R.string.cache_cleared) }
+  val userPreferences by settingsViewModel.userPreferences.collectAsState()
+
+  LaunchedEffect(settingsViewModel.cachePurged) {
+    settingsViewModel.cachePurged.getContentIfNotHandled()?.let {
+      context.toast(R.string.cache_cleared)
+    }
   }
-  settingsViewModel.dataDeleted.getContentIfNotHandled()?.let {
-    LaunchedEffect(Unit) {
+
+  LaunchedEffect(settingsViewModel.dataDeleted) {
+    settingsViewModel.dataDeleted.getContentIfNotHandled()?.let {
       context.toast(msg = context.getString(R.string.all_data_deleted))
       navController.navigateToAppStartDestination()
     }
   }
 
-  val userPreferences by settingsViewModel.userPreferences.collectAsState()
   SettingsScreen(
     showDeleteAllDataAlertDialog = settingsViewModel.showDeleteAllDataAlertDialog,
     expandDarkModeDropdownMenu = settingsViewModel.expandedDarkModeMenu,

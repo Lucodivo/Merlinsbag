@@ -89,6 +89,7 @@ fun EnsembleDetailRoute(
         factory.create(ensembleId)
       }
   val context = LocalContext.current
+  BackHandler(enabled = ensembleDetailViewModel.onBackEnabled, onBack = ensembleDetailViewModel::onBack)
 
   val ensembleTitle by ensembleDetailViewModel.ensembleTitle.collectAsStateWithLifecycle()
   val ensembleUiState by ensembleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
@@ -119,13 +120,14 @@ fun EnsembleDetailRoute(
     onClickTitle = ensembleDetailViewModel::onClickTitle,
     onTitleChanged = ensembleDetailViewModel::onTitleChanged,
     onClickEdit = ensembleDetailViewModel::onClickEdit,
+    onClickMinimizeButtonControl = ensembleDetailViewModel::onClickMinimizeButtonControl,
     onClickArticle = ensembleDetailViewModel::onClickArticle,
     onLongClickArticle = ensembleDetailViewModel::onLongPressArticle,
     onClickArticleAddDialog = ensembleDetailViewModel::onClickArticleAddDialog,
     onClickCancelArticleSelection = ensembleDetailViewModel::onClickCancelArticleSelection,
     onClickRemoveArticles = ensembleDetailViewModel::onClickRemoveArticles,
     onClickDeleteEnsemble = ensembleDetailViewModel::onClickDeleteEnsemble,
-    onAbandonEditTitle = ensembleDetailViewModel::onDismissEditTitle,
+    onDismissEditTitle = ensembleDetailViewModel::onDismissEditTitle,
     showAddArticlesDialog = ensembleDetailViewModel.showAddArticlesDialog,
     onClickConfirmAddArticles = ensembleDetailViewModel::onClickConfirmAddArticles,
     onCloseAddArticlesDialog = ensembleDetailViewModel::onDismissAddArticlesDialog,
@@ -158,6 +160,7 @@ fun EnsembleDetailFloatingActionButtons(
     editEnsemblesMode: Boolean,
     selectedEditArticleIndices: Set<Int>,
     onClickEdit: () -> Unit,
+    onClickMinimizeButtonControl: () -> Unit,
     onClickAddArticles: () -> Unit,
     onClickCancelSelection: () -> Unit,
     onClickRemoveArticles: () -> Unit,
@@ -205,7 +208,7 @@ fun EnsembleDetailFloatingActionButtons(
           ),
         )
       },
-      onClick = onClickEdit,
+      onClick = { if(editEnsemblesMode) onClickMinimizeButtonControl() else onClickEdit() } ,
     )
   }
 }
@@ -223,13 +226,14 @@ fun EnsembleDetailScreen(
     onClickTitle: () -> Unit,
     onTitleChanged: (String) -> Unit,
     onClickEdit: () -> Unit,
+    onClickMinimizeButtonControl: () -> Unit,
     onClickAddArticles: () -> Unit,
     onClickArticle: (index: Int) -> Unit,
     onLongClickArticle: (index: Int) -> Unit,
     onClickRemoveArticles: () -> Unit,
     onClickCancelArticleSelection: () -> Unit,
     onClickDeleteEnsemble: () -> Unit,
-    onAbandonEditTitle: () -> Unit,
+    onDismissEditTitle: () -> Unit,
     showAddArticlesDialog: Boolean,
     onClickArticleAddDialog: (articleIndex: Int) -> Unit,
     onClickConfirmAddArticles: () -> Unit,
@@ -245,6 +249,7 @@ fun EnsembleDetailScreen(
   val systemBarTopPadding = systemBarPaddingValues.calculateTopPadding()
   val systemBarStartPadding = systemBarPaddingValues.calculateStartPadding(layoutDir)
   val systemBarEndPadding = systemBarPaddingValues.calculateEndPadding(layoutDir)
+  BackHandler(enabled = editingTitle, onBack = { onDismissEditTitle() })
   Surface(
     modifier = modifier.fillMaxSize()
   ) {
@@ -286,7 +291,6 @@ fun EnsembleDetailScreen(
                 .focusRequester(focusRequester)
           )
           LaunchedEffect(Unit) { focusRequester.requestFocus() }
-          BackHandler { onAbandonEditTitle() }
         } else {
           val titleModifier = Modifier
           val iconModifier = Modifier.padding(start = if(compactWidth) 0.dp else 16.dp, end = 4.dp)
@@ -318,7 +322,7 @@ fun EnsembleDetailScreen(
                 .clickable(
                   interactionSource = outsideKeyboardRowInteractionSource,
                   indication = null,
-                  onClick = onAbandonEditTitle
+                  onClick = onDismissEditTitle
                 )
           )
         }
@@ -333,6 +337,7 @@ fun EnsembleDetailScreen(
     onClickCancelSelection = onClickCancelArticleSelection,
     onClickRemoveArticles = onClickRemoveArticles,
     onClickDeleteEnsemble = onClickDeleteEnsemble,
+    onClickMinimizeButtonControl = onClickMinimizeButtonControl,
     modifier = Modifier.padding(start = systemBarStartPadding, end = systemBarEndPadding),
   )
   AddArticlesDialog(
@@ -414,10 +419,12 @@ fun PreviewUtilEnsembleDetailScreen(
   addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   selectedEditArticleIndices = selectedArticleIndices,
   selectedAddArticleIndices = selectedAddArticleIndices,
-  onClickTitle = {},
+  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
+  showAddArticlesDialog = showAddArticlesDialog,
+  windowSizeClass = currentWindowAdaptiveInfo(),
+  onClickTitle = {}, onClickMinimizeButtonControl = {}, onDismissDeleteEnsembleDialog = {}, onClickPositiveDeleteEnsembleDialog = {},
   onTitleChanged = {}, onClickEdit = {}, onClickAddArticles = {}, onClickArticle = {}, onLongClickArticle = {}, onClickRemoveArticles = {}, onClickCancelArticleSelection = {},
-  onClickDeleteEnsemble = {}, onAbandonEditTitle = {}, showAddArticlesDialog = showAddArticlesDialog, onClickArticleAddDialog = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {},
-  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog, onDismissDeleteEnsembleDialog = {}, onClickPositiveDeleteEnsembleDialog = {}, windowSizeClass = currentWindowAdaptiveInfo(),
+  onClickDeleteEnsemble = {}, onDismissEditTitle = {}, onClickArticleAddDialog = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {},
 )
 
 @Composable
@@ -428,7 +435,7 @@ fun PreviewUtilEnsembleDetailFloatingActionButtons(
   EnsembleDetailFloatingActionButtons(
     editEnsemblesMode = editEnsemblesMode,
     selectedEditArticleIndices = selectedArticleIndices,
-    onClickEdit = {}, onClickAddArticles = {}, onClickCancelSelection = {}, onClickRemoveArticles = {}, onClickDeleteEnsemble = {}
+    onClickEdit = {}, onClickAddArticles = {}, onClickCancelSelection = {}, onClickRemoveArticles = {}, onClickDeleteEnsemble = {}, onClickMinimizeButtonControl = {},
   )
 }
 

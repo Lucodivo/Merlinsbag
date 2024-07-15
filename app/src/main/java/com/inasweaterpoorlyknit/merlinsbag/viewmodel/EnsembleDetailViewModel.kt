@@ -55,6 +55,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   var editMode by mutableStateOf(false)
   var showDeleteEnsembleDialog by mutableStateOf(false)
   var showAddArticlesDialog by mutableStateOf(false)
+  val onBackEnabled get() = editMode
 
   // TODO: No mutableStateSetOf ??
   val _selectedEditArticleIndices = mutableStateMapOf<Int, Unit>()
@@ -99,9 +100,11 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   fun onClickTitle() { editingTitle = true }
 
-  fun onClickEdit() {
-    if(editMode) _selectedEditArticleIndices.clear()
-    editMode = !editMode
+  fun onBack() { onClickMinimizeButtonControl() }
+  fun onClickEdit() { editMode = true }
+  fun onClickMinimizeButtonControl() {
+    editMode = false
+    if(_selectedEditArticleIndices.isNotEmpty()) _selectedEditArticleIndices.clear()
   }
 
   fun onClickArticle(index: Int) {
