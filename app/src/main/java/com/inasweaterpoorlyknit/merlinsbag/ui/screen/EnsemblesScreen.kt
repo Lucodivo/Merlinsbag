@@ -41,11 +41,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -113,70 +113,38 @@ fun EnsemblesRoute(
     windowSizeClass: WindowSizeClass,
     ensemblesViewModel: EnsemblesViewModel = hiltViewModel(),
 ) {
+  BackHandler(enabled = ensemblesViewModel.onBackEnabled, onBack = ensemblesViewModel::onBack)
+
   val lazyEnsembleThumbnails by ensemblesViewModel.lazyEnsembles.collectAsStateWithLifecycle()
-  val showAddEnsembleDialog by ensemblesViewModel.showAddEnsembleDialog.collectAsStateWithLifecycle(false)
-  val showPlaceholder by ensemblesViewModel.showPlaceholder.collectAsStateWithLifecycle()
   val addEnsembleDialogArticles by ensemblesViewModel.addArticleThumbnails.collectAsStateWithLifecycle()
-  val selectedEnsembleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
-  var showDeleteEnsembleAlertDialog by remember { mutableStateOf(false) }
-  var editMode by remember { mutableStateOf(false) }
-  var searchQuery by remember { mutableStateOf(ensemblesViewModel.searchQuery) }
-  val ensembleTitleError by ensemblesViewModel.ensembleTitleError.collectAsStateWithLifecycle()
-  fun toggleSelectedEnsemble(index: Int){
-    if(selectedEnsembleIndices.contains(index)) selectedEnsembleIndices.remove(index)
-    else selectedEnsembleIndices[index] = Unit
-    if(selectedEnsembleIndices.isEmpty()) editMode = false
+
+  LaunchedEffect(ensemblesViewModel.navigateToEnsembleDetail) {
+    ensemblesViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navController.navigateToEnsembleDetail(ensembleId = it) }
   }
+
   EnsemblesScreen(
     windowSizeClass = windowSizeClass,
     lazyEnsembleThumbnails = lazyEnsembleThumbnails,
-    showAddEnsembleDialog = showAddEnsembleDialog,
-    showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
-    editMode = editMode,
-    selectedEnsembleIndices = selectedEnsembleIndices.keys,
-    showPlaceholder = showPlaceholder,
-    searchQuery = searchQuery,
+    showAddEnsembleDialog = ensemblesViewModel.showAddEnsembleDialog,
+    showDeleteEnsembleAlertDialog = ensemblesViewModel.showDeleteEnsembleAlertDialog,
+    editMode = ensemblesViewModel.editMode,
+    selectedEnsembleIndices = ensemblesViewModel.selectedEnsembleIndices,
+    showPlaceholder = ensemblesViewModel.showPlaceholder,
+    searchQuery = ensemblesViewModel.searchQuery,
     addEnsembleDialogArticles = addEnsembleDialogArticles,
-    onLongPressEnsemble = { index ->
-      if(!editMode) {
-        editMode = true
-        selectedEnsembleIndices.clear()
-      }
-      toggleSelectedEnsemble(index)
-    },
-    onClickEnsemble = { index ->
-      if(editMode) toggleSelectedEnsemble(index)
-      else navController.navigateToEnsembleDetail(ensemblesViewModel.onClickEnsemble(index))
-    },
+    onLongPressEnsemble = ensemblesViewModel::onLongPressEnsemble,
+    onClickEnsemble = ensemblesViewModel::onClickEnsemble,
     onClickSettings = navController::navigateToSettings,
-    onClickAddEnsemble = {
-      if(editMode) editMode = false
-      else ensemblesViewModel.onClickAddEnsemble()
-    },
-    onClickSaveEnsemble = { saveEnsembleData ->
-      ensemblesViewModel.onClickSaveAddEnsembleDialog(saveEnsembleData)
-    },
-    ensembleTitleError = ensembleTitleError,
+    onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
+    onClickMinimizeButtonControl = ensemblesViewModel::onClickMinimizeButtonControl,
+    onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
+    ensembleTitleError = ensemblesViewModel.ensembleTitleError,
     onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog,
-    onUpdateSearchQuery = { newSearchQuery ->
-      ensemblesViewModel.onSearchQueryUpdate(newSearchQuery)
-      searchQuery = newSearchQuery
-      editMode = false
-    },
-    onClearSearchQuery = {
-      ensemblesViewModel.onSearchQueryUpdate("")
-      searchQuery = ""
-      editMode = false
-    },
-    onClickDeleteSelected = {
-      showDeleteEnsembleAlertDialog = true
-      editMode = false
-    },
-    onAlertDialogDismiss = { showDeleteEnsembleAlertDialog = false },
-    onAlertDialogPositive = {
-      ensemblesViewModel.deleteEnsembles(selectedEnsembleIndices.keys.toList())
-      showDeleteEnsembleAlertDialog = false
-    },
+    onUpdateSearchQuery = ensemblesViewModel::onSearchQueryUpdate,
+    onClearSearchQuery = ensemblesViewModel::onSearchQueryClear,
+    onClickDeleteSelected = ensemblesViewModel::onClickDeleteSelectedEnsembles,
+    onDeleteEnsemblesAlertDialogDismiss = ensemblesViewModel::onDeleteEnsemblesAlertDialogDismiss,
+    onDeleteEnsemblesAlertDialogPositive = ensemblesViewModel::onDeleteEnsemblesAlertDialogPositive,
   )
 }
 
@@ -197,14 +165,15 @@ fun EnsemblesScreen(
     onClickEnsemble: (index: Int) -> Unit,
     onLongPressEnsemble: (index: Int) -> Unit,
     onClickAddEnsemble: () -> Unit,
+    onClickMinimizeButtonControl: () -> Unit,
     onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
     ensembleTitleError: Int?,
-    onAlertDialogPositive: () -> Unit,
+    onDeleteEnsemblesAlertDialogPositive: () -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
     onUpdateSearchQuery: (String) -> Unit,
     onClearSearchQuery: () -> Unit,
     onClickDeleteSelected: () -> Unit,
-    onAlertDialogDismiss: () -> Unit,
+    onDeleteEnsemblesAlertDialogDismiss: () -> Unit,
 ) {
   val sidePadding = 8.dp
   val bottomPadding = 4.dp
@@ -277,6 +246,7 @@ fun EnsemblesScreen(
       EditEnsemblesExpandingActionButton(
         expanded = editMode,
         onClickAddEnsemble = onClickAddEnsemble,
+        onClickMinimizeButtonControl = onClickMinimizeButtonControl,
         onClickDeleteSelected = onClickDeleteSelected,
       )
     }
@@ -288,7 +258,7 @@ fun EnsemblesScreen(
       ensembleTitleError = ensembleTitleError,
     )
     if(showDeleteEnsembleAlertDialog) {
-      DeleteEnsemblesAlertDialog(onDismiss = onAlertDialogDismiss, onConfirm = onAlertDialogPositive)
+      DeleteEnsemblesAlertDialog(onDismiss = onDeleteEnsemblesAlertDialogDismiss, onConfirm = onDeleteEnsemblesAlertDialogPositive)
     }
   }
 }
@@ -297,15 +267,16 @@ fun EnsemblesScreen(
 private fun EditEnsemblesExpandingActionButton(
     expanded: Boolean,
     onClickAddEnsemble: () -> Unit,
+    onClickMinimizeButtonControl: () -> Unit,
     onClickDeleteSelected: () -> Unit,
 ) {
   NoopExpandingIconButton(
     expanded = expanded,
     collapsedIcon = IconData(NoopIcons.Add, stringResource(R.string.add_ensemble)),
     expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
-    onClick = onClickAddEnsemble,
+    onClick = { if(expanded) onClickMinimizeButtonControl() else onClickAddEnsemble() },
     verticalExpandedButtons = listOf(
-      IconButtonData(IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_selected_ensembles))) { onClickDeleteSelected() },
+      IconButtonData(IconData(NoopIcons.DeleteForever, stringResource(R.string.delete_selected_ensembles)), onClick = onClickDeleteSelected),
     )
   )
 }
@@ -648,11 +619,13 @@ fun PreviewUtilEnsembleScreen(
     lazyEnsembleThumbnails = ensembles,
     showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,
-    showDeleteEnsembleAlertDialog = false, selectedEnsembleIndices = emptySet(), showPlaceholder = showPlaceholder, addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
+    showDeleteEnsembleAlertDialog = false,
+    selectedEnsembleIndices = emptySet(),
+    showPlaceholder = showPlaceholder,
+    addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
     searchQuery = "Goth 2 Boss",
-    onClickEnsemble = {}, onLongPressEnsemble = {}, onClickAddEnsemble = {},
-    onClickSaveEnsemble = {}, ensembleTitleError = null, onClickSettings = {},
-    onAlertDialogPositive = {}, onCloseAddEnsembleDialog = {}, onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onAlertDialogDismiss = {},
+    onClickSettings = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, onClickAddEnsemble = {}, onClickMinimizeButtonControl = {}, onClickSaveEnsemble = {}, ensembleTitleError = null,
+    onDeleteEnsemblesAlertDialogPositive = {}, onCloseAddEnsembleDialog = {}, onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onDeleteEnsemblesAlertDialogDismiss = {},
   )
 }
 

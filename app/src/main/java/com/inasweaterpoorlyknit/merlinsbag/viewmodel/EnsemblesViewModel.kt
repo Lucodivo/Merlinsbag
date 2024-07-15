@@ -2,8 +2,13 @@
 
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
@@ -46,12 +51,19 @@ class EnsemblesViewModel @Inject constructor(
   private lateinit var ensembles: List<LazyEnsembleThumbnails>
   private var searchEnsemblesQuery: MutableSharedFlow<String> = MutableStateFlow("")
 
-  private val _showPlaceholder = MutableStateFlow(false)
-  val showPlaceholder: StateFlow<Boolean> = _showPlaceholder
-  private val _showAddEnsembleDialog = MutableStateFlow(false)
-  val showAddEnsembleDialog: StateFlow<Boolean> = _showAddEnsembleDialog
-  private val _ensembleTitleError = MutableStateFlow<Int?>(null)
-  val ensembleTitleError: StateFlow<Int?> = _ensembleTitleError
+  var showPlaceholder by mutableStateOf(false)
+  var showAddEnsembleDialog by mutableStateOf(false)
+  var ensembleTitleError by mutableStateOf<Int?>(null)
+  var editMode by mutableStateOf(false)
+  var showDeleteEnsembleAlertDialog by mutableStateOf(false)
+  var searchQuery by mutableStateOf("")
+  val onBackEnabled get() = editMode
+
+  // TODO: No mutableStateSetOf ??
+  val _selectedEnsembleIndices = mutableStateMapOf<Int, Unit>()
+  val selectedEnsembleIndices get() = _selectedEnsembleIndices.keys // TODO: Ensure only used in UI
+
+  var navigateToEnsembleDetail by mutableStateOf(Event<String>(null))
 
   val addArticleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
       .onEach { articleImages = it }
@@ -60,15 +72,14 @@ class EnsemblesViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
         initialValue = LazyUriStrings.Empty
       )
-  var searchQuery: String = "" // NOTE: Allows compose function to save search query when composable is returned to from the backstack
 
   val lazyEnsembles: StateFlow<List<Pair<String, LazyUriStrings>>> =
       combine(
         ensemblesRepository.getAllEnsembleArticleThumbnails().onEach {
           if(it.isEmpty()){
-            if(!_showPlaceholder.value) _showPlaceholder.value = true
-          } else if(_showPlaceholder.value) {
-            _showPlaceholder.value = false
+            if(!showPlaceholder) showPlaceholder = true
+          } else if(showPlaceholder) {
+            showPlaceholder = false
           }
         },
         searchEnsemblesQuery,
@@ -87,31 +98,65 @@ class EnsemblesViewModel @Inject constructor(
         initialValue = emptyList()
       )
 
+  fun onClickAddEnsemble() { showAddEnsembleDialog = true }
+  fun onClickMinimizeButtonControl() {
+    editMode = false
+    if(_selectedEnsembleIndices.isNotEmpty()) _selectedEnsembleIndices.clear()
+  }
+  fun onSearchQueryClear() { onSearchQueryUpdate("") }
+  fun onDeleteEnsemblesAlertDialogDismiss() { showDeleteEnsembleAlertDialog = false }
+  fun onClickCloseAddEnsembleDialog() { showAddEnsembleDialog = false }
+
+  fun onLongPressEnsemble(index: Int){
+    if(!editMode) {
+      editMode = true
+      _selectedEnsembleIndices.clear()
+    }
+    toggleSelectedEnsemble(index)
+  }
+
+  fun onClickEnsemble(index: Int) =
+    if(editMode) toggleSelectedEnsemble(index)
+    else navigateToEnsembleDetail = Event(ensembles[index].ensemble.id)
+
   fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
     viewModelScope.launch(Dispatchers.IO) {
       val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(saveEnsembleData.title).first()
       if(ensembleTitleUnique){
         val articleIds = saveEnsembleData.articleIndices.map { articleImages.getArticleId(it) }
-        _showAddEnsembleDialog.value = false
+        showAddEnsembleDialog = false
         ensemblesRepository.insertEnsemble(
           saveEnsembleData.title,
           articleIds,
         )
-      } else _ensembleTitleError.value = R.string.ensemble_with_title_already_exists
+      } else ensembleTitleError = R.string.ensemble_with_title_already_exists
     }
   }
-  fun onClickEnsemble(index: Int): String = ensembles[index].ensemble.id
+
   fun onSearchQueryUpdate(query: String) {
+    editMode = false
     searchQuery = query
     searchEnsemblesQuery.tryEmit(if(query.isEmpty()) "" else "$query*")
   }
-  fun deleteEnsembles(ensembleIndices: List<Int>) {
-    val ensembleIds = ensembles.slice(ensembleIndices).map { it.ensemble.id }
+
+  fun onBack() = onClickMinimizeButtonControl()
+
+  fun onDeleteEnsemblesAlertDialogPositive() {
+    showDeleteEnsembleAlertDialog = false
+    val ensembleIds = ensembles.slice(selectedEnsembleIndices).map { it.ensemble.id }
     viewModelScope.launch(Dispatchers.IO) {
       ensemblesRepository.deleteEnsembles(ensembleIds)
     }
   }
 
-  fun onClickAddEnsemble() { _showAddEnsembleDialog.value = true }
-  fun onClickCloseAddEnsembleDialog() { _showAddEnsembleDialog.value = false }
+  fun onClickDeleteSelectedEnsembles() {
+    showDeleteEnsembleAlertDialog = true
+    editMode = false
+  }
+
+  private fun toggleSelectedEnsemble(index: Int){
+    if(_selectedEnsembleIndices.contains(index)) _selectedEnsembleIndices.remove(index)
+    else _selectedEnsembleIndices[index] = Unit
+    if(_selectedEnsembleIndices.isEmpty()) editMode = false
+  }
 }

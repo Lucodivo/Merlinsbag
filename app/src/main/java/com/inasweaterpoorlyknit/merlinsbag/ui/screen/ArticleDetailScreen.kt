@@ -60,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -129,29 +130,23 @@ fun ArticleDetailRoute(
   val lazyArticleFilenames by articleDetailViewModel.lazyArticleFilenames.collectAsStateWithLifecycle()
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
 
-  articleDetailViewModel.finished.getContentIfNotHandled()?.let{ navController.popBackStack() }
-  articleDetailViewModel.launchSettings.getContentIfNotHandled()?.let{ settingsLauncher.launch() }
-  articleDetailViewModel.navigateToCamera.getContentIfNotHandled()?.let{ navController.navigateToCamera(articleId = it)}
-  articleDetailViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navController.navigateToEnsembleDetail(ensembleId = it) }
-
-  val pagerState = rememberPagerState(
-    initialPage = articleDetailViewModel.articleIndex,
-    initialPageOffsetFraction = 0.0f,
-    pageCount = { lazyArticleFilenames.size },
-  )
-
-  val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris ->
-    if(uris.isNotEmpty()) navController.navigateToAddArticle(
-      uriStringArray = uris.map { navigationSafeUriStringEncode(it) },
-      articleId = articleDetailViewModel.articleId
-    )
+  LaunchedEffect(articleDetailViewModel.finished) {
+    articleDetailViewModel.finished.getContentIfNotHandled()?.let{ navController.popBackStack() }
   }
-
-  val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
-    onPermissionsGranted = articleDetailViewModel::onExportPermissionsGranted,
-    onPermissionDenied = { navController.context.toast(R.string.storage_permissions_required) },
-    onNeverAskAgain = articleDetailViewModel::neverAskExportPermissionAgain,
-  )
+  LaunchedEffect(articleDetailViewModel.launchSettings) {
+    articleDetailViewModel.launchSettings.getContentIfNotHandled()?.let{ settingsLauncher.launch() }
+  }
+  LaunchedEffect(articleDetailViewModel.navigateToCamera) {
+    articleDetailViewModel.navigateToCamera.getContentIfNotHandled()?.let{ navController.navigateToCamera(articleId = it)}
+  }
+  LaunchedEffect(articleDetailViewModel.navigateToEnsembleDetail) {
+    articleDetailViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navController.navigateToEnsembleDetail(ensembleId = it) }
+  }
+  LaunchedEffect(articleDetailViewModel.navigateToAddArticle) {
+    articleDetailViewModel.navigateToAddArticle.getContentIfNotHandled()?.let{ (articleId, uris) ->
+      navController.navigateToAddArticle(articleId = articleId, uriStringArray = uris)
+    }
+  }
 
   LaunchedEffect(articleDetailViewModel.exportedImage) {
     articleDetailViewModel.exportedImage.getContentIfNotHandled()?.let { exportedImageUri ->
@@ -162,12 +157,10 @@ fun ArticleDetailRoute(
       )) {
         SnackbarResult.Dismissed -> {}
         SnackbarResult.ActionPerformed -> {
-          // TODO: There are other ways to open up an image URI that may need to be explored
-          val intent = Intent().apply {
-            setAction(Intent.ACTION_VIEW)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            setDataAndType(exportedImageUri, "image/webp")
-          }
+          val intent = Intent()
+              .setAction(Intent.ACTION_VIEW)
+              .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+              .setDataAndType(exportedImageUri, "image/webp")
           val pIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
           pIntent.send()
         }
@@ -175,11 +168,23 @@ fun ArticleDetailRoute(
     }
   }
 
+  val pagerState = rememberPagerState(
+    initialPage = articleDetailViewModel.articleIndex,
+    initialPageOffsetFraction = 0.0f,
+    pageCount = { lazyArticleFilenames.size },
+  )
   LaunchedEffect(pagerState) {
     snapshotFlow { pagerState.currentPage }.collect {
-      i -> articleDetailViewModel.onArticleFocus(i)
+        i -> articleDetailViewModel.onArticleFocus(i)
     }
   }
+
+  val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris -> articleDetailViewModel.onPhotoAlbumResult(uris) }
+  val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
+    onPermissionsGranted = articleDetailViewModel::onExportPermissionsGranted,
+    onPermissionDenied = { navController.context.toast(R.string.storage_permissions_required) },
+    onNeverAskAgain = articleDetailViewModel::neverAskExportPermissionAgain,
+  )
 
   ArticleDetailScreen(
     windowSizeClass = windowSizeClass,

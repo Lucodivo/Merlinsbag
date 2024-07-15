@@ -18,6 +18,7 @@ import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringEncode
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -83,6 +84,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
   var launchSettings by mutableStateOf(Event<Unit>(null))
   var navigateToCamera by mutableStateOf(Event<String>(null))
   var navigateToEnsembleDetail by mutableStateOf(Event<String>(null))
+  var navigateToAddArticle by mutableStateOf(Event<Pair<String, List<String>>>(null))
 
   var articleId by mutableStateOf<String?>(null)
   var ensemblesSearchQuery by mutableStateOf("")
@@ -308,5 +310,11 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onBack() {
     if(editMode) onClickEdit() else finished = Event(Unit)
+  }
+
+  fun onPhotoAlbumResult(uris: List<Uri>) {
+    if(uris.isNotEmpty()){
+      navigateToAddArticle = Event(Pair(articleId!!, uris.map { navigationSafeUriStringEncode(it) }))
+    }
   }
 }
