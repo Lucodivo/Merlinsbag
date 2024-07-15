@@ -31,11 +31,13 @@ class ArticlesViewModel @Inject constructor(
 
   var showDeleteArticlesAlert by mutableStateOf(false)
   var editMode by mutableStateOf(ArticlesScreenEditMode.DISABLED)
+  val onBackEnabled get() = editMode != ArticlesScreenEditMode.DISABLED
 
   // TODO: No mutableStateSetOf ??
   val _selectedArticleIndices = mutableStateMapOf<Int, Unit>()
   val selectedArticleIndices = _selectedArticleIndices.keys
 
+  var finish by mutableStateOf(Event<Unit>(null))
   var navigateToArticleDetail by mutableStateOf(Event<Int>(null))
   var navigateToCamera by mutableStateOf(Event<Unit>(null))
   var navigateToSettings by mutableStateOf(Event<Unit>(null))
@@ -94,4 +96,8 @@ class ArticlesViewModel @Inject constructor(
     viewModelScope.launch(Dispatchers.IO) { articleRepository.deleteArticles(articleIds) }
   }
 
+  fun onBack() {
+    if(editMode != ArticlesScreenEditMode.DISABLED) editMode = ArticlesScreenEditMode.DISABLED
+    else { finish = Event(Unit) }
+  }
 }

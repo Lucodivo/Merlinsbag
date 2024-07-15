@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -66,11 +67,17 @@ fun ArticlesRoute(
     windowSizeClass: WindowSizeClass,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
+  BackHandler(enabled = articlesViewModel.onBackEnabled, onBack = articlesViewModel::onBack)
 
   val articleThumbnails by articlesViewModel.articleThumbnails.collectAsStateWithLifecycle()
 
   val photoAlbumLauncher = rememberPhotoAlbumLauncher(onResult = articlesViewModel::onPhotoAlbumResults)
 
+  LaunchedEffect(articlesViewModel.finish){
+    articlesViewModel.finish.getContentIfNotHandled()?.let {
+      navController.popBackStack()
+    }
+  }
   LaunchedEffect(articlesViewModel.navigateToArticleDetail){
     articlesViewModel.navigateToArticleDetail.getContentIfNotHandled()?.let {
       navController.navigateToArticleDetail(it)
