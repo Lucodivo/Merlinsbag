@@ -143,7 +143,7 @@ class EnsemblesViewModel @Inject constructor(
 
   fun onDeleteEnsemblesAlertDialogPositive() {
     showDeleteEnsembleAlertDialog = false
-    val ensembleIds = ensembles.slice(selectedEnsembleIndices).map { it.ensemble.id }
+    val ensembleIds = ensembles.slice(_selectedEnsembleIndices.keys).map { it.ensemble.id }
     viewModelScope.launch(Dispatchers.IO) {
       ensemblesRepository.deleteEnsembles(ensembleIds)
     }

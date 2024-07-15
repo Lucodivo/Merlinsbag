@@ -28,15 +28,14 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -89,74 +88,51 @@ fun EnsembleDetailRoute(
       hiltViewModel<EnsembleDetailViewModel, EnsembleDetailViewModel.EnsembleDetailViewModelFactory> { factory ->
         factory.create(ensembleId)
       }
+  val context = LocalContext.current
+
   val ensembleTitle by ensembleDetailViewModel.ensembleTitle.collectAsStateWithLifecycle()
   val ensembleUiState by ensembleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
-  var editingTitle by remember { mutableStateOf(false) }
-  var editMode by remember { mutableStateOf(false) }
-  var showDeleteEnsembleDialog by remember { mutableStateOf(false) }
-  val selectedEditArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
-  var showAddArticlesDialog by remember { mutableStateOf(false) }
-  val selectedAddArticleIndices = remember { mutableStateMapOf<Int, Unit>() } // TODO: No mutableStateSetOf ??
-  ensembleDetailViewModel.titleChangeError.value.getContentIfNotHandled()?.let { Toast(it) }
+
+  LaunchedEffect(ensembleDetailViewModel.titleChangeError) {
+    ensembleDetailViewModel.titleChangeError.getContentIfNotHandled()?.let { context.toast(it) }
+  }
+
+  LaunchedEffect(ensembleDetailViewModel.navigateToArticleDetail) {
+    ensembleDetailViewModel.navigateToArticleDetail.getContentIfNotHandled()?.let { (index, ensembleId) ->
+      navController.navigateToArticleDetail(index, ensembleId)
+    }
+  }
+
+  LaunchedEffect(ensembleDetailViewModel.finished) {
+    ensembleDetailViewModel.finished.getContentIfNotHandled()?.let{ navController.popBackStack() }
+  }
+
   EnsembleDetailScreen(
     windowSizeClass = windowSizeClass,
     title = ensembleTitle,
-    editingTitle = editingTitle,
-    editEnsemblesMode = editMode,
+    editingTitle = ensembleDetailViewModel.editingTitle,
+    editEnsemblesMode = ensembleDetailViewModel.editMode,
     ensembleArticleThumbnailUris = ensembleUiState.ensembleArticleThumbnailUris,
     addArticleThumbnailUris = ensembleUiState.addArticleThumbnailUris,
-    selectedEditArticleIndices = selectedEditArticleIndices.keys,
-    selectedAddArticleIndices = selectedAddArticleIndices.keys,
-    onTitleClicked = { editingTitle = true },
-    onTitleChanged = { newTitle ->
-      if(newTitle != ensembleTitle) ensembleDetailViewModel.onTitleChanged(newTitle)
-      editingTitle = false
-    },
-    onClickEdit = {
-      if(editMode) selectedEditArticleIndices.clear()
-      editMode = !editMode
-    },
-    onSelectArticle = { index ->
-      if(editMode) {
-        if(selectedEditArticleIndices.containsKey(index)) selectedEditArticleIndices.remove(index) else selectedEditArticleIndices[index] = Unit
-      } else {
-        navController.navigateToArticleDetail(index, ensembleId)
-      }
-    },
-    onLongSelectArticle = { index ->
-      if(!editMode) editMode = true
-      if(selectedEditArticleIndices.containsKey(index)) selectedEditArticleIndices.remove(index) else selectedEditArticleIndices[index] = Unit
-    },
-    onSelectedAddArticle = { index ->
-      if(selectedAddArticleIndices.containsKey(index)) selectedAddArticleIndices.remove(index) else selectedAddArticleIndices[index] = Unit
-    },
-    onClickCancelSelection = { selectedEditArticleIndices.clear() },
-    onClickRemoveArticles = {
-      ensembleDetailViewModel.removeEnsembleArticles(selectedEditArticleIndices.keys.toList())
-      selectedEditArticleIndices.clear()
-    },
-    onClickDeleteEnsemble = { showDeleteEnsembleDialog = true },
-    onAbandonEditTitle = { editingTitle = false },
-    showAddArticlesDialog = showAddArticlesDialog,
-    onClickConfirmAddArticles = {
-      if(selectedAddArticleIndices.isNotEmpty()) {
-        ensembleDetailViewModel.addEnsembleArticles(selectedAddArticleIndices.keys.toList())
-        selectedAddArticleIndices.clear()
-      }
-      showAddArticlesDialog = false
-    },
-    onCloseAddArticlesDialog = {
-      showAddArticlesDialog = false
-      selectedAddArticleIndices.clear()
-    },
-    onClickAddArticles = { showAddArticlesDialog = true },
-    showDeleteEnsembleAlertDialog = showDeleteEnsembleDialog,
-    onDismissDeleteEnsembleDialog = { showDeleteEnsembleDialog = false },
-    onClickPositiveDeleteEnsembleDialog = {
-      showDeleteEnsembleDialog = false
-      ensembleDetailViewModel.deleteEnsemble()
-      navController.popBackStack()
-    },
+    selectedEditArticleIndices = ensembleDetailViewModel.selectedEditArticleIndices,
+    selectedAddArticleIndices = ensembleDetailViewModel.selectedAddArticleIndices,
+    onClickTitle = ensembleDetailViewModel::onClickTitle,
+    onTitleChanged = ensembleDetailViewModel::onTitleChanged,
+    onClickEdit = ensembleDetailViewModel::onClickEdit,
+    onClickArticle = ensembleDetailViewModel::onClickArticle,
+    onLongClickArticle = ensembleDetailViewModel::onLongPressArticle,
+    onClickArticleAddDialog = ensembleDetailViewModel::onClickArticleAddDialog,
+    onClickCancelArticleSelection = ensembleDetailViewModel::onClickCancelArticleSelection,
+    onClickRemoveArticles = ensembleDetailViewModel::onClickRemoveArticles,
+    onClickDeleteEnsemble = ensembleDetailViewModel::onClickDeleteEnsemble,
+    onAbandonEditTitle = ensembleDetailViewModel::onDismissEditTitle,
+    showAddArticlesDialog = ensembleDetailViewModel.showAddArticlesDialog,
+    onClickConfirmAddArticles = ensembleDetailViewModel::onClickConfirmAddArticles,
+    onCloseAddArticlesDialog = ensembleDetailViewModel::onDismissAddArticlesDialog,
+    onClickAddArticles = ensembleDetailViewModel::onClickAddArticles,
+    showDeleteEnsembleAlertDialog = ensembleDetailViewModel.showDeleteEnsembleDialog,
+    onDismissDeleteEnsembleDialog = ensembleDetailViewModel::onDismissDeleteEnsembleDialog,
+    onClickPositiveDeleteEnsembleDialog = ensembleDetailViewModel::onClickPositiveDeleteEnsembleDialog,
     modifier = modifier,
   )
 }
@@ -244,18 +220,18 @@ fun EnsembleDetailScreen(
     addArticleThumbnailUris: LazyUriStrings,
     selectedEditArticleIndices: Set<Int>,
     selectedAddArticleIndices: Set<Int>,
-    onTitleClicked: () -> Unit,
+    onClickTitle: () -> Unit,
     onTitleChanged: (String) -> Unit,
     onClickEdit: () -> Unit,
     onClickAddArticles: () -> Unit,
-    onSelectArticle: (index: Int) -> Unit,
-    onLongSelectArticle: (index: Int) -> Unit,
+    onClickArticle: (index: Int) -> Unit,
+    onLongClickArticle: (index: Int) -> Unit,
     onClickRemoveArticles: () -> Unit,
-    onClickCancelSelection: () -> Unit,
+    onClickCancelArticleSelection: () -> Unit,
     onClickDeleteEnsemble: () -> Unit,
     onAbandonEditTitle: () -> Unit,
     showAddArticlesDialog: Boolean,
-    onSelectedAddArticle: (articleIndex: Int) -> Unit,
+    onClickArticleAddDialog: (articleIndex: Int) -> Unit,
     onClickConfirmAddArticles: () -> Unit,
     onCloseAddArticlesDialog: () -> Unit,
     showDeleteEnsembleAlertDialog: Boolean,
@@ -291,7 +267,7 @@ fun EnsembleDetailScreen(
             .clickable(
               interactionSource = titleRowInteractionSource,
               indication = null,
-              onClick = { if(!editingTitle) onTitleClicked() }
+              onClick = { if(!editingTitle) onClickTitle() }
             ),
       ) {
         if(editingTitle) {
@@ -329,8 +305,8 @@ fun EnsembleDetailScreen(
       Box(modifier = Modifier.fillMaxSize()) {
         SelectableStaggeredThumbnailGrid(
           selectable = editEnsemblesMode,
-          onSelect = onSelectArticle,
-          onLongSelect = onLongSelectArticle,
+          onSelect = onClickArticle,
+          onLongSelect = onLongClickArticle,
           thumbnailUris = ensembleArticleThumbnailUris,
           selectedThumbnails = selectedEditArticleIndices,
         )
@@ -354,7 +330,7 @@ fun EnsembleDetailScreen(
     selectedEditArticleIndices = selectedEditArticleIndices,
     onClickEdit = onClickEdit,
     onClickAddArticles = onClickAddArticles,
-    onClickCancelSelection = onClickCancelSelection,
+    onClickCancelSelection = onClickCancelArticleSelection,
     onClickRemoveArticles = onClickRemoveArticles,
     onClickDeleteEnsemble = onClickDeleteEnsemble,
     modifier = Modifier.padding(start = systemBarStartPadding, end = systemBarEndPadding),
@@ -363,7 +339,7 @@ fun EnsembleDetailScreen(
     visible = showAddArticlesDialog,
     articleThumbnailUris = addArticleThumbnailUris,
     selectedArticleIndices = selectedAddArticleIndices,
-    onSelectedArticle = onSelectedAddArticle,
+    onSelectedArticle = onClickArticleAddDialog,
     onClose = onCloseAddArticlesDialog,
     onConfirm = onClickConfirmAddArticles,
   )
@@ -438,9 +414,9 @@ fun PreviewUtilEnsembleDetailScreen(
   addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   selectedEditArticleIndices = selectedArticleIndices,
   selectedAddArticleIndices = selectedAddArticleIndices,
-  onTitleClicked = {},
-  onTitleChanged = {}, onClickEdit = {}, onClickAddArticles = {}, onSelectArticle = {}, onLongSelectArticle = {}, onClickRemoveArticles = {}, onClickCancelSelection = {},
-  onClickDeleteEnsemble = {}, onAbandonEditTitle = {}, showAddArticlesDialog = showAddArticlesDialog, onSelectedAddArticle = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {},
+  onClickTitle = {},
+  onTitleChanged = {}, onClickEdit = {}, onClickAddArticles = {}, onClickArticle = {}, onLongClickArticle = {}, onClickRemoveArticles = {}, onClickCancelArticleSelection = {},
+  onClickDeleteEnsemble = {}, onAbandonEditTitle = {}, showAddArticlesDialog = showAddArticlesDialog, onClickArticleAddDialog = {}, onClickConfirmAddArticles = {}, onCloseAddArticlesDialog = {},
   showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog, onDismissDeleteEnsembleDialog = {}, onClickPositiveDeleteEnsembleDialog = {}, windowSizeClass = currentWindowAdaptiveInfo(),
 )
 
