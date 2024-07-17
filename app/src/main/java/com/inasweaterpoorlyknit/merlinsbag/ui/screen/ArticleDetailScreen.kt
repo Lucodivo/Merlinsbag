@@ -92,6 +92,12 @@ import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.DeleteArticle
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.DeleteArticleByRemovingAllArticles
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.ExportPermissions
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.None
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.RemoveFromEnsembles
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.RemoveImages
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
 import kotlinx.serialization.Serializable
 
@@ -107,11 +113,20 @@ val storagePermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_STORAGE_PERMISSIONS = if(storagePermissionsRequired) arrayOf(permission.WRITE_EXTERNAL_STORAGE) else emptyArray()
 
 enum class ArticleDetailScreenEditMode {
-  ENABLED_GENERAL,
-  ENABLED_SELECTED_ENSEMBLES,
-  ENABLED_SELECTED_THUMBNAILS,
-  ENABLED_ALL_THUMBNAILS,
-  DISABLED,
+  EnabledGeneral,
+  EnabledSelectedEnsembles,
+  EnabledSelectedThumbnails,
+  EnabledAllThumbnails,
+  Disabled,
+}
+
+enum class ArticleDetailScreenAlertDialogMode {
+  DeleteArticle,
+  DeleteArticleByRemovingAllArticles,
+  ExportPermissions,
+  RemoveFromEnsembles,
+  RemoveImages,
+  None,
 }
 
 fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null) =
@@ -206,10 +221,7 @@ fun ArticleDetailRoute(
     selectedImages = articleDetailViewModel.selectedThumbnails,
     editMode = articleDetailViewModel.editMode,
     exportingEnabled = articleDetailViewModel.exportButtonEnabled,
-    showDeleteArticleAlertDialog = articleDetailViewModel.showDeleteArticleAlertDialog,
-    showExportPermissionsAlertDialog = articleDetailViewModel.showExportPermissionsAlertDialog,
-    showRemoveFromEnsemblesAlertDialog = articleDetailViewModel.showRemoveFromEnsemblesAlertDialog,
-    showRemoveImagesAlertDialog = articleDetailViewModel.showRemoveImagesAlertDialog,
+    alertDialogMode = articleDetailViewModel.alertDialogMode,
     showAddToEnsembleDialog = articleDetailViewModel.showAddToEnsemblesDialog,
     onClickEdit = articleDetailViewModel::onClickEdit,
     onClickMinimizeButtonControl = articleDetailViewModel::onClickMinimizeButtonControl,
@@ -254,11 +266,8 @@ fun ArticleDetailScreen(
     articleImageIndices: List<Int>,
     articlesWithImages: LazyFilenames,
     editMode: ArticleDetailScreenEditMode,
-    showDeleteArticleAlertDialog: Boolean,
-    showExportPermissionsAlertDialog: Boolean,
-    showRemoveFromEnsemblesAlertDialog: Boolean,
+    alertDialogMode: ArticleDetailScreenAlertDialogMode,
     showAddToEnsembleDialog: Boolean,
-    showRemoveImagesAlertDialog: Boolean,
     onClickDelete: () -> Unit,
     onClickRemoveEnsembles: () -> Unit,
     onClickCancelSelection: () -> Unit,
@@ -340,7 +349,7 @@ fun ArticleDetailScreen(
   val ensembleChips: @Composable () -> Unit = {
     EnsembleLazyChips(
       compactWidth = compactWidth,
-      selectable = editMode == ArticleDetailScreenEditMode.ENABLED_SELECTED_ENSEMBLES,
+      selectable = editMode == ArticleDetailScreenEditMode.EnabledSelectedEnsembles,
       onLongPressEnsemble = onLongPressEnsemble,
       onClickEnsemble = onClickEnsemble,
       ensembleListState = ensembleListState,
@@ -351,7 +360,7 @@ fun ArticleDetailScreen(
   }
 
   val thumbnailSize = ButtonDefaults.MinHeight
-  val thumbnailsSelectable = editMode == ArticleDetailScreenEditMode.ENABLED_SELECTED_THUMBNAILS
+  val thumbnailsSelectable = editMode == ArticleDetailScreenEditMode.EnabledSelectedThumbnails
   if(compactWidth) {
     Box(
       contentAlignment = Alignment.BottomStart,
@@ -448,10 +457,14 @@ fun ArticleDetailScreen(
       end = systemBarEndPadding,
     ),
   )
-  if(showDeleteArticleAlertDialog) DeleteArticleAlertDialog(fromDeletingAllImages = editMode == ArticleDetailScreenEditMode.ENABLED_ALL_THUMBNAILS, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
-  if(showExportPermissionsAlertDialog) ExportPermissionsAlertDialog(onDismiss = onDismissExportPermissionsDialog, onConfirm = onConfirmExportPermissionsDialog)
-  if(showRemoveFromEnsemblesAlertDialog) RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
-  if(showRemoveImagesAlertDialog) RemoveImagesAlertDialog(onDismiss = onDismissRemoveImagesDialog, onConfirm = onConfirmRemoveImagesDialog)
+  when(alertDialogMode){
+    DeleteArticle -> DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
+    DeleteArticleByRemovingAllArticles -> DeleteArticleAlertDialog(fromDeletingAllImages = editMode == ArticleDetailScreenEditMode.EnabledAllThumbnails, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
+    ExportPermissions -> ExportPermissionsAlertDialog(onDismiss = onDismissExportPermissionsDialog, onConfirm = onConfirmExportPermissionsDialog)
+    RemoveFromEnsembles -> RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
+    RemoveImages -> RemoveImagesAlertDialog(onDismiss = onDismissRemoveImagesDialog, onConfirm = onConfirmRemoveImagesDialog)
+    None -> {}
+  }
   AddToEnsembleDialog(
     visible = showAddToEnsembleDialog,
     userSearch = ensemblesSearchQuery,
@@ -549,7 +562,7 @@ fun FloatingActionButtonDetailScreen(
     onClickAddPhotoFromCamera: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  val expanded = editMode != ArticleDetailScreenEditMode.DISABLED
+  val expanded = editMode != ArticleDetailScreenEditMode.Disabled
   NoopBottomEndButtonContainer(extraPadding = PaddingValues(bottom = 4.dp, end = 8.dp), modifier = modifier) {
     NoopExpandingIconButton(
       expanded = expanded,
@@ -557,7 +570,7 @@ fun FloatingActionButtonDetailScreen(
       expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       onClick = if(expanded) onClickMinimizeButtonControl else onClickEdit,
       verticalExpandedButtons = when(editMode) {
-        ArticleDetailScreenEditMode.ENABLED_SELECTED_ENSEMBLES -> listOf(
+        ArticleDetailScreenEditMode.EnabledSelectedEnsembles -> listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_ensembles)),
             onClick = onClickCancelSelection
@@ -567,7 +580,7 @@ fun FloatingActionButtonDetailScreen(
             onClick = onClickRemoveEnsembles,
           ),
         )
-        ArticleDetailScreenEditMode.ENABLED_SELECTED_THUMBNAILS -> {
+        ArticleDetailScreenEditMode.EnabledSelectedThumbnails -> {
           listOf(
             IconButtonData(
               icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
@@ -579,7 +592,7 @@ fun FloatingActionButtonDetailScreen(
             )
           )
         }
-        ArticleDetailScreenEditMode.ENABLED_ALL_THUMBNAILS -> {
+        ArticleDetailScreenEditMode.EnabledAllThumbnails -> {
           listOf(
             IconButtonData(
               icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_images)),
@@ -624,7 +637,7 @@ fun FloatingActionButtonDetailScreen(
 
 @Composable
 fun DeleteArticleAlertDialog(
-    fromDeletingAllImages: Boolean,
+    fromDeletingAllImages: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -787,11 +800,8 @@ private fun AddToEnsembleDialog(
 fun PreviewUtilArticleDetailScreen(
     filter: String = "",
     darkMode: Boolean = false,
-    floatingActionButtonExpanded: ArticleDetailScreenEditMode = ArticleDetailScreenEditMode.DISABLED,
-    showDeleteArticleAlertDialog: Boolean = false,
-    showPermissionsAlertDialog: Boolean = false,
-    showRemoveFromEnsemblesAlertDialog: Boolean = false,
-    showRemoveImagesAlertDialog: Boolean = false,
+    floatingActionButtonExpanded: ArticleDetailScreenEditMode = ArticleDetailScreenEditMode.Disabled,
+    alertDialogMode: ArticleDetailScreenAlertDialogMode = ArticleDetailScreenAlertDialogMode.None,
     showAddToEnsembleDialog: Boolean = false,
     selectedEnsembles: Set<Int> = emptySet(),
     addEnsembles: List<Ensemble> = emptyList(),
@@ -825,11 +835,8 @@ fun PreviewUtilArticleDetailScreen(
       articleImageIndices = listOf(0),
       articlesWithImages = articlesWithImages,
       editMode = floatingActionButtonExpanded,
-      showDeleteArticleAlertDialog = showDeleteArticleAlertDialog,
-      showExportPermissionsAlertDialog = showPermissionsAlertDialog,
-      showRemoveFromEnsemblesAlertDialog = showRemoveFromEnsemblesAlertDialog,
+      alertDialogMode = alertDialogMode,
       showAddToEnsembleDialog = showAddToEnsembleDialog,
-      showRemoveImagesAlertDialog = showRemoveImagesAlertDialog,
       selectedEnsembles = selectedEnsembles,
       ensemblesToAdd = addEnsembles,
       exportingEnabled = true,
@@ -848,10 +855,11 @@ fun PreviewUtilArticleDetailScreen(
 }
 
 @PreviewScreenSizes @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen(filter = "Golden Girls")
-@Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = ArticleDetailScreenEditMode.ENABLED_GENERAL, darkMode = true)
-@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(showDeleteArticleAlertDialog = true, floatingActionButtonExpanded = ArticleDetailScreenEditMode.ENABLED_GENERAL, selectedEnsembles = setOf(1))
-@Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() = PreviewUtilArticleDetailScreen(showPermissionsAlertDialog = true)
-@Preview @Composable fun PreviewArticleDetailScreen_removeFromEnsemblesDialog() = PreviewUtilArticleDetailScreen(showRemoveFromEnsemblesAlertDialog = true)
+@Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = ArticleDetailScreenEditMode.EnabledGeneral, darkMode = true)
+@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = ArticleDetailScreenAlertDialogMode.DeleteArticle, floatingActionButtonExpanded = ArticleDetailScreenEditMode.EnabledGeneral, selectedEnsembles = setOf(1))
+@Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = ArticleDetailScreenAlertDialogMode.ExportPermissions)
+@Preview @Composable fun PreviewArticleDetailScreen_removeFromEnsemblesDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = ArticleDetailScreenAlertDialogMode.RemoveFromEnsembles)
+@Preview @Composable fun PreviewArticleDetailScreen_removeImages() = PreviewUtilArticleDetailScreen(alertDialogMode = ArticleDetailScreenAlertDialogMode.RemoveImages)
 @Preview @Composable fun PreviewArticleDetailScreen_addToEnsembleDialog() = PreviewUtilArticleDetailScreen(
   showAddToEnsembleDialog = true,
   addEnsembles = listOf(

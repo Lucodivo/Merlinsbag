@@ -149,11 +149,11 @@ class NoopAppState(
     navController.addOnDestinationChangedListener { controller, destination, arguments ->
       val route = destination.route
       if(route != null && (
-              route.startsWith(AddArticleRoute::javaClass.name) ||
-              route.startsWith(CameraRoute::javaClass.name) ||
-              route == SettingsRoute::javaClass.name ||
-              route == TipsAndInfoRoute::javaClass.name ||
-              route == StatisticsRoute::javaClass.name
+              route.startsWith(AddArticleRoute::class.qualifiedName ?: "") ||
+              route.startsWith(CameraRoute::class.qualifiedName ?: "") ||
+              route == SettingsRoute::class.qualifiedName ||
+              route == TipsAndInfoRoute::class.qualifiedName ||
+              route == StatisticsRoute::class.qualifiedName
       )){
         showNavBar.value = false
       } else if(!showNavBar.value) {
