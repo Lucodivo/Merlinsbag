@@ -19,7 +19,6 @@ import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenEditMode
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringEncode
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -314,7 +313,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onPhotoAlbumResult(uris: List<Uri>) {
     if(uris.isNotEmpty()){
-      navigateToAddArticle = Event(Pair(articleId!!, uris.map { navigationSafeUriStringEncode(it) }))
+      navigateToAddArticle = Event(Pair(articleId!!, uris.map { it.toString() }))
     }
   }
 }

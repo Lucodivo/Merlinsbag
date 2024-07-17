@@ -39,8 +39,8 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NavUIDestinations
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CAMERA_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.AddArticleRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CameraRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.StatisticsRoute
@@ -149,11 +149,11 @@ class NoopAppState(
     navController.addOnDestinationChangedListener { controller, destination, arguments ->
       val route = destination.route
       if(route != null && (
-          route.startsWith(ADD_ARTICLES_BASE) ||
-          route.startsWith(CAMERA_ROUTE) ||
-          route == SettingsRoute.javaClass.name ||
-          route == TipsAndInfoRoute.javaClass.name ||
-          route == StatisticsRoute.javaClass.name
+              route.startsWith(AddArticleRoute::javaClass.name) ||
+              route.startsWith(CameraRoute::javaClass.name) ||
+              route == SettingsRoute::javaClass.name ||
+              route == TipsAndInfoRoute::javaClass.name ||
+              route == StatisticsRoute::javaClass.name
       )){
         showNavBar.value = false
       } else if(!showNavBar.value) {

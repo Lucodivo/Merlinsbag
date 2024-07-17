@@ -27,9 +27,12 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.CameraViewModel
+import kotlinx.serialization.Serializable
 
-const val CAMERA_ROUTE_BASE = "camera_route"
-const val CAMERA_ROUTE = "$CAMERA_ROUTE_BASE?$ARTICLE_ID_ARG={$ARTICLE_ID_ARG}"
+@Serializable
+data class CameraRoute(
+  val articleId: String?,
+)
 
 val additionalCameraPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_CAMERA_PERMISSIONS =
@@ -42,10 +45,7 @@ private val REQUIRED_CAMERA_PERMISSIONS =
 fun NavController.navigateToCamera(
     articleId: String? = null,
     navOptions: NavOptions? = null
-) {
-  val route = "$CAMERA_ROUTE_BASE?$ARTICLE_ID_ARG=$articleId"
-  navigate(route, navOptions)
-}
+) = navigate(CameraRoute(articleId = articleId), navOptions)
 
 @Composable
 fun CameraRoute(
@@ -64,7 +64,7 @@ fun CameraRoute(
       cameraViewModel.onPictureTaken(success)
       if(success) {
         if(cameraPictureUri != null) navController.navigateToAddArticle(
-          uriStringArray = listOf(navigationSafeUriStringEncode(cameraPictureUri)),
+          uriStringArray = listOf(cameraPictureUri.toString()),
           articleId = articleId,
         ) else {
           Log.e("GetContent ActivityResultContract", "Temp camera picture URI was null after picture was taken")

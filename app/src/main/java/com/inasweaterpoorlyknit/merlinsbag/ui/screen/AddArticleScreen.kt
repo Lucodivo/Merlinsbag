@@ -60,20 +60,20 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.AddArticleViewModel
+import kotlinx.serialization.Serializable
 
-const val IMAGE_URI_STRING_LIST_ARG = "imageUriStringArray"
-const val ARTICLE_ID_ARG = "articleId"
-const val ADD_ARTICLES_BASE = "add_articles_route"
-const val ADD_ARTICLES_ROUTE = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG={$IMAGE_URI_STRING_LIST_ARG}?$ARTICLE_ID_ARG={$ARTICLE_ID_ARG}"
+@Serializable
+data class AddArticleRoute(
+  val imageUriStringList: List<String>,
+  val articleId: String?,
+)
 
 fun NavController.navigateToAddArticle(
     uriStringArray: List<String>,
     articleId: String? = null,
     navOptions: NavOptions? = null,
-) {
-  val route = "$ADD_ARTICLES_BASE?$IMAGE_URI_STRING_LIST_ARG=${uriStringArray.joinToString(",")}?$ARTICLE_ID_ARG=$articleId"
-  navigate(route, navOptions)
-}
+) = navigate(AddArticleRoute(imageUriStringList = uriStringArray, articleId = articleId), navOptions)
+
 
 @Composable
 fun AddArticleRoute(
