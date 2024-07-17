@@ -6,14 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLES_ROUTE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLES_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
 
 enum class NavUIDestinations(
     @StringRes val label: Int,
     val selectedIcon: @Composable () -> Unit,
     val unselectedIcon: @Composable () -> Unit,
-    val route: String,
+    val route: Any,
 ) {
   ARTICLES(
     label = R.string.articles,
@@ -29,7 +29,7 @@ enum class NavUIDestinations(
         contentDescription = stringResource(R.string.simple_shapes),
       )
     },
-    route = ARTICLES_ROUTE
+    route = ArticlesRoute
   ),
   ENSEMBLES(
     label = R.string.ensembles,
@@ -45,6 +45,6 @@ enum class NavUIDestinations(
         contentDescription = stringResource(R.string.hashtag),
       )
     },
-    route = ENSEMBLES_ROUTE
+    route = EnsemblesRoute
   ),
 }

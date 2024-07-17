@@ -50,10 +50,12 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
+import kotlinx.serialization.Serializable
 
-const val ARTICLES_ROUTE = "articles_route"
+@Serializable
+object ArticlesRoute
 
-fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ARTICLES_ROUTE, navOptions)
+fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ArticlesRoute, navOptions)
 
 enum class ArticlesScreenEditMode {
   ENABLED_GENERAL,

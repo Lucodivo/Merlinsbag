@@ -93,6 +93,7 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SaveEnsembleData
+import kotlinx.serialization.Serializable
 
 private val thumbnailsPadding = 10.dp
 private val maxThumbnailSize = 70.dp
@@ -103,9 +104,11 @@ private val rowVerticalPadding = 8.dp
 private val rowStartPadding = 16.dp
 private val rowEndPadding = 4.dp
 private val overlapTitleSpacing = 4.dp
-const val ENSEMBLES_ROUTE = "ensembles_route"
 
-fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate(ENSEMBLES_ROUTE, navOptions)
+@Serializable
+object EnsemblesRoute
+
+fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate(EnsemblesRoute, navOptions)
 
 @Composable
 fun EnsemblesRoute(

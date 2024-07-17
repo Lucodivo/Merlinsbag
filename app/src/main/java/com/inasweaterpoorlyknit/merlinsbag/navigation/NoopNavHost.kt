@@ -9,7 +9,6 @@ import androidx.navigation.navArgument
 import androidx.navigation.navOptions
 import com.inasweaterpoorlyknit.merlinsbag.ui.NoopAppState
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_ROUTE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLES_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLE_DETAIL_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLE_ID_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ARTICLE_INDEX_ARG
@@ -18,7 +17,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CAMERA_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CameraRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLES_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLE_DETAIL_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLE_ID_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailRoute
@@ -32,33 +30,33 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TIPS_AND_INFO_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringDecode
 
-const val APP_START_DESTINATION = ARTICLES_ROUTE
+val APP_START_ROUTE = ArticlesRoute
 
 fun NavController.navigateToAppStartDestination() {
   val navOptions = navOptions {
-    popUpTo(route = APP_START_DESTINATION) {
+    popUpTo(route = APP_START_ROUTE) {
       inclusive = true
       saveState = false
     }
     launchSingleTop = true
     restoreState = false
   }
-  navigate(APP_START_DESTINATION, navOptions)
+  navigate(APP_START_ROUTE, navOptions)
 }
 
 @Composable
 fun NoopNavHost(
     appState: NoopAppState,
-    startDestination: String = APP_START_DESTINATION,
+    startRoute: Any = APP_START_ROUTE,
 ) {
   val navController = appState.navController
 
   NavHost(
     navController = navController,
-    startDestination = startDestination,
+    startDestination = startRoute,
   ) {
-    composable(route = ARTICLES_ROUTE) { ArticlesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
-    composable(route = ENSEMBLES_ROUTE) { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
+    composable<ArticlesRoute> { ArticlesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
+    composable<EnsemblesRoute> { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
     composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController) }
     composable(
       route = CAMERA_ROUTE,
