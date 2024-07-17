@@ -67,15 +67,15 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
+import kotlinx.serialization.Serializable
 
-const val ENSEMBLE_ID_ARG = "ensembleId"
-const val ENSEMBLE_DETAIL_ROUTE_BASE = "ensembles_route"
-const val ENSEMBLE_DETAIL_ROUTE = "$ENSEMBLE_DETAIL_ROUTE_BASE?$ENSEMBLE_ID_ARG={$ENSEMBLE_ID_ARG}"
+@Serializable
+data class EnsembleDetailRoute(
+  val ensembleId: String,
+)
 
-fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOptions? = null) {
-  val route = "${ENSEMBLE_DETAIL_ROUTE_BASE}?${ENSEMBLE_ID_ARG}=$ensembleId"
-  navigate(route, navOptions)
-}
+fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOptions? = null) =
+  navigate(EnsembleDetailRoute(ensembleId = ensembleId), navOptions)
 
 @Composable
 fun EnsembleDetailRoute(

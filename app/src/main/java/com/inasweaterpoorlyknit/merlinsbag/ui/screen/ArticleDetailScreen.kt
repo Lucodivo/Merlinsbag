@@ -93,12 +93,15 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
+import kotlinx.serialization.Serializable
 
 const val thumbnailAndEnsembleHiddenPercent = 0.98f
 
-const val ARTICLE_INDEX_ARG = "articleIndex"
-const val ARTICLE_DETAIL_ROUTE_BASE = "article_detail_route"
-const val ARTICLE_DETAIL_ROUTE = "$ARTICLE_DETAIL_ROUTE_BASE?$ARTICLE_INDEX_ARG={$ARTICLE_INDEX_ARG}?$ENSEMBLE_ID_ARG={$ENSEMBLE_ID_ARG}"
+@Serializable
+data class ArticleDetailRoute(
+  val articleIndex: Int,
+  val ensembleId: String?,
+)
 
 val storagePermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_STORAGE_PERMISSIONS = if(storagePermissionsRequired) arrayOf(permission.WRITE_EXTERNAL_STORAGE) else emptyArray()
@@ -111,10 +114,8 @@ enum class ArticleDetailScreenEditMode {
   DISABLED,
 }
 
-fun articleDetailRoute(articleIndex: Int, ensembleId: String? = null) = "${ARTICLE_DETAIL_ROUTE_BASE}?$ARTICLE_INDEX_ARG=$articleIndex?$ENSEMBLE_ID_ARG=$ensembleId"
-
 fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null) =
-  navigate(articleDetailRoute(articleIndex, ensembleId), navOptions)
+  navigate(ArticleDetailRoute(articleIndex = articleIndex, ensembleId = ensembleId), navOptions)
 
 @Composable
 fun ArticleDetailRoute(
