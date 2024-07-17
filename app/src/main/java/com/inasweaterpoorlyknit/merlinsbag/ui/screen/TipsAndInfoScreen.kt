@@ -31,13 +31,15 @@ import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
+import kotlinx.serialization.Serializable
 
-const val TIPS_AND_INFO_ROUTE = "tips_and_info_route"
+@Serializable
+object TipsAndInfoRoute
 
-fun NavController.navigateToTipsAndInfo(navOptions: NavOptions? = null) = navigate(TIPS_AND_INFO_ROUTE, navOptions)
+fun NavController.navigateToTipsAndInfo(navOptions: NavOptions? = null) = navigate(TipsAndInfoRoute, navOptions)
 
 @Composable
-fun TipsAndInfoRoute(navController: NavController){
+fun TipsAndInfoRoute(){
   TipsAndInfoScreen()
 }
 

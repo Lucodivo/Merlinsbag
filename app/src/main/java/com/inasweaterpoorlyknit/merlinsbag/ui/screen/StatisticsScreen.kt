@@ -46,16 +46,15 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
+import kotlinx.serialization.Serializable
 
-const val STATISTICS_ROUTE = "statistics_route"
+@Serializable
+object StatisticsRoute
 
-fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigate(STATISTICS_ROUTE, navOptions)
+fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigate(StatisticsRoute, navOptions)
 
 @Composable
-fun StatisticsRoute(
-    navController: NavController,
-    statisticsViewModel: StatisticsViewModel = hiltViewModel(),
-) {
+fun StatisticsRoute(statisticsViewModel: StatisticsViewModel = hiltViewModel()) {
   val articleCount by statisticsViewModel.articleCount.collectAsStateWithLifecycle()
   val articleImageCount by statisticsViewModel.articleImagesCount.collectAsStateWithLifecycle()
   val ensembleCount by statisticsViewModel.ensembleCount.collectAsStateWithLifecycle()

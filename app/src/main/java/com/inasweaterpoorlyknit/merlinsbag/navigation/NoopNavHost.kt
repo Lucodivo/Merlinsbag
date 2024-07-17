@@ -22,11 +22,8 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ENSEMBLE_ID_ARG
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.IMAGE_URI_STRING_LIST_ARG
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.STATISTICS_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.StatisticsRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TIPS_AND_INFO_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringDecode
 
@@ -55,9 +52,11 @@ fun NoopNavHost(
     navController = navController,
     startDestination = startRoute,
   ) {
-    composable<ArticlesRoute> { ArticlesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
-    composable<EnsemblesRoute> { EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
-    composable(route = SETTINGS_ROUTE) { SettingsRoute(navController = navController) }
+    composable<ArticlesRoute>{ ArticlesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
+    composable<EnsemblesRoute>{ EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
+    composable<SettingsRoute>{ SettingsRoute(navController = navController) }
+    composable<TipsAndInfoRoute>{ TipsAndInfoRoute() }
+    composable<StatisticsRoute>{ StatisticsRoute() }
     composable(
       route = CAMERA_ROUTE,
       arguments = listOf(
@@ -71,8 +70,6 @@ fun NoopNavHost(
       val articleIdArg = navBackStackEntry.arguments!!.getString(ARTICLE_ID_ARG)
       CameraRoute(articleId = articleIdArg, navController = navController)
     }
-    composable(route = TIPS_AND_INFO_ROUTE) { TipsAndInfoRoute(navController = navController) }
-    composable(route = STATISTICS_ROUTE) { StatisticsRoute(navController = navController) }
     composable(
       route = ARTICLE_DETAIL_ROUTE,
       arguments = listOf(

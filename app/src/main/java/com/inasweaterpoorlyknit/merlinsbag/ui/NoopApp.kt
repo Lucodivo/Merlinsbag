@@ -42,9 +42,9 @@ import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ADD_ARTICLES_BASE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CAMERA_ROUTE
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SETTINGS_ROUTE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.STATISTICS_ROUTE
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TIPS_AND_INFO_ROUTE
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.StatisticsRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.compactWidth
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles
@@ -150,10 +150,10 @@ class NoopAppState(
       val route = destination.route
       if(route != null && (
           route.startsWith(ADD_ARTICLES_BASE) ||
-          route.startsWith(SETTINGS_ROUTE) ||
           route.startsWith(CAMERA_ROUTE) ||
-          route.startsWith(TIPS_AND_INFO_ROUTE) ||
-          route.startsWith(STATISTICS_ROUTE)
+          route == SettingsRoute.javaClass.name ||
+          route == TipsAndInfoRoute.javaClass.name ||
+          route == StatisticsRoute.javaClass.name
       )){
         showNavBar.value = false
       } else if(!showNavBar.value) {

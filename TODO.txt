@@ -38,6 +38,7 @@ Compose Navigation:
     - Enable a more robust back stack
         - Ensure the proper navigation UI element is highlighted
         - Ensure that back history is wiped on "Delete All Data"
+    - Don't pass around the nav controller from the NavHost?
 Bugs:
     - Out of Memory (OOM) crash (or silent PROCESS ENDED while app is in the background due to camera contract) when processing an image in AddArticleScreen
         - Seen easily running application on an Motorola Z Play, 3GB RAM, API 26
@@ -71,8 +72,6 @@ Settings Screen:
     - Export All Data
 Aesthetics:
     - placeholder shimmer could use a little work
-ArticleDetailScreen:
-    - separate edit modes for thumbnail/ensemble selection/deletion
 Performance:
     - Investigate any performance issues from pre-emptively dispatching to IO for file writing operations.
         - Potential areas:
