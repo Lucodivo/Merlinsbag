@@ -89,7 +89,7 @@ fun StatisticsRow(
 fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
   val thumbnailSize = 80.dp
   var animateTopImagesIndex by remember { mutableStateOf(false) }
-  val animateIndex = animateIntAsState(
+  val animateIndex by animateIntAsState(
     targetValue =
     if(!animateTopImagesIndex) 0
     else if(uriStrings.isNotEmpty()) uriStrings.lastIndex
@@ -110,7 +110,7 @@ fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
     modifier = modifier.size(width = thumbnailSize, height = thumbnailSize)
   ){
     NoopImage(
-      uriString = uriStrings[animateIndex.value],
+      uriString = if(animateIndex < uriStrings.size) uriStrings[animateIndex] else null,
       contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
       crossFadeMs = 0,
       modifier = Modifier
