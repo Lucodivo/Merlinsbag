@@ -196,7 +196,7 @@ class EnsembleDaoTests: DatabaseTests() {
 
     assertEquals(popularCount, mostPopularArticle.size)
     assertEquals(articles.last().id, mostPopularArticle.first().articleId)
-    assertEquals(articles.size.toLong(), mostPopularArticle.first().ensembleCount)
+    assertEquals(articles.size, mostPopularArticle.first().ensembleCount)
   }
 
   @Test

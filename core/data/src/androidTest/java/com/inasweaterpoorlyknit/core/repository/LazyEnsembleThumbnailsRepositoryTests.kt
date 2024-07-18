@@ -18,8 +18,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 
-// These tests are for baseline sanity of the database.
-// If these aren't passing, something must be  wrong with the database as a whole.
 @RunWith(AndroidJUnit4::class)
 class LazyEnsembleThumbnailsRepositoryTests {
   private lateinit var articleRepository: ArticleRepository

@@ -13,7 +13,6 @@ import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesScreenEditMode
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigationSafeUriStringEncode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -78,7 +77,7 @@ class ArticlesViewModel @Inject constructor(
   fun onClickAddPhotoCamera(){ navigateToCamera = Event(Unit) }
   fun onClickAddPhotoAlbum(){ launchPhotoAlbum = Event(Unit) }
   fun onPhotoAlbumResults(uris: List<Uri>){
-    if(uris.isNotEmpty()) navigateToAddArticle = Event(uris.map { navigationSafeUriStringEncode(it) })
+    if(uris.isNotEmpty()) navigateToAddArticle = Event(uris.map{ it.toString() })
   }
 
   fun onClickEdit(){ editMode = ArticlesScreenEditMode.ENABLED_GENERAL }
@@ -98,6 +97,5 @@ class ArticlesViewModel @Inject constructor(
 
   fun onBack() {
     if(editMode != ArticlesScreenEditMode.DISABLED) editMode = ArticlesScreenEditMode.DISABLED
-    else { finish = Event(Unit) }
   }
 }

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.navigationSafeArgs)
     alias(libs.plugins.hiltAndroid)
@@ -70,8 +71,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.tracing.ktx)
-
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.kotlinx.serialization.core)
 
     // Compose
     implementation(libs.androidx.activity.compose)
