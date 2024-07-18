@@ -314,7 +314,7 @@ fun ArticleDetailScreen(
   // Index may be out of bounds is the Pager has yet to adjust to the new size after a deletion
   val showAltThumbnails = articleIndex < articlesWithImages.size && articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size > 1
 
-  if(articlesWithImages.isNotEmpty()) {
+  if(articleImageIndices.isNotEmpty()) {
     HorizontalPager(
       state = pagerState,
       verticalAlignment = Alignment.Bottom,
