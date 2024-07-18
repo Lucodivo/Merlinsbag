@@ -134,10 +134,13 @@ fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String?
 
 @Composable
 fun ArticleDetailRoute(
-    navController: NavController,
-    snackbarHostState: SnackbarHostState,
     articleIndex: Int,
     filterEnsembleId: String?,
+    navigateBack: () -> Unit,
+    navigateToCamera: (articleId: String) -> Unit,
+    navigateToEnsembleDetail: (ensembleId: String) -> Unit,
+    navigateToAddArticle: (uriStrings: List<String>, articleId: String?) -> Unit,
+    snackbarHostState: SnackbarHostState,
     windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier,
 ){
@@ -154,20 +157,20 @@ fun ArticleDetailRoute(
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
 
   LaunchedEffect(articleDetailViewModel.finished) {
-    articleDetailViewModel.finished.getContentIfNotHandled()?.let{ navController.popBackStack() }
+    articleDetailViewModel.finished.getContentIfNotHandled()?.let{ navigateBack() }
   }
   LaunchedEffect(articleDetailViewModel.launchSettings) {
     articleDetailViewModel.launchSettings.getContentIfNotHandled()?.let{ settingsLauncher.launch() }
   }
   LaunchedEffect(articleDetailViewModel.navigateToCamera) {
-    articleDetailViewModel.navigateToCamera.getContentIfNotHandled()?.let{ navController.navigateToCamera(articleId = it)}
+    articleDetailViewModel.navigateToCamera.getContentIfNotHandled()?.let{ navigateToCamera(it)}
   }
   LaunchedEffect(articleDetailViewModel.navigateToEnsembleDetail) {
-    articleDetailViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navController.navigateToEnsembleDetail(ensembleId = it) }
+    articleDetailViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navigateToEnsembleDetail(it) }
   }
   LaunchedEffect(articleDetailViewModel.navigateToAddArticle) {
     articleDetailViewModel.navigateToAddArticle.getContentIfNotHandled()?.let{ (articleId, uris) ->
-      navController.navigateToAddArticle(articleId = articleId, uriStringArray = uris)
+      navigateToAddArticle(uris, articleId)
     }
   }
   LaunchedEffect(articleDetailViewModel.exportedImage) {
@@ -204,7 +207,7 @@ fun ArticleDetailRoute(
   val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris -> articleDetailViewModel.onPhotoAlbumResult(uris) }
   val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
     onPermissionsGranted = articleDetailViewModel::onExportPermissionsGranted,
-    onPermissionDenied = { navController.context.toast(R.string.storage_permissions_required) },
+    onPermissionDenied = { context.toast(R.string.storage_permissions_required) },
     onNeverAskAgain = articleDetailViewModel::neverAskExportPermissionAgain,
   )
 

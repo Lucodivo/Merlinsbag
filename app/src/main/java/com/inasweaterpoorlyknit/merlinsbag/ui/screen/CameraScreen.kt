@@ -1,24 +1,17 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.Manifest.permission
-import android.content.Context
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
@@ -50,7 +43,8 @@ fun NavController.navigateToCamera(
 @Composable
 fun CameraRoute(
     articleId: String? = null,
-    navController: NavController,
+    navigateToAddArticle: (uriStrings: List<String>, articleId: String?) -> Unit,
+    navigateBack: () -> Unit,
     cameraViewModel: CameraViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
@@ -63,9 +57,9 @@ fun CameraRoute(
       val cameraPictureUri = cameraViewModel.takePictureUri
       cameraViewModel.onPictureTaken(success)
       if(success) {
-        if(cameraPictureUri != null) navController.navigateToAddArticle(
-          uriStringArray = listOf(cameraPictureUri.toString()),
-          articleId = articleId,
+        if(cameraPictureUri != null) navigateToAddArticle(
+          listOf(cameraPictureUri.toString()),
+          articleId,
         ) else {
           Log.e("GetContent ActivityResultContract", "Temp camera picture URI was null after picture was taken")
           context.toast(R.string.sorry_try_again)
@@ -80,12 +74,12 @@ fun CameraRoute(
         takePictureLauncher.launch(uri)
       } else {
         Log.e("GetContent ActivityResultContract", "Temp camera picture URI was returned as null at generation")
-        navController.popBackStack()
+        navigateBack()
       }
     },
     onPermissionDenied = {
-      navController.context.toast(R.string.camera_permission_required)
-      navController.popBackStack()
+      context.toast(R.string.camera_permission_required)
+      navigateBack()
     },
     onNeverAskAgain = cameraViewModel::onNeverAskAgain,
   )
@@ -99,7 +93,7 @@ fun CameraRoute(
 
   LaunchedEffect(cameraViewModel.finished){
     cameraViewModel.finished.getContentIfNotHandled()?.let {
-      navController.popBackStack()
+      navigateBack()
     }
   }
 

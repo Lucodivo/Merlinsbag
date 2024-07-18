@@ -97,6 +97,5 @@ class ArticlesViewModel @Inject constructor(
 
   fun onBack() {
     if(editMode != ArticlesScreenEditMode.DISABLED) editMode = ArticlesScreenEditMode.DISABLED
-    else { finish = Event(Unit) }
   }
 }

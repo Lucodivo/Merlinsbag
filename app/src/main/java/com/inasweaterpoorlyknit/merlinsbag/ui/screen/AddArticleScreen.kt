@@ -77,9 +77,9 @@ fun NavController.navigateToAddArticle(
 
 @Composable
 fun AddArticleRoute(
-    navController: NavController,
     imageUriStringList: List<String>,
     articleId: String? = null,
+    navigateBack: () -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
   val addArticleViewModel = hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
@@ -87,7 +87,7 @@ fun AddArticleRoute(
   }
 
   addArticleViewModel.imageProcessingError.getContentIfNotHandled()?.let { msg -> Toast(msg = msg) }
-  addArticleViewModel.finished.getContentIfNotHandled()?.let { navController.popBackStack() }
+  addArticleViewModel.finished.getContentIfNotHandled()?.let { navigateBack() }
 
   val attachArticleThumbnails by addArticleViewModel.attachArticleThumbnails.collectAsStateWithLifecycle()
   val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()

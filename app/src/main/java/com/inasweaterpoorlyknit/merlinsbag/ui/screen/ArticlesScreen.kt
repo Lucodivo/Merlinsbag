@@ -65,7 +65,10 @@ enum class ArticlesScreenEditMode {
 
 @Composable
 fun ArticlesRoute(
-    navController: NavController,
+    navigateToArticleDetail: (index: Int) -> Unit,
+    navigateToCamera: () -> Unit,
+    navigateToSettings: () -> Unit,
+    navigateToAddArticle: (uriStrings: List<String>) -> Unit,
     windowSizeClass: WindowSizeClass,
     articlesViewModel: ArticlesViewModel = hiltViewModel(),
 ) {
@@ -75,24 +78,19 @@ fun ArticlesRoute(
 
   val photoAlbumLauncher = rememberPhotoAlbumLauncher(onResult = articlesViewModel::onPhotoAlbumResults)
 
-  LaunchedEffect(articlesViewModel.finish){
-    articlesViewModel.finish.getContentIfNotHandled()?.let {
-      navController.popBackStack()
-    }
-  }
   LaunchedEffect(articlesViewModel.navigateToArticleDetail){
     articlesViewModel.navigateToArticleDetail.getContentIfNotHandled()?.let {
-      navController.navigateToArticleDetail(it)
+      navigateToArticleDetail(it)
     }
   }
   LaunchedEffect(articlesViewModel.navigateToCamera){
     articlesViewModel.navigateToCamera.getContentIfNotHandled()?.let {
-      navController.navigateToCamera()
+      navigateToCamera()
     }
   }
   LaunchedEffect(articlesViewModel.navigateToSettings){
     articlesViewModel.navigateToSettings.getContentIfNotHandled()?.let {
-      navController.navigateToSettings()
+      navigateToSettings()
     }
   }
   LaunchedEffect(articlesViewModel.launchPhotoAlbum){
@@ -102,7 +100,7 @@ fun ArticlesRoute(
   }
   LaunchedEffect(articlesViewModel.navigateToAddArticle){
     articlesViewModel.navigateToAddArticle.getContentIfNotHandled()?.let {
-      navController.navigateToAddArticle(it)
+      navigateToAddArticle(it)
     }
   }
 

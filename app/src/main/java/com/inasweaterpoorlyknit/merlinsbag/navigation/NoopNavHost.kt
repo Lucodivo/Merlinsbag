@@ -16,6 +16,13 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.StatisticsRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToAddArticle
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticleDetail
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToCamera
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembleDetail
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToSettings
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToStatistics
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToTipsAndInfo
 
 val APP_START_ROUTE = ArticlesRoute
 
@@ -38,42 +45,73 @@ fun NoopNavHost(
 ) {
   val navController = appState.navController
 
-  // TODO: Avoid sending nav controller to routes
   NavHost(
     navController = navController,
     startDestination = startRoute,
   ) {
-    composable<ArticlesRoute>{ ArticlesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
-    composable<EnsemblesRoute>{ EnsemblesRoute(navController = navController, windowSizeClass = appState.windowSizeClass) }
-    composable<SettingsRoute>{ SettingsRoute(navController = navController) }
-    composable<TipsAndInfoRoute>{ TipsAndInfoRoute() }
-    composable<StatisticsRoute>{ StatisticsRoute() }
-    composable<ArticleDetailRoute>{ navBackStackEntry ->
-      val articleDetailRoute: ArticleDetailRoute = navBackStackEntry.toRoute()
-      ArticleDetailRoute(
-        navController = navController,
-        snackbarHostState = appState.snackbarHostState,
+    composable<ArticlesRoute>{
+      ArticlesRoute(
+        navigateToArticleDetail = navController::navigateToArticleDetail,
+        navigateToCamera = navController::navigateToCamera,
+        navigateToSettings = navController::navigateToSettings,
+        navigateToAddArticle = navController::navigateToAddArticle,
         windowSizeClass = appState.windowSizeClass,
-        articleIndex = articleDetailRoute.articleIndex,
-        filterEnsembleId = articleDetailRoute.ensembleId,
       )
     }
-    composable<EnsembleDetailRoute>{ navBackStackEntry ->
-      val ensembleDetailRoute: EnsembleDetailRoute = navBackStackEntry.toRoute()
-      EnsembleDetailRoute(navController = navController, ensembleId = ensembleDetailRoute.ensembleId, windowSizeClass = appState.windowSizeClass)
+    composable<EnsemblesRoute>{
+      EnsemblesRoute(
+        navigateToSettings = navController::navigateToSettings,
+        navigateToEnsembleDetail = navController::navigateToEnsembleDetail,
+        windowSizeClass = appState.windowSizeClass
+      )
     }
     composable<CameraRoute>{ navBackStackEntry ->
       val cameraRoute: CameraRoute = navBackStackEntry.toRoute()
-      CameraRoute(articleId = cameraRoute.articleId, navController = navController)
+      CameraRoute(
+        articleId = cameraRoute.articleId,
+        navigateToAddArticle = navController::navigateToAddArticle,
+        navigateBack = navController::popBackStack,
+      )
     }
     composable<AddArticleRoute> { navBackStackEntry ->
       val addArticleRoute: AddArticleRoute = navBackStackEntry.toRoute()
       AddArticleRoute(
-        navController = navController,
         imageUriStringList = addArticleRoute.imageUriStringList,
         articleId = addArticleRoute.articleId,
+        navigateBack = navController::popBackStack,
         windowSizeClass = appState.windowSizeClass,
       )
     }
+    composable<ArticleDetailRoute>{ navBackStackEntry ->
+      val articleDetailRoute: ArticleDetailRoute = navBackStackEntry.toRoute()
+      ArticleDetailRoute(
+        articleIndex = articleDetailRoute.articleIndex,
+        navigateBack = navController::popBackStack,
+        navigateToCamera = navController::navigateToCamera,
+        navigateToEnsembleDetail = navController::navigateToEnsembleDetail,
+        navigateToAddArticle = navController::navigateToAddArticle,
+        filterEnsembleId = articleDetailRoute.ensembleId,
+        snackbarHostState = appState.snackbarHostState,
+        windowSizeClass = appState.windowSizeClass,
+      )
+    }
+    composable<EnsembleDetailRoute>{ navBackStackEntry ->
+      val ensembleDetailRoute: EnsembleDetailRoute = navBackStackEntry.toRoute()
+      EnsembleDetailRoute(
+        ensembleId = ensembleDetailRoute.ensembleId,
+        navigateToArticleDetail = navController::navigateToArticleDetail,
+        navigateBack = navController::popBackStack,
+        windowSizeClass = appState.windowSizeClass
+      )
+    }
+    composable<SettingsRoute>{
+      SettingsRoute(
+        navigateToStatistics = navController::navigateToStatistics,
+        navigateToTipsAndInfo = navController::navigateToTipsAndInfo,
+        navigateToStartDestination = navController::navigateToAppStartDestination,
+      )
+    }
+    composable<TipsAndInfoRoute>{ TipsAndInfoRoute() }
+    composable<StatisticsRoute>{ StatisticsRoute() }
   }
 }

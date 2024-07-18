@@ -62,7 +62,6 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.navigation.navigateToAppStartDestination
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 import kotlinx.serialization.Serializable
 
@@ -91,7 +90,9 @@ fun NavController.navigateToSettings(navOptions: NavOptions? = null) = navigate(
 
 @Composable
 fun SettingsRoute(
-    navController: NavController,
+    navigateToTipsAndInfo: () -> Unit,
+    navigateToStatistics: () -> Unit,
+    navigateToStartDestination: () -> Unit,
     settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
@@ -108,7 +109,7 @@ fun SettingsRoute(
   LaunchedEffect(settingsViewModel.dataDeleted) {
     settingsViewModel.dataDeleted.getContentIfNotHandled()?.let {
       context.toast(msg = context.getString(R.string.all_data_deleted))
-      navController.navigateToAppStartDestination()
+      navigateToStartDestination()
     }
   }
 
@@ -129,7 +130,7 @@ fun SettingsRoute(
     onClickDemoVideo = { uriHandler.openUri(DEMO_VIDEO_URL) },
     onClickReview = { uriHandler.openUri(MERLINSBAG_URL) },
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
-    onClickTipsAndInfoPage = { navController.navigateToTipsAndInfo() },
+    onClickTipsAndInfoPage = navigateToTipsAndInfo,
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
     onClickClearCache = settingsViewModel::clearCache,
     onClickDeleteAllData = settingsViewModel::onClickDeleteAllData,
@@ -147,7 +148,7 @@ fun SettingsRoute(
     onSelectTypography = settingsViewModel::setTypography,
     onDismissTypography = settingsViewModel::onDismissTypography,
     onClickTypography = settingsViewModel::onClickTypography,
-    onClickStatistics = navController::navigateToStatistics
+    onClickStatistics = navigateToStatistics
   )
 }
 

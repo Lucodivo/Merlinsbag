@@ -112,7 +112,8 @@ fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate
 
 @Composable
 fun EnsemblesRoute(
-    navController: NavController,
+    navigateToEnsembleDetail: (ensembleId: String) -> Unit,
+    navigateToSettings: () -> Unit,
     windowSizeClass: WindowSizeClass,
     ensemblesViewModel: EnsemblesViewModel = hiltViewModel(),
 ) {
@@ -122,7 +123,7 @@ fun EnsemblesRoute(
   val addEnsembleDialogArticles by ensemblesViewModel.addArticleThumbnails.collectAsStateWithLifecycle()
 
   LaunchedEffect(ensemblesViewModel.navigateToEnsembleDetail) {
-    ensemblesViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navController.navigateToEnsembleDetail(ensembleId = it) }
+    ensemblesViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navigateToEnsembleDetail(it) }
   }
 
   EnsemblesScreen(
@@ -137,7 +138,7 @@ fun EnsemblesRoute(
     addEnsembleDialogArticles = addEnsembleDialogArticles,
     onLongPressEnsemble = ensemblesViewModel::onLongPressEnsemble,
     onClickEnsemble = ensemblesViewModel::onClickEnsemble,
-    onClickSettings = navController::navigateToSettings,
+    onClickSettings = navigateToSettings,
     onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
     onClickMinimizeButtonControl = ensemblesViewModel::onClickMinimizeButtonControl,
     onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,

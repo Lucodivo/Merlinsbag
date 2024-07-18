@@ -79,9 +79,10 @@ fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOp
 
 @Composable
 fun EnsembleDetailRoute(
-    navController: NavController,
-    windowSizeClass: WindowSizeClass,
     ensembleId: String,
+    navigateToArticleDetail: (articleIndex: Int, ensembleId: String) -> Unit,
+    navigateBack: () -> Unit,
+    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier,
 ) {
   val ensembleDetailViewModel =
@@ -100,12 +101,12 @@ fun EnsembleDetailRoute(
 
   LaunchedEffect(ensembleDetailViewModel.navigateToArticleDetail) {
     ensembleDetailViewModel.navigateToArticleDetail.getContentIfNotHandled()?.let { (index, ensembleId) ->
-      navController.navigateToArticleDetail(index, ensembleId)
+      navigateToArticleDetail(index, ensembleId)
     }
   }
 
   LaunchedEffect(ensembleDetailViewModel.finished) {
-    ensembleDetailViewModel.finished.getContentIfNotHandled()?.let{ navController.popBackStack() }
+    ensembleDetailViewModel.finished.getContentIfNotHandled()?.let{ navigateBack() }
   }
 
   EnsembleDetailScreen(
