@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import android.content.pm.PackageManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -167,6 +168,14 @@ fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   onClick = onClick,
   modifier = itemModifier,
 )
+
+@Composable
+fun VersionRow() {
+  Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 4.dp)){
+    Text(stringResource(R.string.version))
+    Text(versionName())
+  }
+}
 
 @Composable
 fun StatisticsRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
@@ -500,6 +509,7 @@ fun SettingsScreen(
       item { SettingsTitle(stringResource(R.string.about)) }
       item { AuthorRow(onClickAuthor) }
       item { SourceRow(onClickSource) }
+      item { VersionRow() }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.etc)) }
       item { ReviewRow(onClickReview) }
@@ -512,6 +522,17 @@ fun SettingsScreen(
       onDismiss = onDismissDeleteAllDataAlertDialog,
       onClickPositive = onClickConfirmDeleteAllDataAlertDialog,
     )
+  }
+}
+
+@Composable
+fun versionName(): String {
+  val context = LocalContext.current
+  try {
+    return context.packageManager.getPackageInfo(context.packageName, 0).versionName
+  } catch(e: Exception){
+    e.printStackTrace()
+    return "?"
   }
 }
 
