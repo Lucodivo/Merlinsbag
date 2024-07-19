@@ -221,14 +221,6 @@ fun AddArticleScreen(
                     }
                   }
             )
-            if(selected) {
-              Icon(
-                imageVector = NoopIcons.SelectedIndicator,
-                contentDescription = stringResource(com.inasweaterpoorlyknit.core.ui.R.string.selected),
-                modifier = Modifier.align(Alignment.BottomEnd),
-                tint = MaterialTheme.colorScheme.primary,
-              )
-            }
           }
         }
       }

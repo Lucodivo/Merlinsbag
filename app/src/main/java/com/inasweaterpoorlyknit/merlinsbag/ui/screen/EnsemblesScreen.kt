@@ -147,7 +147,7 @@ fun EnsemblesRoute(
     onUpdateSearchQuery = ensemblesViewModel::onSearchQueryUpdate,
     onClearSearchQuery = ensemblesViewModel::onSearchQueryClear,
     onClickDeleteSelected = ensemblesViewModel::onClickDeleteSelectedEnsembles,
-    onDeleteEnsemblesAlertDialogDismiss = ensemblesViewModel::onDeleteEnsemblesAlertDialogDismiss,
+    onDeleteEnsemblesAlertDialogDismiss = ensemblesViewModel::onDismissDeleteEnsemblesAlertDialog,
     onDeleteEnsemblesAlertDialogPositive = ensemblesViewModel::onDeleteEnsemblesAlertDialogPositive,
   )
 }
@@ -207,7 +207,7 @@ fun EnsemblesScreen(
           }
           NoopSearchBox(
             query = searchQuery,
-            placeholder = stringResource(R.string.search_ensembles),
+            placeholder = stringResource(R.string.search),
             onQueryChange = onUpdateSearchQuery,
             onClearQuery = onClearSearchQuery,
             modifier = Modifier.fillMaxWidth()

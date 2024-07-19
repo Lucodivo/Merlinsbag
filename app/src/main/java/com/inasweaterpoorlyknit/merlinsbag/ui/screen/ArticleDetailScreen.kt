@@ -317,6 +317,10 @@ fun ArticleDetailScreen(
   // Index may be out of bounds is the Pager has yet to adjust to the new size after a deletion
   val showAltThumbnails = articleIndex < articlesWithImages.size && articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex).size > 1
 
+  val verticalArticleImagePadding = 16.dp
+  val startArticleImagePadding: Dp = if(systemBarStartPadding > 0.dp) systemBarStartPadding else verticalArticleImagePadding
+  val endArticleImagePadding: Dp = if(systemBarEndPadding > 0.dp) systemBarEndPadding else verticalArticleImagePadding
+
   if(articleImageIndices.isNotEmpty()) {
     HorizontalPager(
       state = pagerState,
@@ -330,7 +334,7 @@ fun ArticleDetailScreen(
         contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(top = verticalArticleImagePadding, bottom = verticalArticleImagePadding, start = startArticleImagePadding, end = endArticleImagePadding),
       )
     }
   }
@@ -462,7 +466,7 @@ fun ArticleDetailScreen(
   )
   when(alertDialogMode){
     DeleteArticle -> DeleteArticleAlertDialog(onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
-    DeleteArticleByRemovingAllArticles -> DeleteArticleAlertDialog(fromDeletingAllImages = editMode == ArticleDetailScreenEditMode.EnabledAllThumbnails, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
+    DeleteArticleByRemovingAllArticles -> DeleteArticleAlertDialog(fromDeletingAllImages = true, onDismiss = onDismissDeleteDialog, onConfirm = onConfirmDeleteDialog)
     ExportPermissions -> ExportPermissionsAlertDialog(onDismiss = onDismissExportPermissionsDialog, onConfirm = onConfirmExportPermissionsDialog)
     RemoveFromEnsembles -> RemoveFromEnsemblesAlertDialog(onDismiss = onDismissRemoveFromEnsemblesDialog, onConfirm = onConfirmRemoveFromEnsemblesDialog)
     RemoveImages -> RemoveImagesAlertDialog(onDismiss = onDismissRemoveImagesDialog, onConfirm = onConfirmRemoveImagesDialog)
@@ -644,7 +648,7 @@ fun DeleteArticleAlertDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-  val text = "${if(fromDeletingAllImages){stringResource(id = R.string.an_article_cannot_exist_without_an_image)}else{""}}${stringResource (id = R.string.deleted_articles_unrecoverable)}"
+  val text = "${if(fromDeletingAllImages){stringResource(id = R.string.an_article_cannot_exist_without_an_image) + " "}else{""}}${stringResource (id = R.string.deleted_articles_unrecoverable)}"
   NoopSimpleAlertDialog(
     title = stringResource(id = R.string.delete_article),
     text = text,
@@ -788,7 +792,7 @@ private fun AddToEnsembleDialog(
     }
     NoopSearchBox(
       query = userSearch,
-      placeholder = stringResource(R.string.search_ensembles),
+      placeholder = stringResource(R.string.search),
       onQueryChange = { onSearchQueryUpdate(it) },
       onClearQuery = { onSearchQueryUpdate("") },
       modifier = Modifier

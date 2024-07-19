@@ -104,7 +104,7 @@ class EnsemblesViewModel @Inject constructor(
     if(_selectedEnsembleIndices.isNotEmpty()) _selectedEnsembleIndices.clear()
   }
   fun onSearchQueryClear() { onSearchQueryUpdate("") }
-  fun onDeleteEnsemblesAlertDialogDismiss() { showDeleteEnsembleAlertDialog = false }
+  fun onDismissDeleteEnsemblesAlertDialog() { showDeleteEnsembleAlertDialog = false }
   fun onClickCloseAddEnsembleDialog() { showAddEnsembleDialog = false }
 
   fun onLongPressEnsemble(index: Int){
@@ -143,6 +143,7 @@ class EnsemblesViewModel @Inject constructor(
 
   fun onDeleteEnsemblesAlertDialogPositive() {
     showDeleteEnsembleAlertDialog = false
+    editMode = false
     val ensembleIds = ensembles.slice(_selectedEnsembleIndices.keys).map { it.ensemble.id }
     viewModelScope.launch(Dispatchers.IO) {
       ensemblesRepository.deleteEnsembles(ensembleIds)
@@ -151,7 +152,6 @@ class EnsemblesViewModel @Inject constructor(
 
   fun onClickDeleteSelectedEnsembles() {
     showDeleteEnsembleAlertDialog = true
-    editMode = false
   }
 
   private fun toggleSelectedEnsemble(index: Int){

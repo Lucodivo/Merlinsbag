@@ -8,6 +8,10 @@ Add Article:
     - Primary / Secondary color classifications?
     - Add to ensemble?
     - Wait for ML Model to download? Inform user that they need internet?
+Ensemble Detail:
+    - Add new article?
+Article Detail:
+    - Click to minimize UI elements
 Ensembles:
     - Composite ensembles?
         - Exclusive: #Goth & #Tops
