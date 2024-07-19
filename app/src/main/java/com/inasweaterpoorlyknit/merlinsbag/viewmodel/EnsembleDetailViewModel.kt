@@ -3,7 +3,6 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,8 +13,11 @@ import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.Disabled
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledGeneral
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledSelectedArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticleDetail
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -52,10 +54,10 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   private lateinit var ensembleArticleIds: Set<String>
 
   var editingTitle by mutableStateOf(false)
-  var editMode by mutableStateOf(false)
+  var editMode by mutableStateOf<EnsembleDetailEditMode>(Disabled)
   var showDeleteEnsembleDialog by mutableStateOf(false)
   var showAddArticlesDialog by mutableStateOf(false)
-  val onBackEnabled get() = editMode
+  val onBackEnabled get() = editMode != Disabled
 
   // TODO: No mutableStateSetOf ??
   val _selectedEditArticleIndices = mutableStateMapOf<Int, Unit>()
@@ -101,24 +103,27 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   fun onClickTitle() { editingTitle = true }
 
   fun onBack() { onClickMinimizeButtonControl() }
-  fun onClickEdit() { editMode = true }
+  fun onClickEdit() { editMode = EnabledGeneral }
   fun onClickMinimizeButtonControl() {
-    editMode = false
+    editMode = Disabled
     if(_selectedEditArticleIndices.isNotEmpty()) _selectedEditArticleIndices.clear()
   }
 
   fun onClickArticle(index: Int) {
-    if(editMode) {
-      if(_selectedEditArticleIndices.containsKey(index)) _selectedEditArticleIndices.remove(index)
-      else _selectedEditArticleIndices[index] = Unit
+    if(editMode == EnabledSelectedArticles) {
+      if(_selectedEditArticleIndices.containsKey(index)) {
+        _selectedEditArticleIndices.remove(index)
+        if(_selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
+      } else _selectedEditArticleIndices[index] = Unit
     } else {
       navigateToArticleDetail = Event(Pair(index, ensembleId))
     }
   }
 
   fun onClickArticleAddDialog(index: Int) {
-    if(_selectedAddArticleIndices.containsKey(index)) _selectedAddArticleIndices.remove(index)
-    else _selectedAddArticleIndices[index] = Unit
+    if(_selectedAddArticleIndices.containsKey(index)) {
+      _selectedAddArticleIndices.remove(index)
+    } else _selectedAddArticleIndices[index] = Unit
   }
 
   fun onClickCancelArticleSelection() { _selectedEditArticleIndices.clear() }
@@ -126,6 +131,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   fun onClickRemoveArticles() {
     val articleIds = _selectedEditArticleIndices.keys.map { ensembleArticles.getArticleId(it) }
     _selectedEditArticleIndices.clear()
+    editMode = EnabledGeneral
     viewModelScope.launch(Dispatchers.IO) {
       ensemblesRepository.deleteArticlesFromEnsemble(
         ensembleId = ensemble.id,
@@ -135,9 +141,11 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   }
 
   fun onLongPressArticle(index: Int){
-    if(!editMode) editMode = true
-    if(_selectedEditArticleIndices.containsKey(index)) _selectedEditArticleIndices.remove(index)
-    else _selectedEditArticleIndices[index] = Unit
+    if(editMode != EnabledSelectedArticles) editMode = EnabledSelectedArticles
+    if(_selectedEditArticleIndices.containsKey(index)) {
+      _selectedEditArticleIndices.remove(index)
+      if(_selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
+    } else _selectedEditArticleIndices[index] = Unit
   }
 
   fun onTitleChanged(newTitle: String) {

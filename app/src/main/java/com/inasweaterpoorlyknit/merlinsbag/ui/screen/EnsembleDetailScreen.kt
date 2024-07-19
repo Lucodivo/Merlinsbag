@@ -68,6 +68,10 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import kotlinx.serialization.Serializable
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledSelectedArticles
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.Disabled
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledGeneral
+
 
 @Serializable
 data class EnsembleDetailRoute(
@@ -76,6 +80,12 @@ data class EnsembleDetailRoute(
 
 fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOptions? = null) =
   navigate(EnsembleDetailRoute(ensembleId = ensembleId), navOptions)
+
+enum class EnsembleDetailEditMode {
+  EnabledGeneral,
+  EnabledSelectedArticles,
+  Disabled
+}
 
 @Composable
 fun EnsembleDetailRoute(
@@ -113,7 +123,7 @@ fun EnsembleDetailRoute(
     windowSizeClass = windowSizeClass,
     title = ensembleTitle,
     editingTitle = ensembleDetailViewModel.editingTitle,
-    editEnsemblesMode = ensembleDetailViewModel.editMode,
+    editMode = ensembleDetailViewModel.editMode,
     ensembleArticleThumbnailUris = ensembleUiState.ensembleArticleThumbnailUris,
     addArticleThumbnailUris = ensembleUiState.addArticleThumbnailUris,
     selectedEditArticleIndices = ensembleDetailViewModel.selectedEditArticleIndices,
@@ -158,7 +168,7 @@ fun DeleteEnsembleAlertDialog(
 
 @Composable
 fun EnsembleDetailFloatingActionButtons(
-    editEnsemblesMode: Boolean,
+    editMode: EnsembleDetailEditMode,
     selectedEditArticleIndices: Set<Int>,
     onClickEdit: () -> Unit,
     onClickMinimizeButtonControl: () -> Unit,
@@ -170,11 +180,11 @@ fun EnsembleDetailFloatingActionButtons(
 ) {
   NoopBottomEndButtonContainer(modifier) {
     NoopExpandingIconButton(
-      expanded = editEnsemblesMode,
+      expanded = editMode != Disabled,
       collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
       expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
       verticalExpandedButtons =
-      if(selectedEditArticleIndices.isNotEmpty()) {
+      if(editMode == EnabledSelectedArticles) {
         listOf(
           IconButtonData(
             icon = IconData(
@@ -209,7 +219,7 @@ fun EnsembleDetailFloatingActionButtons(
           ),
         )
       },
-      onClick = { if(editEnsemblesMode) onClickMinimizeButtonControl() else onClickEdit() } ,
+      onClick = { if(editMode != Disabled) onClickMinimizeButtonControl() else onClickEdit() } ,
     )
   }
 }
@@ -218,7 +228,7 @@ fun EnsembleDetailFloatingActionButtons(
 fun EnsembleDetailScreen(
     windowSizeClass: WindowSizeClass,
     title: String,
-    editEnsemblesMode: Boolean,
+    editMode: EnsembleDetailEditMode,
     editingTitle: Boolean,
     ensembleArticleThumbnailUris: LazyUriStrings,
     addArticleThumbnailUris: LazyUriStrings,
@@ -309,7 +319,7 @@ fun EnsembleDetailScreen(
       }
       Box(modifier = Modifier.fillMaxSize()) {
         SelectableStaggeredThumbnailGrid(
-          selectable = editEnsemblesMode,
+          selectable = editMode == EnabledSelectedArticles,
           onSelect = onClickArticle,
           onLongSelect = onLongClickArticle,
           thumbnailUris = ensembleArticleThumbnailUris,
@@ -331,7 +341,7 @@ fun EnsembleDetailScreen(
     }
   }
   EnsembleDetailFloatingActionButtons(
-    editEnsemblesMode = editEnsemblesMode,
+    editMode = editMode,
     selectedEditArticleIndices = selectedEditArticleIndices,
     onClickEdit = onClickEdit,
     onClickAddArticles = onClickAddArticles,
@@ -407,14 +417,14 @@ fun AddArticlesDialog(
 @Composable
 fun PreviewUtilEnsembleDetailScreen(
     editingTitle: Boolean = false,
-    editMode: Boolean = false,
+    editMode: EnsembleDetailEditMode = Disabled,
     showAddArticlesDialog: Boolean = false,
     selectedArticleIndices: Set<Int> = emptySet(),
     selectedAddArticleIndices: Set<Int> = emptySet(),
     showDeleteEnsembleAlertDialog: Boolean = false,
 ) = EnsembleDetailScreen(
   title = "Ensemble Title",
-  editEnsemblesMode = editMode,
+  editMode = editMode,
   editingTitle = editingTitle,
   ensembleArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
@@ -430,11 +440,11 @@ fun PreviewUtilEnsembleDetailScreen(
 
 @Composable
 fun PreviewUtilEnsembleDetailFloatingActionButtons(
-    editEnsemblesMode: Boolean,
+    editMode: EnsembleDetailEditMode = Disabled,
     selectedArticleIndices: Set<Int> = emptySet(),
 ) = NoopTheme {
   EnsembleDetailFloatingActionButtons(
-    editEnsemblesMode = editEnsemblesMode,
+    editMode = editMode,
     selectedEditArticleIndices = selectedArticleIndices,
     onClickEdit = {}, onClickAddArticles = {}, onClickCancelSelection = {}, onClickRemoveArticles = {}, onClickDeleteEnsemble = {}, onClickMinimizeButtonControl = {},
   )
@@ -442,13 +452,13 @@ fun PreviewUtilEnsembleDetailFloatingActionButtons(
 
 @Preview @Composable fun PreviewEnsembleDetailScreen() = NoopTheme { PreviewUtilEnsembleDetailScreen() }
 
-@LandscapePreview @Composable fun PreviewEnsembleDetailScreen_EditingLandscape() = NoopTheme { PreviewUtilEnsembleDetailScreen(editMode = true) }
+@LandscapePreview @Composable fun PreviewEnsembleDetailScreen_EditingLandscape() = NoopTheme { PreviewUtilEnsembleDetailScreen(editMode = EnabledGeneral) }
 
 @Preview
 @Composable
 fun PreviewEnsembleDetailScreen_Editing() = NoopTheme {
   PreviewUtilEnsembleDetailScreen(
-    editMode = true,
+    editMode = EnabledSelectedArticles,
     editingTitle = true,
     selectedArticleIndices = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
   )
@@ -458,7 +468,7 @@ fun PreviewEnsembleDetailScreen_Editing() = NoopTheme {
 @Composable
 fun PreviewEnsembleDetailScreen_DeleteEnsembleAlertDialog() = NoopTheme {
   PreviewUtilEnsembleDetailScreen(
-    editMode = true,
+    editMode = EnabledGeneral,
     showDeleteEnsembleAlertDialog = true,
   )
 }
@@ -467,7 +477,7 @@ fun PreviewEnsembleDetailScreen_DeleteEnsembleAlertDialog() = NoopTheme {
 @Composable
 fun PreviewEnsembleDetailScreen_AddArticlesDialog() = NoopTheme {
   PreviewUtilEnsembleDetailScreen(
-    editMode = false,
+    editMode = EnabledGeneral,
     editingTitle = false,
     showAddArticlesDialog = true,
     selectedArticleIndices = repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet,
@@ -496,8 +506,8 @@ fun PreviewAddArticlesDialog_noAddArticles() = NoopTheme {
   )
 }
 
-@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = PreviewUtilEnsembleDetailFloatingActionButtons(false)
-@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = PreviewUtilEnsembleDetailFloatingActionButtons(true)
-@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(true, setOf(0))
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = PreviewUtilEnsembleDetailFloatingActionButtons(Disabled)
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = PreviewUtilEnsembleDetailFloatingActionButtons(EnabledGeneral)
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(EnabledSelectedArticles, setOf(0))
 @Preview @Composable fun PreviewDeleteEnsembleAlertDialog() = NoopTheme { DeleteEnsembleAlertDialog(onDismiss = {}, onClickPositive = {}) }
 //endregion

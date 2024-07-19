@@ -132,7 +132,7 @@
     <string name="discard_the_article">Discard the article.</string>
     <string name="rotate_clockwise_90_degrees">Rotate clockwise 90°</string>
     <string name="rotate_counterclockwise_90_degrees">Rotate counterclockwise 90°</string>
-    <string name="ensemble_answer">An ensemble is a category for articles. In Merlinsbag, there is an attempt to associate ensembles with hashtags.</string>
+    <string name="ensemble_answer">An ensemble is a category for articles. In Merlinsbag, ensembles can be thought of as a hashtag on other platforms.</string>
     <string name="add_article_controls">Add Article Controls</string>
     <string name="article_answer">An article is an item that you have cataloged from an image. This could be an article of clothing, a book, a record, a person, a pet, or anything else that can be isolated from an photograph.</string>
     <string name="video">Video</string>
@@ -185,4 +185,6 @@
     <string name="most_ensembles">Most Ensembles</string>
     <string name="most_images">Most Images</string>
     <string name="article_image_count">Article Image Count</string>
+    <string name="controls">Controls</string>
+    <string name="long_press_to_interact">Long presses (holding finger down, as opposed to a quick finger tap) is utilized heavily in Merlins bag. It is often used to select multiple ensembles, articles, or images for editing.</string>
 </resources>
