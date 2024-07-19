@@ -53,8 +53,10 @@ class ArticlesViewModel @Inject constructor(
 
   fun onClickArticle(index: Int){
     if(editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES) {
-      if(_selectedArticleIndices.contains(index)) _selectedArticleIndices.remove(index)
-      else _selectedArticleIndices[index] = Unit
+      if(_selectedArticleIndices.contains(index)) {
+        _selectedArticleIndices.remove(index)
+        if(_selectedArticleIndices.isEmpty()) editMode = ArticlesScreenEditMode.ENABLED_GENERAL
+      } else _selectedArticleIndices[index] = Unit
     } else {
       navigateToArticleDetail = Event(index)
     }
@@ -65,8 +67,10 @@ class ArticlesViewModel @Inject constructor(
       editMode = ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES
       _selectedArticleIndices.clear()
     }
-    if(_selectedArticleIndices.contains(index)) _selectedArticleIndices.remove(index)
-    else _selectedArticleIndices[index] = Unit
+    if(_selectedArticleIndices.contains(index)) {
+      _selectedArticleIndices.remove(index)
+      if(_selectedArticleIndices.isEmpty()) editMode = ArticlesScreenEditMode.ENABLED_GENERAL
+    } else _selectedArticleIndices[index] = Unit
   }
 
   fun onClickClearSelection() {

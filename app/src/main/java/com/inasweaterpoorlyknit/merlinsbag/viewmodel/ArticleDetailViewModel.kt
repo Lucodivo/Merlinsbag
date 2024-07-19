@@ -261,8 +261,10 @@ class ArticleDetailViewModel @AssistedInject constructor(
   fun onClickArticleThumbnail(thumbnailIndex: Int) {
     articleImageIndices[articleIndex] = thumbnailIndex
     if(editMode == EnabledSelectedThumbnails || editMode == EnabledAllThumbnails) {
-      if(_selectedThumbnails.containsKey(thumbnailIndex)) _selectedThumbnails.remove(thumbnailIndex)
-      else _selectedThumbnails[thumbnailIndex] = Unit
+      if(_selectedThumbnails.containsKey(thumbnailIndex)) {
+        _selectedThumbnails.remove(thumbnailIndex)
+        if(_selectedThumbnails.isEmpty()) editMode = EnabledGeneral
+      } else _selectedThumbnails[thumbnailIndex] = Unit
     }
   }
 
@@ -271,8 +273,10 @@ class ArticleDetailViewModel @AssistedInject constructor(
     if(editMode != EnabledSelectedThumbnails){
       if(_selectedThumbnails.isNotEmpty()) _selectedThumbnails.clear()
     }
-    if(_selectedThumbnails.containsKey(thumbnailIndex)) _selectedThumbnails.remove(thumbnailIndex)
-    else _selectedThumbnails[thumbnailIndex] = Unit
+    if(_selectedThumbnails.containsKey(thumbnailIndex)) {
+      _selectedThumbnails.remove(thumbnailIndex)
+      if(_selectedThumbnails.isEmpty()) editMode = EnabledGeneral
+    } else _selectedThumbnails[thumbnailIndex] = Unit
     if(_selectedThumbnails.size == cachedArticlesWithFullImages.size) {
       editMode = EnabledAllThumbnails
     } else if(editMode != EnabledSelectedThumbnails){
@@ -303,8 +307,10 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onClickEnsemble(ensembleIndex: Int) {
     if(editMode == EnabledSelectedEnsembles){
-      if(_selectedEnsembles.containsKey(ensembleIndex)) _selectedEnsembles.remove(ensembleIndex)
-      else _selectedEnsembles[ensembleIndex] = Unit
+      if(_selectedEnsembles.containsKey(ensembleIndex)) {
+        _selectedEnsembles.remove(ensembleIndex)
+        if(_selectedEnsembles.isEmpty()) editMode = EnabledGeneral
+      } else _selectedEnsembles[ensembleIndex] = Unit
     } else navigateToEnsembleDetail = Event(cachedArticleEnsembles[ensembleIndex].id)
   }
 
@@ -313,8 +319,10 @@ class ArticleDetailViewModel @AssistedInject constructor(
       if(_selectedEnsembles.isNotEmpty()) _selectedEnsembles.clear()
       editMode = EnabledSelectedEnsembles
     }
-    if(_selectedEnsembles.containsKey(ensembleIndex)) _selectedEnsembles.remove(ensembleIndex)
-    else _selectedEnsembles[ensembleIndex] = Unit
+    if(_selectedEnsembles.containsKey(ensembleIndex)) {
+      _selectedEnsembles.remove(ensembleIndex)
+      if(_selectedEnsembles.isEmpty()) editMode = EnabledGeneral
+    } else _selectedEnsembles[ensembleIndex] = Unit
   }
 
   fun onClickCancelSelection() {
