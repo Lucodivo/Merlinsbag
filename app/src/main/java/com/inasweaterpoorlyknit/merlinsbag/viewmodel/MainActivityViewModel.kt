@@ -3,6 +3,7 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -30,6 +31,7 @@ class MainActivityViewModel @Inject constructor(
 
   var uiState by mutableStateOf<MainActivityUiState>(MainActivityUiState.Loading)
   var intentImageUriArgs by mutableStateOf(Event<List<String>>(null))
+  var navigateToCamera by mutableStateOf(Event<Boolean>(null))
 
   val userPreferences = userPreferencesRepository.userPreferences
       .onEach { uiState = MainActivityUiState.Success }
@@ -44,7 +46,7 @@ class MainActivityViewModel @Inject constructor(
   fun processIntent(intent: Intent) {
     val intentImageUris =
         if(intent.type?.startsWith("image/") == true) {
-          when(intent?.action){
+          when(intent.action){
             Intent.ACTION_SEND -> {
               (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let{
                 listOf(it)
@@ -58,6 +60,11 @@ class MainActivityViewModel @Inject constructor(
         } else { emptyList() }
     if(intentImageUris.isNotEmpty()) {
       intentImageUriArgs = Event(intentImageUris.map { it.toString() })
+    }
+    if(intent.action == Intent.ACTION_VIEW){
+      if(intent.dataString?.equals("camera") == true){
+        navigateToCamera = Event(true)
+      }
     }
   }
 }

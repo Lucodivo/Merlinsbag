@@ -94,6 +94,7 @@ class ArticlesViewModel @Inject constructor(
   fun onDismissDeleteArticlesAlert() { showDeleteArticlesAlert = false }
   fun onConfirmDeleteArticlesAlert() {
     showDeleteArticlesAlert = false
+    editMode = ArticlesScreenEditMode.ENABLED_GENERAL
     val articleIds = _selectedArticleIndices.keys.map { lazyArticleImagesCache.getArticleId(it) }
     _selectedArticleIndices.clear()
     viewModelScope.launch(Dispatchers.IO) { articleRepository.deleteArticles(articleIds) }

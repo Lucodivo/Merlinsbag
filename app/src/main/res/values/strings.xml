@@ -188,4 +188,6 @@
     <string name="controls">Controls</string>
     <string name="long_press_to_interact">Long presses (holding finger down, as opposed to a quick finger tap) is utilized heavily in Merlins bag. It is often used to select multiple ensembles, articles, or images for editing.</string>
     <string name="version">Version</string>
+    <string name="shortcut_camera_label_long">Add Articles</string>
+    <string name="shortcut_camera_label_short">Add Articles</string>
 </resources>
