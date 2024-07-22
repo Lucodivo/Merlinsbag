@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
-import android.content.pm.PackageManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -125,11 +124,11 @@ fun SettingsRoute(
     colorPalette = userPreferences.colorPalette,
     highContrast = userPreferences.highContrast,
     typography = userPreferences.typography,
-    onClickAuthor = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
+    onClickDeveloper = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
     onClickDemoVideo = { uriHandler.openUri(DEMO_VIDEO_URL) },
-    onClickReview = { uriHandler.openUri(MERLINSBAG_URL) },
+    onClickRateAndReview = { uriHandler.openUri(MERLINSBAG_URL) },
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
     onClickTipsAndInfoPage = navigateToTipsAndInfo,
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
@@ -154,7 +153,7 @@ fun SettingsRoute(
 }
 
 @Composable
-fun AuthorRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+fun DeveloperRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.developer),
   indicator = { Icon(NoopIcons.Web, stringResource(R.string.web_page)) },
   onClick = onClick,
@@ -186,7 +185,7 @@ fun StatisticsRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 )
 
 @Composable
-fun ReviewRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
+fun RateAndReviewRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.review),
   indicator = { Icon(NoopIcons.Reviews, REDUNDANT_CONTENT_DESCRIPTION)},
   onClick = onClick,
@@ -421,13 +420,13 @@ fun SettingsScreen(
     colorPalette: ColorPalette,
     typography: Typography,
     highContrast: HighContrast,
-    onClickAuthor: () -> Unit,
+    onClickDeveloper: () -> Unit,
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
     onClickWelcomePage: () -> Unit,
     onClickStatistics: () -> Unit,
     onClickTipsAndInfoPage: () -> Unit,
-    onClickReview: () -> Unit,
+    onClickRateAndReview: () -> Unit,
     onClickPrivacyInfo: () -> Unit,
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
@@ -507,12 +506,12 @@ fun SettingsScreen(
       item { DeleteAllDataRow(onClickDeleteAllData) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.about)) }
-      item { AuthorRow(onClickAuthor) }
+      item { DeveloperRow(onClickDeveloper) }
       item { SourceRow(onClickSource) }
       item { VersionRow() }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.etc)) }
-      item { ReviewRow(onClickReview) }
+      item { RateAndReviewRow(onClickRateAndReview) }
       item { EccohedraRow(onClickEccohedra) }
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + sectionSpacerHeight)) }
     }
@@ -668,12 +667,12 @@ fun PreviewUtilSettingsScreen(
       darkMode = darkMode,
       colorPalette = colorPalette,
       typography = typography,
-      highContrast = highContrast, onClickAuthor = {}, onClickSource = {}, onClickEccohedra = {},
+      highContrast = highContrast, onClickDeveloper = {}, onClickSource = {}, onClickEccohedra = {},
       onClickWelcomePage = {}, onClickTipsAndInfoPage = {}, onClickPrivacyInfo = {},
       onClickClearCache = {}, onClickDeleteAllData = {}, onClickStatistics = {},
       onClickDemoVideo = {}, onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
       onDismissDarkMode = {}, onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
-      onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {}, onClickReview = {},
+      onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {}, onClickRateAndReview = {},
       onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {}, onDismissDeleteAllDataAlertDialog = {},
     )
   }

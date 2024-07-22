@@ -7,12 +7,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.inasweaterpoorlyknit.core.ml.encourageInstallSubjectSegmentationModel
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToAddArticle
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityUiState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,6 +31,8 @@ class MainActivity: ComponentActivity() {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
 
+    mainActivityViewModel.processIntent(intent)
+
     var loading = true
     splashscreen.setKeepOnScreenCondition { loading }
 
@@ -41,6 +45,14 @@ class MainActivity: ComponentActivity() {
       )
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
       if(loading && mainActivityViewModel.uiState !is MainActivityUiState.Loading) loading = false
+
+      if(!loading && userPreferences.hasCompletedOnboarding) {
+        LaunchedEffect(mainActivityViewModel.intentImageUriArgs) {
+          mainActivityViewModel.intentImageUriArgs.getContentIfNotHandled()?.let {
+            appState.navController.navigateToAddArticle(it)
+          }
+        }
+      }
 
       NoopTheme(
         darkMode = userPreferences.darkMode,

@@ -20,6 +20,7 @@ Features:
     - Collage
     - Share!
     - App shortcut to camera
+        - How do shortcuts even work in Compose Navigation?
     - Hook for sharing from camera roll to Merlinsbag
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
@@ -42,7 +43,6 @@ Compose Navigation:
     - Enable a more robust back stack
         - Ensure the proper navigation UI element is highlighted
         - Ensure that back history is wiped on "Delete All Data"
-    - Don't pass around the nav controller from the NavHost?
 Bugs:
     - Out of Memory (OOM) crash (or silent PROCESS ENDED while app is in the background due to camera contract) when processing an image in AddArticleScreen
         - Seen easily running application on an Motorola Z Play, 3GB RAM, API 26
@@ -53,29 +53,24 @@ Bugs:
                 - Deallocations obviously matter, but 150MB is not going to cause an OOM exception
                 - This does *NOT* mean that SegmentedImage cannot or should not have it's memory optimized. But it is not the core issue.
         - CacheManager::trimMemory(20) or similar logging messages can usually be seen before a crash
+        - Potential Solutions:
+            - Reduce image resolution
+            - Reduce image resolution that is sent to ML Kit and interpolated reduced resolution data to full resolution image
     - During screen transitions, the previous screen is still interactable?
-        - UPDATE: Not able to reproduce outside of debug build. Will verify at some random point in future before bug is removed.
     - FTS is imperfect sometimes shows irrelevant results on first character
         - Reproduce: Type one random character in search bar. Sometimes show unrelated results. Have seen unrelated results on pairs of 2 characters.
         - Maybe expected due to efficient imperfect hashing?
-    - If the user edits articles on the ArticleDetailScreen, leaves the app, and re-enters, the order of the articles will have changed and their place will not have been saved.
     - Passing indices instead of ids from a screen to it's associated ViewModel may be more buggy than simply passing ids.
-        - The idea of using indices was that the UI doesn't need to know about a database ID, but maybe it is worth the trade?
+        - The idea of using indices was that the UI doesn't need to know about a database ID, but maybe it is worth the trade for stability?
     - The ML Kit model does not actually install with the application or even after the application is installed. It seems to only attempt to install by either an attempted use or an explicit call to installation.
     - Error with no known ill effect in AddArticleScreen
         - The following error occurs twice EVERY time:
             Failed to get service from broker. java.lang.SecurityException: Unknown calling package name 'com.google.android.gms'.
-        - One lead is to see if the problem exists in the ML Kit vision-quickstart project:
-            https://github.com/googlesamples/mlkit/blob/master/android/vision-quickstart
-            - answer might lie in the AndroidManifest.xml?
+        - Seems to be a known problem with Google Play Services?
 QoL:
     - Preserve backstack between top level destinations
-    - Avoid optimizing for clarity of thumbnail and simply shrink to the most convenient size
-    - Back press closes edit more (already implemented for ArticleDetailScreen)
 Settings Screen:
     - Export All Data
-Aesthetics:
-    - placeholder shimmer could use a little work
 Performance:
     - Investigate any performance issues from pre-emptively dispatching to IO for file writing operations.
         - Potential areas:
