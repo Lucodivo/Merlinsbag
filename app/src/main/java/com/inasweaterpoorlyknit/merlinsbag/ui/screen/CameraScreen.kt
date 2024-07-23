@@ -103,29 +103,32 @@ fun CameraRoute(
     }
   }
 
-  if(cameraViewModel.showPermissionsAlert) {
-    CameraPermissionsAlertDialog(
-      onDismiss = cameraViewModel::onDismissPermissionsAlert,
-      onConfirm = cameraViewModel::onConfirmPermissionsAlert,
-    )
-  }
+  CameraPermissionsAlertDialog(
+    visible = cameraViewModel.showPermissionsAlert,
+    onDismiss = cameraViewModel::onDismissPermissionsAlert,
+    onConfirm = cameraViewModel::onConfirmPermissionsAlert,
+  )
 }
 
 @Composable
-fun CameraPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-    NoopSimpleAlertDialog(
-      title = stringResource(id = R.string.permission_alert_title),
-      text = stringResource(
-        if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
-        else R.string.camera_permission_alert_justification
-      ),
-      headerIcon = { Icon(imageVector = NoopIcons.Camera, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
-      onDismiss = onDismiss,
-      onConfirm = onConfirm,
-      confirmText = stringResource(id = R.string.permission_alert_positive),
-      cancelText = stringResource(id = R.string.permission_alert_negative),
-    )
+fun CameraPermissionsAlertDialog(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) = NoopSimpleAlertDialog(
+  visible = visible,
+  title = stringResource(id = R.string.permission_alert_title),
+  text = stringResource(
+    if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
+    else R.string.camera_permission_alert_justification
+  ),
+  headerIcon = { Icon(imageVector = NoopIcons.Camera, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
+  onDismiss = onDismiss,
+  onConfirm = onConfirm,
+  confirmText = stringResource(id = R.string.permission_alert_positive),
+  cancelText = stringResource(id = R.string.permission_alert_negative),
+)
 
 //region COMPOSABLE PREVIEWS
-@Preview @Composable fun PreviewCameraPermissionsAlertDialog() = NoopTheme { CameraPermissionsAlertDialog(onConfirm = {}, onDismiss = {}) }
+@Preview @Composable fun PreviewCameraPermissionsAlertDialog() = NoopTheme { CameraPermissionsAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

@@ -183,7 +183,12 @@ fun EnsemblesScreen(
   val bottomPadding = 4.dp
   val layoutDir = LocalLayoutDirection.current
   Surface(
-    modifier = Modifier.fillMaxSize().padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(
+          start = systemBarPaddingValues.calculateStartPadding(layoutDir),
+          end = systemBarPaddingValues.calculateEndPadding(layoutDir)
+        ),
   ) {
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
       targetValue = if(showPlaceholder) 1.0f else 0.0f,
@@ -246,25 +251,30 @@ fun EnsemblesScreen(
         }
       }
     }
-    NoopBottomEndButtonContainer {
-      EditEnsemblesExpandingActionButton(
-        expanded = editMode,
-        onClickAddEnsemble = onClickAddEnsemble,
-        onClickMinimizeButtonControl = onClickMinimizeButtonControl,
-        onClickDeleteSelected = onClickDeleteSelected,
-      )
-    }
-    AddEnsembleDialog(
-      visible = showAddEnsembleDialog,
-      articleThumbnails = addEnsembleDialogArticles,
-      onClickSave = onClickSaveEnsemble,
-      onClickClose = onCloseAddEnsembleDialog,
-      ensembleTitleError = ensembleTitleError,
-    )
-    if(showDeleteEnsembleAlertDialog) {
-      DeleteEnsemblesAlertDialog(onDismiss = onDeleteEnsemblesAlertDialogDismiss, onConfirm = onDeleteEnsemblesAlertDialogPositive)
-    }
   }
+
+  NoopBottomEndButtonContainer {
+    EditEnsemblesExpandingActionButton(
+      expanded = editMode,
+      onClickAddEnsemble = onClickAddEnsemble,
+      onClickMinimizeButtonControl = onClickMinimizeButtonControl,
+      onClickDeleteSelected = onClickDeleteSelected,
+    )
+  }
+
+  AddEnsembleDialog(
+    visible = showAddEnsembleDialog,
+    articleThumbnails = addEnsembleDialogArticles,
+    onClickSave = onClickSaveEnsemble,
+    onClickClose = onCloseAddEnsembleDialog,
+    ensembleTitleError = ensembleTitleError,
+  )
+
+  DeleteEnsemblesAlertDialog(
+    visible = showDeleteEnsembleAlertDialog,
+    onDismiss = onDeleteEnsemblesAlertDialogDismiss,
+    onConfirm = onDeleteEnsemblesAlertDialogPositive
+  )
 }
 
 @Composable
@@ -377,9 +387,11 @@ private fun AddEnsembleDialog(
 
 @Composable
 fun DeleteEnsemblesAlertDialog(
+    visible: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) = NoopSimpleAlertDialog(
+  visible = visible,
   headerIcon = { Icon(NoopIcons.DeleteForever, REDUNDANT_CONTENT_DESCRIPTION) },
   title = stringResource(R.string.delete_ensembles),
   text = stringResource(R.string.are_you_sure),
@@ -667,5 +679,5 @@ fun PreviewEnsembleOverlappingPlaceholderRowOverflow() = NoopTheme {
 @Preview @Composable fun PreviewAddEnsembleDialog_NoArticles() = PreviewUtilAddEnsembleDialog(thumbnails = LazyUriStrings.Empty)
 @Preview @Composable fun PreviewAddEnsembleDialog_EnsembleTitleError() = PreviewUtilAddEnsembleDialog(ensembleTitleError = R.string.ensemble_with_title_already_exists)
 
-@Preview @Composable fun PreviewDeleteEnsemblesAlertDialog() = NoopTheme { DeleteEnsemblesAlertDialog(onConfirm = {}, onDismiss = {}) }
+@Preview @Composable fun PreviewDeleteEnsemblesAlertDialog() = NoopTheme { DeleteEnsemblesAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

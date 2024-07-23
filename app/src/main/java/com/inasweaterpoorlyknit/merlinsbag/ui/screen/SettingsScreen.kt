@@ -516,12 +516,11 @@ fun SettingsScreen(
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + sectionSpacerHeight)) }
     }
   }
-  if(showDeleteAllDataAlertDialog) {
-    DeleteAllDataAlertDialog(
-      onDismiss = onDismissDeleteAllDataAlertDialog,
-      onClickPositive = onClickConfirmDeleteAllDataAlertDialog,
-    )
-  }
+  DeleteAllDataAlertDialog(
+    visible = showDeleteAllDataAlertDialog,
+    onDismiss = onDismissDeleteAllDataAlertDialog,
+    onClickPositive = onClickConfirmDeleteAllDataAlertDialog,
+  )
 }
 
 @Composable
@@ -592,6 +591,7 @@ fun TipsAndInfoRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 
 @Composable
 fun DeleteAllDataAlertDialog(
+    visible: Boolean,
     onDismiss: () -> Unit,
     onClickPositive: () -> Unit,
 ) {
@@ -600,6 +600,7 @@ fun DeleteAllDataAlertDialog(
   val containerColor = MaterialTheme.colorScheme.errorContainer
   val contentColor = MaterialTheme.colorScheme.onErrorContainer
   NoopAlertDialog(
+    visible = visible,
     title = { Text(stringResource(id = R.string.delete_all_data)) },
     headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
     text = {
@@ -681,5 +682,5 @@ fun PreviewUtilSettingsScreen(
 @SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK, colorPalette = ColorPalette.SYSTEM_DYNAMIC)
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
-@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(onClickPositive = {}, onDismiss = {}) }
+@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onClickPositive = {}, onDismiss = {}) }
 //endregion

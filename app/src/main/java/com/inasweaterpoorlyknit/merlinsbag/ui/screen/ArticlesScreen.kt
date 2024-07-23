@@ -125,16 +125,20 @@ fun ArticlesRoute(
 }
 
 @Composable
-fun DeleteArticlesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-    NoopSimpleAlertDialog(
-      title = stringResource(id = R.string.delete_article),
-      text = stringResource(id = R.string.deleted_articles_unrecoverable),
-      headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
-      onDismiss = onDismiss,
-      onConfirm = onConfirm,
-      confirmText = stringResource(id = R.string.delete),
-      cancelText = stringResource(id = R.string.cancel),
-    )
+fun DeleteArticlesAlertDialog(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) = NoopSimpleAlertDialog(
+  visible = visible,
+  title = stringResource(id = R.string.delete_article),
+  text = stringResource(id = R.string.deleted_articles_unrecoverable),
+  headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
+  onDismiss = onDismiss,
+  onConfirm = onConfirm,
+  confirmText = stringResource(id = R.string.delete),
+  cancelText = stringResource(id = R.string.cancel),
+)
 
 @Composable
 fun ArticlesScreen(
@@ -156,67 +160,26 @@ fun ArticlesScreen(
     onConfirmDeleteArticlesAlert: () -> Unit,
     onDismissDeleteArticlesAlert: () -> Unit,
 ) {
-  if(showDeleteArticlesAlert) {
-    DeleteArticlesAlertDialog(
-      onDismiss = onDismissDeleteArticlesAlert,
-      onConfirm = onConfirmDeleteArticlesAlert,
-    )
-  }
 
   val layoutDir = LocalLayoutDirection.current
+
   Box(
     modifier = Modifier
         .fillMaxSize()
         .padding(
+          top = systemBarPaddingValues.calculateTopPadding(),
           start = systemBarPaddingValues.calculateStartPadding(layoutDir),
           end = systemBarPaddingValues.calculateEndPadding(layoutDir)
         )
   ){
-    Column(
-      verticalArrangement = Arrangement.Top,
-      modifier = Modifier.fillMaxSize()
-    ) {
-      Spacer(modifier = Modifier
-          .fillMaxWidth()
-          .height(systemBarPaddingValues.calculateTopPadding()))
-      val placeholderVisibilityAnimatedFloat by animateFloatAsState(
-        targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
-        animationSpec = tween(durationMillis = 1000),
-        label = "placeholder article grid visibility"
-      )
-      if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null) {
-        SelectableStaggeredThumbnailGrid(
-          selectable = editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES,
-          onSelect = onClickArticle,
-          onLongSelect = onLongPressArticle,
-          thumbnailUris = thumbnailUris,
-          selectedThumbnails = selectedThumbnails,
-        )
-      } else {
-        Box(
-          contentAlignment = Alignment.Center,
-          modifier = Modifier
-              .alpha(placeholderVisibilityAnimatedFloat)
-        ) {
-          PlaceholderThumbnailGrid()
-          if(thumbnailUris?.isEmpty() != false){
-            val addArticleButtonAnimatedAlphaFloat by animateFloatAsState(
-              targetValue = if(editMode != ArticlesScreenEditMode.DISABLED) 0.0f else 1.0f,
-              label = "add article alpha"
-            )
-            val buttonAlpha = 0.9f
-            if(addArticleButtonAnimatedAlphaFloat > 0.0f){
-              Button(
-                onClick = onClickEdit,
-                modifier = Modifier.alpha(buttonAlpha * addArticleButtonAnimatedAlphaFloat)
-              ){
-                Text(text = stringResource(R.string.add_article))
-              }
-            }
-          }
-        }
-      }
-    }
+    ArticlesScreenThumbnailGrid(
+      thumbnailUris = thumbnailUris,
+      selectedThumbnails = selectedThumbnails,
+      editMode = editMode,
+      onClickArticle = onClickArticle,
+      onLongPressArticle = onLongPressArticle,
+      onClickAddArticle = onClickEdit,
+    )
     ArticlesButtonControls(
       windowSizeClass = windowSizeClass,
       editMode = editMode,
@@ -228,6 +191,64 @@ fun ArticlesScreen(
       onClickMinimizeButtonControl = onClickMinimizeButtonControl,
       onClickEdit = onClickEdit,
     )
+  }
+
+  DeleteArticlesAlertDialog(
+    visible = showDeleteArticlesAlert,
+    onDismiss = onDismissDeleteArticlesAlert,
+    onConfirm = onConfirmDeleteArticlesAlert,
+  )
+}
+
+@Composable fun ArticlesScreenThumbnailGrid(
+    thumbnailUris: LazyUriStrings?,
+    selectedThumbnails: Set<Int>,
+    editMode: ArticlesScreenEditMode,
+    onClickArticle: (index: Int) -> Unit,
+    onLongPressArticle: (index: Int) -> Unit,
+    onClickAddArticle: () -> Unit,
+) {
+  Column(
+    verticalArrangement = Arrangement.Top,
+    modifier = Modifier.fillMaxSize()
+  ) {
+    val placeholderVisibilityAnimatedFloat by animateFloatAsState(
+      targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
+      animationSpec = tween(durationMillis = 1000),
+      label = "placeholder article grid visibility"
+    )
+    if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null) {
+      SelectableStaggeredThumbnailGrid(
+        selectable = editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES,
+        onSelect = onClickArticle,
+        onLongSelect = onLongPressArticle,
+        thumbnailUris = thumbnailUris,
+        selectedThumbnails = selectedThumbnails,
+      )
+    } else {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .alpha(placeholderVisibilityAnimatedFloat)
+      ) {
+        PlaceholderThumbnailGrid()
+        if(thumbnailUris?.isEmpty() != false){
+          val addArticleButtonAnimatedAlphaFloat by animateFloatAsState(
+            targetValue = if(editMode != ArticlesScreenEditMode.DISABLED) 0.0f else 1.0f,
+            label = "add article alpha"
+          )
+          val buttonAlpha = 0.9f
+          if(addArticleButtonAnimatedAlphaFloat > 0.0f){
+            Button(
+              onClick = onClickAddArticle,
+              modifier = Modifier.alpha(buttonAlpha * addArticleButtonAnimatedAlphaFloat)
+            ){
+              Text(text = stringResource(R.string.add_article))
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -327,6 +348,6 @@ fun PreviewArticlesScreenWithDeleteArticlesAlert() = PreviewUtilArticleScreen(
 @Preview
 @Composable
 fun PreviewDeleteArticlesAlert() = NoopTheme {
-  DeleteArticlesAlertDialog(onConfirm = {}, onDismiss = {})
+  DeleteArticlesAlertDialog(visible = true, onConfirm = {}, onDismiss = {})
 }
 //endregion

@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
@@ -184,7 +182,7 @@ fun AddArticleScreen(
       Row { controls() }
     }
   }
-  if(showDiscardAlertDialog) DiscardAlertDialog(onDismiss = onDismissDiscardDialog, onConfirm = onConfirmDiscardDialog)
+  DiscardAlertDialog(visible = showDiscardAlertDialog, onDismiss = onDismissDiscardDialog, onConfirm = onConfirmDiscardDialog)
 
   BackHandler(enabled = showAttachDialog) { onDismissAttachDialog() }
   NoopBottomSheetDialog(
@@ -318,8 +316,13 @@ fun AddArticleControls(
 
 
 @Composable
-fun DiscardAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
+fun DiscardAlertDialog(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) =
     NoopSimpleAlertDialog(
+      visible = visible,
       title = stringResource(id = R.string.discard_article),
       text = stringResource(id = R.string.are_you_sure),
       onDismiss = onDismiss,

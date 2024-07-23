@@ -152,19 +152,19 @@ fun EnsembleDetailRoute(
 
 @Composable
 fun DeleteEnsembleAlertDialog(
+    visible: Boolean,
     onDismiss: () -> Unit,
     onClickPositive: () -> Unit,
-) {
-  NoopSimpleAlertDialog(
-    title = stringResource(id = R.string.delete_ensemble),
-    text = stringResource(id = R.string.are_you_sure),
-    headerIcon = { Icon(NoopIcons.DeleteForever, REDUNDANT_CONTENT_DESCRIPTION) },
-    confirmText = stringResource(id = R.string.delete),
-    cancelText = stringResource(id = R.string.cancel),
-    onDismiss = onDismiss,
-    onConfirm = onClickPositive,
-  )
-}
+) = NoopSimpleAlertDialog(
+  visible = visible,
+  title = stringResource(id = R.string.delete_ensemble),
+  text = stringResource(id = R.string.are_you_sure),
+  headerIcon = { Icon(NoopIcons.DeleteForever, REDUNDANT_CONTENT_DESCRIPTION) },
+  confirmText = stringResource(id = R.string.delete),
+  cancelText = stringResource(id = R.string.cancel),
+  onDismiss = onDismiss,
+  onConfirm = onClickPositive,
+)
 
 @Composable
 fun EnsembleDetailFloatingActionButtons(
@@ -359,12 +359,11 @@ fun EnsembleDetailScreen(
     onClose = onCloseAddArticlesDialog,
     onConfirm = onClickConfirmAddArticles,
   )
-  if(showDeleteEnsembleAlertDialog) {
-    DeleteEnsembleAlertDialog(
-      onDismiss = onDismissDeleteEnsembleDialog,
-      onClickPositive = onClickPositiveDeleteEnsembleDialog,
-    )
-  }
+  DeleteEnsembleAlertDialog(
+    visible = showDeleteEnsembleAlertDialog,
+    onDismiss = onDismissDeleteEnsembleDialog,
+    onClickPositive = onClickPositiveDeleteEnsembleDialog,
+  )
 }
 
 @Composable
@@ -509,5 +508,5 @@ fun PreviewAddArticlesDialog_noAddArticles() = NoopTheme {
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = PreviewUtilEnsembleDetailFloatingActionButtons(Disabled)
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = PreviewUtilEnsembleDetailFloatingActionButtons(EnabledGeneral)
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(EnabledSelectedArticles, setOf(0))
-@Preview @Composable fun PreviewDeleteEnsembleAlertDialog() = NoopTheme { DeleteEnsembleAlertDialog(onDismiss = {}, onClickPositive = {}) }
+@Preview @Composable fun PreviewDeleteEnsembleAlertDialog() = NoopTheme { DeleteEnsembleAlertDialog(visible = true, onDismiss = {}, onClickPositive = {}) }
 //endregion

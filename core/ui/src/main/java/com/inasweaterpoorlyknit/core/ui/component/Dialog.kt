@@ -137,9 +137,9 @@ fun NoopBottomSheetDialog(
   }
 }
 
-// TODO: Visibility?
 @Composable
 fun NoopAlertDialog(
+    visible: Boolean = true,
     title: @Composable () -> Unit,
     text: @Composable () -> Unit,
     confirmButton: @Composable () -> Unit,
@@ -148,7 +148,8 @@ fun NoopAlertDialog(
     headerIcon: @Composable (() -> Unit)? = null,
     containerColor: Color = AlertDialogDefaults.containerColor,
     contentColor: Color = AlertDialogDefaults.titleContentColor,
-) = AlertDialog(
+) {
+  if(visible) AlertDialog(
     title = title,
     text = text,
     icon = headerIcon,
@@ -160,9 +161,11 @@ fun NoopAlertDialog(
     iconContentColor = contentColor,
     titleContentColor = contentColor,
   )
+}
 
 @Composable
 fun NoopSimpleAlertDialog(
+    visible: Boolean = true,
     title: String,
     text: String,
     confirmText: String,
@@ -171,6 +174,7 @@ fun NoopSimpleAlertDialog(
     onConfirm: () -> Unit,
     headerIcon: @Composable (() -> Unit)? = null,
 ) = NoopAlertDialog(
+    visible = visible,
     title = { Text(title) },
     text = { Text(text = text) },
     confirmButton = { TextButton(onClick = onConfirm){ Text(text = confirmText, color = MaterialTheme.colorScheme.secondary) } },
@@ -184,6 +188,7 @@ fun NoopSimpleAlertDialog(
 @Composable
 fun PreviewNoopSimpleAlertDialog() = NoopTheme {
   NoopSimpleAlertDialog (
+    visible = true,
     title = "Delete All Data",
     text = "Are you sure you want to delete all data?",
     confirmText = "Delete",

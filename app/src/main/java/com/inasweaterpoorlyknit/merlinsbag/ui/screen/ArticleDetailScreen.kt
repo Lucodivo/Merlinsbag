@@ -647,22 +647,21 @@ fun DeleteArticleAlertDialog(
     fromDeletingAllImages: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
-) {
-  val text = "${if(fromDeletingAllImages){stringResource(id = R.string.an_article_cannot_exist_without_an_image) + " "}else{""}}${stringResource (id = R.string.deleted_articles_unrecoverable)}"
-  NoopSimpleAlertDialog(
+) = NoopSimpleAlertDialog(
     title = stringResource(id = R.string.delete_article),
-    text = text,
+    text = "${if(fromDeletingAllImages){stringResource(id = R.string.an_article_cannot_exist_without_an_image) + " "}else{""}}${stringResource (id = R.string.deleted_articles_unrecoverable)}",
     headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
     onDismiss = onDismiss,
     onConfirm = onConfirm,
     confirmText = stringResource(id = R.string.delete),
     cancelText = stringResource(id = R.string.cancel),
   )
-}
 
 @Composable
-fun RemoveFromEnsemblesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-    NoopSimpleAlertDialog(
+fun RemoveFromEnsemblesAlertDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) = NoopSimpleAlertDialog(
       title = stringResource(id = R.string.remove_ensembles),
       text = stringResource(id = R.string.are_you_sure_remove_article_from_ensembles),
       headerIcon = { Icon(imageVector = NoopIcons.attachmentRemove(), contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
@@ -672,8 +671,10 @@ fun RemoveFromEnsemblesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit)
       cancelText = stringResource(id = R.string.cancel),
     )
 @Composable
-fun RemoveImagesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-    NoopSimpleAlertDialog(
+fun RemoveImagesAlertDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) = NoopSimpleAlertDialog(
       title = stringResource(id = R.string.remove_images),
       text = stringResource(id = R.string.deleted_images_unrecoverable),
       headerIcon = { Icon(imageVector = NoopIcons.DeleteForever, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
@@ -684,8 +685,10 @@ fun RemoveImagesAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
     )
 
 @Composable
-fun ExportPermissionsAlertDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) =
-    NoopSimpleAlertDialog(
+fun ExportPermissionsAlertDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) = NoopSimpleAlertDialog(
       title = stringResource(id = R.string.permission_alert_title),
       text = stringResource(id = R.string.export_permission_alert_justification),
       onDismiss = onDismiss,
