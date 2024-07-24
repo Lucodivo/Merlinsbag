@@ -1,6 +1,7 @@
 package com.inasweaterpoorlyknit.merlinsbag.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,12 +45,14 @@ fun NoopNavHost(
     startRoute: Any = APP_START_ROUTE,
 ) {
   val navController = appState.navController
+  fun hideNavBar(hide: Boolean){ if(hide) appState.hideNavBar() else appState.showNavBar() }
 
   NavHost(
     navController = navController,
     startDestination = startRoute,
   ) {
     composable<ArticlesRoute>{
+      LaunchedEffect(Unit) { hideNavBar(false) }
       ArticlesRoute(
         navigateToArticleDetail = navController::navigateToArticleDetail,
         navigateToCamera = navController::navigateToCamera,
@@ -59,6 +62,7 @@ fun NoopNavHost(
       )
     }
     composable<EnsemblesRoute>{
+      LaunchedEffect(Unit) { hideNavBar(false) }
       EnsemblesRoute(
         navigateToSettings = navController::navigateToSettings,
         navigateToEnsembleDetail = navController::navigateToEnsembleDetail,
@@ -67,6 +71,7 @@ fun NoopNavHost(
     }
     composable<CameraRoute>{ navBackStackEntry ->
       val cameraRoute: CameraRoute = navBackStackEntry.toRoute()
+      LaunchedEffect(Unit) { hideNavBar(true) }
       CameraRoute(
         articleId = cameraRoute.articleId,
         navigateToAddArticle = navController::navigateToAddArticle,
@@ -75,6 +80,7 @@ fun NoopNavHost(
     }
     composable<AddArticleRoute> { navBackStackEntry ->
       val addArticleRoute: AddArticleRoute = navBackStackEntry.toRoute()
+      LaunchedEffect(Unit) { hideNavBar(true) }
       AddArticleRoute(
         imageUriStringList = addArticleRoute.imageUriStringList,
         articleId = addArticleRoute.articleId,
@@ -84,6 +90,7 @@ fun NoopNavHost(
     }
     composable<ArticleDetailRoute>{ navBackStackEntry ->
       val articleDetailRoute: ArticleDetailRoute = navBackStackEntry.toRoute()
+      LaunchedEffect(Unit) { hideNavBar(false) }
       ArticleDetailRoute(
         articleIndex = articleDetailRoute.articleIndex,
         navigateBack = navController::popBackStack,
@@ -97,6 +104,7 @@ fun NoopNavHost(
     }
     composable<EnsembleDetailRoute>{ navBackStackEntry ->
       val ensembleDetailRoute: EnsembleDetailRoute = navBackStackEntry.toRoute()
+      LaunchedEffect(Unit) { hideNavBar(false) }
       EnsembleDetailRoute(
         ensembleId = ensembleDetailRoute.ensembleId,
         navigateToArticleDetail = navController::navigateToArticleDetail,
@@ -105,13 +113,20 @@ fun NoopNavHost(
       )
     }
     composable<SettingsRoute>{
+      LaunchedEffect(Unit) { hideNavBar(true) }
       SettingsRoute(
         navigateToStatistics = navController::navigateToStatistics,
         navigateToTipsAndInfo = navController::navigateToTipsAndInfo,
         navigateToStartDestination = navController::navigateToAppStartDestination,
       )
     }
-    composable<TipsAndInfoRoute>{ TipsAndInfoRoute() }
-    composable<StatisticsRoute>{ StatisticsRoute() }
+    composable<TipsAndInfoRoute>{
+      LaunchedEffect(Unit) { hideNavBar(true) }
+      TipsAndInfoRoute()
+    }
+    composable<StatisticsRoute>{
+      LaunchedEffect(Unit) { hideNavBar(true) }
+      StatisticsRoute()
+    }
   }
 }

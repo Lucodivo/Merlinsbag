@@ -12,6 +12,11 @@ Ensemble Detail:
     - Add new article?
 Article Detail:
     - Click to minimize UI elements
+Aesthetics:
+    - Lottie animations?
+    - Vulkan / OpenGL fun?
+Documentation:
+    - Update README.md and best practices
 Ensembles:
     - Composite ensembles?
         - Exclusive: #Goth & #Tops

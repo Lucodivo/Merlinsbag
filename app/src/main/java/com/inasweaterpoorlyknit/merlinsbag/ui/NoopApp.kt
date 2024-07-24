@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -95,7 +96,7 @@ fun NoopApp(
         }
       },
       layoutType =
-        if(!appState.showNavBar.value) NavigationSuiteType.None
+        if(!appState.showNavBar) NavigationSuiteType.None
         else if(compactWidth) NavigationSuiteType.NavigationBar
         else NavigationSuiteType.NavigationRail
       ,
@@ -143,24 +144,9 @@ class NoopAppState(
     val windowSizeClass: WindowSizeClass,
     val snackbarHostState: SnackbarHostState,
 ) {
-  var showNavBar = mutableStateOf(true)
-
-  init {
-    navController.addOnDestinationChangedListener { controller, destination, arguments ->
-      val route = destination.route
-      if(route != null && (
-              route.startsWith(AddArticleRoute::class.qualifiedName ?: "") ||
-              route.startsWith(CameraRoute::class.qualifiedName ?: "") ||
-              route == SettingsRoute::class.qualifiedName ||
-              route == TipsAndInfoRoute::class.qualifiedName ||
-              route == StatisticsRoute::class.qualifiedName
-      )){
-        showNavBar.value = false
-      } else if(!showNavBar.value) {
-        showNavBar.value = true
-      }
-    }
-  }
+  var showNavBar by mutableStateOf(true)
+  fun hideNavBar(){ if(showNavBar) showNavBar = false }
+  fun showNavBar(){ if(!showNavBar) showNavBar = true }
 }
 
 @Composable
