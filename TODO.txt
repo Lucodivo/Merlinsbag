@@ -15,8 +15,13 @@ Article Detail:
 Aesthetics:
     - Lottie animations?
     - Vulkan / OpenGL fun?
-Documentation:
-    - Update README.md and best practices
+README.md:
+    - Updated conventions
+    - Updated screenshots
+Testing:
+    - Viewmodels?
+    - Expanded repository tests?
+    - Database migrations?
 Ensembles:
     - Composite ensembles?
         - Exclusive: #Goth & #Tops
@@ -76,6 +81,7 @@ QoL:
     - Preserve backstack between top level destinations
 Settings Screen:
     - Export All Data
+    - Rate & Review in-app
 Performance:
     - Investigate any performance issues from pre-emptively dispatching to IO for file writing operations.
         - Potential areas:

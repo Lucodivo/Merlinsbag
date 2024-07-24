@@ -3,56 +3,110 @@
 <a href="https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"><img alt="Download" src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/logo/merlinsbag_logo_96x96_rounded.png"></a><br>
 <a href="https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"><img alt="Download" src="https://img.shields.io/badge/Google%20Play-%20?logo=googleplay&amp;color=grey"></a>
 
-Merlinsbag is an Android application for virtualizing & organizing a user's wardrobe and favorite items.
-
-## Features
-
-### Add Article
-"Article" refers to an item that has been digitized, stemming from an "article of clothing".  
-Users can provide photos of the things they love and the app will utilize ML Kit's Subject Segmentation to provide a stencil.  
-Due to imperfections in the model's output, the user can adjust the tightness of the stencil around the isolated subject.  
-The user can also rotate the image by 90 or 180 degrees.  
-
-### Add Ensemble
-
-"Ensembles" refers to a collection of articles.
-Users can create titled ensembles that contains any articles currently available in their catalog.
-
-### Ensembles
-Ensembles can be viewed as a list displaying a short (sometimes truncated) view of the ensemble's articles.
-
-### Articles
-All articles can be viewed as a catalog, where they can be deleted if chosen
-
-### Article Detail
-Articles can be viewed in their full glory and navigated through swiping based on selected filters.
-
-### Screenshots
-
-<p float="left">
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_articles.png" alt="Articles Screen" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_articleDetail.png" alt="Article Detail Screen" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_addArticle.png" alt="Add Article Screen" width="200"/><br>
-</p>
-<p float="left">
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_ensembles.png" alt="Ensembles Screen" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_createEnsemble.png" alt="Add Ensemble Dialog" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_ensembleDetail.png" alt="EnsembleDetail" width="200"/>
-</p>
-<p float="left">
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_addToEnsemble.png" alt="Add to Ensemble" width="200"/>
-  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_settings.png" alt="Settings" width="200"/>
-</p>
+Merlinsbag is an Android application for cataloging the things in your life.
 
 ## Video Demo
 
 [![YouTube Demo Video of Merlinsbag App](https://img.youtube.com/vi/uUQYMU2N4kA/0.jpg)](https://youtu.be/uUQYMU2N4kA )
 
+## Terminology
+- "Article": an item that has been cataloged 
+  - stemming from an "article of clothing"
+  - examples: a shirt, a pair of pant, a poster, a cat, a record, a book, etc.
+- "Ensemble": a collection of articles
+  - analogous to hashtags on other platforms
+  - examples: "tshirt", "yellow", "vinyl", "gaming", "non-fiction", "painting", etc.
+
+## Features By Screen
+
+### Add Article
+- Provide photos of the things to catalog
+- Adjust the tightness of the article cutout area
+- Rotate the image in 90 degree increments
+- Confirm cutout as newly cataloged article or attach cutout to existing article
+
+### Articles
+- View articles in one large catalog
+- Select and edit articles in bulk
+- Navigate to article detail view
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_addArticle.png" alt="Add Article Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_articles.png" alt="Articles Screen" width="200"/>
+</p>
+
+### Article Detail
+- View an article in its full glory
+- Attach additional images to article
+- Easily select and view each image attached to article
+- Attach article to existing or newly created ensembles
+- Navigate among articles via horizontal swiping
+- Export article images as PNGs to easily share outside the application
+- View and easily navigate to attached ensembles
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_articleDetail.png" alt="Article Detail Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_addToEnsemble.png" alt="Add to Ensemble" width="200"/>
+</p>
+
+### Add Ensemble
+- Create an ensemble with a given title
+- Select articles to initialize ensemble with
+
+### View Ensembles
+- View all ensembles with short previews of the ensemble's articles
+- Search among all ensembles
+- Select and edit ensembles in bulk
+- Navigate to ensemble detail view
+
+### Ensemble Detail
+- View all articles attached to an ensemble on one screen
+- Select and remove articles from ensemble in bulk
+- Attach existing articles to ensemble
+- Navigate to article detail view that is filtered by the current ensemble
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_createEnsemble.png" alt="Add Ensemble Dialog" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_ensembles.png" alt="Ensembles Screen" width="200"/>
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_ensembleDetail.png" alt="EnsembleDetail" width="200"/>
+</p>
+
+### Settings
+- Adjust the app-wide appearance of Merlinsbag:
+  - Color Scheme
+  - Font
+  - Dark Mode
+  - High Contrast
+- View: 
+  - Tips & information
+  - Statistics about cataloged articles and ensembles
+  - Welcome page (onboarding screen) 
+  - App version numbers
+- Links to:
+  - Video demo
+  - Privacy information
+  - Developer information
+  - Source code
+  - Merlinsbag on Google Play Store for rating & reviewing
+  - Eccohedra on Google Play Store (advertisement)
+- Data Management:
+  - Clear cache
+  - Delete all data
+<p float="left">
+  <img src="https://raw.githubusercontent.com/Lucodivo/RepoSampleImages/master/Merlinsbag/Merlinsbag_snapshot_settings.png" alt="Settings" width="200"/>
+</p>
+
+### Accessibility
+- Landscape view supported in entire app with unique layout configurations
+- Great efforts made to ensure UI elements contain content descriptions for screen readers  
+
+🐛 [If you experience any problems accessibility, please create an issue and it will quickly become a priority.](https://github.com/Lucodivo/Merlinsbag/issues/new) 🐛
+
 ## Codebase
 
 ### Terminology
 
-- "Noop" has no meaning and is a simple prefix for application specific implementations.
+- "Noop" is a simple prefix for application specific implementations of over general Android library classes and functions
   - Ex: NoopApplication, NoopIcons, NoopTheme, NoopDatabase
 
 ### Android Architecture
