@@ -1,5 +1,12 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
@@ -407,6 +415,20 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
   )
 }
 
+fun LazyListScope.SettingsScreenAnimatedRow(
+  visible: Boolean,
+  content: @Composable AnimatedVisibilityScope.() -> Unit,
+){
+  item {
+    AnimatedVisibility(
+      visible = visible,
+      enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }),
+      exit = slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }),
+      content = content,
+    )
+  }
+}
+
 @Composable
 fun SettingsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
@@ -447,6 +469,16 @@ fun SettingsScreen(
     onDismissDeleteAllDataAlertDialog: () -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
+  val animationFloat = remember { Animatable(initialValue = 0.0f) }
+  LaunchedEffect(Unit) {
+    animationFloat.animateTo(
+      targetValue = 2.0f,
+      animationSpec = TweenSpec(
+        durationMillis = 600,
+        easing = LinearEasing,
+      )
+    )
+  }
   Row {
     LazyColumn(
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -455,7 +487,7 @@ fun SettingsScreen(
     ) {
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding())) }
       item { SettingsTitle(stringResource(R.string.appearance)) }
-      item {
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.1f) {
         ColorPaletteRow(
           selectedColorPalette = colorPalette,
           expandedMenu = expandColorPaletteDropdownMenu,
@@ -464,7 +496,7 @@ fun SettingsScreen(
           onDismiss = onDismissColorPalette,
         )
       }
-      item {
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.2f) {
         TypographyRow(
           selectedTypography = typography,
           expandedMenu = expandTypographyDropdownMenu,
@@ -473,7 +505,7 @@ fun SettingsScreen(
           onDismiss = onDismissTypography,
         )
       }
-      item {
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.3f) {
         DarkModeRow(
           selectedDarkMode = darkMode,
           expandedMenu = expandDarkModeDropdownMenu,
@@ -482,7 +514,7 @@ fun SettingsScreen(
           onDismiss = onDismissDarkMode,
         )
       }
-      item {
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.4f) {
         val systemDynamic = colorPalette == ColorPalette.SYSTEM_DYNAMIC
         HighContrastRow(
           enabled = !systemDynamic, // System dynamic color schemes do not currently support high contrast
@@ -495,24 +527,24 @@ fun SettingsScreen(
       }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.info)) }
-      item { DemoVideoRow(onClickDemoVideo) }
-      item { TipsAndInfoRow(onClickTipsAndInfoPage) }
-      item { WelcomePageRow(onClickWelcomePage)}
-      item { StatisticsRow(onClickStatistics) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.5f){ DemoVideoRow(onClickDemoVideo) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.6f){ TipsAndInfoRow(onClickTipsAndInfoPage) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.7f){ WelcomePageRow(onClickWelcomePage)}
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.8f){ StatisticsRow(onClickStatistics) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.data)) }
-      item { PrivacyInfoRow(onClickPrivacyInfo) }
-      item { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
-      item { DeleteAllDataRow(onClickDeleteAllData) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.9f){ PrivacyInfoRow(onClickPrivacyInfo) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.0f){ ClearCacheRow(clearCacheEnabled, onClickClearCache) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.1f){ DeleteAllDataRow(onClickDeleteAllData) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.about)) }
-      item { DeveloperRow(onClickDeveloper) }
-      item { SourceRow(onClickSource) }
-      item { VersionRow() }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.2f){ DeveloperRow(onClickDeveloper) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.3f){ SourceRow(onClickSource) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.4f){ VersionRow() }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
-      item { SettingsTitle(stringResource(R.string.etc)) }
-      item { RateAndReviewRow(onClickRateAndReview) }
-      item { EccohedraRow(onClickEccohedra) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.5f){ SettingsTitle(stringResource(R.string.etc)) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.6f){ RateAndReviewRow(onClickRateAndReview) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.7f){ EccohedraRow(onClickEccohedra) }
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + sectionSpacerHeight)) }
     }
   }
