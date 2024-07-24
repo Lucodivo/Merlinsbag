@@ -26,7 +26,7 @@ object NoopColorSchemes {
       highContrast: HighContrast,
   ): ColorScheme {
     val context = LocalContext.current
-    // TODO: Samsung's One UI seems to not respect this whatsoever. Always a shade of blue...
+    // Note: Samsung's One UI seems to not respect this whatsoever. Always a shade of blue...
     return if(colorPalette == ColorPalette.SYSTEM_DYNAMIC && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       if(darkMode) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     } else {

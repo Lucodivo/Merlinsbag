@@ -2,7 +2,6 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import android.net.Uri
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -32,11 +31,8 @@ class ArticlesViewModel @Inject constructor(
   var editMode by mutableStateOf(ArticlesScreenEditMode.DISABLED)
   val onBackEnabled get() = editMode != ArticlesScreenEditMode.DISABLED
 
-  // TODO: No mutableStateSetOf ??
-  val _selectedArticleIndices = mutableStateMapOf<Int, Unit>()
-  val selectedArticleIndices = _selectedArticleIndices.keys
+  val selectedArticleIndices = mutableStateSetOf<Int>()
 
-  var finish by mutableStateOf(Event<Unit>(null))
   var navigateToArticleDetail by mutableStateOf(Event<Int>(null))
   var navigateToCamera by mutableStateOf(Event<Unit>(null))
   var navigateToSettings by mutableStateOf(Event<Unit>(null))
@@ -53,10 +49,10 @@ class ArticlesViewModel @Inject constructor(
 
   fun onClickArticle(index: Int){
     if(editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES) {
-      if(_selectedArticleIndices.contains(index)) {
-        _selectedArticleIndices.remove(index)
-        if(_selectedArticleIndices.isEmpty()) editMode = ArticlesScreenEditMode.ENABLED_GENERAL
-      } else _selectedArticleIndices[index] = Unit
+      if(selectedArticleIndices.contains(index)) {
+        selectedArticleIndices.remove(index)
+        if(selectedArticleIndices.isEmpty()) editMode = ArticlesScreenEditMode.ENABLED_GENERAL
+      } else selectedArticleIndices.add(index)
     } else {
       navigateToArticleDetail = Event(index)
     }
@@ -65,16 +61,16 @@ class ArticlesViewModel @Inject constructor(
   fun onLongPressArticle(index: Int) {
     if(editMode != ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES) {
       editMode = ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES
-      _selectedArticleIndices.clear()
+      selectedArticleIndices.clear()
     }
-    if(_selectedArticleIndices.contains(index)) {
-      _selectedArticleIndices.remove(index)
-      if(_selectedArticleIndices.isEmpty()) editMode = ArticlesScreenEditMode.ENABLED_GENERAL
-    } else _selectedArticleIndices[index] = Unit
+    if(selectedArticleIndices.contains(index)) {
+      selectedArticleIndices.remove(index)
+      if(selectedArticleIndices.isEmpty()) editMode = ArticlesScreenEditMode.ENABLED_GENERAL
+    } else selectedArticleIndices.add(index)
   }
 
   fun onClickClearSelection() {
-    _selectedArticleIndices.clear()
+    selectedArticleIndices.clear()
     editMode = ArticlesScreenEditMode.ENABLED_GENERAL
   }
   fun onClickSettings(){ navigateToSettings = Event(Unit) }
@@ -87,7 +83,7 @@ class ArticlesViewModel @Inject constructor(
   fun onClickEdit(){ editMode = ArticlesScreenEditMode.ENABLED_GENERAL }
   fun onClickMinimizeButtonControl(){
     editMode = ArticlesScreenEditMode.DISABLED
-    if(_selectedArticleIndices.isNotEmpty()) _selectedArticleIndices.clear()
+    if(selectedArticleIndices.isNotEmpty()) selectedArticleIndices.clear()
   }
 
   fun onClickDelete(){ showDeleteArticlesAlert = true  }
@@ -95,8 +91,8 @@ class ArticlesViewModel @Inject constructor(
   fun onConfirmDeleteArticlesAlert() {
     showDeleteArticlesAlert = false
     editMode = ArticlesScreenEditMode.ENABLED_GENERAL
-    val articleIds = _selectedArticleIndices.keys.map { lazyArticleImagesCache.getArticleId(it) }
-    _selectedArticleIndices.clear()
+    val articleIds = selectedArticleIndices.map { lazyArticleImagesCache.getArticleId(it) }
+    selectedArticleIndices.clear()
     viewModelScope.launch(Dispatchers.IO) { articleRepository.deleteArticles(articleIds) }
   }
 

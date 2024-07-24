@@ -41,7 +41,6 @@ class ArticleRepositoryTests {
     @Throws(IOException::class)
     fun closeDb() { database.close() }
 
-    // TODO: Fix Test
     @Test
     @Throws(Exception::class)
     fun insertArticle() {

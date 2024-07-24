@@ -43,8 +43,6 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,7 +79,6 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.component.shimmerBrush
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
-import com.inasweaterpoorlyknit.core.ui.isComposePreview
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedPlaceholderDrawables
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
@@ -91,8 +88,6 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.topDrawables
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SaveEnsembleData
 import kotlinx.serialization.Serializable
 
 private val thumbnailsPadding = 10.dp
@@ -149,6 +144,10 @@ fun EnsemblesRoute(
     onClickDeleteSelected = ensemblesViewModel::onClickDeleteSelectedEnsembles,
     onDeleteEnsemblesAlertDialogDismiss = ensemblesViewModel::onDismissDeleteEnsemblesAlertDialog,
     onDeleteEnsemblesAlertDialogPositive = ensemblesViewModel::onDeleteEnsemblesAlertDialogPositive,
+    onClickArticleNewEnsemble = ensemblesViewModel::onClickNewEnsembleArticle,
+    newEnsembleTitle = ensemblesViewModel.newEnsembleTitle,
+    onUpdateNewEnsembleTitle = ensemblesViewModel::onUpdateNewEnsembleTitle,
+    newEnsembleSelectedArticleIndices = ensemblesViewModel.selectedNewEnsembleArticles,
   )
 }
 
@@ -170,7 +169,11 @@ fun EnsemblesScreen(
     onLongPressEnsemble: (index: Int) -> Unit,
     onClickAddEnsemble: () -> Unit,
     onClickMinimizeButtonControl: () -> Unit,
-    onClickSaveEnsemble: (SaveEnsembleData) -> Unit,
+    newEnsembleTitle: String,
+    onClickSaveEnsemble: () -> Unit,
+    onClickArticleNewEnsemble: (index: Int) -> Unit,
+    onUpdateNewEnsembleTitle: (newTitle: String) -> Unit,
+    newEnsembleSelectedArticleIndices: Set<Int>,
     ensembleTitleError: Int?,
     onDeleteEnsemblesAlertDialogPositive: () -> Unit,
     onCloseAddEnsembleDialog: () -> Unit,
@@ -179,95 +182,51 @@ fun EnsemblesScreen(
     onClickDeleteSelected: () -> Unit,
     onDeleteEnsemblesAlertDialogDismiss: () -> Unit,
 ) {
-  val sidePadding = 8.dp
-  val bottomPadding = 4.dp
   val layoutDir = LocalLayoutDirection.current
   Surface(
     modifier = Modifier
         .fillMaxSize()
         .padding(
+          top = systemBarPaddingValues.calculateTopPadding(),
           start = systemBarPaddingValues.calculateStartPadding(layoutDir),
           end = systemBarPaddingValues.calculateEndPadding(layoutDir)
         ),
   ) {
-    val placeholderVisibilityAnimatedFloat by animateFloatAsState(
-      targetValue = if(showPlaceholder) 1.0f else 0.0f,
-      animationSpec = tween(durationMillis = 1000),
-      label = "placeholder ensemble grid visibility"
-    )
-    Column {
-      Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding()))
-      if(placeholderVisibilityAnimatedFloat == 0.0f) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          modifier = Modifier.padding(bottom = bottomPadding, start = sidePadding, end = sidePadding)
-        ){
-          if(windowSizeClass.compactWidth()){
-            IconButton(onClick = onClickSettings) {
-              Icon(
-                imageVector = NoopIcons.Settings,
-                contentDescription = stringResource(R.string.cog),
-              )
-            }
-          }
-          NoopSearchBox(
-            query = searchQuery,
-            placeholder = stringResource(R.string.search),
-            onQueryChange = onUpdateSearchQuery,
-            onClearQuery = onClearSearchQuery,
-            modifier = Modifier.fillMaxWidth()
-          )
-        }
-        EnsemblesOverlappingImageRowColumn(
-          windowSizeClass,
-          selectedEnsembleIndices,
-          selectable = editMode,
-          lazyEnsembleThumbnails,
-          onClickEnsemble,
-          onLongPress = onLongPressEnsemble,
-          modifier = Modifier.padding(horizontal = sidePadding)
-        )
-      } else {
-        Box(
-          contentAlignment = Alignment.Center,
-          modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
-        ) {
-          EnsemblesOverlappingPlaceholderRowColumn(windowSizeClass = windowSizeClass)
-          if(lazyEnsembleThumbnails.isEmpty()){
-            val addEnsembleButtonAnimatedAlphaFloat by animateFloatAsState(
-              targetValue = if(showAddEnsembleDialog) 0.0f else 1.0f,
-              label = "add article alpha"
-            )
-            val buttonAlpha = 0.9f
-            if(addEnsembleButtonAnimatedAlphaFloat > 0.0f){
-              Button(
-                onClick = onClickAddEnsemble,
-                modifier = Modifier.alpha(buttonAlpha * addEnsembleButtonAnimatedAlphaFloat)
-              ){
-                Text(text = stringResource(R.string.add_ensemble))
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  NoopBottomEndButtonContainer {
-    EditEnsemblesExpandingActionButton(
-      expanded = editMode,
+    EnsembleScreensMainContent(
+      showPlaceholder = showPlaceholder,
+      windowSizeClass = windowSizeClass,
+      searchQuery = searchQuery,
+      onUpdateSearchQuery = onUpdateSearchQuery,
+      onClickSettings = onClickSettings,
+      onClearSearchQuery = onClearSearchQuery,
+      selectedEnsembleIndices = selectedEnsembleIndices,
+      editMode = editMode,
+      lazyEnsembleThumbnails = lazyEnsembleThumbnails,
+      onClickEnsemble = onClickEnsemble,
+      onLongPressEnsemble = onLongPressEnsemble,
+      showAddEnsembleDialog = showAddEnsembleDialog,
       onClickAddEnsemble = onClickAddEnsemble,
-      onClickMinimizeButtonControl = onClickMinimizeButtonControl,
-      onClickDeleteSelected = onClickDeleteSelected,
     )
+    NoopBottomEndButtonContainer {
+      EditEnsemblesExpandingActionButton(
+        expanded = editMode,
+        onClickAddEnsemble = onClickAddEnsemble,
+        onClickMinimizeButtonControl = onClickMinimizeButtonControl,
+        onClickDeleteSelected = onClickDeleteSelected,
+      )
+    }
   }
 
   AddEnsembleDialog(
     visible = showAddEnsembleDialog,
+    userInputTitle = newEnsembleTitle,
     articleThumbnails = addEnsembleDialogArticles,
     onClickSave = onClickSaveEnsemble,
     onClickClose = onCloseAddEnsembleDialog,
     ensembleTitleError = ensembleTitleError,
+    onTitleChange = onUpdateNewEnsembleTitle,
+    onClickArticle = onClickArticleNewEnsemble,
+    selectedArticleIndices = newEnsembleSelectedArticleIndices,
   )
 
   DeleteEnsemblesAlertDialog(
@@ -275,6 +234,99 @@ fun EnsemblesScreen(
     onDismiss = onDeleteEnsemblesAlertDialogDismiss,
     onConfirm = onDeleteEnsemblesAlertDialogPositive
   )
+}
+
+@Composable fun EnsembleScreensMainContent(
+    showPlaceholder: Boolean,
+    windowSizeClass: WindowSizeClass,
+    searchQuery: String,
+    onUpdateSearchQuery: (String) -> Unit,
+    onClickSettings: () -> Unit,
+    onClearSearchQuery: () -> Unit,
+    selectedEnsembleIndices: Set<Int>,
+    editMode: Boolean,
+    lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
+    onClickEnsemble: (index: Int) -> Unit,
+    onLongPressEnsemble: (index: Int) -> Unit,
+    showAddEnsembleDialog: Boolean,
+    onClickAddEnsemble: () -> Unit,
+) {
+  val sidePadding = 8.dp
+  val bottomPadding = 4.dp
+  val placeholderVisibilityAnimatedFloat by animateFloatAsState(
+    targetValue = if(showPlaceholder) 1.0f else 0.0f,
+    animationSpec = tween(durationMillis = 1000),
+    label = "placeholder ensemble grid visibility"
+  )
+  Column(modifier = Modifier.padding(horizontal = sidePadding)) {
+    if(placeholderVisibilityAnimatedFloat == 0.0f) {
+      EnsemblesScreenSearchBox(
+        windowSizeClass = windowSizeClass,
+        onClickSettings = onClickSettings,
+        searchQuery = searchQuery,
+        onUpdateSearchQuery = onUpdateSearchQuery,
+        onClearSearchQuery = onClearSearchQuery
+      )
+      Spacer(modifier = Modifier.height(bottomPadding).fillMaxWidth())
+      EnsemblesOverlappingImageRowColumn(
+        windowSizeClass,
+        selectedEnsembleIndices,
+        selectable = editMode,
+        lazyEnsembleThumbnails,
+        onClickEnsemble,
+        onLongPress = onLongPressEnsemble,
+      )
+    } else {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.alpha(placeholderVisibilityAnimatedFloat)
+      ) {
+        EnsemblesOverlappingPlaceholderRowColumn(windowSizeClass = windowSizeClass)
+        if(lazyEnsembleThumbnails.isEmpty()){
+          val addEnsembleButtonAnimatedAlphaFloat by animateFloatAsState(
+            targetValue = if(showAddEnsembleDialog) 0.0f else 1.0f,
+            label = "add article alpha"
+          )
+          val buttonAlpha = 0.9f
+          if(addEnsembleButtonAnimatedAlphaFloat > 0.0f){
+            Button(
+              onClick = onClickAddEnsemble,
+              modifier = Modifier.alpha(buttonAlpha * addEnsembleButtonAnimatedAlphaFloat)
+            ){
+              Text(text = stringResource(R.string.add_ensemble))
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun EnsemblesScreenSearchBox(
+    windowSizeClass: WindowSizeClass,
+    onClickSettings: () -> Unit,
+    searchQuery: String,
+    onUpdateSearchQuery: (String) -> Unit,
+    onClearSearchQuery: () -> Unit,
+){
+  Row(verticalAlignment = Alignment.CenterVertically){
+    if(windowSizeClass.compactWidth()){
+      IconButton(onClick = onClickSettings) {
+        Icon(
+          imageVector = NoopIcons.Settings,
+          contentDescription = stringResource(R.string.cog),
+        )
+      }
+    }
+    NoopSearchBox(
+      query = searchQuery,
+      placeholder = stringResource(R.string.search),
+      onQueryChange = onUpdateSearchQuery,
+      onClearQuery = onClearSearchQuery,
+      modifier = Modifier.fillMaxWidth()
+    )
+  }
 }
 
 @Composable
@@ -298,38 +350,28 @@ private fun EditEnsemblesExpandingActionButton(
 @Composable
 private fun AddEnsembleDialog(
     visible: Boolean,
+    userInputTitle: String,
     articleThumbnails: LazyUriStrings,
-    onClickSave: (SaveEnsembleData) -> Unit,
+    selectedArticleIndices: Set<Int>,
+    onTitleChange: (String) -> Unit,
+    onClickArticle: (index: Int) -> Unit,
+    onClickSave: () -> Unit,
     onClickClose: () -> Unit,
     ensembleTitleError: Int?,
 ) {
-  BackHandler(enabled = visible) { onClickClose() }
-  val (userInputTitle, setUserInputTitle) = remember { mutableStateOf("") }
-  val selectedArticleIndices =
-      if(isComposePreview) remember { mutableStateMapOf(Pair(0,Unit), Pair(1,Unit)) }
-      else remember { mutableStateMapOf() }
   NoopBottomSheetDialog(
     visible = visible,
     title = stringResource(id = R.string.add_ensemble),
     positiveButtonText = stringResource(id = R.string.save),
     positiveButtonEnabled = selectedArticleIndices.isNotEmpty() || userInputTitle.isNotEmpty(),
     onClose = onClickClose,
-    onPositive = {
-      onClickSave(
-        SaveEnsembleData(
-          title = userInputTitle,
-          articleIndices = selectedArticleIndices.keys.toList(),
-        )
-      )
-      selectedArticleIndices.clear()
-      setUserInputTitle("")
-    },
+    onPositive = onClickSave,
   ) {
     Column {
       OutlinedTextField(
         value = userInputTitle,
         placeholder = { Text(text = stringResource(id = R.string.goth_2_boss)) },
-        onValueChange = { if(it.length <= MAX_ENSEMBLE_TITLE_LENGTH) setUserInputTitle(it) },
+        onValueChange = onTitleChange,
         label = { Text(text = stringResource(id = R.string.ensemble_title)) },
         singleLine = true,
       )
@@ -355,23 +397,14 @@ private fun AddEnsembleDialog(
         items(count = articleThumbnails.size) { articleIndex ->
           val articleThumbnailUriString = articleThumbnails.getUriStrings(articleIndex)
           Box(contentAlignment = Alignment.Center) {
-            val (selected, setSelected) = remember { mutableStateOf(selectedArticleIndices.contains(articleIndex)) }
             SelectableNoopImage(
               selectable = true,
-              selected = selected,
+              selected = selectedArticleIndices.contains(articleIndex),
               uriString = articleThumbnailUriString.first(), // TODO: Animate between thumbnails?
               contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
               modifier = Modifier
                   .padding(padding)
-                  .clickable {
-                    if(selected) {
-                      selectedArticleIndices.remove(articleIndex)
-                      setSelected(false)
-                    } else {
-                      selectedArticleIndices[articleIndex] = Unit
-                      setSelected(true)
-                    }
-                  }
+                  .clickable{ onClickArticle(articleIndex) }
             )
           }
         }
@@ -420,17 +453,20 @@ fun EnsembleOverlappingImageRow(
 ) {
   val ensembleOverlappingImagesDescription = stringResource(R.string.ensemble_overlapping)
   RowCard(modifier = modifier.semantics { contentDescription = ensembleOverlappingImagesDescription }) {
-    Box {
+    Box(modifier = Modifier.fillMaxWidth()) {
       Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
         modifier = Modifier
             .heightIn(min = minRowHeight)
-            .padding(start = rowStartPadding, end = rowEndPadding, top = rowVerticalPadding, bottom = rowVerticalPadding),
+            .padding(
+              start = rowStartPadding,
+              end = rowEndPadding,
+              top = rowVerticalPadding,
+              bottom = rowVerticalPadding
+            ),
       ) {
-        HorizontalOverlappingLayout(
-          overlapPercentage = overlapPercentage,
-        ) {
+        HorizontalOverlappingLayout(overlapPercentage = overlapPercentage) {
           repeat(lazyUriStrings.size) { index ->
             NoopImage(
               uriString = lazyUriStrings.getUriStrings(index).first(), // TODO: Animate between thumbnails?
@@ -464,7 +500,6 @@ fun EnsemblesOverlappingImageRowColumn(
     lazyTitleAndUriStrings: List<Pair<String, LazyUriStrings>>,
     onClick: (index: Int) -> Unit,
     onLongPress: (index: Int) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
   val lazyGridState = rememberLazyStaggeredGridState()
   // TODO: RowSize could be more versatile to accommodate better for tablet size screens
@@ -474,7 +509,7 @@ fun EnsemblesOverlappingImageRowColumn(
     columns = StaggeredGridCells.Fixed(rowSize),
     horizontalArrangement = Arrangement.spacedBy(2.dp),
     verticalItemSpacing = 2.dp,
-    modifier = modifier.fillMaxSize(),
+    modifier = Modifier.fillMaxSize(),
     state = lazyGridState,
   ){
     items(lazyTitleAndUriStrings.size) { index ->
@@ -547,10 +582,7 @@ private val drawablePlaceholders: List<Pair<Int, List<Int>>> =
     }
 
 @Composable
-fun EnsemblesOverlappingPlaceholderRowColumn(
-    windowSizeClass: WindowSizeClass,
-    modifier: Modifier = Modifier,
-) {
+fun EnsemblesOverlappingPlaceholderRowColumn(windowSizeClass: WindowSizeClass) {
   val maxPlaceholderRows = 20
   val rowSize = if(windowSizeClass.compactWidth()) 1 else 2
   val widthPercent = 1.0 / rowSize
@@ -561,7 +593,7 @@ fun EnsemblesOverlappingPlaceholderRowColumn(
       columns = StaggeredGridCells.Fixed(rowSize),
       horizontalArrangement = Arrangement.spacedBy(2.dp),
       verticalItemSpacing = 2.dp,
-      modifier = modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize(),
       state = lazyGridState,
     ){
       items(maxPlaceholderRows) { index ->
@@ -628,12 +660,15 @@ fun PreviewUtilEnsembleScreen(
     showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,
     showDeleteEnsembleAlertDialog = false,
-    selectedEnsembleIndices = emptySet(),
+    selectedEnsembleIndices = setOf(1, 3),
     showPlaceholder = showPlaceholder,
     addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
     searchQuery = "Goth 2 Boss",
+    newEnsembleSelectedArticleIndices = setOf(0, 2),
+    newEnsembleTitle = "Goth 2 Boss",
     onClickSettings = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, onClickAddEnsemble = {}, onClickMinimizeButtonControl = {}, onClickSaveEnsemble = {}, ensembleTitleError = null,
     onDeleteEnsemblesAlertDialogPositive = {}, onCloseAddEnsembleDialog = {}, onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onDeleteEnsemblesAlertDialogDismiss = {},
+    onUpdateNewEnsembleTitle = {}, onClickArticleNewEnsemble = {},
   )
 }
 
@@ -646,7 +681,9 @@ fun PreviewUtilAddEnsembleDialog(
     visible = true,
     articleThumbnails = thumbnails,
     ensembleTitleError = ensembleTitleError,
-    onClickSave = {}, onClickClose = {},
+    selectedArticleIndices = setOf(0, 1),
+    userInputTitle = "Goth 2 Boss",
+    onClickSave = {}, onClickClose = {}, onClickArticle = {}, onTitleChange = {}
   )
 }
 

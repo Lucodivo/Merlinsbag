@@ -22,11 +22,6 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.CameraViewModel
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class CameraRoute(
-  val articleId: String?,
-)
-
 val additionalCameraPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 private val REQUIRED_CAMERA_PERMISSIONS =
     if(additionalCameraPermissionsRequired) {
@@ -34,6 +29,11 @@ private val REQUIRED_CAMERA_PERMISSIONS =
     } else {
       arrayOf(permission.CAMERA)
     }
+
+@Serializable
+data class CameraRoute(
+  val articleId: String?,
+)
 
 fun NavController.navigateToCamera(
     articleId: String? = null,

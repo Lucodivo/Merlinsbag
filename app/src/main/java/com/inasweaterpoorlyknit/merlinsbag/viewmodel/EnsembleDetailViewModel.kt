@@ -1,7 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -59,12 +58,8 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   var showAddArticlesDialog by mutableStateOf(false)
   val onBackEnabled get() = editMode != Disabled
 
-  // TODO: No mutableStateSetOf ??
-  val _selectedEditArticleIndices = mutableStateMapOf<Int, Unit>()
-  val _selectedAddArticleIndices = mutableStateMapOf<Int, Unit>()
-
-  val selectedEditArticleIndices get() = _selectedEditArticleIndices.keys
-  val selectedAddArticleIndices get() = _selectedAddArticleIndices.keys
+  val selectedEditArticleIndices = mutableStateSetOf<Int>()
+  val selectedAddArticleIndices = mutableStateSetOf<Int>()
 
   var titleChangeError by mutableStateOf(Event<Int>(null))
   var navigateToArticleDetail by mutableStateOf(Event<Pair<Int, String>>(null))
@@ -106,31 +101,31 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   fun onClickEdit() { editMode = EnabledGeneral }
   fun onClickMinimizeButtonControl() {
     editMode = Disabled
-    if(_selectedEditArticleIndices.isNotEmpty()) _selectedEditArticleIndices.clear()
+    if(selectedEditArticleIndices.isNotEmpty()) selectedEditArticleIndices.clear()
   }
 
   fun onClickArticle(index: Int) {
     if(editMode == EnabledSelectedArticles) {
-      if(_selectedEditArticleIndices.containsKey(index)) {
-        _selectedEditArticleIndices.remove(index)
-        if(_selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
-      } else _selectedEditArticleIndices[index] = Unit
+      if(selectedEditArticleIndices.contains(index)) {
+        selectedEditArticleIndices.remove(index)
+        if(selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
+      } else selectedEditArticleIndices.add(index)
     } else {
       navigateToArticleDetail = Event(Pair(index, ensembleId))
     }
   }
 
   fun onClickArticleAddDialog(index: Int) {
-    if(_selectedAddArticleIndices.containsKey(index)) {
-      _selectedAddArticleIndices.remove(index)
-    } else _selectedAddArticleIndices[index] = Unit
+    if(selectedAddArticleIndices.contains(index)) {
+      selectedAddArticleIndices.remove(index)
+    } else selectedAddArticleIndices.add(index)
   }
 
-  fun onClickCancelArticleSelection() { _selectedEditArticleIndices.clear() }
+  fun onClickCancelArticleSelection() { selectedEditArticleIndices.clear() }
 
   fun onClickRemoveArticles() {
-    val articleIds = _selectedEditArticleIndices.keys.map { ensembleArticles.getArticleId(it) }
-    _selectedEditArticleIndices.clear()
+    val articleIds = selectedEditArticleIndices.map { ensembleArticles.getArticleId(it) }
+    selectedEditArticleIndices.clear()
     editMode = EnabledGeneral
     viewModelScope.launch(Dispatchers.IO) {
       ensemblesRepository.deleteArticlesFromEnsemble(
@@ -142,10 +137,10 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   fun onLongPressArticle(index: Int){
     if(editMode != EnabledSelectedArticles) editMode = EnabledSelectedArticles
-    if(_selectedEditArticleIndices.containsKey(index)) {
-      _selectedEditArticleIndices.remove(index)
-      if(_selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
-    } else _selectedEditArticleIndices[index] = Unit
+    if(selectedEditArticleIndices.contains(index)) {
+      selectedEditArticleIndices.remove(index)
+      if(selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
+    } else selectedEditArticleIndices.add(index)
   }
 
   fun onTitleChanged(newTitle: String) {
@@ -173,7 +168,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   fun onClickAddArticles() { showAddArticlesDialog = true }
   fun onDismissAddArticlesDialog() {
     showAddArticlesDialog = false
-    if(_selectedAddArticleIndices.isNotEmpty()) _selectedAddArticleIndices.clear()
+    if(selectedAddArticleIndices.isNotEmpty()) selectedAddArticleIndices.clear()
   }
 
   fun onClickDeleteEnsemble() { showDeleteEnsembleDialog = true }
@@ -181,10 +176,10 @@ class EnsembleDetailViewModel @AssistedInject constructor(
 
   fun onClickConfirmAddArticles() {
     showAddArticlesDialog = false
-    if(_selectedAddArticleIndices.isNotEmpty())
+    if(selectedAddArticleIndices.isNotEmpty())
     {
-      val articleIds = _selectedAddArticleIndices.keys.map { addArticles.getArticleId(it) }
-      _selectedAddArticleIndices.clear()
+      val articleIds = selectedAddArticleIndices.map { addArticles.getArticleId(it) }
+      selectedAddArticleIndices.clear()
       viewModelScope.launch(Dispatchers.IO) {
         ensemblesRepository.addArticlesToEnsemble(ensemble.id, articleIds)
       }

@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.core.ui.component
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.slideInVertically
@@ -59,6 +60,7 @@ fun NoopBottomSheetDialog(
     positiveButtonText: String = "",
     content: @Composable ColumnScope.() -> Unit,
 ) {
+  BackHandler(enabled = visible) { onClose() }
   val padding = 16.dp
   val scrimAlphaAnimatedScale by animateFloatAsState(
     targetValue = if(visible) 1.0f else 0.0f,

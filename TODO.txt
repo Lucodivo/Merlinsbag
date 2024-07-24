@@ -96,7 +96,6 @@ Performance:
             - Drawbacks:
                 - less flexibility for changing the naming scheme of files in the future
                 - there is a tradeoff of having to reconstruct a filename string at runtime which is bottlenecked by whatever the performance of SimpleDateFormat().format() is
-    - Implement mutableStateSetOf. Having to use mutableStateMapOf is just insane.
 
 // Unknowns
 Aesthetic Questions:

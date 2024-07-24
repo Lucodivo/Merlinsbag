@@ -23,6 +23,6 @@ object XxxColorSchemePalette : ColorPaletteScheme {
   override val nameStrRes: Int = R.string.sky
 
 %s/val/override val/gg
-  // TODO: paste all values in Colors.kt here
+  // NOTE: paste all values in Colors.kt here
 }
 ``` ColorSchemePalette Skeleton END

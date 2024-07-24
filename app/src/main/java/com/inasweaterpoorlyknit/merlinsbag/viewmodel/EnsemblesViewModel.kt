@@ -3,7 +3,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -32,11 +31,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class SaveEnsembleData(
-    val title: String,
-    val articleIndices: List<Int>,
-)
-
 @HiltViewModel
 class EnsemblesViewModel @Inject constructor(
     articleRepository: ArticleRepository,
@@ -57,11 +51,11 @@ class EnsemblesViewModel @Inject constructor(
   var editMode by mutableStateOf(false)
   var showDeleteEnsembleAlertDialog by mutableStateOf(false)
   var searchQuery by mutableStateOf("")
+  var newEnsembleTitle by mutableStateOf("")
+  var selectedNewEnsembleArticles = mutableStateSetOf<Int>()
   val onBackEnabled get() = editMode
 
-  // TODO: No mutableStateSetOf ??
-  val _selectedEnsembleIndices = mutableStateMapOf<Int, Unit>()
-  val selectedEnsembleIndices get() = _selectedEnsembleIndices.keys // TODO: Ensure only used in UI
+  val selectedEnsembleIndices = mutableStateSetOf<Int>()
 
   var navigateToEnsembleDetail by mutableStateOf(Event<String>(null))
 
@@ -101,7 +95,7 @@ class EnsemblesViewModel @Inject constructor(
   fun onClickAddEnsemble() { showAddEnsembleDialog = true }
   fun onClickMinimizeButtonControl() {
     editMode = false
-    if(_selectedEnsembleIndices.isNotEmpty()) _selectedEnsembleIndices.clear()
+    if(selectedEnsembleIndices.isNotEmpty()) selectedEnsembleIndices.clear()
   }
   fun onSearchQueryClear() { onSearchQueryUpdate("") }
   fun onDismissDeleteEnsemblesAlertDialog() { showDeleteEnsembleAlertDialog = false }
@@ -110,7 +104,7 @@ class EnsemblesViewModel @Inject constructor(
   fun onLongPressEnsemble(index: Int){
     if(!editMode) {
       editMode = true
-      _selectedEnsembleIndices.clear()
+      selectedEnsembleIndices.clear()
     }
     toggleSelectedEnsemble(index)
   }
@@ -119,14 +113,26 @@ class EnsemblesViewModel @Inject constructor(
     if(editMode) toggleSelectedEnsemble(index)
     else navigateToEnsembleDetail = Event(ensembles[index].ensemble.id)
 
-  fun onClickSaveAddEnsembleDialog(saveEnsembleData: SaveEnsembleData) {
+  fun onUpdateNewEnsembleTitle(newTitle: String){
+    if(newTitle.length <= MAX_ENSEMBLE_TITLE_LENGTH) newEnsembleTitle = newTitle
+  }
+
+  fun onClickNewEnsembleArticle(articleIndex: Int) =
+    if(selectedNewEnsembleArticles.contains(articleIndex)) {
+      selectedNewEnsembleArticles.remove(articleIndex)
+    } else selectedNewEnsembleArticles.add(articleIndex)
+
+  fun onClickSaveAddEnsembleDialog() {
+    val articleIds = selectedNewEnsembleArticles.map { articleImages.getArticleId(it) }
+    val title = newEnsembleTitle
+    newEnsembleTitle = ""
+    selectedNewEnsembleArticles.clear()
     viewModelScope.launch(Dispatchers.IO) {
-      val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(saveEnsembleData.title).first()
+      val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(title).first()
       if(ensembleTitleUnique){
-        val articleIds = saveEnsembleData.articleIndices.map { articleImages.getArticleId(it) }
         showAddEnsembleDialog = false
         ensemblesRepository.insertEnsemble(
-          saveEnsembleData.title,
+          title,
           articleIds,
         )
       } else ensembleTitleError = R.string.ensemble_with_title_already_exists
@@ -144,10 +150,8 @@ class EnsemblesViewModel @Inject constructor(
   fun onDeleteEnsemblesAlertDialogPositive() {
     showDeleteEnsembleAlertDialog = false
     editMode = false
-    val ensembleIds = ensembles.slice(_selectedEnsembleIndices.keys).map { it.ensemble.id }
-    viewModelScope.launch(Dispatchers.IO) {
-      ensemblesRepository.deleteEnsembles(ensembleIds)
-    }
+    val ensembleIds = selectedEnsembleIndices.map { ensembles[it].ensemble.id }
+    viewModelScope.launch(Dispatchers.IO) { ensemblesRepository.deleteEnsembles(ensembleIds) }
   }
 
   fun onClickDeleteSelectedEnsembles() {
@@ -155,8 +159,8 @@ class EnsemblesViewModel @Inject constructor(
   }
 
   private fun toggleSelectedEnsemble(index: Int){
-    if(_selectedEnsembleIndices.contains(index)) _selectedEnsembleIndices.remove(index)
-    else _selectedEnsembleIndices[index] = Unit
-    if(_selectedEnsembleIndices.isEmpty()) editMode = false
+    if(selectedEnsembleIndices.contains(index)) selectedEnsembleIndices.remove(index)
+    else selectedEnsembleIndices.add(index)
+    if(selectedEnsembleIndices.isEmpty()) editMode = false
   }
 }

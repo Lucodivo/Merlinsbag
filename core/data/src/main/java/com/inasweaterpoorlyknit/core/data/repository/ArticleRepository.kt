@@ -36,7 +36,7 @@ class ArticleRepository(
   private val articleDao: ArticleDao,
   private val ensembleDao: EnsembleDao,
 ) {
-  // TODO: Remove. Used in testing only.
+  // Used in testing only.
   fun insertArticle(fullImageUri: String, thumbnailImageUri: String) = articleDao.insertArticle(fullImageUri, thumbnailImageUri)
 
   private fun saveBitmaps(bitmap: Bitmap): ImageFilenames {

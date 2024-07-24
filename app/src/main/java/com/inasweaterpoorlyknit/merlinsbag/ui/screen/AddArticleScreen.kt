@@ -72,7 +72,6 @@ fun NavController.navigateToAddArticle(
     navOptions: NavOptions? = null,
 ) = navigate(AddArticleRoute(imageUriStringList = uriStringArray, articleId = articleId), navOptions)
 
-
 @Composable
 fun AddArticleRoute(
     imageUriStringList: List<String>,
