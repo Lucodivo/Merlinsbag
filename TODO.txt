@@ -18,6 +18,8 @@ Aesthetics:
 README.md:
     - Updated conventions
     - Updated screenshots
+Dependencies:
+    - Remove compose navigation safe args?
 Testing:
     - Viewmodels?
     - Expanded repository tests?

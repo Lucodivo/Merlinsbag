@@ -138,13 +138,26 @@ Jetpack Compose and Navigation with Compose. The important keywords to look for 
 
 - :app
   - Application, UI, ViewModels, Navigation
-  - Most likely candidate to contain code that has not yet found a better home.
+  - Most likely module to contain code that has yet to find a better home
 - :core:database
-  - Room Database, Entities, DAOs
+  - Room Persistence Library Database, Entities, DAOs
+- :core:datastore
+  - Proto DataStore .proto files, Serializers, DAOs
+- :core:data
+  - Repository abstraction layer isolating data sources from :app module
 - :core:common
   - Utility functions & classes used by multiple modules
-- :core:repository
-  - Repositories defining a ViewModel's access to the data
+- :core:ml
+  - ML Kit related files like SegmentedImage which uses Subject Segmentation
+- :core:model
+  - Classes & interfaces that abstract data passed between modules
+    - :app can indirectly communicate with :core:datastore without requiring it to become a dependency
+- :core:ui
+  - Reusable Compose UI components that are not tied to any particular screen
+    - On top of being convenient when creating new screens, it also serves as the foundation for the general design system 
+    of Merlinsbag.
+- :core:common
+  - Generic helper & utility classes or functions used in multiple modules
 
 ### Technology
 
