@@ -104,7 +104,7 @@ import kotlinx.serialization.Serializable
 const val thumbnailAndEnsembleHiddenPercent = 0.98f
 
 @Serializable
-data class ArticleDetailRoute(
+data class ArticleDetailRouteArgs(
   val articleIndex: Int,
   val ensembleId: String?,
 )
@@ -130,7 +130,7 @@ enum class ArticleDetailScreenAlertDialogMode {
 }
 
 fun NavController.navigateToArticleDetail(articleIndex: Int, ensembleId: String? = null, navOptions: NavOptions? = null) =
-  navigate(ArticleDetailRoute(articleIndex = articleIndex, ensembleId = ensembleId), navOptions)
+  navigate(ArticleDetailRouteArgs(articleIndex = articleIndex, ensembleId = ensembleId), navOptions)
 
 @Composable
 fun ArticleDetailRoute(

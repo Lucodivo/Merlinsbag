@@ -32,9 +32,9 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import kotlinx.serialization.Serializable
 
 @Serializable
-object TipsAndInfoRoute
+object TipsAndInfoRouteArgs
 
-fun NavController.navigateToTipsAndInfo(navOptions: NavOptions? = null) = navigate(TipsAndInfoRoute, navOptions)
+fun NavController.navigateToTipsAndInfo(navOptions: NavOptions? = null) = navigate(TipsAndInfoRouteArgs, navOptions)
 
 @Composable
 fun TipsAndInfoRoute(){

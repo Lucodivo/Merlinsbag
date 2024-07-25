@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesRouteArgs
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRouteArgs
 
 enum class NavUIDestinations(
     @StringRes val label: Int,
@@ -29,7 +29,7 @@ enum class NavUIDestinations(
         contentDescription = stringResource(R.string.simple_shapes),
       )
     },
-    route = ArticlesRoute
+    route = ArticlesRouteArgs
   ),
   ENSEMBLES(
     label = R.string.ensembles,
@@ -45,6 +45,6 @@ enum class NavUIDestinations(
         contentDescription = stringResource(R.string.hashtag),
       )
     },
-    route = EnsemblesRoute
+    route = EnsemblesRouteArgs
   ),
 }

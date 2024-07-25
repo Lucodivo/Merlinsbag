@@ -111,28 +111,35 @@ Merlinsbag is an Android application for cataloging the things in your life.
 
 ### Android Architecture
 
-Merlinsbag is a single activity, no fragment, Android application. Standard UI and navigation are all accomplished using
-Jetpack Compose and Navigation with Compose. The important keywords to look for to understand navigation within the application
- are: *NavHost*, *NavController*, *NavHostController*, *Route*, *navigateTo*, *navOptions*.
+Merlinsbag is a single activity, no fragment, Android application. All UI and navigation is accomplished using
+Jetpack Compose and Navigation with Compose. Important keywords to look for to understand navigation within the application
+ are: *NavHost*, *NavController*, *NavHostController*, *Route*, *RouteArgs*, *navigateTo-*, *navOptions*, *Screen*
 
-- NavHost
-  - A Composable function that acts as the interceptor to route navigation requests sent to the NavController
-  - Defines arguments for specific routes and pulls arguments out from bundles to pass to the next screen
-- NavController
-  - NavController extension functions created per screen to simplify the construction of Routes
-  - Used by Routes to request the navigation to some other screen
-- NavHostController *(Subclass of NavController, no special use cases in this application)*
-- Route
-  - A Composable function that acts as a wrapper around some Composable screen
-  - Acquires and maintains the NavController and ViewModel
-    - Rarely also maintains ActivityResultContracts
-  - As much state as possible is hoisted all the way up to the Route 
-    - Most importantly, this allows Screens can be easily verified using @Preview annotated Composable functions
-- navigateTo-
-  - Prefix to NavController extension functions for requesting the navigation to some specified Route represented by the suffix
-- NavOptions
-  - Used by navigateTo- extension functions to create fancier transitions between Routes.
-    - Includes: Animations, Popping the Backstack, restoring previous state
+- *Screen*
+  - Composable functions representing the actual UI implementation of the various app "screens" or "destinations"
+  - In general, state is hoisted out of a *Screen* and into it's associated *Route*
+    - All UI displayed is driven by a *Screen* function's arguments
+    - This allows any *Screen* to be easily verified using @Preview annotated Composable functions
+- *Route*
+  - Composable functions that serve as a wrapper around a specific *Screen*
+  - Acquire and maintain the navigation lambdas, ViewModels, and ActivityResultContracts
+  - Provides state supplied by ViewModels to *Screen*
+- *RouteArgs*
+  - Data classes that hold the necessary information to fulfilling a navigation request to a specified *Route*
+- *NavController*
+  - Used to request navigation destination changes or otherwise manage the navigation back stack
+    - Navigation requests are intercepted by the *NavHost*
+- *navigateTo-*
+  - Prefix of *NavController* extension functions that requesting the navigation to some specified *Route* represented by the suffix
+  - It is also used as a prefix for *Route* navigation lambda arguments which are just wrappers around the *NavController* extension functions mentioned above
+- *NavOptions*
+  - Used by *navigateTo-* extension functions to create specified transitions between *Routes*
+    - Includes: Screen transition animations, popping the navigation backstack, and saving or restoring previous state
+- *NavHost*
+  - A Composable function that acts as the interceptor to *Route* navigation requests via navigation request lambdas
+  - Provides all *Routes* with relevant navigation request lambdas (wrappers of *navigateTo-* extension functions)
+  - Supplies arguments from *RouteArgs* to their associated *Route*
+- *NavHostController* (Subclass of NavController, no special use cases in this application)
 
 ### Modules
 
@@ -163,6 +170,7 @@ Jetpack Compose and Navigation with Compose. The important keywords to look for 
 
 - ML Kit
 - Room Persistence Library (SQLite wrapper for Android)
+- Proto DataStore
 - Hilt (Dagger2 wrapper for Android)
 - Jetpack Compose
   - Navigation with Compose
@@ -170,6 +178,8 @@ Jetpack Compose and Navigation with Compose. The important keywords to look for 
 - Kotlin Flow
 - Kotlin Coroutines
 - Firebase Crashlytics
+- JUnit
+- Robolectric
 
 ### Conventions
 

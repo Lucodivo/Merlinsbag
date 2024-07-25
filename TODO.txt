@@ -44,6 +44,7 @@ Articles:
     - multiple select and add to ensembles
         - needs to also be removed
         - might not be worth as valuable as you can get away with similar functionality on the ensemble detail screen
+    - Animation for horizontal buttons on expanding floating button
 App-wide UI:
     - Explicit to Screen animations
 Tooling:

@@ -74,12 +74,12 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.Enab
 
 
 @Serializable
-data class EnsembleDetailRoute(
+data class EnsembleDetailRouteArgs(
   val ensembleId: String,
 )
 
 fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOptions? = null) =
-  navigate(EnsembleDetailRoute(ensembleId = ensembleId), navOptions)
+  navigate(EnsembleDetailRouteArgs(ensembleId = ensembleId), navOptions)
 
 enum class EnsembleDetailEditMode {
   EnabledGeneral,

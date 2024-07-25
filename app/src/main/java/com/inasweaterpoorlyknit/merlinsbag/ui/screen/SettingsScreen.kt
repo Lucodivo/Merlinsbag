@@ -92,9 +92,9 @@ private const val DEMO_VIDEO_URL = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
 private const val DELETE_ALL_CAPTCHA = "1234"
 
 @Serializable
-object SettingsRoute
+object SettingsRouteArgs
 
-fun NavController.navigateToSettings(navOptions: NavOptions? = null) = navigate(SettingsRoute, navOptions)
+fun NavController.navigateToSettings(navOptions: NavOptions? = null) = navigate(SettingsRouteArgs, navOptions)
 
 @Composable
 fun SettingsRoute(

@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -40,12 +39,7 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NavUIDestinations
 import com.inasweaterpoorlyknit.merlinsbag.navigation.NoopNavHost
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.AddArticleRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CameraRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.Onboarding
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.SettingsRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.StatisticsRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.compactWidth
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembles

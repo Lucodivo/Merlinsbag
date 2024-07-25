@@ -61,7 +61,7 @@ import com.inasweaterpoorlyknit.merlinsbag.viewmodel.AddArticleViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AddArticleRoute(
+data class AddArticleRouteArgs(
   val imageUriStringList: List<String>,
   val articleId: String?,
 )
@@ -70,7 +70,7 @@ fun NavController.navigateToAddArticle(
     uriStringArray: List<String>,
     articleId: String? = null,
     navOptions: NavOptions? = null,
-) = navigate(AddArticleRoute(imageUriStringList = uriStringArray, articleId = articleId), navOptions)
+) = navigate(AddArticleRouteArgs(imageUriStringList = uriStringArray, articleId = articleId), navOptions)
 
 @Composable
 fun AddArticleRoute(

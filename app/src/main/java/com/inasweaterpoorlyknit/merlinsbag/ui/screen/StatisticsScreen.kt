@@ -49,9 +49,9 @@ import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-object StatisticsRoute
+object StatisticsRouteArgs
 
-fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigate(StatisticsRoute, navOptions)
+fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigate(StatisticsRouteArgs, navOptions)
 
 @Composable
 fun StatisticsRoute(statisticsViewModel: StatisticsViewModel = hiltViewModel()) {

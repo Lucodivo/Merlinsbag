@@ -101,9 +101,9 @@ private val rowEndPadding = 4.dp
 private val overlapTitleSpacing = 4.dp
 
 @Serializable
-object EnsemblesRoute
+object EnsemblesRouteArgs
 
-fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate(EnsemblesRoute, navOptions)
+fun NavController.navigateToEnsembles(navOptions: NavOptions? = null) = navigate(EnsemblesRouteArgs, navOptions)
 
 @Composable
 fun EnsemblesRoute(

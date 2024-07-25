@@ -31,14 +31,14 @@ private val REQUIRED_CAMERA_PERMISSIONS =
     }
 
 @Serializable
-data class CameraRoute(
+data class CameraRouteArgs(
   val articleId: String?,
 )
 
 fun NavController.navigateToCamera(
     articleId: String? = null,
     navOptions: NavOptions? = null
-) = navigate(CameraRoute(articleId = articleId), navOptions)
+) = navigate(CameraRouteArgs(articleId = articleId), navOptions)
 
 @Composable
 fun CameraRoute(
