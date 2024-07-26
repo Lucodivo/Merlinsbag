@@ -290,7 +290,7 @@ fun ArticlesButtonControls(
           ),
         )
       },
-      horizontalExpandedButtons = if(editMode == ArticlesScreenEditMode.ENABLED_GENERAL && windowSizeClass.compactWidth()) {
+      horizontalExpandedButtons = if(editMode != ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES && windowSizeClass.compactWidth()) {
         listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Settings, contentDescription = stringResource(R.string.cog)),
