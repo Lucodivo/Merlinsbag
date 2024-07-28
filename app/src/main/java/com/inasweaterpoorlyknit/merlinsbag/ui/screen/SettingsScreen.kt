@@ -67,6 +67,7 @@ import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.SystemUiPreview
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopAlertDialog
+import com.inasweaterpoorlyknit.core.ui.component.NoopSimpleAlertDialog
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
@@ -124,6 +125,7 @@ fun SettingsRoute(
 
   SettingsScreen(
     showDeleteAllDataAlertDialog = settingsViewModel.showDeleteAllDataAlertDialog,
+    showImageQualityAlertDialog = settingsViewModel.showImageQualityAlertDialog,
     expandDarkModeDropdownMenu = settingsViewModel.expandedDarkModeMenu,
     expandColorPaletteDropdownMenu = settingsViewModel.expandedColorPaletteMenu,
     expandHighContrastDropdownMenu = settingsViewModel.expandedHighContrastMenu,
@@ -146,7 +148,9 @@ fun SettingsRoute(
     onClickClearCache = settingsViewModel::clearCache,
     onClickDeleteAllData = settingsViewModel::onClickDeleteAllData,
     onDismissDeleteAllDataAlertDialog = settingsViewModel::onDismissDeleteAllDataAlertDialog,
-    onClickConfirmDeleteAllDataAlertDialog = settingsViewModel::deleteAllData,
+    onConfirmDeleteAllDataAlertDialog = settingsViewModel::onConfirmDeleteAllDataAlertDialog,
+    onDismissImageQualityAlertDialog = settingsViewModel::onDismissImageQualityAlertDialog,
+    onConfirmImageQualityAlertDialog = settingsViewModel::onConfirmImageQualityAlertDialog,
     onSelectDarkMode = settingsViewModel::setDarkMode,
     onClickDarkMode = settingsViewModel::onClickDarkMode,
     onDismissDarkMode = settingsViewModel::onDismissDarkMode,
@@ -156,8 +160,8 @@ fun SettingsRoute(
     onSelectHighContrast = settingsViewModel::setHighContrast,
     onDismissHighContrast = settingsViewModel::onDismissHighContrast,
     onClickHighContrast = settingsViewModel::onClickHighContrast,
-    onSelectImageQuality = settingsViewModel::setImageQuality,
-    onDismissImageQuality = settingsViewModel::onDismissImageQuality,
+    onSelectImageQuality = settingsViewModel::onSelectedImageQuality,
+    onDismissImageQuality = settingsViewModel::onDismissImageQualityDropdown,
     onClickImageQuality = settingsViewModel::onClickImageQuality,
     onSelectTypography = settingsViewModel::setTypography,
     onDismissTypography = settingsViewModel::onDismissTypography,
@@ -472,6 +476,7 @@ fun LazyListScope.SettingsScreenAnimatedRow(
 fun SettingsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     showDeleteAllDataAlertDialog: Boolean,
+    showImageQualityAlertDialog: Boolean,
     expandDarkModeDropdownMenu: Boolean,
     expandColorPaletteDropdownMenu: Boolean,
     expandHighContrastDropdownMenu: Boolean,
@@ -494,7 +499,10 @@ fun SettingsScreen(
     onClickClearCache: () -> Unit,
     onClickDeleteAllData: () -> Unit,
     onClickDemoVideo: () -> Unit,
-    onClickConfirmDeleteAllDataAlertDialog: () -> Unit,
+    onDismissDeleteAllDataAlertDialog: () -> Unit,
+    onConfirmDeleteAllDataAlertDialog: () -> Unit,
+    onDismissImageQualityAlertDialog: () -> Unit,
+    onConfirmImageQualityAlertDialog: () -> Unit,
     onClickDarkMode: () -> Unit,
     onDismissDarkMode: () -> Unit,
     onSelectDarkMode: (DarkMode) -> Unit,
@@ -510,7 +518,6 @@ fun SettingsScreen(
     onClickTypography: () -> Unit,
     onSelectTypography: (Typography) -> Unit,
     onDismissTypography: () -> Unit,
-    onDismissDeleteAllDataAlertDialog: () -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
   val animationFloat = remember { Animatable(initialValue = 0.0f) }
@@ -604,7 +611,12 @@ fun SettingsScreen(
   DeleteAllDataAlertDialog(
     visible = showDeleteAllDataAlertDialog,
     onDismiss = onDismissDeleteAllDataAlertDialog,
-    onClickPositive = onClickConfirmDeleteAllDataAlertDialog,
+    onConfirm = onConfirmDeleteAllDataAlertDialog,
+  )
+  ImageQualityAlertDialog(
+    visible = showImageQualityAlertDialog,
+    onDismiss = onDismissImageQualityAlertDialog,
+    onConfirm = onConfirmImageQualityAlertDialog,
   )
 }
 
@@ -675,10 +687,26 @@ fun TipsAndInfoRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 )
 
 @Composable
+fun ImageQualityAlertDialog(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) = NoopSimpleAlertDialog(
+  visible = visible,
+  title = stringResource(R.string.image_quality_alert_title),
+  text = stringResource(R.string.image_quality_alert_text),
+  confirmText = stringResource(R.string.confirm),
+  cancelText = stringResource(R.string.cancel),
+  onDismiss = onDismiss,
+  onConfirm = onConfirm,
+  headerIcon = { Icon(NoopIcons.Info, stringResource(R.string.information)) }
+)
+
+@Composable
 fun DeleteAllDataAlertDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
-    onClickPositive: () -> Unit,
+    onConfirm: () -> Unit,
 ) {
   val enteredText = remember { mutableStateOf("") }
   val spacerSize = 8.dp
@@ -716,7 +744,7 @@ fun DeleteAllDataAlertDialog(
     confirmButton = {
       Spacer(modifier = Modifier.width(20.dp))
       if(enteredText.value == DELETE_ALL_CAPTCHA) {
-        Text(stringResource(id = R.string.delete), modifier = Modifier.clickable { onClickPositive() })
+        Text(stringResource(id = R.string.delete), modifier = Modifier.clickable { onConfirm() })
       } else {
         Icon(imageVector = NoopIcons.Lock, contentDescription = stringResource(R.string.confirmation_locked))
       }
@@ -732,6 +760,7 @@ fun DeleteAllDataAlertDialog(
 @Composable
 fun PreviewUtilSettingsScreen(
     showDeleteAllDataAlertDialog: Boolean = false,
+    showImageQualityAlertDialog: Boolean = false,
     expandDarkModeDropdownMenu: Boolean = false,
     expandColorPaletteDropdownMenu: Boolean = false,
     expandHighContrastDropdownMenu: Boolean = false,
@@ -747,6 +776,7 @@ fun PreviewUtilSettingsScreen(
   Surface {
     SettingsScreen(
       showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
+      showImageQualityAlertDialog = showImageQualityAlertDialog,
       expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
       expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,
       expandHighContrastDropdownMenu = expandHighContrastDropdownMenu,
@@ -761,11 +791,11 @@ fun PreviewUtilSettingsScreen(
       onClickDeveloper = {}, onClickSource = {}, onClickEccohedra = {},
       onClickWelcomePage = {}, onClickTipsAndInfoPage = {}, onClickPrivacyInfo = {},
       onClickClearCache = {}, onClickDeleteAllData = {}, onClickStatistics = {},
-      onClickDemoVideo = {}, onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
+      onClickDemoVideo = {}, onConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
       onDismissDarkMode = {}, onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
       onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {}, onClickRateAndReview = {},
       onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {}, onDismissDeleteAllDataAlertDialog = {},
-      onClickImageQuality = {}, onSelectImageQuality = {}, onDismissImageQuality = {},
+      onClickImageQuality = {}, onSelectImageQuality = {}, onDismissImageQuality = {}, onDismissImageQualityAlertDialog = {}, onConfirmImageQualityAlertDialog = {},
     )
   }
 }
@@ -773,5 +803,5 @@ fun PreviewUtilSettingsScreen(
 @SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK, colorPalette = ColorPalette.SYSTEM_DYNAMIC)
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
-@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onClickPositive = {}, onDismiss = {}) }
+@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

@@ -58,12 +58,20 @@ fun TipsAndInfoScreen(
       Text(text = stringResource(description))
     }
 
-  @Composable fun title(@StringRes title: Int, modifier: Modifier = spacerModifier){
-    Text(text = stringResource(title), fontSize = MaterialTheme.typography.titleLarge.fontSize, modifier = modifier)
+  @Composable fun title(@StringRes text: Int, modifier: Modifier = spacerModifier){
+    Text(text = stringResource(text), fontSize = MaterialTheme.typography.titleLarge.fontSize, modifier = modifier)
   }
 
-  @Composable fun errorSubtitle(@StringRes subtitle: Int, modifier: Modifier = spacerModifier){
-    Text(text = "\"${stringResource(subtitle)}\"", fontStyle = FontStyle.Italic, modifier = modifier)
+  @Composable fun subtitle(text: String, modifier: Modifier = spacerModifier){
+    Text(text = text, fontStyle = FontStyle.Italic, modifier = modifier)
+  }
+
+  @Composable fun subtitle(@StringRes text: Int, modifier: Modifier = spacerModifier){
+    subtitle(text = stringResource(text), modifier = modifier)
+  }
+
+  @Composable fun errorSubtitle(@StringRes text: Int, modifier: Modifier = spacerModifier){
+    subtitle(text = "\"${stringResource(text)}\"", modifier = modifier)
   }
 
   @Composable fun body(@StringRes msg: Int, modifier: Modifier = spacerModifier){
@@ -105,6 +113,11 @@ fun TipsAndInfoScreen(
       buttonIcon(NoopIcons.Attachment, R.string.attach_article_ensemble_or_image)
       buttonIcon(NoopIcons.attachmentRemove(), R.string.remove_attached_article_or_ensemble)
       buttonIcon(NoopIcons.Download, R.string.export_image_to_device, modifier = spacerModifier)
+    }
+    item{
+      title(R.string.settings)
+      subtitle(R.string.image_quality)
+      body(R.string.image_quality_answer)
     }
     item {
       title(R.string.underlying_technology)

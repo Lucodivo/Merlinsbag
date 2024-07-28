@@ -18,6 +18,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEO
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,6 +31,7 @@ class SettingsViewModel @Inject constructor(
   var cachePurged by mutableStateOf(Event<Unit>(null))
   var dataDeleted by mutableStateOf(Event<Unit>(null))
   var showDeleteAllDataAlertDialog by mutableStateOf(false)
+  var showImageQualityAlertDialog by mutableStateOf(false)
   var expandedDarkModeMenu by mutableStateOf(false)
   var expandedColorPaletteMenu by mutableStateOf(false)
   var expandedHighContrastMenu by mutableStateOf(false)
@@ -37,12 +39,16 @@ class SettingsViewModel @Inject constructor(
   var expandedImageQualityMenu by mutableStateOf(false)
   var clearCacheEnabled by mutableStateOf(true)
 
-  val userPreferences = userPreferencesRepository.userPreferences
-      .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = UserPreferences(),
-      )
+  private var cachedImageQuality: ImageQuality? = null
+  private var selectedImageQuality: ImageQuality? = null
+
+  val userPreferences = userPreferencesRepository.userPreferences.onEach {
+    cachedImageQuality = it.imageQuality
+  }.stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+    initialValue = UserPreferences(),
+  )
 
   fun clearCache() {
     // Disable clearing cache until view model is recreated
@@ -55,7 +61,7 @@ class SettingsViewModel @Inject constructor(
 
   fun onClickDeleteAllData() { showDeleteAllDataAlertDialog = true }
   fun onDismissDeleteAllDataAlertDialog() { showDeleteAllDataAlertDialog = false }
-  fun deleteAllData() {
+  fun onConfirmDeleteAllDataAlertDialog() {
     showDeleteAllDataAlertDialog = false
     viewModelScope.launch(Dispatchers.IO) {
       purgeRepository.purgeUserData()
@@ -99,13 +105,30 @@ class SettingsViewModel @Inject constructor(
     }
   }
 
+  private fun setImageQuality(imageQuality: ImageQuality) = viewModelScope.launch(Dispatchers.IO){
+    userPreferencesRepository.setImageQuality(imageQuality)
+  }
   fun onClickImageQuality() { expandedImageQualityMenu = !expandedImageQualityMenu }
-  fun onDismissImageQuality() { expandedImageQualityMenu = false }
-  fun setImageQuality(imageQuality: ImageQuality) {
+  fun onDismissImageQualityDropdown() { expandedImageQualityMenu = false }
+  fun onSelectedImageQuality(newImageQuality: ImageQuality) {
     expandedImageQualityMenu = false
-    viewModelScope.launch(Dispatchers.IO){
-      userPreferencesRepository.setImageQuality(imageQuality)
+    cachedImageQuality?.let { oldImageQuality ->
+      val imageQualityRaised = oldImageQuality.ordinal < newImageQuality.ordinal
+      if(imageQualityRaised){
+        selectedImageQuality = newImageQuality
+        showImageQualityAlertDialog = true
+      } else {
+        setImageQuality(newImageQuality)
+      }
     }
+  }
+  fun onDismissImageQualityAlertDialog() { showImageQualityAlertDialog = false }
+  fun onConfirmImageQualityAlertDialog() {
+    showImageQualityAlertDialog = false
+    selectedImageQuality?.let {
+      setImageQuality(it)
+    }
+    selectedImageQuality = null
   }
 
   fun showWelcomePage() = viewModelScope.launch(Dispatchers.IO){
