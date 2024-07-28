@@ -17,6 +17,7 @@ import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
+import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -26,9 +27,32 @@ import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.math.min
 
-val compressionFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
-val compressionQualityFull = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) 100 else 99
-const val compressionQualityThumb = 70
+// Webp compression quality test case:
+// Article image size 1499x1951
+// | FORMAT         | SIZE      | LOSSLESS PERCENTAGE |
+// WEBP_LOSSLESS:     1.6   MB    (100%)
+// WEBP_LOSSY @ 100:  779.8 KB    (48.7%)
+// WEBP_LOSSY @ 90:   341.7 KB    (21.4%)
+// WEBP_LOSSY @ 80:   199.6 kB    (12.5%)
+// WEBP_LOSSY @ 70:   147.4 KB    (9.21%)
+
+val useDeprecatedWebpFormat = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+
+fun ImageQuality.compressionFormat(): Bitmap.CompressFormat = when{
+  useDeprecatedWebpFormat -> Bitmap.CompressFormat.WEBP
+  this == ImageQuality.PERFECT -> Bitmap.CompressFormat.WEBP_LOSSLESS
+  else -> Bitmap.CompressFormat.WEBP_LOSSY
+}
+
+fun ImageQuality.compressionQuality(): Int = when(this){
+  ImageQuality.PERFECT -> 100
+  ImageQuality.VERY_HIGH -> if(useDeprecatedWebpFormat) 90 else 100
+  ImageQuality.HIGH -> if(useDeprecatedWebpFormat) 80 else 90
+  ImageQuality.STANDARD -> if(useDeprecatedWebpFormat) 70 else 80
+}
+
+val compressionFormatThumb = ImageQuality.STANDARD.compressionFormat()
+val compressionQualityThumb = ImageQuality.STANDARD.compressionQuality()
 val exportFormat = Bitmap.CompressFormat.PNG
 
 class ArticleRepository(
@@ -39,7 +63,7 @@ class ArticleRepository(
   // Used in testing only.
   fun insertArticle(fullImageUri: String, thumbnailImageUri: String) = articleDao.insertArticle(fullImageUri, thumbnailImageUri)
 
-  private fun saveBitmaps(bitmap: Bitmap): ImageFilenames {
+  private fun saveBitmaps(bitmap: Bitmap, imageQuality: ImageQuality): ImageFilenames {
     val articleFilesDir = articleFilesDir(context).apply { mkdirs() }
     val thumbnailBitmapToSave = bitmap.toThumbnail()
     val filenameBase = timestampFileName()
@@ -47,18 +71,18 @@ class ArticleRepository(
       filename = "${filenameBase}_full.webp",
       filenameThumb = "${filenameBase}_thumb.webp",
     )
-    saveBitmap(articleFilesDir, imageFilenames.filename, bitmap, compressionQualityFull)
-    saveBitmap(articleFilesDir, imageFilenames.filenameThumb, thumbnailBitmapToSave, compressionQualityThumb)
+    saveBitmap(articleFilesDir, imageFilenames.filename, bitmap, imageQuality.compressionFormat(), imageQuality.compressionQuality())
+    saveBitmap(articleFilesDir, imageFilenames.filenameThumb, thumbnailBitmapToSave, compressionFormatThumb, compressionQualityThumb)
     return imageFilenames
   }
 
-  fun insertArticle(bitmap: Bitmap) {
-    val filenames = saveBitmaps(bitmap)
+  fun insertArticle(bitmap: Bitmap, imageQuality: ImageQuality) {
+    val filenames = saveBitmaps(bitmap, imageQuality)
     articleDao.insertArticle(filenames.filename, filenames.filenameThumb)
   }
 
-  fun insertArticleImage(bitmap: Bitmap, articleId: String){
-    val filenames = saveBitmaps(bitmap)
+  fun insertArticleImage(bitmap: Bitmap, articleId: String, imageQuality: ImageQuality){
+    val filenames = saveBitmaps(bitmap, imageQuality)
     articleDao.insertArticleImages(
       ArticleImageEntity(
         articleId = articleId,
@@ -152,6 +176,7 @@ private fun saveBitmap(
     directory: File,
     fileName: String,
     bitmap: Bitmap,
+    compressionFormat: Bitmap.CompressFormat,
     compressionQuality: Int,
 ){
   val imageFile = File(directory, fileName)

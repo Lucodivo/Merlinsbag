@@ -9,6 +9,7 @@ import javax.inject.Inject
 import com.inasweaterpoorlyknit.merlinsbag.ColorPalette as ColorPaletteDataStore
 import com.inasweaterpoorlyknit.merlinsbag.DarkMode as DarkModeDataStore
 import com.inasweaterpoorlyknit.merlinsbag.HighContrast as HighContrastDataStore
+import com.inasweaterpoorlyknit.merlinsbag.ImageQuality as ImageQualityDataStore
 import com.inasweaterpoorlyknit.merlinsbag.Typography as TypographyDataStore
 import com.inasweaterpoorlyknit.merlinsbag.UserPreferences as UserPreferencesDataStore
 
@@ -35,6 +36,7 @@ class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferenc
         .setColorPalette(ColorPaletteDataStore.ColorPalette_RoadWarrior)
         .setHighContrast(HighContrastDataStore.HighContrast_Off)
         .setTypography(TypographyDataStore.Typography_Default)
+        .setImageQuality(ImageQualityDataStore.ImageQuality_Standard)
         .build()
 
   }

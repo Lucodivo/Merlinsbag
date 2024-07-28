@@ -190,4 +190,8 @@
     <string name="version">Version</string>
     <string name="shortcut_camera_label_long">Add Articles</string>
     <string name="shortcut_camera_label_short">Add Articles</string>
+    <string name="standard">Standard</string>
+    <string name="very_high">Very High</string>
+    <string name="perfect">Perfect</string>
+    <string name="image_quality">Image Quality</string>
 </resources>

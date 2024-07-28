@@ -4,6 +4,7 @@ import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
+import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
@@ -31,5 +32,9 @@ class UserPreferencesRepository(
 
   suspend fun setTypography(typography: Typography) {
     preferencesDao.setTypography(typography)
+  }
+
+  suspend fun setImageQuality(imageQuality: ImageQuality) {
+    preferencesDao.setImageQuality(imageQuality)
   }
 }

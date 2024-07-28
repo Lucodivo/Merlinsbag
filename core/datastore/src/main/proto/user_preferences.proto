@@ -34,10 +34,18 @@ enum HighContrast {
   HighContrast_High = 2;
 }
 
+enum ImageQuality {
+  ImageQuality_Standard = 0;
+  ImageQuality_High = 1;
+  ImageQuality_VeryHigh = 2;
+  ImageQuality_Perfect = 3;
+}
+
 message UserPreferences {
   bool has_completed_onboarding = 1;
   DarkMode dark_mode = 2;
   ColorPalette color_palette = 3;
   HighContrast high_contrast = 4;
   Typography typography = 5;
+  ImageQuality image_quality = 6;
 }

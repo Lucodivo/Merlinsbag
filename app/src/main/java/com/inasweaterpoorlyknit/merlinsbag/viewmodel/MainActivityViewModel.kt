@@ -3,7 +3,6 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue

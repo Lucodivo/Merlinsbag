@@ -34,10 +34,18 @@ enum class Typography {
   TINY_5,
 }
 
+enum class ImageQuality {
+  STANDARD,
+  HIGH,
+  VERY_HIGH,
+  PERFECT,
+}
+
 data class UserPreferences(
     val hasCompletedOnboarding: Boolean = false,
     val darkMode: DarkMode = DarkMode.SYSTEM,
     val colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
     val highContrast: HighContrast = HighContrast.OFF,
     val typography: Typography = Typography.DEFAULT,
+    val imageQuality: ImageQuality = ImageQuality.STANDARD,
 )

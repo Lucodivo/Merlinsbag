@@ -2,7 +2,6 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,13 +11,12 @@ import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
+import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -36,6 +34,7 @@ class SettingsViewModel @Inject constructor(
   var expandedColorPaletteMenu by mutableStateOf(false)
   var expandedHighContrastMenu by mutableStateOf(false)
   var expandedTypographyMenu by mutableStateOf(false)
+  var expandedImageQualityMenu by mutableStateOf(false)
   var clearCacheEnabled by mutableStateOf(true)
 
   val userPreferences = userPreferencesRepository.userPreferences
@@ -97,6 +96,15 @@ class SettingsViewModel @Inject constructor(
     expandedTypographyMenu = false
     viewModelScope.launch(Dispatchers.IO){
       userPreferencesRepository.setTypography(typography)
+    }
+  }
+
+  fun onClickImageQuality() { expandedImageQualityMenu = !expandedImageQualityMenu }
+  fun onDismissImageQuality() { expandedImageQualityMenu = false }
+  fun setImageQuality(imageQuality: ImageQuality) {
+    expandedImageQualityMenu = false
+    viewModelScope.launch(Dispatchers.IO){
+      userPreferencesRepository.setImageQuality(imageQuality)
     }
   }
 

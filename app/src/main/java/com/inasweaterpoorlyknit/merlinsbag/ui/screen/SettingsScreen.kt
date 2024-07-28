@@ -60,6 +60,7 @@ import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
+import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.ui.LargeFontSizePreview
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
@@ -127,10 +128,12 @@ fun SettingsRoute(
     expandColorPaletteDropdownMenu = settingsViewModel.expandedColorPaletteMenu,
     expandHighContrastDropdownMenu = settingsViewModel.expandedHighContrastMenu,
     expandTypographyDropdownMenu = settingsViewModel.expandedTypographyMenu,
+    expandImageQualityDropdownMenu = settingsViewModel.expandedImageQualityMenu,
     clearCacheEnabled = settingsViewModel.clearCacheEnabled,
     darkMode = userPreferences.darkMode,
     colorPalette = userPreferences.colorPalette,
     highContrast = userPreferences.highContrast,
+    imageQuality = userPreferences.imageQuality,
     typography = userPreferences.typography,
     onClickDeveloper = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
@@ -153,6 +156,9 @@ fun SettingsRoute(
     onSelectHighContrast = settingsViewModel::setHighContrast,
     onDismissHighContrast = settingsViewModel::onDismissHighContrast,
     onClickHighContrast = settingsViewModel::onClickHighContrast,
+    onSelectImageQuality = settingsViewModel::setImageQuality,
+    onDismissImageQuality = settingsViewModel::onDismissImageQuality,
+    onClickImageQuality = settingsViewModel::onClickImageQuality,
     onSelectTypography = settingsViewModel::setTypography,
     onDismissTypography = settingsViewModel::onDismissTypography,
     onClickTypography = settingsViewModel::onClickTypography,
@@ -394,6 +400,39 @@ fun HighContrastRow(
 }
 
 @Composable
+fun ImageQualityRow(
+    selectedImageQuality: ImageQuality,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectImageQuality: (ImageQuality) -> Unit,
+    onDismiss: () -> Unit,
+) {
+  // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
+  val dropdownData = listOf(
+    Pair(stringResource(R.string.standard), null),
+    Pair(stringResource(R.string.high), null),
+    Pair(stringResource(R.string.very_high), null),
+    Pair(stringResource(R.string.perfect), null),
+  )
+  DropdownSettingsRow(
+    title = stringResource(R.string.image_quality),
+    indicator = {
+      Text(
+        text = dropdownData[selectedImageQuality.ordinal].first,
+        fontSize = settingsFontSize(),
+        textAlign = TextAlign.Right,
+        modifier = Modifier.fillMaxHeight()
+      )
+    },
+    expanded = expandedMenu,
+    items = dropdownData,
+    onClick = onClick,
+    onSelect = { index -> onSelectImageQuality(ImageQuality.entries[index]) },
+    onDismiss = onDismiss,
+  )
+}
+
+@Composable
 fun ClearCacheRow(
     enabled: Boolean,
     onClick: () -> Unit,
@@ -436,12 +475,14 @@ fun SettingsScreen(
     expandDarkModeDropdownMenu: Boolean,
     expandColorPaletteDropdownMenu: Boolean,
     expandHighContrastDropdownMenu: Boolean,
+    expandImageQualityDropdownMenu: Boolean,
     expandTypographyDropdownMenu: Boolean,
     clearCacheEnabled: Boolean,
     darkMode: DarkMode,
     colorPalette: ColorPalette,
     typography: Typography,
     highContrast: HighContrast,
+    imageQuality: ImageQuality,
     onClickDeveloper: () -> Unit,
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
@@ -463,6 +504,9 @@ fun SettingsScreen(
     onClickHighContrast: () -> Unit,
     onSelectHighContrast: (HighContrast) -> Unit,
     onDismissHighContrast: () -> Unit,
+    onClickImageQuality: () -> Unit,
+    onSelectImageQuality: (ImageQuality) -> Unit,
+    onDismissImageQuality: () -> Unit,
     onClickTypography: () -> Unit,
     onSelectTypography: (Typography) -> Unit,
     onDismissTypography: () -> Unit,
@@ -533,18 +577,27 @@ fun SettingsScreen(
       SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.8f){ StatisticsRow(onClickStatistics) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.data)) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.9f){ PrivacyInfoRow(onClickPrivacyInfo) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.0f){ ClearCacheRow(clearCacheEnabled, onClickClearCache) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.1f){ DeleteAllDataRow(onClickDeleteAllData) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.9f) {
+        ImageQualityRow(
+          selectedImageQuality = imageQuality,
+          expandedMenu = expandImageQualityDropdownMenu,
+          onClick = onClickImageQuality,
+          onSelectImageQuality = onSelectImageQuality,
+          onDismiss = onDismissImageQuality,
+        )
+      }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.0f){ PrivacyInfoRow(onClickPrivacyInfo) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.1f){ ClearCacheRow(clearCacheEnabled, onClickClearCache) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.2f){ DeleteAllDataRow(onClickDeleteAllData) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.about)) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.2f){ DeveloperRow(onClickDeveloper) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.3f){ SourceRow(onClickSource) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.4f){ VersionRow() }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.3f){ DeveloperRow(onClickDeveloper) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.4f){ SourceRow(onClickSource) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.5f){ VersionRow() }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.5f){ SettingsTitle(stringResource(R.string.etc)) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.6f){ RateAndReviewRow(onClickRateAndReview) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.7f){ EccohedraRow(onClickEccohedra) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.6f){ SettingsTitle(stringResource(R.string.etc)) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.7f){ RateAndReviewRow(onClickRateAndReview) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.8f){ EccohedraRow(onClickEccohedra) }
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + sectionSpacerHeight)) }
     }
   }
@@ -683,11 +736,13 @@ fun PreviewUtilSettingsScreen(
     expandColorPaletteDropdownMenu: Boolean = false,
     expandHighContrastDropdownMenu: Boolean = false,
     expandTypographyDropdownMenu: Boolean = false,
+    expandImageQualityDropdownMenu: Boolean = false,
     clearCacheEnabled: Boolean = true,
     darkMode: DarkMode = DarkMode.SYSTEM,
     colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
     highContrast: HighContrast = HighContrast.OFF,
     typography: Typography = Typography.DEFAULT,
+    imageQuality: ImageQuality = ImageQuality.STANDARD,
 ) = NoopTheme(darkMode = darkMode) {
   Surface {
     SettingsScreen(
@@ -696,17 +751,21 @@ fun PreviewUtilSettingsScreen(
       expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,
       expandHighContrastDropdownMenu = expandHighContrastDropdownMenu,
       expandTypographyDropdownMenu = expandTypographyDropdownMenu,
+      expandImageQualityDropdownMenu = expandImageQualityDropdownMenu,
       clearCacheEnabled = clearCacheEnabled,
       darkMode = darkMode,
       colorPalette = colorPalette,
       typography = typography,
-      highContrast = highContrast, onClickDeveloper = {}, onClickSource = {}, onClickEccohedra = {},
+      imageQuality = imageQuality,
+      highContrast = highContrast,
+      onClickDeveloper = {}, onClickSource = {}, onClickEccohedra = {},
       onClickWelcomePage = {}, onClickTipsAndInfoPage = {}, onClickPrivacyInfo = {},
       onClickClearCache = {}, onClickDeleteAllData = {}, onClickStatistics = {},
       onClickDemoVideo = {}, onClickConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
       onDismissDarkMode = {}, onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
       onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {}, onClickRateAndReview = {},
       onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {}, onDismissDeleteAllDataAlertDialog = {},
+      onClickImageQuality = {}, onSelectImageQuality = {}, onDismissImageQuality = {},
     )
   }
 }

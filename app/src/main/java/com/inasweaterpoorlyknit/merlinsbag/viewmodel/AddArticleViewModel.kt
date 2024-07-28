@@ -16,6 +16,7 @@ import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.profiling.Timer
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.ml.image.SegmentedImage
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
@@ -27,6 +28,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -38,6 +40,7 @@ class AddArticleViewModel @AssistedInject constructor(
     @Assisted("articleId") private val articleId: String?,
     private val application: Application,
     private val articleRepository: ArticleRepository,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ): ViewModel() {
 
   @AssistedFactory
@@ -142,7 +145,10 @@ class AddArticleViewModel @AssistedInject constructor(
     } else articleId
     viewModelScope.launch(Dispatchers.Default) {
       nextSubject()
-      if(attachmentArticleId == null) articleRepository.insertArticle(bitmapToSave) else articleRepository.insertArticleImage(bitmapToSave, attachmentArticleId)
+      val imageQuality = userPreferencesRepository.userPreferences.first().imageQuality
+      if(attachmentArticleId == null) {
+        articleRepository.insertArticle(bitmapToSave, imageQuality)
+      } else articleRepository.insertArticleImage(bitmapToSave, attachmentArticleId, imageQuality)
       stopWatch.logElapsed("AddArticleViewModel", "Save article time")
     }
   }
