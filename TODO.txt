@@ -3,6 +3,7 @@ Database:
     - Paging to improve large data performance
         - https://developer.android.com/training/data-storage/room/accessing-data#paging-integration
     - remove app modules dependency on Database models?
+        - may require remapping lists data from one type to another unless smarter decisions are made
 Add Article:
     - ML Kit: Image labelling
     - Primary / Secondary color classifications?
@@ -31,9 +32,6 @@ Ensembles:
 Features:
     - Collage
     - Share!
-    - App shortcut to camera
-        - How do shortcuts even work in Compose Navigation?
-    - Hook for sharing from camera roll to Merlinsbag
 Multiple Form Factor Support:
     - AddArticlesScreen [COMPLETED]
     - NavigationRail [COMPLETED]
@@ -44,7 +42,6 @@ Articles:
     - multiple select and add to ensembles
         - needs to also be removed
         - might not be worth as valuable as you can get away with similar functionality on the ensemble detail screen
-    - Animation for horizontal buttons on expanding floating button
 App-wide UI:
     - Explicit to Screen animations
 Tooling:

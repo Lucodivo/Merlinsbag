@@ -1,5 +1,8 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import android.content.Context
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.Animatable
@@ -57,6 +60,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.google.android.play.core.review.ReviewException
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
@@ -141,7 +146,14 @@ fun SettingsRoute(
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
     onClickDemoVideo = { uriHandler.openUri(DEMO_VIDEO_URL) },
-    onClickRateAndReview = { uriHandler.openUri(MERLINSBAG_URL) },
+    onClickRateAndReview = {
+      rateAndReviewRequest(
+        context = context,
+        onCompleted = { context.toast(R.string.thank_you) },
+        onPreviouslyCompleted = { uriHandler.openUri(MERLINSBAG_URL) },
+        onError = { context.toast(R.string.try_again_later) },
+      )
+    },
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
     onClickTipsAndInfoPage = navigateToTipsAndInfo,
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
@@ -188,7 +200,11 @@ fun SourceRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 
 @Composable
 fun VersionRow() {
-  Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 4.dp)){
+  Row(
+    horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 32.dp, vertical = 4.dp)
+  ) {
     Text(stringResource(R.string.version))
     Text(versionName())
   }
@@ -197,7 +213,7 @@ fun VersionRow() {
 @Composable
 fun StatisticsRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.statistics),
-  indicator = { Icon(NoopIcons.Statistics, stringResource(R.string.bar_chart))},
+  indicator = { Icon(NoopIcons.Statistics, stringResource(R.string.bar_chart)) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -205,7 +221,7 @@ fun StatisticsRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
 @Composable
 fun RateAndReviewRow(onClick: () -> Unit) = SettingsTextIndicatorButton(
   text = stringResource(R.string.review),
-  indicator = { Icon(NoopIcons.Reviews, REDUNDANT_CONTENT_DESCRIPTION)},
+  indicator = { Icon(NoopIcons.Reviews, REDUNDANT_CONTENT_DESCRIPTION) },
   onClick = onClick,
   modifier = itemModifier,
 )
@@ -225,7 +241,7 @@ fun EccohedraRow(onClick: () -> Unit) {
     text = stringResource(R.string.eccohedra),
     indicator = { Icon(NoopIcons.eccohedra(), REDUNDANT_CONTENT_DESCRIPTION) },
     onClick = onClick,
-    modifier = itemModifier.semantics { contentDescription = eccohedraContentDescription},
+    modifier = itemModifier.semantics { contentDescription = eccohedraContentDescription },
   )
 }
 
@@ -330,7 +346,7 @@ fun TypographyRow(
         textAlign = TextAlign.Right,
         modifier = Modifier.fillMaxHeight()
       )
-      },
+    },
     expanded = expandedMenu,
     items = dropdownData,
     onClick = onClick,
@@ -459,9 +475,9 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 }
 
 fun LazyListScope.SettingsScreenAnimatedRow(
-  visible: Boolean,
-  content: @Composable AnimatedVisibilityScope.() -> Unit,
-){
+    visible: Boolean,
+    content: @Composable AnimatedVisibilityScope.() -> Unit,
+) {
   item {
     AnimatedVisibility(
       visible = visible,
@@ -534,7 +550,9 @@ fun SettingsScreen(
     LazyColumn(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Top,
-      modifier = Modifier.fillMaxSize().padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(start = systemBarPaddingValues.calculateStartPadding(layoutDir), end = systemBarPaddingValues.calculateEndPadding(layoutDir)),
     ) {
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding())) }
       item { SettingsTitle(stringResource(R.string.appearance)) }
@@ -578,10 +596,10 @@ fun SettingsScreen(
       }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.info)) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.5f){ DemoVideoRow(onClickDemoVideo) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.6f){ TipsAndInfoRow(onClickTipsAndInfoPage) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.7f){ WelcomePageRow(onClickWelcomePage)}
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.8f){ StatisticsRow(onClickStatistics) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.5f) { DemoVideoRow(onClickDemoVideo) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.6f) { TipsAndInfoRow(onClickTipsAndInfoPage) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.7f) { WelcomePageRow(onClickWelcomePage) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.8f) { StatisticsRow(onClickStatistics) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.data)) }
       SettingsScreenAnimatedRow(visible = animationFloat.value >= 0.9f) {
@@ -593,18 +611,18 @@ fun SettingsScreen(
           onDismiss = onDismissImageQuality,
         )
       }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.0f){ PrivacyInfoRow(onClickPrivacyInfo) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.1f){ ClearCacheRow(clearCacheEnabled, onClickClearCache) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.2f){ DeleteAllDataRow(onClickDeleteAllData) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.0f) { PrivacyInfoRow(onClickPrivacyInfo) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.1f) { ClearCacheRow(clearCacheEnabled, onClickClearCache) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.2f) { DeleteAllDataRow(onClickDeleteAllData) }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
       item { SettingsTitle(stringResource(R.string.about)) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.3f){ DeveloperRow(onClickDeveloper) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.4f){ SourceRow(onClickSource) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.5f){ VersionRow() }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.3f) { DeveloperRow(onClickDeveloper) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.4f) { SourceRow(onClickSource) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.5f) { VersionRow() }
       item { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.6f){ SettingsTitle(stringResource(R.string.etc)) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.7f){ RateAndReviewRow(onClickRateAndReview) }
-      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.8f){ EccohedraRow(onClickEccohedra) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.6f) { SettingsTitle(stringResource(R.string.etc)) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.7f) { RateAndReviewRow(onClickRateAndReview) }
+      SettingsScreenAnimatedRow(visible = animationFloat.value >= 1.8f) { EccohedraRow(onClickEccohedra) }
       item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + sectionSpacerHeight)) }
     }
   }
@@ -625,7 +643,7 @@ fun versionName(): String {
   val context = LocalContext.current
   try {
     return context.packageManager.getPackageInfo(context.packageName, 0).versionName
-  } catch(e: Exception){
+  } catch(e: Exception) {
     e.printStackTrace()
     return "?"
   }

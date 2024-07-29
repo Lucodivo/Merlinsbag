@@ -197,4 +197,6 @@
     <string name="image_quality_answer">The image quality option determines the quality of any newly cataloged images. Lower quality images are preferred, as they reduce the data storage size of Merlinsbag and reduce loading times. Lower quality is often unnoticeable to the naked eye, often removing unnecessary noise present in most photographs. Merlinsbag recommends sticking to the \"Standard\" setting. Only make adjustments if the quality of the images have proven to be unfit for your needs.</string>
     <string name="image_quality_alert_text">Increasing image quality can significantly increase the overall data storage size of Merlinsbag. Standard quality is recommended. Are you sure?</string>
     <string name="image_quality_alert_title">Warning</string>
+    <string name="thank_you">Thank you!</string>
+    <string name="try_again_later">Try again later.</string>
 </resources>

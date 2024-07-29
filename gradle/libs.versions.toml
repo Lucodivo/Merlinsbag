@@ -24,6 +24,8 @@ androidxComposeRuntimeTracing = "1.0.0-beta01"
 compose = "1.6.7"
 composeActivity = "1.9.0"
 composeMaterial3 = "1.2.1"
+review = "2.0.1"
+reviewKtx = "2.0.1"
 robolectric = "4.12.2"
 room = "2.6.1"
 androidxComposeMaterial3Adaptive = "1.0.0-beta02"
@@ -86,6 +88,8 @@ androidx-tracing-ktx = { group = "androidx.tracing", name = "tracing-ktx", versi
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
+review = { module = "com.google.android.play:review", version.ref = "review" }
+review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "reviewKtx" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-material3-adaptive-navigation-suite-android = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite-android", version.ref = "material3AdaptiveNavigationSuiteAndroid" }
 

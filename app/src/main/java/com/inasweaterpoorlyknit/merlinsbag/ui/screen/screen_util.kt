@@ -19,6 +19,8 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import com.google.android.play.core.review.ReviewException
+import com.google.android.play.core.review.ReviewManagerFactory
 
 // magic number based on NowInAndroid source code
 // prevents flows from timing out on basic configuration changes
@@ -109,4 +111,34 @@ fun rememberPhotoAlbumLauncher(
   )
 
   override fun launch() = launcherForActivityResult.launch(arrayOf("image/*"))
+}
+
+fun rateAndReviewRequest(
+    context: Context,
+    onPreviouslyCompleted: () -> Unit,
+    onCompleted: () -> Unit,
+    onError: () -> Unit,
+) {
+  val manager = ReviewManagerFactory.create(context)
+  val request = manager.requestReviewFlow()
+  request.addOnCompleteListener { task ->
+    if(task.isSuccessful) {
+      val reviewInfo = task.result
+      val startNanoTime = System.nanoTime()
+      val flow = manager.launchReviewFlow(context.getActivity() as ComponentActivity, reviewInfo)
+      flow.addOnCompleteListener { _ ->
+        if(System.nanoTime() - startNanoTime < 200_000_000) {
+          // Assume user has already reviewed and send them to the app store
+          onPreviouslyCompleted()
+        } else {
+          // Assume user has potentially attempted to review and thank them
+          onCompleted()
+        }
+      }
+    } else {
+      val reviewException = task.exception as ReviewException
+      Log.e("SettingsScreen", "Error requesting review: ${reviewException.message}")
+      onError()
+    }
+  }
 }
