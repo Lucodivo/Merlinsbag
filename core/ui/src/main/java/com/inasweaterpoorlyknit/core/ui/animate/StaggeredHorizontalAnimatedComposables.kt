@@ -26,7 +26,7 @@ fun staggeredHorizontallyAnimatedComposables(
   }
   return content.mapIndexed { index, item -> {
     AnimatedVisibility(
-      visible = animationFloat.value >= (0.1f * index),
+      visible = animationFloat.value >= (0.1f * (index + 1)),
       enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }),
       exit = slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }),
       content = item,
