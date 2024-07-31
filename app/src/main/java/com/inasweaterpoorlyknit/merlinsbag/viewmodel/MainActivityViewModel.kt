@@ -2,6 +2,7 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Parcelable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,12 +48,22 @@ class MainActivityViewModel @Inject constructor(
         if(intent.type?.startsWith("image/") == true) {
           when(intent.action){
             Intent.ACTION_SEND -> {
-              (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let{
+              if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+              } else {
+                @Suppress("Deprecation")
+                intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
+              }?.let {
                 listOf(it)
               } ?: emptyList()
             }
             Intent.ACTION_SEND_MULTIPLE -> {
-              intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.filterIsInstance<Uri>() ?: emptyList()
+              if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+              } else {
+                @Suppress("Deprecation")
+                intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.filterIsInstance<Uri>()
+              } ?: emptyList()
             }
             else -> emptyList()
           }
