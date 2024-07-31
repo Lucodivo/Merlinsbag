@@ -54,6 +54,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -215,7 +216,7 @@ fun ArticleDetailRoute(
     windowSizeClass = windowSizeClass,
     filter = filter,
     articlesWithImages = lazyArticleFilenames,
-    articleEnsembleTitles = ensembleUiState.articleEnsembles.map { it.title }, // TODO: prevent mapping on every recomposition
+    articleEnsembleTitles = ensembleUiState.articleEnsembleTitles,
     pagerState = pagerState,
     articleImageIndices = articleDetailViewModel.articleImageIndices,
     ensembleListState = articleDetailViewModel.ensembleListState,
@@ -381,18 +382,21 @@ fun ArticleDetailScreen(
             val thumbnailUris = articlesWithImages.lazyThumbImageUris.getUriStrings(articleIndex)
             item { Spacer(modifier = Modifier.width(8.dp)) }
             items(count = thumbnailUris.size) { thumbnailIndex ->
-              SelectableNoopImage(
-                uriString = thumbnailUris[thumbnailIndex],
-                contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
-                selected = selectedImages.contains(thumbnailIndex),
-                selectable = thumbnailsSelectable,
-                modifier = Modifier
-                    .size(thumbnailSize)
-                    .combinedClickable(
-                      onClick = { onClickThumbnail(thumbnailIndex) },
-                      onLongClick = { onLongPressThumbnail(thumbnailIndex) }
-                    )
-              )
+              val thumbnailUri = thumbnailUris[thumbnailIndex]
+              key(thumbnailUri) { // uriStrings are all constrained to be unique as they are files within the same directory
+                SelectableNoopImage(
+                  uriString = thumbnailUri,
+                  contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+                  selected = selectedImages.contains(thumbnailIndex),
+                  selectable = thumbnailsSelectable,
+                  modifier = Modifier
+                      .size(thumbnailSize)
+                      .combinedClickable(
+                        onClick = { onClickThumbnail(thumbnailIndex) },
+                        onLongClick = { onLongPressThumbnail(thumbnailIndex) }
+                      )
+                )
+              }
             }
             item { Spacer(modifier = Modifier.fillParentMaxWidth(thumbnailAndEnsembleHiddenPercent)) }
           }

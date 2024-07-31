@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.Event
+import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
 import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
@@ -51,7 +52,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDia
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.None
 
 data class ArticleEnsembleUiState(
-    val articleEnsembles: List<Ensemble>,
+    val articleEnsembleTitles: List<String>,
     val searchEnsembles: List<Ensemble>,
     val searchIsUniqueTitle: Boolean,
 )
@@ -133,11 +134,12 @@ class ArticleDetailViewModel @AssistedInject constructor(
       )
 
   val ensembleUiState: StateFlow<ArticleEnsembleUiState> = combine(
-    _articleId.flatMapLatest { ensembleRepository.getEnsemblesByArticle(it) }
-        .onEach { ensembles ->
-          cachedArticleEnsembles = ensembles
-          cachedArticleEnsembleIdSet = ensembles.map { it.id }.toSet()
-        },
+    _articleId.flatMapLatest {
+      ensembleRepository.getEnsemblesByArticle(it)
+    }.onEach { ensembles ->
+      cachedArticleEnsembles = ensembles
+      cachedArticleEnsembleIdSet = ensembles.map { it.id }.toSet()
+    }.listMap { it.title },
     _ensemblesSearchQuery.flatMapLatest { searchQuery ->
       if(searchQuery.isEmpty()) { flowOf(Pair(emptyList(), false)) }
       else ensembleRepository.searchAllEnsembles(searchQuery).zip(ensembleRepository.isEnsembleTitleUnique(searchQuery)){ searchEnsembles, unique ->
@@ -148,7 +150,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
   ) { articleEnsembles, searchResults, allEnsembles ->
     val searchEnsembles: List<Ensemble> = if(ensemblesSearchQuery.isEmpty()) allEnsembles else searchResults.first
     ArticleEnsembleUiState(
-      articleEnsembles = articleEnsembles,
+      articleEnsembleTitles = articleEnsembles,
       searchEnsembles = searchEnsembles.filter { !cachedArticleEnsembleIdSet.contains(it.id) },
       searchIsUniqueTitle = searchResults.second
     )

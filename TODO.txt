@@ -81,6 +81,8 @@ Bugs:
         - Seems to be a known problem with Google Play Services?
 QoL:
     - Preserve backstack between top level destinations
+    - Press back twice on root screen to exit app
+        - prevents accidental exiting of app, which can be a minor annoyance
 Settings Screen:
     - Export All Data
     - Rate & Review in-app
@@ -106,6 +108,7 @@ Performance:
             - Benefits:
                 - less storage/mem space
                 - simplified transferring data being as simple as a Long or array of Longs
+                - Compose key could potentially be a Long comparison instead of a String comparison
             - Drawbacks:
                 - less flexibility for changing the naming scheme of files in the future
                 - there is a tradeoff of having to reconstruct a filename string at runtime which is bottlenecked by whatever the performance of SimpleDateFormat().format() is

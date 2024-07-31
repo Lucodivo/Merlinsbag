@@ -43,6 +43,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -514,18 +515,20 @@ fun EnsemblesOverlappingImageRowColumn(
   ){
     items(lazyTitleAndUriStrings.size) { index ->
       val (rowTitle, lazyStrings) = lazyTitleAndUriStrings[index]
-      EnsembleOverlappingImageRow(
-        title = rowTitle,
-        lazyUriStrings = lazyStrings,
-        selected = selectedEnsembleIndices.contains(index),
-        selectable = selectable,
-        modifier = Modifier
-            .combinedClickable(
-              onClick = { onClick(index) },
-              onLongClick = { onLongPress(index) }
-            )
-            .fillMaxWidth(widthPercent.toFloat())
-      )
+      key(rowTitle){ // ensemble titles are constrained to be unique
+        EnsembleOverlappingImageRow(
+          title = rowTitle,
+          lazyUriStrings = lazyStrings,
+          selected = selectedEnsembleIndices.contains(index),
+          selectable = selectable,
+          modifier = Modifier
+              .combinedClickable(
+                onClick = { onClick(index) },
+                onLongClick = { onLongPress(index) }
+              )
+              .fillMaxWidth(widthPercent.toFloat())
+        )
+      }
     }
   }
 }

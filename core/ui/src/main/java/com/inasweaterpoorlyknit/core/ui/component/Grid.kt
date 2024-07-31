@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -103,23 +104,23 @@ fun SelectableStaggeredThumbnailGrid(
     onLongSelect: (index: Int) -> Unit,
     thumbnailUris: LazyUriStrings,
     selectedThumbnails: Set<Int>,
-) {
-  NoopVerticalStaggeredGrid {
-    items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
-        val uriString = thumbnailUris.getUriStrings(thumbnailGridItemIndex)
-        SelectableNoopImage(
-          uriString = uriString.firstOrNull(), // TODO: Animate between items?
-          contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
-          selected = selectedThumbnails.contains(thumbnailGridItemIndex),
-          selectable = selectable,
-          modifier = Modifier
-              .combinedClickable(
-                onClick = { onSelect(thumbnailGridItemIndex) },
-                onLongClick = { onLongSelect(thumbnailGridItemIndex) }
-              )
-              .fillMaxWidth()
-              .sizeIn(maxHeight = staggeredGridColumnMaxHeightDp),
-        )
+) = NoopVerticalStaggeredGrid {
+  items(count = thumbnailUris.size) { thumbnailGridItemIndex ->
+    val uriString = thumbnailUris.getUriStrings(thumbnailGridItemIndex)
+    key(uriString.firstOrNull()){ // uriStrings are all constrained to be unique as they are files within the same directory
+      SelectableNoopImage(
+        uriString = uriString.firstOrNull(), // TODO: Animate between items?
+        contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+        selected = selectedThumbnails.contains(thumbnailGridItemIndex),
+        selectable = selectable,
+        modifier = Modifier
+            .combinedClickable(
+              onClick = { onSelect(thumbnailGridItemIndex) },
+              onLongClick = { onLongSelect(thumbnailGridItemIndex) }
+            )
+            .fillMaxWidth()
+            .sizeIn(maxHeight = staggeredGridColumnMaxHeightDp),
+      )
     }
   }
 }
