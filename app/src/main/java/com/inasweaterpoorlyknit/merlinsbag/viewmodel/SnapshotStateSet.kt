@@ -7,7 +7,7 @@ import androidx.compose.runtime.snapshots.StateObject
 // Inefficient implementation, but delegating most of the implementation to the compose snapshot library
 // devs allows us to avoid any sort of real future maintenance while allowing for a nice user interface
 class SnapshotStateSet<K> private constructor(private val map: SnapshotStateMap<K, Unit> = mutableStateMapOf()) : StateObject by map, MutableSet<K> {
-  override val size: Int = map.size
+  override val size: Int get() = map.size
   override fun iterator() = map.keys.iterator()
   override fun add(element: K) = map.put(element, Unit) != null
   override fun remove(element: K) = map.remove(element) != null
