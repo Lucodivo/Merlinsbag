@@ -73,6 +73,7 @@ import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 import kotlinx.serialization.Serializable
+import staggeredHorizontallyAnimatedComposables
 
 private val headerModifier = Modifier.fillMaxWidth()
 private val itemHorizontalPadding = 8.dp
@@ -469,28 +470,6 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 }
 
 @Composable
-fun settingsScreenAnimatedRow(content: List<@Composable AnimatedVisibilityScope.() -> Unit>): List<@Composable () -> Unit> {
-  val animationFloat = remember { Animatable(initialValue = 0.0f) }
-  LaunchedEffect(content.size) {
-    animationFloat.animateTo(
-      targetValue = content.size * 0.1f + 0.2f,
-      animationSpec = TweenSpec(
-        durationMillis = 1000,
-        easing = LinearEasing,
-      )
-    )
-  }
-  return content.mapIndexed { index, item -> {
-      AnimatedVisibility(
-        visible = animationFloat.value >= (0.1f * index),
-        enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }),
-        exit = slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }),
-        content = item,
-      )
-  }}
-}
-
-@Composable
 fun SettingsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     showDeleteAllDataAlertDialog: Boolean,
@@ -538,8 +517,8 @@ fun SettingsScreen(
     onDismissTypography: () -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
-  val settingsRows = settingsScreenAnimatedRow(
-    listOf(
+  val settingsRows = staggeredHorizontallyAnimatedComposables(
+    content = listOf(
       { SettingsTitle(stringResource(R.string.appearance)) },
       {
         ColorPaletteRow(

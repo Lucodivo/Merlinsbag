@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateIntAsState
@@ -47,6 +48,7 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
 import kotlinx.serialization.Serializable
+import staggeredHorizontallyAnimatedComposables
 
 @Serializable
 object StatisticsRouteArgs
@@ -74,20 +76,22 @@ fun StatisticsRoute(statisticsViewModel: StatisticsViewModel = hiltViewModel()) 
 
 @Composable
 fun StatisticsRow(
-    text: String,
+    title: String,
+    value: String,
     modifier: Modifier = Modifier,
 ){
   Row(
     horizontalArrangement = Arrangement.SpaceBetween,
     modifier = modifier.fillMaxWidth()
-  ){
-    Text(text = text)
+  ) {
+    Text(title)
+    Text(value)
   }
 }
 
 @Composable
 fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
-  val thumbnailSize = 80.dp
+  val thumbnailSize = 120.dp
   var animateTopImagesIndex by remember { mutableStateOf(false) }
   val animateIndex by animateIntAsState(
     targetValue =
@@ -105,18 +109,17 @@ fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
     )
   )
   LaunchedEffect(Unit) { animateTopImagesIndex = true }
-  Box(
-    contentAlignment = Alignment.Center,
-    modifier = modifier.size(width = thumbnailSize, height = thumbnailSize)
-  ){
-    NoopImage(
-      uriString = if(animateIndex < uriStrings.size) uriStrings[animateIndex] else null,
-      contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
-      crossFadeMs = 0,
-      modifier = Modifier
-          .sizeIn(maxWidth = thumbnailSize, maxHeight = thumbnailSize)
-    )
-  }
+  NoopImage(
+    uriString = if(animateIndex < uriStrings.size) uriStrings[animateIndex] else null,
+    contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
+    crossFadeMs = 0,
+    modifier = modifier
+        .padding(vertical = 8.dp)
+        .size(
+          width = thumbnailSize,
+          height = thumbnailSize
+        )
+  )
 }
 
 @Composable
@@ -130,46 +133,61 @@ fun StatisticsScreen(
     topArticleMostImagesUriStrings: List<String>,
 ){
   val layoutDir = LocalLayoutDirection.current
-  val padding = 16.dp
-  val sublistIndentation = 32.dp
-  val subListModifier = Modifier.padding(start = sublistIndentation)
+  val padding = 32.dp
+  val subListModifier = Modifier.padding(start = padding)
+  val items = staggeredHorizontallyAnimatedComposables(
+    content = mutableListOf<@Composable AnimatedVisibilityScope.() -> Unit>(
+      { StatisticsRow(stringResource(R.string.article_count), articleCount.toString()) },
+      { StatisticsRow(stringResource(R.string.article_image_count), articleImageCount.toString()) },
+      { StatisticsRow(stringResource(R.string.ensemble_count), ensembleCount.toString()) },
+      { StatisticsRow(stringResource(R.string.top_articles), "") },
+      { StatisticsRow(stringResource(R.string.most_ensembles), topArticleMostEnsemblesCount.first.toString(), modifier = subListModifier) },
+      if(topArticleMostImagesUriStrings.isNotEmpty()){
+        {
+          StatisticsSlideShow(
+            uriStrings = topArticleMostEnsemblesCount.second,
+            modifier = subListModifier.padding(start = padding)
+          )
+        }
+      } else{
+        { StatisticsRow("[${stringResource(R.string.no_articles_available)}]", "", modifier = subListModifier) }
+      },
+      { StatisticsRow(stringResource(R.string.most_images), topArticleMostImagesUriStrings.size.toString(), modifier = subListModifier) },
+      if(topArticleMostImagesUriStrings.isNotEmpty()){
+        {
+          StatisticsSlideShow(
+            uriStrings = topArticleMostImagesUriStrings,
+            modifier = subListModifier.padding(start = padding)
+          )
+        }
+      } else{
+        { StatisticsRow("[${stringResource(R.string.no_articles_available)}]", "", modifier = subListModifier) }
+      },
+      { StatisticsRow(stringResource(R.string.top_ensembles), "") },
+    ).apply{
+      addAll(
+        if(popularEnsembles.isNotEmpty()){
+          popularEnsembles.map { popularEnsemble ->
+            { StatisticsRow(popularEnsemble.title, popularEnsemble.count.toString(), modifier = subListModifier) }
+          }
+        } else {
+          listOf<@Composable AnimatedVisibilityScope.() -> Unit>(
+            { StatisticsRow("[${stringResource(R.string.no_ensembles_available)}]", "", modifier = subListModifier) }
+          )
+        }
+      )
+    }.toList()
+  )
   LazyColumn(
-    modifier = Modifier.fillMaxSize().padding(
-      start = systemBarPaddingValues.calculateStartPadding(layoutDir) + padding,
-      end = systemBarPaddingValues.calculateEndPadding(layoutDir) + padding,
-    ),
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(
+          start = systemBarPaddingValues.calculateStartPadding(layoutDir) + padding,
+          end = systemBarPaddingValues.calculateEndPadding(layoutDir) + padding,
+        ),
   ) {
     item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateTopPadding() + padding)) }
-    item { StatisticsRow("${stringResource(R.string.article_count)}: $articleCount") }
-    item { StatisticsRow("${stringResource(R.string.article_image_count)}: $articleImageCount") }
-    item { StatisticsRow("${stringResource(R.string.ensemble_count)}: $ensembleCount") }
-    item { StatisticsRow("${stringResource(R.string.top_articles)}:") }
-    item { StatisticsRow("${stringResource(R.string.most_ensembles)}: ${topArticleMostEnsemblesCount.first}", modifier = subListModifier) }
-    if(topArticleMostImagesUriStrings.isNotEmpty()){
-      item{
-        StatisticsSlideShow(
-          uriStrings = topArticleMostEnsemblesCount.second,
-          modifier = subListModifier.padding(start = sublistIndentation)
-        )
-      }
-    }
-    item { StatisticsRow("${stringResource(R.string.most_images)}: ${topArticleMostImagesUriStrings.size}", modifier = subListModifier) }
-    if(topArticleMostImagesUriStrings.isNotEmpty()){
-      item{
-        StatisticsSlideShow(
-          uriStrings = topArticleMostImagesUriStrings,
-          modifier = subListModifier.padding(start = sublistIndentation)
-        )
-      }
-    }
-    item { StatisticsRow("${stringResource(R.string.top_ensembles)}:") }
-    if(popularEnsembles.isNotEmpty()){
-      popularEnsembles.forEach { popularEnsemble ->
-        item { StatisticsRow("${popularEnsemble.title}: ${popularEnsemble.count}", modifier = subListModifier) }
-      }
-    } else {
-      item { StatisticsRow("[${stringResource(R.string.no_ensembles_available)}]", modifier = subListModifier) }
-    }
+    items(items.size){ index -> items[index]() }
     item { Spacer(modifier = Modifier.height(systemBarPaddingValues.calculateBottomPadding() + padding)) }
   }
 }

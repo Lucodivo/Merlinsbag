@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.core.ui.state
+package com.inasweaterpoorlyknit.core.ui.animate
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable

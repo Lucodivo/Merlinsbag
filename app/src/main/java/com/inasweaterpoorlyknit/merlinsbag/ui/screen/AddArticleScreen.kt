@@ -53,7 +53,7 @@ import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.previewAssetBitmap
-import com.inasweaterpoorlyknit.core.ui.state.animateClosestRotationAsState
+import com.inasweaterpoorlyknit.core.ui.animate.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
