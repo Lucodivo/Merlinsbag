@@ -90,6 +90,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
 
+    // In-App Google Play Reviews
+    implementation(libs.review)
+    implementation(libs.review.ktx)
+
     // Firebase (crashlytics)
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.crashlytics.ktx)

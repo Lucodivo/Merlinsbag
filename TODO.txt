@@ -53,6 +53,8 @@ Compose Navigation:
     - Enable a more robust back stack
         - Ensure the proper navigation UI element is highlighted
         - Ensure that back history is wiped on "Delete All Data"
+Refactor:
+    - ViewModels should hold a single general UiState instead of individual values
 Bugs:
     - Out of Memory (OOM) crash (or silent PROCESS ENDED while app is in the background due to camera contract) when processing an image in AddArticleScreen
         - Seen easily running application on an Motorola Z Play, 3GB RAM, API 26
@@ -138,3 +140,6 @@ Accessibility:
                 - If image or icon of a dog, do not say "image of a dog" or "icon of a dog", just say "a dog"
                     - although it may be helpful to describe a more specific type of image (ex: graph, chart, headshot, etc.)
                 - alt text can also be a place for creative expressions
+
+Under utilized functionality
+    - LazyColumn: stickyHeader items
