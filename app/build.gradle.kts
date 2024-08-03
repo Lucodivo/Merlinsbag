@@ -72,7 +72,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.tracing.ktx)
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.core) // used for @Serializable compose route objects / data classes
 
     // Compose
     implementation(libs.androidx.activity.compose)
@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.navigation.compose)
 
     // In-App Google Play Reviews
     implementation(libs.review)
@@ -106,7 +107,6 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.material3.adaptive.navigation.suite.android)
     androidTestImplementation(libs.androidx.navigation.testing)
-    implementation(libs.androidx.navigation.compose)
 
     androidTestImplementation(libs.androidx.core.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)

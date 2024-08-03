@@ -11,9 +11,9 @@ import androidx.compose.runtime.remember
 
 @Composable
 fun staggeredHorizontallyAnimatedComposables(
+    content: List<@Composable AnimatedVisibilityScope.() -> Unit>,
     millisecondsPerRow: Int = 30,
-    content: List<@Composable AnimatedVisibilityScope.() -> Unit>)
-: List<@Composable () -> Unit> {
+): List<@Composable () -> Unit> {
   val animationFloat = remember { Animatable(initialValue = 0.0f) }
   LaunchedEffect(content.size) {
     animationFloat.animateTo(

@@ -29,6 +29,7 @@ Ensembles:
     - Composite ensembles?
         - Exclusive: #Goth & #Tops
         - Inclusive: #HealthGoth | #Hiking
+    - Back button should clear search before exiting?
 Features:
     - Collage
     - Share!
