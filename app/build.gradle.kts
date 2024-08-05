@@ -110,6 +110,7 @@ dependencies {
 
     androidTestImplementation(libs.androidx.core.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -127,4 +128,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     kspTest(libs.hilt.compiler)
     kspAndroidTest(libs.hilt.compiler)
+
+    testImplementation(libs.mockk)
 }
