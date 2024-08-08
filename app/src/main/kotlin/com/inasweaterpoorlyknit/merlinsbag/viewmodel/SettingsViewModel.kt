@@ -50,7 +50,7 @@ class SettingsViewModel @Inject constructor(
     initialValue = UserPreferences(),
   )
 
-  fun clearCache() {
+  fun onClickClearCache() {
     // Disable clearing cache until view model is recreated
     clearCacheEnabled = false
     viewModelScope.launch(Dispatchers.IO) {
@@ -113,6 +113,7 @@ class SettingsViewModel @Inject constructor(
   fun onSelectedImageQuality(newImageQuality: ImageQuality) {
     expandedImageQualityMenu = false
     cachedImageQuality?.let { oldImageQuality ->
+      if(oldImageQuality == newImageQuality) return
       val imageQualityRaised = oldImageQuality.ordinal < newImageQuality.ordinal
       if(imageQualityRaised){
         selectedImageQuality = newImageQuality

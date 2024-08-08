@@ -31,7 +31,7 @@ class Timer {
     private const val NANOSECONDS_PER_SECOND = 1_000_000_000
   }
 
-  fun nanosecondsToString(nanoseconds: Long): String {
+  private fun nanosecondsToString(nanoseconds: Long): String {
     return when(nanoseconds) {
       in 0..<1_000 -> {
         "${nanoseconds}ns"

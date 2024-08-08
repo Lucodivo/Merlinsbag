@@ -1,12 +1,5 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.TweenSpec
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -152,7 +145,7 @@ fun SettingsRoute(
     onClickWelcomePage = { settingsViewModel.showWelcomePage() },
     onClickTipsAndInfoPage = navigateToTipsAndInfo,
     onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
-    onClickClearCache = settingsViewModel::clearCache,
+    onClickClearCache = settingsViewModel::onClickClearCache,
     onClickDeleteAllData = settingsViewModel::onClickDeleteAllData,
     onDismissDeleteAllDataAlertDialog = settingsViewModel::onDismissDeleteAllDataAlertDialog,
     onConfirmDeleteAllDataAlertDialog = settingsViewModel::onConfirmDeleteAllDataAlertDialog,
