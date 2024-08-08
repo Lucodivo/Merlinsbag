@@ -1,14 +1,12 @@
-package com.inasweaterpoorlyknit.core.repository
+package com.inasweaterpoorlyknit.core.data.repository
 
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.inasweaterpoorlyknit.core.common.testing.createFakeUriString
-import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
-import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
+import com.inasweaterpoorlyknit.core.testing.createFakeUriString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -19,7 +17,7 @@ import org.junit.runner.RunWith
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
-class LazyEnsembleThumbnailsRepositoryTests {
+class EnsembleRepositoryTests {
   private lateinit var articleRepository: ArticleRepository
   private lateinit var ensembleRepository: EnsembleRepository
   private lateinit var database: NoopDatabase

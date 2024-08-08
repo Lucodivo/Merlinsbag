@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.core.common.testing
+package com.inasweaterpoorlyknit.core.testing
 
 import android.net.Uri
 import java.util.UUID

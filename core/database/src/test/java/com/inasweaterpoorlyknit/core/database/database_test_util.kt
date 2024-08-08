@@ -1,12 +1,12 @@
 package com.inasweaterpoorlyknit.core.database
 
-import com.inasweaterpoorlyknit.core.common.testing.Counter
-import com.inasweaterpoorlyknit.core.common.testing.createFakeUriString
-import com.inasweaterpoorlyknit.core.common.testing.randUUIDString
 import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
+import com.inasweaterpoorlyknit.core.testing.Counter
+import com.inasweaterpoorlyknit.core.testing.createFakeUriString
+import com.inasweaterpoorlyknit.core.testing.randUUIDString
 
 fun createCounterString() = Counter.next().toString()
 fun createCounterString(count: Int) = Array(count){ Counter.next().toString() }
