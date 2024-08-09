@@ -18,6 +18,7 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEO
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,27 +29,68 @@ class SettingsViewModel @Inject constructor(
     private val purgeRepository: PurgeRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
 ): ViewModel() {
+
+  enum class DropdownMenuState {
+    None,
+    DarkMode,
+    ColorPalette,
+    HighContrast,
+    Typography,
+    ImageQuality,
+  }
+
+  enum class AlertDialogState {
+    None,
+    DeleteAllData,
+    ImageQuality,
+  }
+
+  data class PreferencesState(
+    val darkMode: DarkMode,
+    val colorPalette: ColorPalette,
+    val highContrast: HighContrast,
+    val imageQuality: ImageQuality,
+    val typography: Typography,
+  )
+
   var cachePurged by mutableStateOf(Event<Unit>(null))
   var dataDeleted by mutableStateOf(Event<Unit>(null))
-  var showDeleteAllDataAlertDialog by mutableStateOf(false)
-  var showImageQualityAlertDialog by mutableStateOf(false)
-  var expandedDarkModeMenu by mutableStateOf(false)
-  var expandedColorPaletteMenu by mutableStateOf(false)
-  var expandedHighContrastMenu by mutableStateOf(false)
-  var expandedTypographyMenu by mutableStateOf(false)
-  var expandedImageQualityMenu by mutableStateOf(false)
+  var dropdownMenuState by mutableStateOf(DropdownMenuState.None)
+  var alertDialogState by mutableStateOf(AlertDialogState.None)
   var clearCacheEnabled by mutableStateOf(true)
+  var highContrastEnabled by mutableStateOf(true)
 
   private var cachedImageQuality: ImageQuality? = null
   private var selectedImageQuality: ImageQuality? = null
 
   val userPreferences = userPreferencesRepository.userPreferences.onEach {
+    // System dynamic color schemes do not currently support high contrast
+    highContrastEnabled = it.colorPalette != ColorPalette.SYSTEM_DYNAMIC
     cachedImageQuality = it.imageQuality
+  }.map {
+    PreferencesState(
+      darkMode = it.darkMode,
+      colorPalette = it.colorPalette,
+      highContrast = if(it.colorPalette != ColorPalette.SYSTEM_DYNAMIC) it.highContrast else HighContrast.OFF,
+      imageQuality = it.imageQuality,
+      typography = it.typography,
+    )
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-    initialValue = UserPreferences(),
+    initialValue = with(UserPreferences()){
+      PreferencesState(
+        darkMode = darkMode,
+        colorPalette = colorPalette,
+        highContrast = highContrast,
+        imageQuality = imageQuality,
+        typography = typography,
+      )
+    },
   )
+
+  private fun dismissDropdownMenu() { dropdownMenuState = DropdownMenuState.None }
+  private fun dismissAlertDialog() { alertDialogState = AlertDialogState.None }
 
   fun onClickClearCache() {
     // Disable clearing cache until view model is recreated
@@ -59,47 +101,48 @@ class SettingsViewModel @Inject constructor(
     }
   }
 
-  fun onClickDeleteAllData() { showDeleteAllDataAlertDialog = true }
-  fun onDismissDeleteAllDataAlertDialog() { showDeleteAllDataAlertDialog = false }
+  fun onClickDeleteAllData() { alertDialogState = AlertDialogState.DeleteAllData }
+  fun onDismissDeleteAllDataAlertDialog() = dismissAlertDialog()
   fun onConfirmDeleteAllDataAlertDialog() {
-    showDeleteAllDataAlertDialog = false
+    dismissAlertDialog()
     viewModelScope.launch(Dispatchers.IO) {
       purgeRepository.purgeUserData()
       dataDeleted = Event(Unit)
     }
   }
 
-  fun onClickDarkMode() { expandedDarkModeMenu = !expandedDarkModeMenu }
-  fun onDismissDarkMode() { expandedDarkModeMenu = false }
+
+  fun onClickDarkMode() { dropdownMenuState = DropdownMenuState.DarkMode }
+  fun onDismissDarkMode() = dismissDropdownMenu()
   fun setDarkMode(darkMode: DarkMode) {
-    expandedDarkModeMenu = false
+    dismissDropdownMenu()
     viewModelScope.launch(Dispatchers.IO){
       userPreferencesRepository.setDarkMode(darkMode)
     }
   }
 
-  fun onClickColorPalette() { expandedColorPaletteMenu = !expandedColorPaletteMenu }
-  fun onDismissColorPalette() { expandedColorPaletteMenu = false }
+  fun onClickColorPalette() { dropdownMenuState = DropdownMenuState.ColorPalette }
+  fun onDismissColorPalette() = dismissDropdownMenu()
   fun setColorPalette(colorPalette: ColorPalette) {
-    expandedColorPaletteMenu = false
+    dismissDropdownMenu()
     viewModelScope.launch(Dispatchers.IO){
       userPreferencesRepository.setColorPalette(colorPalette)
     }
   }
 
-  fun onClickHighContrast() { expandedHighContrastMenu = !expandedHighContrastMenu }
-  fun onDismissHighContrast() { expandedHighContrastMenu = false }
+  fun onClickHighContrast() { dropdownMenuState = DropdownMenuState.HighContrast }
+  fun onDismissHighContrast() = dismissDropdownMenu()
   fun setHighContrast(highContrast: HighContrast) {
-    expandedHighContrastMenu = false
+    dismissDropdownMenu()
     viewModelScope.launch(Dispatchers.IO){
       userPreferencesRepository.setHighContrast(highContrast)
     }
   }
 
-  fun onClickTypography() { expandedTypographyMenu = !expandedTypographyMenu }
-  fun onDismissTypography() { expandedTypographyMenu = false }
+  fun onClickTypography() { dropdownMenuState = DropdownMenuState.Typography }
+  fun onDismissTypography() = dismissDropdownMenu()
   fun setTypography(typography: Typography) {
-    expandedTypographyMenu = false
+    dismissDropdownMenu()
     viewModelScope.launch(Dispatchers.IO){
       userPreferencesRepository.setTypography(typography)
     }
@@ -108,27 +151,25 @@ class SettingsViewModel @Inject constructor(
   private fun setImageQuality(imageQuality: ImageQuality) = viewModelScope.launch(Dispatchers.IO){
     userPreferencesRepository.setImageQuality(imageQuality)
   }
-  fun onClickImageQuality() { expandedImageQualityMenu = !expandedImageQualityMenu }
-  fun onDismissImageQualityDropdown() { expandedImageQualityMenu = false }
+  fun onClickImageQuality() { dropdownMenuState = DropdownMenuState.ImageQuality }
+  fun onDismissImageQualityDropdown() = dismissDropdownMenu()
   fun onSelectedImageQuality(newImageQuality: ImageQuality) {
-    expandedImageQualityMenu = false
+    dismissDropdownMenu()
     cachedImageQuality?.let { oldImageQuality ->
       if(oldImageQuality == newImageQuality) return
       val imageQualityRaised = oldImageQuality.ordinal < newImageQuality.ordinal
       if(imageQualityRaised){
         selectedImageQuality = newImageQuality
-        showImageQualityAlertDialog = true
+        alertDialogState = AlertDialogState.ImageQuality
       } else {
         setImageQuality(newImageQuality)
       }
     }
   }
-  fun onDismissImageQualityAlertDialog() { showImageQualityAlertDialog = false }
+  fun onDismissImageQualityAlertDialog() = dismissAlertDialog()
   fun onConfirmImageQualityAlertDialog() {
-    showImageQualityAlertDialog = false
-    selectedImageQuality?.let {
-      setImageQuality(it)
-    }
+    dismissAlertDialog()
+    selectedImageQuality?.let { setImageQuality(it) }
     selectedImageQuality = null
   }
 

@@ -14,16 +14,19 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.io.IOException
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [26])
 class ArticleRepositoryTests {
     private lateinit var context: Context
     private lateinit var articleRepository: ArticleRepository
     private lateinit var database: NoopDatabase
 
     @Before
-    fun createDb() {
+    fun beforeEach() {
         context = ApplicationProvider.getApplicationContext()
         database = Room.inMemoryDatabaseBuilder(context, NoopDatabase::class.java)
             .allowMainThreadQueries()
@@ -37,7 +40,7 @@ class ArticleRepositoryTests {
 
     @After
     @Throws(IOException::class)
-    fun closeDb() { database.close() }
+    fun afterEach() { database.close() }
 
     @Test
     @Throws(Exception::class)

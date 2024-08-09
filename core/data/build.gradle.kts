@@ -29,22 +29,23 @@ dependencies {
   implementation(projects.core.common)
   implementation(projects.core.datastore)
   implementation(projects.core.model)
-  androidTestImplementation(projects.core.testing)
+  testImplementation(projects.core.testing)
 
   implementation(libs.androidx.core.ktx)
 
   // Testing
   testImplementation(libs.junit)
-  androidTestImplementation(libs.androidx.junit)
-  androidTestImplementation(libs.androidx.espresso.core)
-  androidTestImplementation(libs.androidx.room.runtime)
-  androidTestImplementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
-  androidTestImplementation(libs.androidx.room.testing)
+  testImplementation(libs.androidx.junit)
+  testImplementation(libs.androidx.espresso.core)
+  testImplementation(libs.androidx.room.runtime)
+  testImplementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
+  testImplementation(libs.androidx.room.testing)
+  testImplementation(libs.robolectric)
 
   // Hilt
   implementation(libs.hilt.android)
   testImplementation(libs.hilt.android.testing)
-  androidTestImplementation(libs.hilt.android.testing)
+  testImplementation(libs.hilt.android.testing)
   ksp(libs.hilt.compiler)
   kspTest(libs.hilt.compiler)
   kspAndroidTest(libs.hilt.compiler)

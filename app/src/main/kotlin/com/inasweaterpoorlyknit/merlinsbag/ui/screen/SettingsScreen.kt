@@ -117,19 +117,11 @@ fun SettingsRoute(
   }
 
   SettingsScreen(
-    showDeleteAllDataAlertDialog = settingsViewModel.showDeleteAllDataAlertDialog,
-    showImageQualityAlertDialog = settingsViewModel.showImageQualityAlertDialog,
-    expandDarkModeDropdownMenu = settingsViewModel.expandedDarkModeMenu,
-    expandColorPaletteDropdownMenu = settingsViewModel.expandedColorPaletteMenu,
-    expandHighContrastDropdownMenu = settingsViewModel.expandedHighContrastMenu,
-    expandTypographyDropdownMenu = settingsViewModel.expandedTypographyMenu,
-    expandImageQualityDropdownMenu = settingsViewModel.expandedImageQualityMenu,
+    alertDialogState = settingsViewModel.alertDialogState,
+    dropdownMenuState = settingsViewModel.dropdownMenuState,
+    highContrastEnabled = settingsViewModel.highContrastEnabled,
     clearCacheEnabled = settingsViewModel.clearCacheEnabled,
-    darkMode = userPreferences.darkMode,
-    colorPalette = userPreferences.colorPalette,
-    highContrast = userPreferences.highContrast,
-    imageQuality = userPreferences.imageQuality,
-    typography = userPreferences.typography,
+    preferencesState = userPreferences,
     onClickDeveloper = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
     onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
     onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
@@ -465,19 +457,11 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 @Composable
 fun SettingsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    showDeleteAllDataAlertDialog: Boolean,
-    showImageQualityAlertDialog: Boolean,
-    expandDarkModeDropdownMenu: Boolean,
-    expandColorPaletteDropdownMenu: Boolean,
-    expandHighContrastDropdownMenu: Boolean,
-    expandImageQualityDropdownMenu: Boolean,
-    expandTypographyDropdownMenu: Boolean,
+    alertDialogState: SettingsViewModel.AlertDialogState,
+    dropdownMenuState: SettingsViewModel.DropdownMenuState,
+    highContrastEnabled: Boolean,
     clearCacheEnabled: Boolean,
-    darkMode: DarkMode,
-    colorPalette: ColorPalette,
-    typography: Typography,
-    highContrast: HighContrast,
-    imageQuality: ImageQuality,
+    preferencesState: SettingsViewModel.PreferencesState,
     onClickDeveloper: () -> Unit,
     onClickSource: () -> Unit,
     onClickEccohedra: () -> Unit,
@@ -515,8 +499,8 @@ fun SettingsScreen(
       { SettingsTitle(stringResource(R.string.appearance)) },
       {
         ColorPaletteRow(
-          selectedColorPalette = colorPalette,
-          expandedMenu = expandColorPaletteDropdownMenu,
+          selectedColorPalette = preferencesState.colorPalette,
+          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.ColorPalette,
           onClick = onClickColorPalette,
           onSelectColorPalette = onSelectColorPalette,
           onDismiss = onDismissColorPalette,
@@ -524,8 +508,8 @@ fun SettingsScreen(
       },
       {
         TypographyRow(
-          selectedTypography = typography,
-          expandedMenu = expandTypographyDropdownMenu,
+          selectedTypography = preferencesState.typography,
+          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.Typography,
           onClick = onClickTypography,
           onSelectTypography = onSelectTypography,
           onDismiss = onDismissTypography,
@@ -533,19 +517,18 @@ fun SettingsScreen(
       },
       {
         DarkModeRow(
-          selectedDarkMode = darkMode,
-          expandedMenu = expandDarkModeDropdownMenu,
+          selectedDarkMode = preferencesState.darkMode,
+          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.DarkMode,
           onClick = onClickDarkMode,
           onSelectDarkMode = onSelectDarkMode,
           onDismiss = onDismissDarkMode,
         )
       },
       {
-        val systemDynamic = colorPalette == ColorPalette.SYSTEM_DYNAMIC
         HighContrastRow(
-          enabled = !systemDynamic, // System dynamic color schemes do not currently support high contrast
-          selectedHighContrast = if(systemDynamic) HighContrast.OFF else highContrast,
-          expandedMenu = expandHighContrastDropdownMenu,
+          enabled = highContrastEnabled,
+          selectedHighContrast = preferencesState.highContrast,
+          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.HighContrast,
           onClick = onClickHighContrast,
           onSelectHighContrast = onSelectHighContrast,
           onDismiss = onDismissHighContrast,
@@ -561,8 +544,8 @@ fun SettingsScreen(
       { SettingsTitle(stringResource(R.string.data)) },
       {
         ImageQualityRow(
-          selectedImageQuality = imageQuality,
-          expandedMenu = expandImageQualityDropdownMenu,
+          selectedImageQuality = preferencesState.imageQuality,
+          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.ImageQuality,
           onClick = onClickImageQuality,
           onSelectImageQuality = onSelectImageQuality,
           onDismiss = onDismissImageQuality,
@@ -596,12 +579,12 @@ fun SettingsScreen(
     }
   }
   DeleteAllDataAlertDialog(
-    visible = showDeleteAllDataAlertDialog,
+    visible = alertDialogState == SettingsViewModel.AlertDialogState.DeleteAllData,
     onDismiss = onDismissDeleteAllDataAlertDialog,
     onConfirm = onConfirmDeleteAllDataAlertDialog,
   )
   ImageQualityAlertDialog(
-    visible = showImageQualityAlertDialog,
+    visible = alertDialogState == SettingsViewModel.AlertDialogState.ImageQuality,
     onDismiss = onDismissImageQualityAlertDialog,
     onConfirm = onConfirmImageQualityAlertDialog,
   )
@@ -746,35 +729,25 @@ fun DeleteAllDataAlertDialog(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilSettingsScreen(
-    showDeleteAllDataAlertDialog: Boolean = false,
-    showImageQualityAlertDialog: Boolean = false,
-    expandDarkModeDropdownMenu: Boolean = false,
-    expandColorPaletteDropdownMenu: Boolean = false,
-    expandHighContrastDropdownMenu: Boolean = false,
-    expandTypographyDropdownMenu: Boolean = false,
-    expandImageQualityDropdownMenu: Boolean = false,
+    alertDialogState: SettingsViewModel.AlertDialogState = SettingsViewModel.AlertDialogState.None,
+    dropdownMenuState: SettingsViewModel.DropdownMenuState = SettingsViewModel.DropdownMenuState.None,
+    highContrastEnabled: Boolean = true,
     clearCacheEnabled: Boolean = true,
-    darkMode: DarkMode = DarkMode.SYSTEM,
-    colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
-    highContrast: HighContrast = HighContrast.OFF,
-    typography: Typography = Typography.DEFAULT,
-    imageQuality: ImageQuality = ImageQuality.STANDARD,
-) = NoopTheme(darkMode = darkMode) {
+    preferencesState: SettingsViewModel.PreferencesState = SettingsViewModel.PreferencesState(
+      darkMode = DarkMode.DARK,
+      colorPalette = ColorPalette.ROAD_WARRIOR,
+      highContrast = HighContrast.OFF,
+      imageQuality = ImageQuality.STANDARD,
+      typography = Typography.DEFAULT,
+    )
+) = NoopTheme(darkMode = preferencesState.darkMode) {
   Surface {
     SettingsScreen(
-      showDeleteAllDataAlertDialog = showDeleteAllDataAlertDialog,
-      showImageQualityAlertDialog = showImageQualityAlertDialog,
-      expandDarkModeDropdownMenu = expandDarkModeDropdownMenu,
-      expandColorPaletteDropdownMenu = expandColorPaletteDropdownMenu,
-      expandHighContrastDropdownMenu = expandHighContrastDropdownMenu,
-      expandTypographyDropdownMenu = expandTypographyDropdownMenu,
-      expandImageQualityDropdownMenu = expandImageQualityDropdownMenu,
+      alertDialogState = alertDialogState,
+      dropdownMenuState = dropdownMenuState,
+      highContrastEnabled = highContrastEnabled,
       clearCacheEnabled = clearCacheEnabled,
-      darkMode = darkMode,
-      colorPalette = colorPalette,
-      typography = typography,
-      imageQuality = imageQuality,
-      highContrast = highContrast,
+      preferencesState = preferencesState,
       onClickDeveloper = {}, onClickSource = {}, onClickEccohedra = {},
       onClickWelcomePage = {}, onClickTipsAndInfoPage = {}, onClickPrivacyInfo = {},
       onClickClearCache = {}, onClickDeleteAllData = {}, onClickStatistics = {},
@@ -787,8 +760,8 @@ fun PreviewUtilSettingsScreen(
   }
 }
 
-@SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK)
-@LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen(darkMode = DarkMode.DARK, colorPalette = ColorPalette.SYSTEM_DYNAMIC)
-@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(showDeleteAllDataAlertDialog = true, darkMode = DarkMode.LIGHT)
+@SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen()
+@LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen()
+@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(alertDialogState = SettingsViewModel.AlertDialogState.DeleteAllData)
 @Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion
