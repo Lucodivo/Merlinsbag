@@ -22,13 +22,12 @@ import javax.inject.Inject
 class CameraViewModel @Inject constructor(
     @ApplicationContext val context: Context,
 ): ViewModel() {
+
   var takePictureUri: Uri? = null
   var pictureInProgress = false
-
   var showPermissionsAlert by mutableStateOf(false)
-
   var finished by mutableStateOf(Event<Unit>(null))
-  var launchSettings by mutableStateOf(Event<Unit>(null))
+  var launchSystemAppSettings by mutableStateOf(Event<Unit>(null))
 
   fun onNeverAskAgain() { showPermissionsAlert = true }
   fun onDismissPermissionsAlert() {
@@ -37,7 +36,7 @@ class CameraViewModel @Inject constructor(
   }
   fun onConfirmPermissionsAlert() {
     showPermissionsAlert = false
-    launchSettings = Event(Unit)
+    launchSystemAppSettings = Event(Unit)
     finished = Event(Unit)
   }
 

@@ -51,6 +51,12 @@ class AddArticleViewModel @AssistedInject constructor(
     ): AddArticleViewModel
   }
 
+  enum class DialogState {
+    None,
+    Discard,
+    Attach,
+  }
+
   companion object {
     private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
   }
@@ -64,8 +70,7 @@ class AddArticleViewModel @AssistedInject constructor(
   var finished by mutableStateOf(Event<Unit>(null))
   var imageProcessingError by mutableStateOf(Event<Int>(null))
   var attachArticleIndex by mutableStateOf<Int?>(null)
-  var showDiscardAlertDialog by mutableStateOf(false)
-  var showAttachDialog by mutableStateOf(false)
+  var dialogState by mutableStateOf(DialogState.None)
 
   val attachToArticleEnabled = articleId == null
 
@@ -90,11 +95,19 @@ class AddArticleViewModel @AssistedInject constructor(
   fun removeAttachedArticle() { attachArticleIndex = null }
   fun addAttachedArticle(articleIndex: Int) { attachArticleIndex = articleIndex }
 
-  fun onClickDiscard() { showDiscardAlertDialog = true }
-  fun onDismissDiscardDialog() { showDiscardAlertDialog = false }
+  private fun dismissDialog() {
+    if(dialogState != DialogState.None) dialogState = DialogState.None
+  }
 
-  fun onClickAttach() { showAttachDialog = true }
-  fun onDismissAttachDialog() { showAttachDialog = false }
+  fun onClickDiscard() { dialogState = DialogState.Discard }
+  fun onDismissDiscardDialog() = dismissDialog()
+  fun onDiscard() {
+    dismissDialog()
+    nextSubject()
+  }
+
+  fun onClickAttach() { dialogState = DialogState.Attach }
+  fun onDismissAttachDialog() = dismissDialog()
 
   fun onWidenClicked() {
     processing = true
@@ -118,13 +131,8 @@ class AddArticleViewModel @AssistedInject constructor(
     rotation = rotations[rotationIndex]
   }
 
-  fun onDiscard() {
-    showDiscardAlertDialog = false
-    nextSubject()
-  }
-
   fun onSave() {
-    showAttachDialog = false
+    dismissDialog()
     val stopWatch = Timer()
     lateinit var bitmapToSave: Bitmap
     val rotationMatrix = Matrix()

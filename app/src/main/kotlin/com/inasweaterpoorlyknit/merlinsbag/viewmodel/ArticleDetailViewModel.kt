@@ -38,25 +38,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenEditMode.EnabledSelectedThumbnails
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenEditMode.EnabledGeneral
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenEditMode.EnabledAllThumbnails
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenEditMode.EnabledSelectedEnsembles
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenEditMode.Disabled
-
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.DeleteArticle
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.DeleteArticleByRemovingAllArticles
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.ExportPermissions
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.RemoveFromEnsembles
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.RemoveImages
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailScreenAlertDialogMode.None
-
-data class ArticleEnsembleUiState(
-    val articleEnsembleTitles: List<String>,
-    val searchEnsembles: List<Ensemble>,
-    val searchIsUniqueTitle: Boolean,
-)
-
 @HiltViewModel(assistedFactory = ArticleDetailViewModel.ArticleDetailViewModelFactory::class)
 class ArticleDetailViewModel @AssistedInject constructor(
     @Assisted("ensembleId") private val ensembleId: String?,
@@ -64,6 +45,29 @@ class ArticleDetailViewModel @AssistedInject constructor(
     val articleRepository: ArticleRepository,
     val ensembleRepository: EnsembleRepository,
 ): ViewModel() {
+
+  data class ArticleEnsembleState(
+      val articleEnsembleTitles: List<String>,
+      val searchEnsembles: List<Ensemble>,
+      val searchIsUniqueTitle: Boolean,
+  )
+
+  enum class EditState {
+    EnabledGeneral,
+    EnabledSelectedEnsembles,
+    EnabledSelectedThumbnails,
+    EnabledAllThumbnails,
+    Disabled,
+  }
+
+  enum class AlertDialogState {
+    DeleteArticle,
+    DeleteArticleByRemovingAllArticles,
+    ExportPermissions,
+    RemoveFromEnsembles,
+    RemoveImages,
+    None,
+  }
 
   @AssistedFactory
   interface ArticleDetailViewModelFactory {
@@ -83,8 +87,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
   val articleBeingExported = mutableStateSetOf<Int>()
   val newlyAddedEnsembles = mutableStateSetOf<String>()
 
-  var editMode by mutableStateOf(Disabled)
-  var alertDialogMode by mutableStateOf(None)
+  var editState by mutableStateOf(EditState.Disabled)
+  var alertDialogState by mutableStateOf(AlertDialogState.None)
   var showAddToEnsemblesDialog by mutableStateOf(false)
 
   var exportedImage by mutableStateOf(Event<Uri>(null))
@@ -133,7 +137,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
       )
 
-  val ensembleUiState: StateFlow<ArticleEnsembleUiState> = combine(
+  val ensembleUiState: StateFlow<ArticleEnsembleState> = combine(
     _articleId.flatMapLatest {
       ensembleRepository.getEnsemblesByArticle(it)
     }.onEach { ensembles ->
@@ -149,19 +153,23 @@ class ArticleDetailViewModel @AssistedInject constructor(
     ensembleRepository.getAllEnsembles().onEach { cachedAllEnsembles = it },
   ) { articleEnsembles, searchResults, allEnsembles ->
     val searchEnsembles: List<Ensemble> = if(ensemblesSearchQuery.isEmpty()) allEnsembles else searchResults.first
-    ArticleEnsembleUiState(
+    ArticleEnsembleState(
       articleEnsembleTitles = articleEnsembles,
       searchEnsembles = searchEnsembles.filter { !cachedArticleEnsembleIdSet.contains(it.id) },
       searchIsUniqueTitle = searchResults.second
     )
   }.stateIn(
     scope = viewModelScope,
-    initialValue = ArticleEnsembleUiState(emptyList(), emptyList(), false),
+    initialValue = ArticleEnsembleState(emptyList(), emptyList(), false),
     started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
   )
 
-  fun onClickEdit() { editMode = EnabledGeneral }
-  fun onClickMinimizeButtonControl() { editMode = Disabled }
+  fun dismissAlertDialog() {
+    if(alertDialogState != AlertDialogState.None) alertDialogState = AlertDialogState.None
+  }
+
+  fun onClickEdit() { editState = EditState.EnabledGeneral }
+  fun onClickMinimizeButtonControl() { editState = EditState.Disabled }
   fun onClickCamera() { navigateToCamera = Event(articleId) }
 
   fun onClickAddToEnsemble() { showAddToEnsemblesDialog = true }
@@ -171,10 +179,10 @@ class ArticleDetailViewModel @AssistedInject constructor(
     newlyAddedEnsembles.clear()
   }
 
-  fun onClickDelete() { alertDialogMode = DeleteArticle }
-  fun onDismissDeleteArticleDialog() { alertDialogMode = None }
+  fun onClickDelete() { alertDialogState = AlertDialogState.DeleteArticle }
+  fun onDismissDeleteArticleDialog() = dismissAlertDialog()
   fun onConfirmDeleteArticleDialog() {
-    alertDialogMode = None
+    dismissAlertDialog()
     selectedEnsembles.clear()
     selectedThumbnails.clear()
     val articleId = cachedArticlesWithFullImages.getArticleId(articleIndex)
@@ -184,12 +192,12 @@ class ArticleDetailViewModel @AssistedInject constructor(
     if(lazyArticleFilenames.value.size == 1) finished = Event(Unit)
   }
 
-  fun onClickRemoveFromEnsembles() { if(selectedEnsembles.isNotEmpty()) { alertDialogMode = RemoveFromEnsembles } }
-  fun onDismissRemoveFromEnsemblesArticleDialog() { alertDialogMode = None }
+  fun onClickRemoveFromEnsembles() { if(selectedEnsembles.isNotEmpty()) { alertDialogState = AlertDialogState.RemoveFromEnsembles } }
+  fun onDismissRemoveFromEnsemblesArticleDialog() = dismissAlertDialog()
   fun onConfirmRemoveFromEnsemblesArticleDialog() {
     val articleId = cachedArticlesWithFullImages.getArticleId(articleIndex)
     val articleEnsembleIds = selectedEnsembles.toList().map { cachedArticleEnsembles[it].id }
-    alertDialogMode = None
+    dismissAlertDialog()
     selectedEnsembles.clear()
     ensembleListState = LazyListState()
     viewModelScope.launch(Dispatchers.IO) {
@@ -199,31 +207,31 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onClickRemoveImages() {
     if(selectedThumbnails.isNotEmpty()) {
-      alertDialogMode = if(selectedThumbnails.size == cachedArticlesWithFullImages.articleWithImages[articleIndex].imagePaths.size){
-        DeleteArticleByRemovingAllArticles
+      alertDialogState = if(selectedThumbnails.size == cachedArticlesWithFullImages.articleWithImages[articleIndex].imagePaths.size){
+        AlertDialogState.DeleteArticleByRemovingAllArticles
       } else {
-        RemoveImages
+        AlertDialogState.RemoveImages
       }
     }
   }
-  fun onDismissRemoveImagesArticleDialog() { alertDialogMode = None }
+  fun onDismissRemoveImagesArticleDialog() = dismissAlertDialog()
   fun onConfirmRemoveImagesArticleDialog() {
-    alertDialogMode = None
+    dismissAlertDialog()
     val articleImageFilenamesThumb = selectedThumbnails.toList().map {
       cachedArticlesWithFullImages.articleWithImages[articleIndex].imagePaths[it].filenameThumb
     }
     selectedThumbnails.clear()
-    editMode = EnabledGeneral
+    editState = EditState.EnabledGeneral
     thumbnailAltsListState = LazyListState()
     viewModelScope.launch(Dispatchers.IO) {
       articleRepository.deleteArticleImages(articleImageFilenamesThumb)
     }
   }
 
-  fun neverAskExportPermissionAgain() { alertDialogMode = ExportPermissions }
-  fun onDismissExportPermissionsArticleDialog() { alertDialogMode = None }
+  fun neverAskExportPermissionAgain() { alertDialogState = AlertDialogState.ExportPermissions }
+  fun onDismissExportPermissionsArticleDialog() = dismissAlertDialog()
   fun onConfirmExportPermissionsArticleDialog() {
-    alertDialogMode = None
+    dismissAlertDialog()
     launchSettings = Event(Unit)
   }
 
@@ -256,27 +264,27 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onClickArticleThumbnail(thumbnailIndex: Int) {
     articleImageIndices[articleIndex] = thumbnailIndex
-    if(editMode == EnabledSelectedThumbnails || editMode == EnabledAllThumbnails) {
+    if(editState == EditState.EnabledSelectedThumbnails || editState == EditState.EnabledAllThumbnails) {
       if(selectedThumbnails.contains(thumbnailIndex)) {
         selectedThumbnails.remove(thumbnailIndex)
-        if(selectedThumbnails.isEmpty()) editMode = EnabledGeneral
+        if(selectedThumbnails.isEmpty()) editState = EditState.EnabledGeneral
       } else selectedThumbnails.add(thumbnailIndex)
     }
   }
 
   fun onLongPressArticleThumbnail(thumbnailIndex: Int) {
     articleImageIndices[articleIndex] = thumbnailIndex
-    if(editMode != EnabledSelectedThumbnails){
+    if(editState != EditState.EnabledSelectedThumbnails){
       if(selectedThumbnails.isNotEmpty()) selectedThumbnails.clear()
     }
     if(selectedThumbnails.contains(thumbnailIndex)) {
       selectedThumbnails.remove(thumbnailIndex)
-      if(selectedThumbnails.isEmpty()) editMode = EnabledGeneral
+      if(selectedThumbnails.isEmpty()) editState = EditState.EnabledGeneral
     } else selectedThumbnails.add(thumbnailIndex)
     if(selectedThumbnails.size == cachedArticlesWithFullImages.size) {
-      editMode = EnabledAllThumbnails
-    } else if(editMode != EnabledSelectedThumbnails){
-      editMode = EnabledSelectedThumbnails
+      editState = EditState.EnabledAllThumbnails
+    } else if(editState != EditState.EnabledSelectedThumbnails){
+      editState = EditState.EnabledSelectedThumbnails
     }
   }
 
@@ -302,36 +310,36 @@ class ArticleDetailViewModel @AssistedInject constructor(
   }
 
   fun onClickEnsemble(ensembleIndex: Int) {
-    if(editMode == EnabledSelectedEnsembles){
+    if(editState == EditState.EnabledSelectedEnsembles){
       if(selectedEnsembles.contains(ensembleIndex)) {
         selectedEnsembles.remove(ensembleIndex)
-        if(selectedEnsembles.isEmpty()) editMode = EnabledGeneral
+        if(selectedEnsembles.isEmpty()) editState = EditState.EnabledGeneral
       } else selectedEnsembles.add(ensembleIndex)
     } else navigateToEnsembleDetail = Event(cachedArticleEnsembles[ensembleIndex].id)
   }
 
   fun onLongPressEnsemble(ensembleIndex: Int) {
-    if(editMode != EnabledSelectedEnsembles){
+    if(editState != EditState.EnabledSelectedEnsembles){
       if(selectedEnsembles.isNotEmpty()) selectedEnsembles.clear()
-      editMode = EnabledSelectedEnsembles
+      editState = EditState.EnabledSelectedEnsembles
     }
     if(selectedEnsembles.contains(ensembleIndex)) {
       selectedEnsembles.remove(ensembleIndex)
-      if(selectedEnsembles.isEmpty()) editMode = EnabledGeneral
+      if(selectedEnsembles.isEmpty()) editState = EditState.EnabledGeneral
     } else selectedEnsembles.add(ensembleIndex)
   }
 
   fun onClickCancelSelection() {
-    if(editMode == EnabledSelectedEnsembles) {
+    if(editState == EditState.EnabledSelectedEnsembles) {
       if(selectedEnsembles.isNotEmpty()) selectedEnsembles.clear()
     } else {
       if(selectedThumbnails.isNotEmpty()) selectedThumbnails.clear()
     }
-    editMode = Disabled
+    editState = EditState.Disabled
   }
 
   fun onBack() {
-    if(editMode != Disabled) onClickMinimizeButtonControl() else finished = Event(Unit)
+    if(editState != EditState.Disabled) onClickMinimizeButtonControl() else finished = Event(Unit)
   }
 
   fun onPhotoAlbumResult(uris: List<Uri>) {

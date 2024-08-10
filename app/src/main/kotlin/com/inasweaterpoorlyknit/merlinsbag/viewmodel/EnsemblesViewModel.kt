@@ -37,6 +37,12 @@ class EnsemblesViewModel @Inject constructor(
     val ensemblesRepository: EnsembleRepository,
 ): ViewModel() {
 
+  enum class DialogState{
+    None,
+    AddEnsemble,
+    DeleteEnsembleAlert,
+  }
+
   companion object {
     const val MAX_ENSEMBLE_TITLE_LENGTH = 256
   }
@@ -46,10 +52,9 @@ class EnsemblesViewModel @Inject constructor(
   private var searchEnsemblesQuery: MutableSharedFlow<String> = MutableStateFlow("")
 
   var showPlaceholder by mutableStateOf(false)
-  var showAddEnsembleDialog by mutableStateOf(false)
+  var dialogState by mutableStateOf(DialogState.None)
   var ensembleTitleError by mutableStateOf<Int?>(null)
   var editMode by mutableStateOf(false)
-  var showDeleteEnsembleAlertDialog by mutableStateOf(false)
   var searchQuery by mutableStateOf("")
   var newEnsembleTitle by mutableStateOf("")
   var selectedNewEnsembleArticles = mutableStateSetOf<Int>()
@@ -92,14 +97,19 @@ class EnsemblesViewModel @Inject constructor(
         initialValue = emptyList()
       )
 
-  fun onClickAddEnsemble() { showAddEnsembleDialog = true }
+  private fun dismissDialog() {
+    if(dialogState != DialogState.None) dialogState = DialogState.None
+  }
+
+  fun onClickAddEnsemble() { dialogState = DialogState.AddEnsemble }
+  fun onClickCloseAddEnsembleDialog() = dismissDialog()
+
   fun onClickMinimizeButtonControl() {
     editMode = false
     if(selectedEnsembleIndices.isNotEmpty()) selectedEnsembleIndices.clear()
   }
+
   fun onSearchQueryClear() { onSearchQueryUpdate("") }
-  fun onDismissDeleteEnsemblesAlertDialog() { showDeleteEnsembleAlertDialog = false }
-  fun onClickCloseAddEnsembleDialog() { showAddEnsembleDialog = false }
 
   fun onLongPressEnsemble(index: Int){
     if(!editMode) {
@@ -130,7 +140,7 @@ class EnsemblesViewModel @Inject constructor(
     viewModelScope.launch(Dispatchers.IO) {
       val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(title).first()
       if(ensembleTitleUnique){
-        showAddEnsembleDialog = false
+        dismissDialog()
         ensemblesRepository.insertEnsemble(
           title,
           articleIds,
@@ -147,15 +157,15 @@ class EnsemblesViewModel @Inject constructor(
 
   fun onBack() = onClickMinimizeButtonControl()
 
+  fun onClickDeleteSelectedEnsembles() {
+    dialogState = DialogState.DeleteEnsembleAlert
+  }
+  fun onDismissDeleteEnsemblesAlertDialog() = dismissDialog()
   fun onDeleteEnsemblesAlertDialogPositive() {
-    showDeleteEnsembleAlertDialog = false
+    dismissDialog()
     editMode = false
     val ensembleIds = selectedEnsembleIndices.map { ensembles[it].ensemble.id }
     viewModelScope.launch(Dispatchers.IO) { ensemblesRepository.deleteEnsembles(ensembleIds) }
-  }
-
-  fun onClickDeleteSelectedEnsembles() {
-    showDeleteEnsembleAlertDialog = true
   }
 
   private fun toggleSelectedEnsemble(index: Int){

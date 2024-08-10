@@ -65,12 +65,13 @@ import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings_Ev
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import kotlinx.serialization.Serializable
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledSelectedArticles
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.Disabled
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledGeneral
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledSelectedArticles
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.Disabled
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledGeneral
 
 
 @Serializable
@@ -80,12 +81,6 @@ data class EnsembleDetailRouteArgs(
 
 fun NavController.navigateToEnsembleDetail(ensembleId: String, navOptions: NavOptions? = null) =
   navigate(EnsembleDetailRouteArgs(ensembleId = ensembleId), navOptions)
-
-enum class EnsembleDetailEditMode {
-  EnabledGeneral,
-  EnabledSelectedArticles,
-  Disabled
-}
 
 @Composable
 fun EnsembleDetailRoute(
@@ -109,21 +104,21 @@ fun EnsembleDetailRoute(
     ensembleDetailViewModel.titleChangeError.getContentIfNotHandled()?.let { context.toast(it) }
   }
 
-  LaunchedEffect(ensembleDetailViewModel.navigateToArticleDetail) {
-    ensembleDetailViewModel.navigateToArticleDetail.getContentIfNotHandled()?.let { (index, ensembleId) ->
-      navigateToArticleDetail(index, ensembleId)
+  LaunchedEffect(ensembleDetailViewModel.navigationEventState) {
+    ensembleDetailViewModel.navigationEventState.getContentIfNotHandled()?.let {
+      when(it){
+        is EnsembleDetailViewModel.NavigationState.ArticleDetail -> navigateToArticleDetail(it.index, it.ensembleId)
+        EnsembleDetailViewModel.NavigationState.Finished -> navigateBack()
+      }
     }
-  }
-
-  LaunchedEffect(ensembleDetailViewModel.finished) {
-    ensembleDetailViewModel.finished.getContentIfNotHandled()?.let{ navigateBack() }
   }
 
   EnsembleDetailScreen(
     windowSizeClass = windowSizeClass,
     title = ensembleTitle,
     editingTitle = ensembleDetailViewModel.editingTitle,
-    editMode = ensembleDetailViewModel.editMode,
+    editState = ensembleDetailViewModel.editState,
+    dialogState = ensembleDetailViewModel.dialogState,
     ensembleArticleThumbnailUris = ensembleUiState.ensembleArticleThumbnailUris,
     addArticleThumbnailUris = ensembleUiState.addArticleThumbnailUris,
     selectedEditArticleIndices = ensembleDetailViewModel.selectedEditArticleIndices,
@@ -139,11 +134,9 @@ fun EnsembleDetailRoute(
     onClickRemoveArticles = ensembleDetailViewModel::onClickRemoveArticles,
     onClickDeleteEnsemble = ensembleDetailViewModel::onClickDeleteEnsemble,
     onDismissEditTitle = ensembleDetailViewModel::onDismissEditTitle,
-    showAddArticlesDialog = ensembleDetailViewModel.showAddArticlesDialog,
     onClickConfirmAddArticles = ensembleDetailViewModel::onClickConfirmAddArticles,
     onCloseAddArticlesDialog = ensembleDetailViewModel::onDismissAddArticlesDialog,
     onClickAddArticles = ensembleDetailViewModel::onClickAddArticles,
-    showDeleteEnsembleAlertDialog = ensembleDetailViewModel.showDeleteEnsembleDialog,
     onDismissDeleteEnsembleDialog = ensembleDetailViewModel::onDismissDeleteEnsembleDialog,
     onClickPositiveDeleteEnsembleDialog = ensembleDetailViewModel::onClickPositiveDeleteEnsembleDialog,
     modifier = modifier,
@@ -168,8 +161,7 @@ fun DeleteEnsembleAlertDialog(
 
 @Composable
 fun EnsembleDetailFloatingActionButtons(
-    editMode: EnsembleDetailEditMode,
-    selectedEditArticleIndices: Set<Int>,
+    editMode: EditState,
     onClickEdit: () -> Unit,
     onClickMinimizeButtonControl: () -> Unit,
     onClickAddArticles: () -> Unit,
@@ -228,7 +220,8 @@ fun EnsembleDetailFloatingActionButtons(
 fun EnsembleDetailScreen(
     windowSizeClass: WindowSizeClass,
     title: String,
-    editMode: EnsembleDetailEditMode,
+    editState: EditState,
+    dialogState: EnsembleDetailViewModel.DialogState,
     editingTitle: Boolean,
     ensembleArticleThumbnailUris: LazyUriStrings,
     addArticleThumbnailUris: LazyUriStrings,
@@ -245,11 +238,9 @@ fun EnsembleDetailScreen(
     onClickCancelArticleSelection: () -> Unit,
     onClickDeleteEnsemble: () -> Unit,
     onDismissEditTitle: () -> Unit,
-    showAddArticlesDialog: Boolean,
     onClickArticleAddDialog: (articleIndex: Int) -> Unit,
     onClickConfirmAddArticles: () -> Unit,
     onCloseAddArticlesDialog: () -> Unit,
-    showDeleteEnsembleAlertDialog: Boolean,
     onDismissDeleteEnsembleDialog: () -> Unit,
     onClickPositiveDeleteEnsembleDialog: () -> Unit,
     modifier: Modifier = Modifier,
@@ -319,7 +310,7 @@ fun EnsembleDetailScreen(
       }
       Box(modifier = Modifier.fillMaxSize()) {
         SelectableStaggeredThumbnailGrid(
-          selectable = editMode == EnabledSelectedArticles,
+          selectable = editState == EnabledSelectedArticles,
           onSelect = onClickArticle,
           onLongSelect = onLongClickArticle,
           thumbnailUris = ensembleArticleThumbnailUris,
@@ -341,8 +332,7 @@ fun EnsembleDetailScreen(
     }
   }
   EnsembleDetailFloatingActionButtons(
-    editMode = editMode,
-    selectedEditArticleIndices = selectedEditArticleIndices,
+    editMode = editState,
     onClickEdit = onClickEdit,
     onClickAddArticles = onClickAddArticles,
     onClickCancelSelection = onClickCancelArticleSelection,
@@ -352,7 +342,7 @@ fun EnsembleDetailScreen(
     modifier = Modifier.padding(start = systemBarStartPadding, end = systemBarEndPadding),
   )
   AddArticlesDialog(
-    visible = showAddArticlesDialog,
+    visible = dialogState == EnsembleDetailViewModel.DialogState.AddArticles,
     articleThumbnailUris = addArticleThumbnailUris,
     selectedArticleIndices = selectedAddArticleIndices,
     onSelectedArticle = onClickArticleAddDialog,
@@ -360,7 +350,7 @@ fun EnsembleDetailScreen(
     onConfirm = onClickConfirmAddArticles,
   )
   DeleteEnsembleAlertDialog(
-    visible = showDeleteEnsembleAlertDialog,
+    visible = dialogState == EnsembleDetailViewModel.DialogState.DeleteEnsemble,
     onDismiss = onDismissDeleteEnsembleDialog,
     onClickPositive = onClickPositiveDeleteEnsembleDialog,
   )
@@ -416,21 +406,19 @@ fun AddArticlesDialog(
 @Composable
 fun PreviewUtilEnsembleDetailScreen(
     editingTitle: Boolean = false,
-    editMode: EnsembleDetailEditMode = Disabled,
-    showAddArticlesDialog: Boolean = false,
+    editState: EditState = Disabled,
+    dialogState: EnsembleDetailViewModel.DialogState = EnsembleDetailViewModel.DialogState.None,
     selectedArticleIndices: Set<Int> = emptySet(),
     selectedAddArticleIndices: Set<Int> = emptySet(),
-    showDeleteEnsembleAlertDialog: Boolean = false,
 ) = EnsembleDetailScreen(
   title = "Ensemble Title",
-  editMode = editMode,
+  editState = editState,
+  dialogState = dialogState,
   editingTitle = editingTitle,
   ensembleArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   addArticleThumbnailUris = lazyRepeatedThumbnailResourceIdsAsStrings,
   selectedEditArticleIndices = selectedArticleIndices,
   selectedAddArticleIndices = selectedAddArticleIndices,
-  showDeleteEnsembleAlertDialog = showDeleteEnsembleAlertDialog,
-  showAddArticlesDialog = showAddArticlesDialog,
   windowSizeClass = currentWindowAdaptiveInfo(),
   onClickTitle = {}, onClickMinimizeButtonControl = {}, onDismissDeleteEnsembleDialog = {}, onClickPositiveDeleteEnsembleDialog = {},
   onTitleChanged = {}, onClickEdit = {}, onClickAddArticles = {}, onClickArticle = {}, onLongClickArticle = {}, onClickRemoveArticles = {}, onClickCancelArticleSelection = {},
@@ -439,25 +427,23 @@ fun PreviewUtilEnsembleDetailScreen(
 
 @Composable
 fun PreviewUtilEnsembleDetailFloatingActionButtons(
-    editMode: EnsembleDetailEditMode = Disabled,
-    selectedArticleIndices: Set<Int> = emptySet(),
+    editMode: EditState = Disabled,
 ) = NoopTheme {
   EnsembleDetailFloatingActionButtons(
     editMode = editMode,
-    selectedEditArticleIndices = selectedArticleIndices,
     onClickEdit = {}, onClickAddArticles = {}, onClickCancelSelection = {}, onClickRemoveArticles = {}, onClickDeleteEnsemble = {}, onClickMinimizeButtonControl = {},
   )
 }
 
 @Preview @Composable fun PreviewEnsembleDetailScreen() = NoopTheme { PreviewUtilEnsembleDetailScreen() }
 
-@LandscapePreview @Composable fun PreviewEnsembleDetailScreen_EditingLandscape() = NoopTheme { PreviewUtilEnsembleDetailScreen(editMode = EnabledGeneral) }
+@LandscapePreview @Composable fun PreviewEnsembleDetailScreen_EditingLandscape() = NoopTheme { PreviewUtilEnsembleDetailScreen(editState = EnabledGeneral) }
 
 @Preview
 @Composable
 fun PreviewEnsembleDetailScreen_Editing() = NoopTheme {
   PreviewUtilEnsembleDetailScreen(
-    editMode = EnabledSelectedArticles,
+    editState = EnabledSelectedArticles,
     editingTitle = true,
     selectedArticleIndices = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet()
   )
@@ -467,8 +453,8 @@ fun PreviewEnsembleDetailScreen_Editing() = NoopTheme {
 @Composable
 fun PreviewEnsembleDetailScreen_DeleteEnsembleAlertDialog() = NoopTheme {
   PreviewUtilEnsembleDetailScreen(
-    editMode = EnabledGeneral,
-    showDeleteEnsembleAlertDialog = true,
+    editState = EnabledGeneral,
+    dialogState = EnsembleDetailViewModel.DialogState.DeleteEnsemble,
   )
 }
 
@@ -476,9 +462,9 @@ fun PreviewEnsembleDetailScreen_DeleteEnsembleAlertDialog() = NoopTheme {
 @Composable
 fun PreviewEnsembleDetailScreen_AddArticlesDialog() = NoopTheme {
   PreviewUtilEnsembleDetailScreen(
-    editMode = EnabledGeneral,
+    editState = EnabledGeneral,
     editingTitle = false,
-    showAddArticlesDialog = true,
+    dialogState = EnsembleDetailViewModel.DialogState.AddArticles,
     selectedArticleIndices = repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet,
   )
 }
@@ -507,6 +493,6 @@ fun PreviewAddArticlesDialog_noAddArticles() = NoopTheme {
 
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Collapsed() = PreviewUtilEnsembleDetailFloatingActionButtons(Disabled)
 @Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_Expanded() = PreviewUtilEnsembleDetailFloatingActionButtons(EnabledGeneral)
-@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(EnabledSelectedArticles, setOf(0))
+@Preview @Composable fun PreviewEnsembleDetailFloatingActionButtons_EditingArticles() = PreviewUtilEnsembleDetailFloatingActionButtons(EnabledSelectedArticles)
 @Preview @Composable fun PreviewDeleteEnsembleAlertDialog() = NoopTheme { DeleteEnsembleAlertDialog(visible = true, onDismiss = {}, onClickPositive = {}) }
 //endregion

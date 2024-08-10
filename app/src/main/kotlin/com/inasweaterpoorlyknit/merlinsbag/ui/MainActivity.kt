@@ -16,7 +16,7 @@ import com.inasweaterpoorlyknit.core.ml.encourageInstallSubjectSegmentationModel
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToAddArticle
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToCamera
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityUiState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel.LoadState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -45,7 +45,7 @@ class MainActivity: ComponentActivity() {
         windowSizeClass = calculateWindowSizeClass(this)
       )
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
-      if(loading && mainActivityViewModel.uiState !is MainActivityUiState.Loading) loading = false
+      if(loading && mainActivityViewModel.uiState !is LoadState.Loading) loading = false
 
       if(!loading && userPreferences.hasCompletedOnboarding) {
         LaunchedEffect(mainActivityViewModel.intentImageUriArgs) {

@@ -55,17 +55,15 @@ class SettingsViewModel @Inject constructor(
 
   var cachePurged by mutableStateOf(Event<Unit>(null))
   var dataDeleted by mutableStateOf(Event<Unit>(null))
-  var dropdownMenuState by mutableStateOf(DropdownMenuState.None)
-  var alertDialogState by mutableStateOf(AlertDialogState.None)
   var clearCacheEnabled by mutableStateOf(true)
   var highContrastEnabled by mutableStateOf(true)
-
-  private var cachedImageQuality: ImageQuality? = null
-  private var selectedImageQuality: ImageQuality? = null
-
-  val userPreferences = userPreferencesRepository.userPreferences.onEach {
+  var dropdownMenuState by mutableStateOf(DropdownMenuState.None)
+  var alertDialogState by mutableStateOf(AlertDialogState.None)
+  val preferencesState = userPreferencesRepository.userPreferences.onEach {
     // System dynamic color schemes do not currently support high contrast
-    highContrastEnabled = it.colorPalette != ColorPalette.SYSTEM_DYNAMIC
+    if(it.colorPalette == ColorPalette.SYSTEM_DYNAMIC){
+      if(highContrastEnabled) highContrastEnabled = false
+    } else if(!highContrastEnabled) highContrastEnabled = true
     cachedImageQuality = it.imageQuality
   }.map {
     PreferencesState(
@@ -88,6 +86,9 @@ class SettingsViewModel @Inject constructor(
       )
     },
   )
+
+  private var cachedImageQuality: ImageQuality? = null
+  private var selectedImageQuality: ImageQuality? = null
 
   private fun dismissDropdownMenu() { dropdownMenuState = DropdownMenuState.None }
   private fun dismissAlertDialog() { alertDialogState = AlertDialogState.None }

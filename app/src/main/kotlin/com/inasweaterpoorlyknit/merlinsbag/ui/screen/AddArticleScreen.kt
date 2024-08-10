@@ -104,10 +104,9 @@ fun AddArticleRoute(
     onRotateCCW = addArticleViewModel::onRotateCCW,
     onDiscard = addArticleViewModel::onClickDiscard,
     onSave = addArticleViewModel::onSave,
-    showDiscardAlertDialog = addArticleViewModel.showDiscardAlertDialog,
+    dialogState = addArticleViewModel.dialogState,
     onDismissDiscardDialog = addArticleViewModel::onDismissDiscardDialog,
     onConfirmDiscardDialog = addArticleViewModel::onDiscard,
-    showAttachDialog = addArticleViewModel.showAttachDialog,
     onAttach = addArticleViewModel::onClickAttach,
     onDismissAttachDialog = addArticleViewModel::onDismissAttachDialog,
     removeAttachedArticle = addArticleViewModel::removeAttachedArticle,
@@ -131,8 +130,7 @@ fun AddArticleScreen(
     onDiscard: () -> Unit,
     onSave: () -> Unit,
     onAttach: () -> Unit,
-    showAttachDialog: Boolean,
-    showDiscardAlertDialog: Boolean,
+    dialogState: AddArticleViewModel.DialogState,
     onDismissDiscardDialog: () -> Unit,
     onConfirmDiscardDialog: () -> Unit,
     onDismissAttachDialog: () -> Unit,
@@ -181,8 +179,13 @@ fun AddArticleScreen(
       Row { controls() }
     }
   }
-  DiscardAlertDialog(visible = showDiscardAlertDialog, onDismiss = onDismissDiscardDialog, onConfirm = onConfirmDiscardDialog)
+  DiscardAlertDialog(
+    visible = dialogState == AddArticleViewModel.DialogState.Discard,
+    onDismiss = onDismissDiscardDialog,
+    onConfirm = onConfirmDiscardDialog
+  )
 
+  val showAttachDialog = dialogState == AddArticleViewModel.DialogState.Attach
   BackHandler(enabled = showAttachDialog) { onDismissAttachDialog() }
   NoopBottomSheetDialog(
     visible = showAttachDialog,
@@ -333,8 +336,7 @@ fun DiscardAlertDialog(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilAddArticleScreen(
-    showDiscardAlertDialog: Boolean = false,
-    showAttachDialog: Boolean = false,
+    dialogState: AddArticleViewModel.DialogState =  AddArticleViewModel.DialogState.None,
     attachToArticleEnabled: Boolean = true,
 ) = NoopTheme(darkMode = DarkMode.DARK) {
   AddArticleScreen(
@@ -346,15 +348,16 @@ fun PreviewUtilAddArticleScreen(
     attachArticleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
     attachToArticleEnabled = attachToArticleEnabled,
     articleAttachmentIndex = 2,
+    dialogState = dialogState,
     onBroadenFocusClick = {},
-    onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {}, onAttach = {}, showAttachDialog = showAttachDialog,
-    showDiscardAlertDialog = showDiscardAlertDialog, onDismissDiscardDialog = {}, onConfirmDiscardDialog = {}, onDismissAttachDialog = {}, onNarrowFocusClick = {}, removeAttachedArticle = {}, attachToArticle = {}
+    onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {}, onAttach = {},
+    onDismissDiscardDialog = {}, onConfirmDiscardDialog = {}, onDismissAttachDialog = {}, onNarrowFocusClick = {}, removeAttachedArticle = {}, attachToArticle = {}
   )
 }
 
 @DevicePreviews @Composable fun PreviewAddArticleScreen() = PreviewUtilAddArticleScreen()
-@Preview @Composable fun PreviewAddArticleScreen_discardAlertDialog() = PreviewUtilAddArticleScreen(showDiscardAlertDialog = true)
-@Preview @Composable fun PreviewAddArticleScreen_attachToDialog() = PreviewUtilAddArticleScreen(showAttachDialog = true)
+@Preview @Composable fun PreviewAddArticleScreen_discardAlertDialog() = PreviewUtilAddArticleScreen(dialogState = AddArticleViewModel.DialogState.Discard)
+@Preview @Composable fun PreviewAddArticleScreen_attachToDialog() = PreviewUtilAddArticleScreen(dialogState = AddArticleViewModel.DialogState.Attach)
 @Preview @Composable fun PreviewAddArticleScreen_attachToArticleDisabled() = PreviewUtilAddArticleScreen(attachToArticleEnabled = false)
 @LandscapePreview @Composable fun PreviewAddArticleScreen_attachToArticleDisabled_landscape() = PreviewUtilAddArticleScreen(attachToArticleEnabled = false)
 //endregion

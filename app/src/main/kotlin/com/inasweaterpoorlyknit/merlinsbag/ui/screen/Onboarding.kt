@@ -68,8 +68,8 @@ fun Onboarding(
   )
   OnboardingInternal(
     pagerState = pagerState,
-    onClickSkip = onboardingViewModel::onGetStarted,
-    onClickGetStarted = onboardingViewModel::onGetStarted,
+    onClickSkip = onboardingViewModel::onCompletion,
+    onClickGetStarted = onboardingViewModel::onCompletion,
   )
 }
 

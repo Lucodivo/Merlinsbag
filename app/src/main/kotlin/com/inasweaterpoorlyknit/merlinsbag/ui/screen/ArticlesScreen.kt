@@ -46,6 +46,7 @@ import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel.EditState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
 import kotlinx.serialization.Serializable
 
@@ -53,12 +54,6 @@ import kotlinx.serialization.Serializable
 object ArticlesRouteArgs
 
 fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(ArticlesRouteArgs, navOptions)
-
-enum class ArticlesScreenEditMode {
-  ENABLED_GENERAL,
-  ENABLED_SELECTED_ARTICLES,
-  DISABLED
-}
 
 @Composable
 fun ArticlesRoute(
@@ -75,29 +70,15 @@ fun ArticlesRoute(
 
   val photoAlbumLauncher = rememberPhotoAlbumLauncher(onResult = articlesViewModel::onPhotoAlbumResults)
 
-  LaunchedEffect(articlesViewModel.navigateToArticleDetail){
-    articlesViewModel.navigateToArticleDetail.getContentIfNotHandled()?.let {
-      navigateToArticleDetail(it)
-    }
-  }
-  LaunchedEffect(articlesViewModel.navigateToCamera){
-    articlesViewModel.navigateToCamera.getContentIfNotHandled()?.let {
-      navigateToCamera()
-    }
-  }
-  LaunchedEffect(articlesViewModel.navigateToSettings){
-    articlesViewModel.navigateToSettings.getContentIfNotHandled()?.let {
-      navigateToSettings()
-    }
-  }
-  LaunchedEffect(articlesViewModel.launchPhotoAlbum){
-    articlesViewModel.launchPhotoAlbum.getContentIfNotHandled()?.let {
-      photoAlbumLauncher.launch()
-    }
-  }
-  LaunchedEffect(articlesViewModel.navigateToAddArticle){
-    articlesViewModel.navigateToAddArticle.getContentIfNotHandled()?.let {
-      navigateToAddArticle(it)
+  LaunchedEffect(articlesViewModel.navigationEventState){
+    articlesViewModel.navigationEventState.getContentIfNotHandled()?.let {
+      when(it) {
+        is ArticlesViewModel.NavigationState.AddArticle -> navigateToAddArticle(it.uriStrings)
+        is ArticlesViewModel.NavigationState.ArticleDetail -> navigateToArticleDetail(it.index)
+        ArticlesViewModel.NavigationState.Camera -> navigateToCamera()
+        ArticlesViewModel.NavigationState.PhotoAlbum -> photoAlbumLauncher.launch()
+        ArticlesViewModel.NavigationState.Settings -> navigateToSettings()
+      }
     }
   }
 
@@ -105,7 +86,7 @@ fun ArticlesRoute(
     windowSizeClass = windowSizeClass,
     thumbnailUris = articleThumbnails,
     selectedThumbnails = articlesViewModel.selectedArticleIndices,
-    editMode = articlesViewModel.editMode,
+    editMode = articlesViewModel.editState,
     showDeleteArticlesAlert = articlesViewModel.showDeleteArticlesAlert,
     onClickArticle = articlesViewModel::onClickArticle,
     onLongPressArticle = articlesViewModel::onLongPressArticle,
@@ -143,7 +124,7 @@ fun ArticlesScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
-    editMode: ArticlesScreenEditMode,
+    editMode: EditState,
     showDeleteArticlesAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
     onLongPressArticle: (index: Int) -> Unit,
@@ -200,7 +181,7 @@ fun ArticlesScreen(
 @Composable fun ArticlesScreenThumbnailGrid(
     thumbnailUris: LazyUriStrings?,
     selectedThumbnails: Set<Int>,
-    editMode: ArticlesScreenEditMode,
+    editMode: EditState,
     onClickArticle: (index: Int) -> Unit,
     onLongPressArticle: (index: Int) -> Unit,
     onClickAddArticle: () -> Unit,
@@ -216,7 +197,7 @@ fun ArticlesScreen(
     )
     if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null) {
       SelectableStaggeredThumbnailGrid(
-        selectable = editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES,
+        selectable = editMode == EditState.ENABLED_SELECTED_ARTICLES,
         onSelect = onClickArticle,
         onLongSelect = onLongPressArticle,
         thumbnailUris = thumbnailUris,
@@ -231,7 +212,7 @@ fun ArticlesScreen(
         PlaceholderThumbnailGrid()
         if(thumbnailUris?.isEmpty() != false){
           val addArticleButtonAnimatedAlphaFloat by animateFloatAsState(
-            targetValue = if(editMode != ArticlesScreenEditMode.DISABLED) 0.0f else 1.0f,
+            targetValue = if(editMode != EditState.DISABLED) 0.0f else 1.0f,
             label = "add article alpha"
           )
           val buttonAlpha = 0.9f
@@ -252,7 +233,7 @@ fun ArticlesScreen(
 @Composable
 fun ArticlesButtonControls(
     windowSizeClass: WindowSizeClass,
-    editMode: ArticlesScreenEditMode,
+    editMode: EditState,
     onClickClearSelection: () -> Unit,
     onClickDelete: () -> Unit,
     onClickAddPhotoAlbum: () -> Unit,
@@ -262,12 +243,12 @@ fun ArticlesButtonControls(
     onClickEdit: () -> Unit,
 ){
   NoopBottomEndButtonContainer {
-    val expanded = editMode != ArticlesScreenEditMode.DISABLED
+    val expanded = editMode != EditState.DISABLED
     NoopExpandingIconButton(
       expanded = expanded,
       collapsedIcon = IconData(NoopIcons.Edit, stringResource(R.string.enter_editing_mode)),
       expandedIcon = IconData(NoopIcons.Remove, stringResource(R.string.exit_editing_mode)),
-      verticalExpandedButtons = if(editMode == ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES) {
+      verticalExpandedButtons = if(editMode == EditState.ENABLED_SELECTED_ARTICLES) {
         listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Cancel, contentDescription = stringResource(R.string.clear_selected_articles)),
@@ -290,7 +271,7 @@ fun ArticlesButtonControls(
           ),
         )
       },
-      horizontalExpandedButtons = if(editMode != ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES && windowSizeClass.compactWidth()) {
+      horizontalExpandedButtons = if(editMode != EditState.ENABLED_SELECTED_ARTICLES && windowSizeClass.compactWidth()) {
         listOf(
           IconButtonData(
             icon = IconData(icon = NoopIcons.Settings, contentDescription = stringResource(R.string.cog)),
@@ -306,7 +287,7 @@ fun ArticlesButtonControls(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilArticleScreen(
-    editMode: ArticlesScreenEditMode = ArticlesScreenEditMode.DISABLED,
+    editMode: EditState = EditState.DISABLED,
     showDeleteArticlesAlert: Boolean = false,
     thumbUris: LazyUriStrings? = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails: Set<Int> = emptySet(),
@@ -330,7 +311,7 @@ fun PreviewUtilArticleScreen(
 @Composable
 fun PreviewArticlesScreen_editMode() = PreviewUtilArticleScreen(
   selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
-  editMode = ArticlesScreenEditMode.ENABLED_GENERAL,
+  editMode = EditState.ENABLED_GENERAL,
 )
 
 
@@ -338,7 +319,7 @@ fun PreviewArticlesScreen_editMode() = PreviewUtilArticleScreen(
 @Composable
 fun PreviewArticlesScreenWithDeleteArticlesAlert() = PreviewUtilArticleScreen(
   showDeleteArticlesAlert = true,
-  editMode = ArticlesScreenEditMode.ENABLED_SELECTED_ARTICLES,
+  editMode = EditState.ENABLED_SELECTED_ARTICLES,
   selectedThumbnails = (0..repeatedThumbnailResourceIdsAsStrings.lastIndex step 2).toSet(),
 )
 

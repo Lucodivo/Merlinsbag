@@ -56,39 +56,38 @@ class SettingsViewModelTest {
 
   @Test
   fun `Dialogs are hidden by default`() = runTest {
-    assertEquals(false, viewModel.showImageQualityAlertDialog)
-    assertEquals(false, viewModel.showDeleteAllDataAlertDialog)
+    assertEquals(SettingsViewModel.AlertDialogState.None, viewModel.alertDialogState)
   }
 
   @Test
   fun `Show delete all data alert dialog`() = runTest {
     viewModel.onClickDeleteAllData()
-    assertEquals(true, viewModel.showDeleteAllDataAlertDialog)
+    assertEquals(SettingsViewModel.AlertDialogState.DeleteAllData, viewModel.alertDialogState)
   }
 
   @Test
   fun `Selecting a higher image quality triggers alert dialog`() = runTest {
-    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.userPreferences.collect() }
+    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.preferencesState.collect() }
 
     viewModel.onSelectedImageQuality(
         ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal + 1]
     )
 
-    assertEquals(true, viewModel.showImageQualityAlertDialog)
+    assertEquals(SettingsViewModel.AlertDialogState.ImageQuality, viewModel.alertDialogState)
 
     collectJob.cancel()
   }
 
   @Test
   fun `Selecting a lower image quality does not triggers alert dialog`() = runTest {
-    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.userPreferences.collect() }
+    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.preferencesState.collect() }
 
     val lowerImageQuality = ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal - 1]
     coJustRun { userPreferencesRepository.setImageQuality(lowerImageQuality) }
 
     viewModel.onSelectedImageQuality(lowerImageQuality)
 
-    assertEquals(false, viewModel.showImageQualityAlertDialog)
+    assertEquals(SettingsViewModel.AlertDialogState.None, viewModel.alertDialogState)
     coVerify(exactly = 1) { userPreferencesRepository.setImageQuality(lowerImageQuality) }
 
     collectJob.cancel()
@@ -96,11 +95,11 @@ class SettingsViewModelTest {
 
   @Test
   fun `Selecting a equal image quality does not triggers alert dialog`() = runTest {
-    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.userPreferences.collect() }
+    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.preferencesState.collect() }
 
     viewModel.onSelectedImageQuality(testInitialUserPreferences.imageQuality)
 
-    assertEquals(false, viewModel.showImageQualityAlertDialog)
+    assertEquals(SettingsViewModel.AlertDialogState.None, viewModel.alertDialogState)
 
     collectJob.cancel()
   }

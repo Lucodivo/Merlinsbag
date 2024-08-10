@@ -12,7 +12,7 @@ import javax.inject.Inject
 class OnboardingViewModel @Inject constructor(
   val userPreferencesRepository: UserPreferencesRepository
 ): ViewModel() {
-  fun onGetStarted() = viewModelScope.launch(Dispatchers.IO){
+  fun onCompletion() = viewModelScope.launch(Dispatchers.IO){
     userPreferencesRepository.setHasCompletedOnboarding(true)
   }
 }

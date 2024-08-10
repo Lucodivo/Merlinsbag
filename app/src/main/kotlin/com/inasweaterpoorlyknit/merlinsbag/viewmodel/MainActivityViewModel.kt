@@ -19,22 +19,22 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-sealed interface MainActivityUiState {
-  data object Loading : MainActivityUiState
-  data object Success : MainActivityUiState
-}
-
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository
 ): ViewModel() {
 
-  var uiState by mutableStateOf<MainActivityUiState>(MainActivityUiState.Loading)
+  sealed interface LoadState {
+    data object Loading : LoadState
+    data object Success : LoadState
+  }
+
+  var uiState by mutableStateOf<LoadState>(LoadState.Loading)
   var intentImageUriArgs by mutableStateOf(Event<List<String>>(null))
   var navigateToCamera by mutableStateOf(Event<Boolean>(null))
 
   val userPreferences = userPreferencesRepository.userPreferences
-      .onEach { uiState = MainActivityUiState.Success }
+      .onEach { uiState = LoadState.Success }
       .stateIn(
         scope = viewModelScope,
         initialValue = UserPreferences(

@@ -101,7 +101,7 @@ fun SettingsRoute(
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
 
-  val userPreferences by settingsViewModel.userPreferences.collectAsState()
+  val userPreferences by settingsViewModel.preferencesState.collectAsState()
 
   LaunchedEffect(settingsViewModel.cachePurged) {
     settingsViewModel.cachePurged.getContentIfNotHandled()?.let {

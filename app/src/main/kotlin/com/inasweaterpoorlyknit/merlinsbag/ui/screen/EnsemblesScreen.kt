@@ -125,8 +125,7 @@ fun EnsemblesRoute(
   EnsemblesScreen(
     windowSizeClass = windowSizeClass,
     lazyEnsembleThumbnails = lazyEnsembleThumbnails,
-    showAddEnsembleDialog = ensemblesViewModel.showAddEnsembleDialog,
-    showDeleteEnsembleAlertDialog = ensemblesViewModel.showDeleteEnsembleAlertDialog,
+    dialogState = ensemblesViewModel.dialogState,
     editMode = ensemblesViewModel.editMode,
     selectedEnsembleIndices = ensemblesViewModel.selectedEnsembleIndices,
     showPlaceholder = ensemblesViewModel.showPlaceholder,
@@ -158,9 +157,8 @@ fun EnsemblesScreen(
     windowSizeClass: WindowSizeClass,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
-    showAddEnsembleDialog: Boolean,
     editMode: Boolean,
-    showDeleteEnsembleAlertDialog: Boolean,
+    dialogState: EnsemblesViewModel.DialogState,
     selectedEnsembleIndices: Set<Int>,
     showPlaceholder: Boolean,
     addEnsembleDialogArticles: LazyUriStrings,
@@ -205,7 +203,6 @@ fun EnsemblesScreen(
       lazyEnsembleThumbnails = lazyEnsembleThumbnails,
       onClickEnsemble = onClickEnsemble,
       onLongPressEnsemble = onLongPressEnsemble,
-      showAddEnsembleDialog = showAddEnsembleDialog,
       onClickAddEnsemble = onClickAddEnsemble,
     )
     NoopBottomEndButtonContainer {
@@ -219,7 +216,7 @@ fun EnsemblesScreen(
   }
 
   AddEnsembleDialog(
-    visible = showAddEnsembleDialog,
+    visible = dialogState == EnsemblesViewModel.DialogState.AddEnsemble,
     userInputTitle = newEnsembleTitle,
     articleThumbnails = addEnsembleDialogArticles,
     onClickSave = onClickSaveEnsemble,
@@ -231,7 +228,7 @@ fun EnsemblesScreen(
   )
 
   DeleteEnsemblesAlertDialog(
-    visible = showDeleteEnsembleAlertDialog,
+    visible = dialogState == EnsemblesViewModel.DialogState.DeleteEnsembleAlert,
     onDismiss = onDeleteEnsemblesAlertDialogDismiss,
     onConfirm = onDeleteEnsemblesAlertDialogPositive
   )
@@ -249,7 +246,6 @@ fun EnsemblesScreen(
     lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
     onClickEnsemble: (index: Int) -> Unit,
     onLongPressEnsemble: (index: Int) -> Unit,
-    showAddEnsembleDialog: Boolean,
     onClickAddEnsemble: () -> Unit,
 ) {
   val sidePadding = 8.dp
@@ -284,18 +280,12 @@ fun EnsemblesScreen(
       ) {
         EnsemblesOverlappingPlaceholderRowColumn(windowSizeClass = windowSizeClass)
         if(lazyEnsembleThumbnails.isEmpty()){
-          val addEnsembleButtonAnimatedAlphaFloat by animateFloatAsState(
-            targetValue = if(showAddEnsembleDialog) 0.0f else 1.0f,
-            label = "add article alpha"
-          )
           val buttonAlpha = 0.9f
-          if(addEnsembleButtonAnimatedAlphaFloat > 0.0f){
-            Button(
-              onClick = onClickAddEnsemble,
-              modifier = Modifier.alpha(buttonAlpha * addEnsembleButtonAnimatedAlphaFloat)
-            ){
-              Text(text = stringResource(R.string.add_ensemble))
-            }
+          Button(
+            onClick = onClickAddEnsemble,
+            modifier = Modifier.alpha(buttonAlpha * placeholderVisibilityAnimatedFloat)
+          ){
+            Text(text = stringResource(R.string.add_ensemble))
           }
         }
       }
@@ -654,15 +644,14 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
 fun PreviewUtilEnsembleScreen(
     ensembles: List<Pair<String, LazyUriStrings>> = previewEnsembles,
     darkMode: Boolean = false,
-    showAddEnsembleForm: Boolean = false,
+    dialogState: EnsemblesViewModel.DialogState = EnsemblesViewModel.DialogState.None,
     showPlaceholder: Boolean = false,
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   EnsemblesScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
     lazyEnsembleThumbnails = ensembles,
-    showAddEnsembleDialog = showAddEnsembleForm,
     editMode = false,
-    showDeleteEnsembleAlertDialog = false,
+    dialogState = dialogState,
     selectedEnsembleIndices = setOf(1, 3),
     showPlaceholder = showPlaceholder,
     addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,

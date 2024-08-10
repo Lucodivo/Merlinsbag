@@ -97,8 +97,8 @@ fun CameraRoute(
     }
   }
 
-  LaunchedEffect(cameraViewModel.launchSettings) {
-    cameraViewModel.launchSettings.getContentIfNotHandled()?.let {
+  LaunchedEffect(cameraViewModel.launchSystemAppSettings) {
+    cameraViewModel.launchSystemAppSettings.getContentIfNotHandled()?.let {
       appSettingsLauncher.launch()
     }
   }

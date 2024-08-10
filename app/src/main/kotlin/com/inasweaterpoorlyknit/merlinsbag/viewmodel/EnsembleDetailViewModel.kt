@@ -12,10 +12,9 @@ import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.Disabled
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledGeneral
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailEditMode.EnabledSelectedArticles
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.Disabled
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledGeneral
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledSelectedArticles
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -42,6 +41,23 @@ class EnsembleDetailViewModel @AssistedInject constructor(
     private val articleRepository: ArticleRepository,
 ): ViewModel() {
 
+  enum class EditState {
+    EnabledGeneral,
+    EnabledSelectedArticles,
+    Disabled
+  }
+
+  enum class DialogState {
+    None,
+    DeleteEnsemble,
+    AddArticles,
+  }
+
+  sealed interface NavigationState {
+    data object Finished: NavigationState
+    data class ArticleDetail(val index: Int, val ensembleId: String): NavigationState
+  }
+
   @AssistedFactory
   interface EnsembleDetailViewModelFactory {
     fun create(ensembleId: String): EnsembleDetailViewModel
@@ -53,17 +69,13 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   private lateinit var ensembleArticleIds: Set<String>
 
   var editingTitle by mutableStateOf(false)
-  var editMode by mutableStateOf<EnsembleDetailEditMode>(Disabled)
-  var showDeleteEnsembleDialog by mutableStateOf(false)
-  var showAddArticlesDialog by mutableStateOf(false)
-  val onBackEnabled get() = editMode != Disabled
-
+  var editState by mutableStateOf(Disabled)
+  var dialogState by mutableStateOf(DialogState.None)
+  val onBackEnabled get() = editState != Disabled
   val selectedEditArticleIndices = mutableStateSetOf<Int>()
   val selectedAddArticleIndices = mutableStateSetOf<Int>()
-
   var titleChangeError by mutableStateOf(Event<Int>(null))
-  var navigateToArticleDetail by mutableStateOf(Event<Pair<Int, String>>(null))
-  var finished by mutableStateOf(Event<Unit>(null))
+  var navigationEventState by mutableStateOf(Event<NavigationState>(null))
 
   val ensembleTitle = ensemblesRepository.getEnsemble(ensembleId)
       .onEach { ensemble = it }
@@ -95,23 +107,27 @@ class EnsembleDetailViewModel @AssistedInject constructor(
     )
   )
 
+  private fun dismissDialog() {
+    if(dialogState != DialogState.None) dialogState = DialogState.None
+  }
+
   fun onClickTitle() { editingTitle = true }
 
   fun onBack() { onClickMinimizeButtonControl() }
-  fun onClickEdit() { editMode = EnabledGeneral }
+  fun onClickEdit() { editState = EnabledGeneral }
   fun onClickMinimizeButtonControl() {
-    editMode = Disabled
+    editState = Disabled
     if(selectedEditArticleIndices.isNotEmpty()) selectedEditArticleIndices.clear()
   }
 
   fun onClickArticle(index: Int) {
-    if(editMode == EnabledSelectedArticles) {
+    if(editState == EnabledSelectedArticles) {
       if(selectedEditArticleIndices.contains(index)) {
         selectedEditArticleIndices.remove(index)
-        if(selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
+        if(selectedEditArticleIndices.isEmpty()) editState = EnabledGeneral
       } else selectedEditArticleIndices.add(index)
     } else {
-      navigateToArticleDetail = Event(Pair(index, ensembleId))
+      navigationEventState = Event(NavigationState.ArticleDetail(index, ensembleId))
     }
   }
 
@@ -126,7 +142,7 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   fun onClickRemoveArticles() {
     val articleIds = selectedEditArticleIndices.map { ensembleArticles.getArticleId(it) }
     selectedEditArticleIndices.clear()
-    editMode = EnabledGeneral
+    editState = EnabledGeneral
     viewModelScope.launch(Dispatchers.IO) {
       ensemblesRepository.deleteArticlesFromEnsemble(
         ensembleId = ensemble.id,
@@ -136,10 +152,10 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   }
 
   fun onLongPressArticle(index: Int){
-    if(editMode != EnabledSelectedArticles) editMode = EnabledSelectedArticles
+    if(editState != EnabledSelectedArticles) editState = EnabledSelectedArticles
     if(selectedEditArticleIndices.contains(index)) {
       selectedEditArticleIndices.remove(index)
-      if(selectedEditArticleIndices.isEmpty()) editMode = EnabledGeneral
+      if(selectedEditArticleIndices.isEmpty()) editState = EnabledGeneral
     } else selectedEditArticleIndices.add(index)
   }
 
@@ -156,26 +172,26 @@ class EnsembleDetailViewModel @AssistedInject constructor(
     }
   }
 
-  fun onDismissDeleteEnsembleDialog() { showDeleteEnsembleDialog = false }
+  fun onClickDeleteEnsemble() { dialogState = DialogState.DeleteEnsemble }
+  fun onDismissDeleteEnsembleDialog() = dismissDialog()
   fun onClickPositiveDeleteEnsembleDialog() {
     viewModelScope.launch(Dispatchers.IO) {
       ensemblesRepository.deleteEnsemble(ensemble.id)
     }
-    finished = Event(Unit)
-    showDeleteEnsembleDialog = false
+    navigationEventState = Event(NavigationState.Finished)
+    dismissDialog()
   }
 
-  fun onClickAddArticles() { showAddArticlesDialog = true }
+  fun onClickAddArticles() { dialogState = DialogState.AddArticles }
   fun onDismissAddArticlesDialog() {
-    showAddArticlesDialog = false
+    dismissDialog()
     if(selectedAddArticleIndices.isNotEmpty()) selectedAddArticleIndices.clear()
   }
 
-  fun onClickDeleteEnsemble() { showDeleteEnsembleDialog = true }
   fun onDismissEditTitle() { editingTitle = false }
 
   fun onClickConfirmAddArticles() {
-    showAddArticlesDialog = false
+    dismissDialog()
     if(selectedAddArticleIndices.isNotEmpty())
     {
       val articleIds = selectedAddArticleIndices.map { addArticles.getArticleId(it) }
