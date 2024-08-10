@@ -2,6 +2,7 @@ package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.inasweaterpoorlyknit.core.common.combine
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
@@ -19,46 +20,49 @@ class StatisticsViewModel @Inject constructor(
     articleRepository: ArticleRepository,
 ): ViewModel() {
 
+  data class UiState(
+      val ensembleCount: Int,
+      val articleCount: Int,
+      val articleImageCount: Int,
+      val ensemblesWithMostArticles: List<EnsembleArticleCount>,
+      val articleWithMostImages: List<String>,
+      val articleWithMostEnsembles: Pair<Int, List<String>>,
+  )
+
   companion object {
     const val TOP_ENSEMBLES_COUNT = 10
   }
 
-  val ensembleCount: StateFlow<Int> = ensembleRepository.getCountEnsembles()
-      .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = 0,
-      )
-  val articleCount: StateFlow<Int> = articleRepository.getCountArticles()
-      .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = 0,
-      )
-  val articleImagesCount: StateFlow<Int> = articleRepository.getCountArticleImages()
-      .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = 0,
-      )
-  val topEnsembles: StateFlow<List<EnsembleArticleCount>> = ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT)
-      .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = emptyList(),
-      )
-  val topArticleMostImagesCount: StateFlow<List<String>> = articleRepository.getMostPopularArticlesImageCount(1).map {
-    if(it.isEmpty()) emptyList() else it.getUriStrings(0)
+  val uiState: StateFlow<UiState> = combine(
+    ensembleRepository.getCountEnsembles(),
+    articleRepository.getCountArticles(),
+    articleRepository.getCountArticleImages(),
+    ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT),
+    articleRepository.getMostPopularArticlesImageCount(1).map {
+      if(it.isEmpty()) emptyList() else it.getUriStrings(0)
+    },
+    ensembleRepository.getMostPopularArticlesEnsembleCount(1).map {
+      if(it.first.isEmpty() || it.second.isEmpty()) Pair(0, emptyList()) else Pair(it.first[0], it.second.getUriStrings(0))
+    },
+  ) { ensembleCount, articleCount, articleImageCount, ensemblesWithMostArticles, articleWithMostImages, articleWithMostEnsembles ->
+    UiState(
+      ensembleCount = ensembleCount,
+      articleCount = articleCount,
+      articleImageCount = articleImageCount,
+      ensemblesWithMostArticles = ensemblesWithMostArticles,
+      articleWithMostImages = articleWithMostImages,
+      articleWithMostEnsembles = articleWithMostEnsembles,
+    )
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-    initialValue = emptyList(),
-  )
-  val topArticleMostEnsemblesCount: StateFlow<Pair<Int, List<String>>> = ensembleRepository.getMostPopularArticlesEnsembleCount(1).map {
-    if(it.first.isEmpty() || it.second.isEmpty()) Pair(0, emptyList()) else Pair(it.first[0], it.second.getUriStrings(0))
-  }.stateIn(
-    scope = viewModelScope,
-    started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-    initialValue = Pair(0, emptyList()),
+    initialValue = UiState(
+      ensembleCount = 0,
+      articleCount = 0,
+      articleImageCount = 0,
+      ensemblesWithMostArticles = emptyList(),
+      articleWithMostImages = emptyList(),
+      articleWithMostEnsembles = Pair(0, emptyList()),
+    ),
   )
 }

@@ -7,7 +7,6 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
@@ -30,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -57,21 +54,8 @@ fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigat
 
 @Composable
 fun StatisticsRoute(statisticsViewModel: StatisticsViewModel = hiltViewModel()) {
-  val articleCount by statisticsViewModel.articleCount.collectAsStateWithLifecycle()
-  val articleImageCount by statisticsViewModel.articleImagesCount.collectAsStateWithLifecycle()
-  val ensembleCount by statisticsViewModel.ensembleCount.collectAsStateWithLifecycle()
-  val popularEnsembles by statisticsViewModel.topEnsembles.collectAsStateWithLifecycle()
-  val topArticleMostEnsemblesCount by statisticsViewModel.topArticleMostEnsemblesCount.collectAsStateWithLifecycle()
-  val topArticleMostImagesUriStrings by statisticsViewModel.topArticleMostImagesCount.collectAsStateWithLifecycle()
-
-  StatisticsScreen(
-    articleCount = articleCount,
-    articleImageCount = articleImageCount,
-    ensembleCount = ensembleCount,
-    popularEnsembles = popularEnsembles,
-    topArticleMostEnsemblesCount = topArticleMostEnsemblesCount,
-    topArticleMostImagesUriStrings = topArticleMostImagesUriStrings,
-  )
+  val uiState by statisticsViewModel.uiState.collectAsStateWithLifecycle()
+  StatisticsScreen(uiState = uiState)
 }
 
 @Composable
@@ -125,38 +109,33 @@ fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
 @Composable
 fun StatisticsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    articleCount: Int,
-    articleImageCount: Int,
-    ensembleCount: Int,
-    popularEnsembles: List<EnsembleArticleCount>,
-    topArticleMostEnsemblesCount: Pair<Int, List<String>>,
-    topArticleMostImagesUriStrings: List<String>,
+    uiState: StatisticsViewModel.UiState,
 ){
   val layoutDir = LocalLayoutDirection.current
   val padding = 32.dp
   val subListModifier = Modifier.padding(start = padding)
   val items = staggeredHorizontallyAnimatedComposables(
     content = mutableListOf<@Composable AnimatedVisibilityScope.() -> Unit>(
-      { StatisticsRow(stringResource(R.string.article_count), articleCount.toString()) },
-      { StatisticsRow(stringResource(R.string.article_image_count), articleImageCount.toString()) },
-      { StatisticsRow(stringResource(R.string.ensemble_count), ensembleCount.toString()) },
+      { StatisticsRow(stringResource(R.string.article_count), uiState.articleCount.toString()) },
+      { StatisticsRow(stringResource(R.string.article_image_count), uiState.articleImageCount.toString()) },
+      { StatisticsRow(stringResource(R.string.ensemble_count), uiState.ensembleCount.toString()) },
       { StatisticsRow(stringResource(R.string.top_articles), "") },
-      { StatisticsRow(stringResource(R.string.most_ensembles), topArticleMostEnsemblesCount.first.toString(), modifier = subListModifier) },
-      if(topArticleMostImagesUriStrings.isNotEmpty()){
+      { StatisticsRow(stringResource(R.string.most_ensembles), uiState.articleWithMostEnsembles.first.toString(), modifier = subListModifier) },
+      if(uiState.articleWithMostImages.isNotEmpty()){
         {
           StatisticsSlideShow(
-            uriStrings = topArticleMostEnsemblesCount.second,
+            uriStrings = uiState.articleWithMostEnsembles.second,
             modifier = subListModifier.padding(start = padding)
           )
         }
       } else{
         { StatisticsRow("[${stringResource(R.string.no_articles_available)}]", "", modifier = subListModifier) }
       },
-      { StatisticsRow(stringResource(R.string.most_images), topArticleMostImagesUriStrings.size.toString(), modifier = subListModifier) },
-      if(topArticleMostImagesUriStrings.isNotEmpty()){
+      { StatisticsRow(stringResource(R.string.most_images), uiState.articleWithMostImages.size.toString(), modifier = subListModifier) },
+      if(uiState.articleWithMostImages.isNotEmpty()){
         {
           StatisticsSlideShow(
-            uriStrings = topArticleMostImagesUriStrings,
+            uriStrings = uiState.articleWithMostImages,
             modifier = subListModifier.padding(start = padding)
           )
         }
@@ -166,8 +145,8 @@ fun StatisticsScreen(
       { StatisticsRow(stringResource(R.string.top_ensembles), "") },
     ).apply{
       addAll(
-        if(popularEnsembles.isNotEmpty()){
-          popularEnsembles.map { popularEnsemble ->
+        if(uiState.ensemblesWithMostArticles.isNotEmpty()){
+          uiState.ensemblesWithMostArticles.map { popularEnsemble ->
             { StatisticsRow(popularEnsemble.title, popularEnsemble.count.toString(), modifier = subListModifier) }
           }
         } else {
@@ -196,12 +175,14 @@ fun StatisticsScreen(
 @Composable
 fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleArticleCount>) = NoopTheme {
   StatisticsScreen(
-    articleCount = 12_345,
-    articleImageCount = 300_000,
-    ensembleCount = 67_890,
-    popularEnsembles = popularEnsembles,
-    topArticleMostEnsemblesCount = Pair(allTestThumbnailResourceIdsAsStrings.size, allTestThumbnailResourceIdsAsStrings.toList()),
-    topArticleMostImagesUriStrings = allTestThumbnailResourceIdsAsStrings.toList(),
+      uiState = StatisticsViewModel.UiState(
+      articleCount = 12_345,
+      articleImageCount = 300_000,
+      ensembleCount = 67_890,
+      ensemblesWithMostArticles = popularEnsembles,
+      articleWithMostEnsembles = Pair(allTestThumbnailResourceIdsAsStrings.size, allTestThumbnailResourceIdsAsStrings.toList()),
+      articleWithMostImages = allTestThumbnailResourceIdsAsStrings.toList(),
+    )
   )
 }
 
