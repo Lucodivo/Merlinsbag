@@ -87,7 +87,7 @@ class SettingsLauncher private constructor(
 }
 
 @Composable
-fun rememberSettingsLauncher() = SettingsLauncher.create()
+fun rememberSystemAppSettingsLauncher() = SettingsLauncher.create()
 
 interface Launcher {
   fun launch()

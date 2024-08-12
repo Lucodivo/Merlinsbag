@@ -87,6 +87,7 @@ fun ArticlesRoute(
     thumbnailUris = articleThumbnails,
     selectedThumbnails = articlesViewModel.selectedArticleIndices,
     editMode = articlesViewModel.editState,
+    showPlaceholder = articlesViewModel.showPlaceholder,
     showDeleteArticlesAlert = articlesViewModel.showDeleteArticlesAlert,
     onClickArticle = articlesViewModel::onClickArticle,
     onLongPressArticle = articlesViewModel::onLongPressArticle,
@@ -122,9 +123,10 @@ fun DeleteArticlesAlertDialog(
 fun ArticlesScreen(
     windowSizeClass: WindowSizeClass,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    thumbnailUris: LazyUriStrings?,
+    thumbnailUris: LazyUriStrings,
     selectedThumbnails: Set<Int>,
     editMode: EditState,
+    showPlaceholder: Boolean,
     showDeleteArticlesAlert: Boolean,
     onClickArticle: (index: Int) -> Unit,
     onLongPressArticle: (index: Int) -> Unit,
@@ -154,6 +156,7 @@ fun ArticlesScreen(
       thumbnailUris = thumbnailUris,
       selectedThumbnails = selectedThumbnails,
       editMode = editMode,
+      showPlaceholder = showPlaceholder,
       onClickArticle = onClickArticle,
       onLongPressArticle = onLongPressArticle,
       onClickAddArticle = onClickEdit,
@@ -179,8 +182,9 @@ fun ArticlesScreen(
 }
 
 @Composable fun ArticlesScreenThumbnailGrid(
-    thumbnailUris: LazyUriStrings?,
+    thumbnailUris: LazyUriStrings,
     selectedThumbnails: Set<Int>,
+    showPlaceholder: Boolean,
     editMode: EditState,
     onClickArticle: (index: Int) -> Unit,
     onLongPressArticle: (index: Int) -> Unit,
@@ -191,11 +195,27 @@ fun ArticlesScreen(
     modifier = Modifier.fillMaxSize()
   ) {
     val placeholderVisibilityAnimatedFloat by animateFloatAsState(
-      targetValue = if(thumbnailUris?.isEmpty() == true) 1.0f else 0.0f,
+      targetValue = if(showPlaceholder) 1.0f else 0.0f,
       animationSpec = tween(durationMillis = 1000),
       label = "placeholder article grid visibility"
     )
-    if(placeholderVisibilityAnimatedFloat == 0.0f && thumbnailUris != null) {
+    if(placeholderVisibilityAnimatedFloat > 0.0f) {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .alpha(placeholderVisibilityAnimatedFloat)
+      ) {
+        PlaceholderThumbnailGrid()
+        val addArticleButtonAlpha by animateFloatAsState(
+          targetValue = if(editMode != EditState.DISABLED) 0.0f else 0.9f,
+          animationSpec = tween(durationMillis = 400),
+          label = "add article alpha"
+        )
+        Button(onClick = onClickAddArticle, modifier = Modifier.alpha(addArticleButtonAlpha)){
+          Text(text = stringResource(R.string.add_article))
+        }
+      }
+    } else {
       SelectableStaggeredThumbnailGrid(
         selectable = editMode == EditState.ENABLED_SELECTED_ARTICLES,
         onSelect = onClickArticle,
@@ -203,29 +223,6 @@ fun ArticlesScreen(
         thumbnailUris = thumbnailUris,
         selectedThumbnails = selectedThumbnails,
       )
-    } else {
-      Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .alpha(placeholderVisibilityAnimatedFloat)
-      ) {
-        PlaceholderThumbnailGrid()
-        if(thumbnailUris?.isEmpty() != false){
-          val addArticleButtonAnimatedAlphaFloat by animateFloatAsState(
-            targetValue = if(editMode != EditState.DISABLED) 0.0f else 1.0f,
-            label = "add article alpha"
-          )
-          val buttonAlpha = 0.9f
-          if(addArticleButtonAnimatedAlphaFloat > 0.0f){
-            Button(
-              onClick = onClickAddArticle,
-              modifier = Modifier.alpha(buttonAlpha * addArticleButtonAnimatedAlphaFloat)
-            ){
-              Text(text = stringResource(R.string.add_article))
-            }
-          }
-        }
-      }
     }
   }
 }
@@ -289,12 +286,14 @@ fun ArticlesButtonControls(
 fun PreviewUtilArticleScreen(
     editMode: EditState = EditState.DISABLED,
     showDeleteArticlesAlert: Boolean = false,
-    thumbUris: LazyUriStrings? = lazyRepeatedThumbnailResourceIdsAsStrings,
+    showPlaceholder: Boolean = false,
+    thumbUris: LazyUriStrings = lazyRepeatedThumbnailResourceIdsAsStrings,
     selectedThumbnails: Set<Int> = emptySet(),
 ) = NoopTheme {
   ArticlesScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
     thumbnailUris = thumbUris,
+    showPlaceholder = true,
     selectedThumbnails = selectedThumbnails,
     editMode = editMode,
     showDeleteArticlesAlert = showDeleteArticlesAlert,

@@ -143,7 +143,7 @@ fun ArticleDetailRoute(
     onPermissionDenied = { context.toast(R.string.storage_permissions_required) },
     onNeverAskAgain = articleDetailViewModel::neverAskExportPermissionAgain,
   )
-  val systemAppSettingsLauncher = rememberSettingsLauncher()
+  val systemAppSettingsLauncher = rememberSystemAppSettingsLauncher()
   val ensembleUiState by articleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   val lazyArticleFilenames by articleDetailViewModel.lazyArticleFilenames.collectAsStateWithLifecycle()
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()

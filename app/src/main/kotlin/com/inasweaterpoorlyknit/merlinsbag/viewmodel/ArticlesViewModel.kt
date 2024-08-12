@@ -42,16 +42,21 @@ class ArticlesViewModel @Inject constructor(
   private lateinit var lazyArticleImagesCache: LazyArticleThumbnails
 
   var showDeleteArticlesAlert by mutableStateOf(false)
+  var showPlaceholder by mutableStateOf(false)
   var editState by mutableStateOf(EditState.DISABLED)
   val onBackEnabled get() = editState != EditState.DISABLED
   val selectedArticleIndices = mutableStateSetOf<Int>()
   var navigationEventState by mutableStateOf(Event<NavigationState>(null))
-  val articleThumbnails: StateFlow<LazyUriStrings?> = articleRepository.getAllArticlesWithThumbnails()
-      .onEach { lazyArticleImagesCache = it }
+  val articleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
+      .onEach {
+        lazyArticleImagesCache = it
+        if(it.isEmpty()) showPlaceholder = true
+        else if(showPlaceholder) showPlaceholder = false
+      }
       .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = null,
+        initialValue = LazyUriStrings.Empty,
       )
 
   fun onClickArticle(index: Int){

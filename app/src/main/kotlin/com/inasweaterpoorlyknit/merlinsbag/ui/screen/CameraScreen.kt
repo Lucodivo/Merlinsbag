@@ -49,7 +49,7 @@ fun CameraRoute(
 ) {
   val context = LocalContext.current
 
-  val appSettingsLauncher = rememberSettingsLauncher()
+  val systemAppSettingsLauncher = rememberSystemAppSettingsLauncher()
 
   val takePictureLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.TakePicture(),
@@ -91,15 +91,15 @@ fun CameraRoute(
     }
   }
 
-  LaunchedEffect(cameraViewModel.finished){
-    cameraViewModel.finished.getContentIfNotHandled()?.let {
-      navigateBack()
-    }
-  }
-
-  LaunchedEffect(cameraViewModel.launchSystemAppSettings) {
-    cameraViewModel.launchSystemAppSettings.getContentIfNotHandled()?.let {
-      appSettingsLauncher.launch()
+  LaunchedEffect(cameraViewModel.navigationEventState){
+    cameraViewModel.navigationEventState.getContentIfNotHandled()?.let {
+      when(it){
+        CameraViewModel.NavigationState.Back -> navigateBack()
+        CameraViewModel.NavigationState.SystemAppSettings -> {
+          systemAppSettingsLauncher.launch()
+          navigateBack()
+        }
+      }
     }
   }
 

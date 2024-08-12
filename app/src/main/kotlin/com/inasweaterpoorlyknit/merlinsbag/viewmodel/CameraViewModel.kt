@@ -23,21 +23,24 @@ class CameraViewModel @Inject constructor(
     @ApplicationContext val context: Context,
 ): ViewModel() {
 
+  enum class NavigationState{
+    Back,
+    SystemAppSettings,
+  }
+
   var takePictureUri: Uri? = null
   var pictureInProgress = false
   var showPermissionsAlert by mutableStateOf(false)
-  var finished by mutableStateOf(Event<Unit>(null))
-  var launchSystemAppSettings by mutableStateOf(Event<Unit>(null))
+  var navigationEventState by mutableStateOf(Event<NavigationState>(null))
 
   fun onNeverAskAgain() { showPermissionsAlert = true }
   fun onDismissPermissionsAlert() {
     showPermissionsAlert = false
-    finished = Event(Unit)
+    navigationEventState = Event(NavigationState.Back)
   }
   fun onConfirmPermissionsAlert() {
     showPermissionsAlert = false
-    launchSystemAppSettings = Event(Unit)
-    finished = Event(Unit)
+    navigationEventState = Event(NavigationState.SystemAppSettings)
   }
 
   fun onCameraPermissionsLaunch() {
@@ -71,7 +74,7 @@ class CameraViewModel @Inject constructor(
         takePictureUri?.let { contentResolver.delete(it, null, null) }
         takePictureUri = null
       }
-      finished = Event(Unit)
+      navigationEventState = Event(NavigationState.Back)
     } else {
       takePictureUri = null
       pictureInProgress = false
