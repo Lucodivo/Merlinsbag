@@ -69,6 +69,15 @@ class ArticleDetailViewModel @AssistedInject constructor(
     None,
   }
 
+  sealed interface NavigationState {
+    data object Back: NavigationState
+    data object SystemAppSettings: NavigationState
+    data object PhotoAlbum: NavigationState
+    data class Camera(val articleId: String): NavigationState
+    data class EnsembleDetail(val ensembleId: String): NavigationState
+    data class AddArticle(val uriStrings: List<String>, val articleId: String): NavigationState
+  }
+
   @AssistedFactory
   interface ArticleDetailViewModelFactory {
     fun create(
@@ -92,11 +101,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
   var showAddToEnsemblesDialog by mutableStateOf(false)
 
   var exportedImage by mutableStateOf(Event<Uri>(null))
-  var finished by mutableStateOf(Event<Unit>(null))
-  var launchSettings by mutableStateOf(Event<Unit>(null))
-  var navigateToCamera by mutableStateOf(Event<String>(null))
-  var navigateToEnsembleDetail by mutableStateOf(Event<String>(null))
-  var navigateToAddArticle by mutableStateOf(Event<Pair<String, List<String>>>(null))
+  var navigationEventState by mutableStateOf(Event<NavigationState>(null))
 
   var articleId by mutableStateOf<String?>(null)
   var ensemblesSearchQuery by mutableStateOf("")
@@ -170,7 +175,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onClickEdit() { editState = EditState.EnabledGeneral }
   fun onClickMinimizeButtonControl() { editState = EditState.Disabled }
-  fun onClickCamera() { navigateToCamera = Event(articleId) }
+  fun onClickCamera() = articleId?.let{ navigationEventState = Event(NavigationState.Camera(it)) }
 
   fun onClickAddToEnsemble() { showAddToEnsemblesDialog = true }
   fun onCloseAddToEnsembleDialog() {
@@ -189,7 +194,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
     viewModelScope.launch(Dispatchers.IO) {
       articleRepository.deleteArticle(articleId)
     }
-    if(lazyArticleFilenames.value.size == 1) finished = Event(Unit)
+    if(lazyArticleFilenames.value.size == 1) navigationEventState = Event(NavigationState.Back)
   }
 
   fun onClickRemoveFromEnsembles() { if(selectedEnsembles.isNotEmpty()) { alertDialogState = AlertDialogState.RemoveFromEnsembles } }
@@ -200,6 +205,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
     dismissAlertDialog()
     selectedEnsembles.clear()
     ensembleListState = LazyListState()
+    editState = EditState.EnabledGeneral
     viewModelScope.launch(Dispatchers.IO) {
       ensembleRepository.deleteEnsemblesFromArticle(articleId, articleEnsembleIds)
     }
@@ -221,8 +227,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
       cachedArticlesWithFullImages.articleWithImages[articleIndex].imagePaths[it].filenameThumb
     }
     selectedThumbnails.clear()
-    editState = EditState.EnabledGeneral
     thumbnailAltsListState = LazyListState()
+    editState = EditState.EnabledGeneral
     viewModelScope.launch(Dispatchers.IO) {
       articleRepository.deleteArticleImages(articleImageFilenamesThumb)
     }
@@ -232,7 +238,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
   fun onDismissExportPermissionsArticleDialog() = dismissAlertDialog()
   fun onConfirmExportPermissionsArticleDialog() {
     dismissAlertDialog()
-    launchSettings = Event(Unit)
+    navigationEventState = Event(NavigationState.SystemAppSettings)
   }
 
   fun onArticleFocus(index: Int) = viewModelScope.launch {
@@ -315,7 +321,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
         selectedEnsembles.remove(ensembleIndex)
         if(selectedEnsembles.isEmpty()) editState = EditState.EnabledGeneral
       } else selectedEnsembles.add(ensembleIndex)
-    } else navigateToEnsembleDetail = Event(cachedArticleEnsembles[ensembleIndex].id)
+    } else navigationEventState = Event(NavigationState.EnsembleDetail(cachedArticleEnsembles[ensembleIndex].id))
   }
 
   fun onLongPressEnsemble(ensembleIndex: Int) {
@@ -339,12 +345,15 @@ class ArticleDetailViewModel @AssistedInject constructor(
   }
 
   fun onBack() {
-    if(editState != EditState.Disabled) onClickMinimizeButtonControl() else finished = Event(Unit)
+    if(editState != EditState.Disabled) onClickMinimizeButtonControl() else navigationEventState = Event(NavigationState.Back)
   }
 
   fun onPhotoAlbumResult(uris: List<Uri>) {
-    if(uris.isNotEmpty()){
-      navigateToAddArticle = Event(Pair(articleId!!, uris.map { it.toString() }))
+    val articleId = articleId
+    if(uris.isNotEmpty() && articleId != null){
+      navigationEventState = Event(NavigationState.AddArticle(uris.map { it.toString() }, articleId))
     }
   }
+
+  fun onClickAddPhotoFromAlbum() { navigationEventState = Event(NavigationState.PhotoAlbum) }
 }

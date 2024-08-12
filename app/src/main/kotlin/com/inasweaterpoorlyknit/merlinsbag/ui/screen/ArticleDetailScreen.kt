@@ -137,26 +137,27 @@ fun ArticleDetailRoute(
       }
   BackHandler(enabled = true, onBack = articleDetailViewModel::onBack)
 
-  val settingsLauncher = rememberSettingsLauncher()
+  val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris -> articleDetailViewModel.onPhotoAlbumResult(uris) }
+  val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
+    onPermissionsGranted = articleDetailViewModel::onExportPermissionsGranted,
+    onPermissionDenied = { context.toast(R.string.storage_permissions_required) },
+    onNeverAskAgain = articleDetailViewModel::neverAskExportPermissionAgain,
+  )
+  val systemAppSettingsLauncher = rememberSettingsLauncher()
   val ensembleUiState by articleDetailViewModel.ensembleUiState.collectAsStateWithLifecycle()
   val lazyArticleFilenames by articleDetailViewModel.lazyArticleFilenames.collectAsStateWithLifecycle()
   val filter by articleDetailViewModel.filter.collectAsStateWithLifecycle()
 
-  LaunchedEffect(articleDetailViewModel.finished) {
-    articleDetailViewModel.finished.getContentIfNotHandled()?.let{ navigateBack() }
-  }
-  LaunchedEffect(articleDetailViewModel.launchSettings) {
-    articleDetailViewModel.launchSettings.getContentIfNotHandled()?.let{ settingsLauncher.launch() }
-  }
-  LaunchedEffect(articleDetailViewModel.navigateToCamera) {
-    articleDetailViewModel.navigateToCamera.getContentIfNotHandled()?.let{ navigateToCamera(it)}
-  }
-  LaunchedEffect(articleDetailViewModel.navigateToEnsembleDetail) {
-    articleDetailViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navigateToEnsembleDetail(it) }
-  }
-  LaunchedEffect(articleDetailViewModel.navigateToAddArticle) {
-    articleDetailViewModel.navigateToAddArticle.getContentIfNotHandled()?.let{ (articleId, uris) ->
-      navigateToAddArticle(uris, articleId)
+  LaunchedEffect(articleDetailViewModel.navigationEventState) {
+    articleDetailViewModel.navigationEventState.getContentIfNotHandled()?.let{
+      when(it) {
+        is ArticleDetailViewModel.NavigationState.AddArticle -> navigateToAddArticle(it.uriStrings, it.articleId)
+        ArticleDetailViewModel.NavigationState.Back -> navigateBack()
+        is ArticleDetailViewModel.NavigationState.Camera -> navigateToCamera(it.articleId)
+        is ArticleDetailViewModel.NavigationState.EnsembleDetail -> navigateToEnsembleDetail(it.ensembleId)
+        ArticleDetailViewModel.NavigationState.PhotoAlbum -> photoAlbumLauncher.launch()
+        ArticleDetailViewModel.NavigationState.SystemAppSettings -> systemAppSettingsLauncher.launch()
+      }
     }
   }
   LaunchedEffect(articleDetailViewModel.exportedImage) {
@@ -190,12 +191,6 @@ fun ArticleDetailRoute(
     }
   }
 
-  val photoAlbumLauncher = rememberPhotoAlbumLauncher { uris -> articleDetailViewModel.onPhotoAlbumResult(uris) }
-  val exportWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
-    onPermissionsGranted = articleDetailViewModel::onExportPermissionsGranted,
-    onPermissionDenied = { context.toast(R.string.storage_permissions_required) },
-    onNeverAskAgain = articleDetailViewModel::neverAskExportPermissionAgain,
-  )
 
   ArticleDetailScreen(
     windowSizeClass = windowSizeClass,
@@ -215,7 +210,7 @@ fun ArticleDetailRoute(
     onClickEdit = articleDetailViewModel::onClickEdit,
     onClickMinimizeButtonControl = articleDetailViewModel::onClickMinimizeButtonControl,
     onClickExport = { exportWithPermissionsCheckLauncher.launch(REQUIRED_STORAGE_PERMISSIONS) },
-    onClickAddPhotoFromAlbum = photoAlbumLauncher::launch,
+    onClickAddPhotoFromAlbum = articleDetailViewModel::onClickAddPhotoFromAlbum,
     onClickAddPhotoFromCamera = articleDetailViewModel::onClickCamera,
     onClickDelete = articleDetailViewModel::onClickDelete,
     onDismissDeleteDialog = articleDetailViewModel::onDismissDeleteArticleDialog,

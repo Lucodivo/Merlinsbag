@@ -115,7 +115,7 @@ fun rememberPhotoAlbumLauncher(
 
 fun rateAndReviewRequest(
     context: Context,
-    onPreviouslyCompleted: () -> Unit,
+    onUnableToDisplayInAppReview: () -> Unit,
     onCompleted: () -> Unit,
     onError: () -> Unit,
 ) {
@@ -129,7 +129,7 @@ fun rateAndReviewRequest(
       flow.addOnCompleteListener { _ ->
         if(System.nanoTime() - startNanoTime < 200_000_000) {
           // Assume user has already reviewed and send them to the app store
-          onPreviouslyCompleted()
+          onUnableToDisplayInAppReview()
         } else {
           // Assume user has potentially attempted to review and thank them
           onCompleted()

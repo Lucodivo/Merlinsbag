@@ -78,12 +78,6 @@ private val sectionSpacerHeight = 16.dp
 @Composable private fun settingsFontSize() = MaterialTheme.typography.bodyLarge.fontSize
 @Composable private fun settingsTitleFontSize() = MaterialTheme.typography.titleMedium.fontSize
 
-private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
-private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
-private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
-private const val MERLINSBAG_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"
-private const val PRIVACY_INFO_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
-private const val DEMO_VIDEO_URL = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
 private const val DELETE_ALL_CAPTCHA = "1234"
 
 @Serializable
@@ -101,8 +95,6 @@ fun SettingsRoute(
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
 
-  val userPreferences by settingsViewModel.preferencesState.collectAsState()
-
   LaunchedEffect(settingsViewModel.cachePurged) {
     settingsViewModel.cachePurged.getContentIfNotHandled()?.let {
       context.toast(R.string.cache_cleared)
@@ -116,27 +108,42 @@ fun SettingsRoute(
     }
   }
 
+  LaunchedEffect(settingsViewModel.rateAndReviewRequest) {
+    settingsViewModel.rateAndReviewRequest.getContentIfNotHandled()?.let {
+      rateAndReviewRequest(
+        context = context,
+        onCompleted = { context.toast(R.string.thank_you) },
+        onUnableToDisplayInAppReview = settingsViewModel::onUnableToDisplayInAppReview,
+        onError = { context.toast(R.string.try_again_later) },
+      )
+    }
+  }
+
+  LaunchedEffect(settingsViewModel.navigationEventState) {
+    settingsViewModel.navigationEventState.getContentIfNotHandled()?.let {
+      when(it){
+        SettingsViewModel.NavigationState.Statistics -> navigateToStatistics()
+        SettingsViewModel.NavigationState.TipsAndInfo -> navigateToTipsAndInfo()
+        is SettingsViewModel.NavigationState.Web -> uriHandler.openUri(it.url)
+      }
+    }
+  }
+
+  val userPreferences by settingsViewModel.preferencesState.collectAsState()
   SettingsScreen(
     alertDialogState = settingsViewModel.alertDialogState,
     dropdownMenuState = settingsViewModel.dropdownMenuState,
     highContrastEnabled = settingsViewModel.highContrastEnabled,
     clearCacheEnabled = settingsViewModel.clearCacheEnabled,
     preferencesState = userPreferences,
-    onClickDeveloper = { uriHandler.openUri(AUTHOR_WEBSITE_URL) },
-    onClickSource = { uriHandler.openUri(SOURCE_CODE_URL) },
-    onClickEccohedra = { uriHandler.openUri(ECCOHEDRA_URL) },
-    onClickDemoVideo = { uriHandler.openUri(DEMO_VIDEO_URL) },
-    onClickRateAndReview = {
-      rateAndReviewRequest(
-        context = context,
-        onCompleted = { context.toast(R.string.thank_you) },
-        onPreviouslyCompleted = { uriHandler.openUri(MERLINSBAG_URL) },
-        onError = { context.toast(R.string.try_again_later) },
-      )
-    },
-    onClickWelcomePage = { settingsViewModel.showWelcomePage() },
-    onClickTipsAndInfoPage = navigateToTipsAndInfo,
-    onClickPrivacyInfo = { uriHandler.openUri(PRIVACY_INFO_URL) },
+    onClickDeveloper = settingsViewModel::onClickDeveloper,
+    onClickSource = settingsViewModel::onClickSource,
+    onClickEccohedra = settingsViewModel::onClickEccohedra,
+    onClickDemoVideo = settingsViewModel::onClickDemo,
+    onClickRateAndReview = settingsViewModel::onClickRateAndReview,
+    onClickWelcomePage = settingsViewModel::onClickWelcome,
+    onClickTipsAndInfoPage = settingsViewModel::onClickTipsAndInfo,
+    onClickPrivacyInfo = settingsViewModel::onClickPrivacyInformation,
     onClickClearCache = settingsViewModel::onClickClearCache,
     onClickDeleteAllData = settingsViewModel::onClickDeleteAllData,
     onDismissDeleteAllDataAlertDialog = settingsViewModel::onDismissDeleteAllDataAlertDialog,
@@ -158,7 +165,7 @@ fun SettingsRoute(
     onSelectTypography = settingsViewModel::setTypography,
     onDismissTypography = settingsViewModel::onDismissTypography,
     onClickTypography = settingsViewModel::onClickTypography,
-    onClickStatistics = navigateToStatistics
+    onClickStatistics = settingsViewModel::onClickStatistics,
   )
 }
 
