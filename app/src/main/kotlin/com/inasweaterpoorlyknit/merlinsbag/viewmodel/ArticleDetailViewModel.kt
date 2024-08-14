@@ -126,7 +126,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS)
       )
 
-  val lazyArticleFilenames: StateFlow<LazyFilenames> = articleRepository.getArticlesWithImages(ensembleId)
+  val lazyArticleFilenames: StateFlow<LazyFilenames> = articleRepository.getArticlesWithImages(ensembleId = ensembleId)
       .onEach { images ->
         articleImageIndices = mutableStateListOf(*Array(images.size) { 0 })
         cachedArticlesWithFullImages = images
