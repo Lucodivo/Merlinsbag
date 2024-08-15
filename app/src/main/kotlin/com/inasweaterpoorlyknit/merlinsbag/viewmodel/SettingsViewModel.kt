@@ -220,39 +220,13 @@ class SettingsViewModel @Inject constructor(
     userPreferencesRepository.setHasCompletedOnboarding(false)
   }
 
-  fun onClickTipsAndInfo() {
-    navigationEventState = Event(NavigationState.TipsAndInfo)
-  }
-
-  fun onClickStatistics() {
-    navigationEventState = Event(NavigationState.Statistics)
-  }
-
-  fun onClickDemo() {
-    navigationEventState = Event(NavigationState.Web(DEMO_VIDEO_URL))
-  }
-
-  fun onClickPrivacyInformation() {
-    navigationEventState = Event(NavigationState.Web(PRIVACY_INFO_URL))
-  }
-
-  fun onClickDeveloper() {
-    navigationEventState = Event(NavigationState.Web(AUTHOR_WEBSITE_URL))
-  }
-
-  fun onClickSource() {
-    navigationEventState = Event(NavigationState.Web(SOURCE_CODE_URL))
-  }
-
-  fun onClickEccohedra() {
-    navigationEventState = Event(NavigationState.Web(ECCOHEDRA_URL))
-  }
-
-  fun onClickRateAndReview() {
-    rateAndReviewRequest = Event(Unit)
-  }
-
-  fun onUnableToDisplayInAppReview() {
-    navigationEventState = Event(NavigationState.Web(MERLINSBAG_URL))
-  }
+  fun onClickRateAndReview() { rateAndReviewRequest = Event(Unit) }
+  fun onClickStatistics() { navigationEventState = Event(NavigationState.Statistics) }
+  fun onClickTipsAndInfo() { navigationEventState = Event(NavigationState.TipsAndInfo) }
+  fun onClickDemo() { navigationEventState = Event(NavigationState.Web(DEMO_VIDEO_URL)) }
+  fun onClickSource() { navigationEventState = Event(NavigationState.Web(SOURCE_CODE_URL)) }
+  fun onClickDeveloper() { navigationEventState = Event(NavigationState.Web(AUTHOR_WEBSITE_URL)) }
+  fun onClickEccohedra() { navigationEventState = Event(NavigationState.Web(ECCOHEDRA_URL)) }
+  fun onClickPrivacyInformation() { navigationEventState = Event(NavigationState.Web(PRIVACY_INFO_URL)) }
+  fun onUnableToDisplayInAppReview() { navigationEventState = Event(NavigationState.Web(MERLINSBAG_URL)) }
 }

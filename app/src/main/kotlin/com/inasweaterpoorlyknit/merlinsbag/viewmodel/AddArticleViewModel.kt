@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.Event
@@ -38,10 +39,11 @@ import java.io.IOException
 class AddArticleViewModel @AssistedInject constructor(
     @Assisted("imageUriStrings") private val imageUriStrings: List<String>,
     @Assisted("articleId") private val articleId: String?,
-    private val application: Application,
+    application: Application,
     private val articleRepository: ArticleRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
-): ViewModel() {
+    private val segmentedImage: SegmentedImage
+): AndroidViewModel(application) {
 
   @AssistedFactory
   interface AddArticleViewModelFactory {
@@ -74,7 +76,6 @@ class AddArticleViewModel @AssistedInject constructor(
 
   val attachToArticleEnabled = articleId == null
 
-  private val segmentedImage = SegmentedImage()
   private var attachArticleThumbnailsCache: LazyArticleThumbnails? = null
 
   val attachArticleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
@@ -180,7 +181,7 @@ class AddArticleViewModel @AssistedInject constructor(
           error(R.string.image_not_found)
         } else {
           try {
-            segmentedImage.process(application, imageUri) { success ->
+            segmentedImage.process(getApplication(), imageUri) { success ->
               when(success){
                 SegmentedImage.ProcessSuccess.SUCCESS -> {
                   if(segmentedImage.subjectsFound) refreshProcessedBitmap()

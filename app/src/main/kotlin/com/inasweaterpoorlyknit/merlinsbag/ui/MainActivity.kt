@@ -45,7 +45,7 @@ class MainActivity: ComponentActivity() {
         windowSizeClass = calculateWindowSizeClass(this)
       )
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
-      if(loading && mainActivityViewModel.uiState !is LoadState.Loading) loading = false
+      if(loading && mainActivityViewModel.uiState == LoadState.Loading) loading = false
 
       if(!loading && userPreferences.hasCompletedOnboarding) {
         LaunchedEffect(mainActivityViewModel.intentImageUriArgs) {

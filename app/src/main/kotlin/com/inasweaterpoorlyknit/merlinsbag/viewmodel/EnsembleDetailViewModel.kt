@@ -38,7 +38,7 @@ data class ThumbnailUiState(
 class EnsembleDetailViewModel @AssistedInject constructor(
     @Assisted private val ensembleId: String,
     private val ensemblesRepository: EnsembleRepository,
-    private val articleRepository: ArticleRepository,
+    articleRepository: ArticleRepository,
 ): ViewModel() {
 
   enum class EditState {
@@ -76,7 +76,6 @@ class EnsembleDetailViewModel @AssistedInject constructor(
   val selectedAddArticleIndices = mutableStateSetOf<Int>()
   var titleChangeError by mutableStateOf(Event<Int>(null))
   var navigationEventState by mutableStateOf(Event<NavigationState>(null))
-
   val ensembleTitle = ensemblesRepository.getEnsemble(ensembleId)
       .onEach { ensemble = it }
       .map { it?.title ?: "" } // Can be null after ensemble is deleted
@@ -85,7 +84,6 @@ class EnsembleDetailViewModel @AssistedInject constructor(
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
         initialValue = "",
       )
-
   val ensembleUiState = combine(
     ensemblesRepository.getEnsembleArticleThumbnails(ensembleId).onEach { articlesWithImages ->
       ensembleArticles = articlesWithImages

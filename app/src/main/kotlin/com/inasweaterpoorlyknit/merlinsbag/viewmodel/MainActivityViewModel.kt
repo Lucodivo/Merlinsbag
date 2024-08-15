@@ -24,12 +24,12 @@ class MainActivityViewModel @Inject constructor(
     userPreferencesRepository: UserPreferencesRepository
 ): ViewModel() {
 
-  sealed interface LoadState {
-    data object Loading : LoadState
-    data object Success : LoadState
+  enum class LoadState {
+    Loading,
+    Success
   }
 
-  var uiState by mutableStateOf<LoadState>(LoadState.Loading)
+  var uiState by mutableStateOf(LoadState.Loading)
   var intentImageUriArgs by mutableStateOf(Event<List<String>>(null))
   var navigateToCamera by mutableStateOf(Event<Boolean>(null))
 

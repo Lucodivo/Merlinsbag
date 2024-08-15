@@ -34,7 +34,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EnsemblesViewModel @Inject constructor(
     articleRepository: ArticleRepository,
-    val ensemblesRepository: EnsembleRepository,
+    val ensembleRepository: EnsembleRepository,
 ): ViewModel() {
 
   enum class DialogState{
@@ -59,11 +59,8 @@ class EnsemblesViewModel @Inject constructor(
   var newEnsembleTitle by mutableStateOf("")
   var selectedNewEnsembleArticles = mutableStateSetOf<Int>()
   val onBackEnabled get() = editMode
-
   val selectedEnsembleIndices = mutableStateSetOf<Int>()
-
   var navigateToEnsembleDetail by mutableStateOf(Event<String>(null))
-
   val addArticleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
       .onEach { articleImages = it }
       .stateIn(
@@ -71,10 +68,9 @@ class EnsemblesViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
         initialValue = LazyUriStrings.Empty
       )
-
   val lazyEnsembles: StateFlow<List<Pair<String, LazyUriStrings>>> =
       combine(
-        ensemblesRepository.getAllEnsembleArticleThumbnails().onEach {
+        ensembleRepository.getAllEnsembleArticleThumbnails().onEach {
           if(it.isEmpty()){
             if(!showPlaceholder) showPlaceholder = true
           } else if(showPlaceholder) {
@@ -83,7 +79,7 @@ class EnsemblesViewModel @Inject constructor(
         },
         searchEnsemblesQuery,
         searchEnsemblesQuery.flatMapLatest { query ->
-          ensemblesRepository.searchEnsembleArticleThumbnails(query)
+          ensembleRepository.searchEnsembleArticleThumbnails(query)
         },
       ) { allEnsembleArticleThumbnails, searchQuery, searchEnsembleArticleThumbnails ->
         if(searchQuery.isEmpty()) allEnsembleArticleThumbnails else searchEnsembleArticleThumbnails
@@ -138,10 +134,10 @@ class EnsemblesViewModel @Inject constructor(
     newEnsembleTitle = ""
     selectedNewEnsembleArticles.clear()
     viewModelScope.launch(Dispatchers.IO) {
-      val ensembleTitleUnique = ensemblesRepository.isEnsembleTitleUnique(title).first()
+      val ensembleTitleUnique = ensembleRepository.isEnsembleTitleUnique(title).first()
       if(ensembleTitleUnique){
         dismissDialog()
-        ensemblesRepository.insertEnsemble(
+        ensembleRepository.insertEnsemble(
           title,
           articleIds,
         )
@@ -165,7 +161,7 @@ class EnsemblesViewModel @Inject constructor(
     dismissDialog()
     editMode = false
     val ensembleIds = selectedEnsembleIndices.map { ensembles[it].ensemble.id }
-    viewModelScope.launch(Dispatchers.IO) { ensemblesRepository.deleteEnsembles(ensembleIds) }
+    viewModelScope.launch(Dispatchers.IO) { ensembleRepository.deleteEnsembles(ensembleIds) }
   }
 
   private fun toggleSelectedEnsemble(index: Int){

@@ -33,16 +33,10 @@ class AddArticleViewModelTest {
   @get:Rule
   val dispatcherRule = MainDispatcherRule()
 
-  @MockK
-  lateinit var articleRepository: ArticleRepository
-
-  @MockK
-  lateinit var userPreferencesRepository: UserPreferencesRepository
-
+  @MockK lateinit var articleRepository: ArticleRepository
+  @MockK lateinit var userPreferencesRepository: UserPreferencesRepository
+  @MockK lateinit var application: Application
   lateinit var segmentedImage: SegmentedImage
-
-  @MockK
-  lateinit var application: Application
 
   lateinit var viewModel: AddArticleViewModel
 

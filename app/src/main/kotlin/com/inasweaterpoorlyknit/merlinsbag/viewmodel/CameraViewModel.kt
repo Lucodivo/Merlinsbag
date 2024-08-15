@@ -1,5 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import android.app.Application
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
@@ -10,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.timestampFileName
@@ -20,8 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    @ApplicationContext val context: Context,
-): ViewModel() {
+    application: Application,
+): AndroidViewModel(application) {
 
   enum class NavigationState{
     Back,
@@ -51,7 +53,7 @@ class CameraViewModel @Inject constructor(
     pictureInProgress = true
     val pictureFilename = "${timestampFileName()}.jpg"
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      val contentResolver = context.contentResolver
+      val contentResolver = getApplication<Application>().contentResolver
       val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, pictureFilename)
         put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
@@ -70,7 +72,7 @@ class CameraViewModel @Inject constructor(
   fun onPictureTaken(taken: Boolean) {
     if(!taken){
       if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-        val contentResolver = context.contentResolver
+        val contentResolver = getApplication<Application>().contentResolver
         takePictureUri?.let { contentResolver.delete(it, null, null) }
         takePictureUri = null
       }
