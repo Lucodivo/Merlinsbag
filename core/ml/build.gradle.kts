@@ -24,4 +24,13 @@ dependencies {
 
   // ML Kit
   implementation(libs.play.services.mlkit.subject.segmentation)
+
+  // Hilt
+  implementation(libs.hilt.android)
+  testImplementation(libs.hilt.android.testing)
+  testImplementation(libs.hilt.android.testing)
+  ksp(libs.hilt.compiler)
+  kspTest(libs.hilt.compiler)
+  kspAndroidTest(libs.hilt.compiler)
+
 }
