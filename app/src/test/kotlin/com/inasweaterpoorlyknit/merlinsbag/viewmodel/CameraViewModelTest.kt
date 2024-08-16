@@ -23,11 +23,14 @@ class CameraViewModelTest {
 
   @Before
   fun beforeEach() {
-    viewModel = CameraViewModel(application = application)
+    viewModel = CameraViewModel(
+      articleId = null,
+      application = application,
+    )
   }
 
   @Test
   fun `Dialogs are hidden by default`() = runTest {
-    assertFalse(viewModel.showPermissionsAlert)
+    assertFalse(viewModel.uiState.showPermissionsAlert)
   }
 }

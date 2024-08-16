@@ -2,7 +2,6 @@ package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
 import android.Manifest.permission
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Icon
@@ -45,68 +44,71 @@ fun CameraRoute(
     articleId: String? = null,
     navigateToAddArticle: (uriStrings: List<String>, articleId: String?) -> Unit,
     navigateBack: () -> Unit,
-    cameraViewModel: CameraViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
+  val cameraViewModel = hiltViewModel<CameraViewModel, CameraViewModel.CameraViewModelFactory> { factory ->
+    factory.create(articleId)
+  }
 
   val systemAppSettingsLauncher = rememberSystemAppSettingsLauncher()
 
   val takePictureLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.TakePicture(),
-    onResult = { success ->
-      val cameraPictureUri = cameraViewModel.takePictureUri
-      cameraViewModel.onPictureTaken(success)
-      if(success) {
-        if(cameraPictureUri != null) navigateToAddArticle(
-          listOf(cameraPictureUri.toString()),
-          articleId,
-        ) else {
-          Log.e("GetContent ActivityResultContract", "Temp camera picture URI was null after picture was taken")
-          context.toast(R.string.sorry_try_again)
-        }
-      }
-    })
+    onResult = cameraViewModel::onPictureTaken
+  )
 
   val cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
-    onPermissionsGranted = {
-      val uri = cameraViewModel.onTakePicture()
-      if(uri != null) {
-        takePictureLauncher.launch(uri)
-      } else {
-        Log.e("GetContent ActivityResultContract", "Temp camera picture URI was returned as null at generation")
-        navigateBack()
-      }
-    },
-    onPermissionDenied = {
-      context.toast(R.string.camera_permission_required)
-      navigateBack()
-    },
+    onPermissionsGranted = cameraViewModel::onCameraPermissionsGranted,
+    onPermissionDenied = cameraViewModel::onCameraPermissionsDenied,
     onNeverAskAgain = cameraViewModel::onNeverAskAgain,
   )
 
-  LaunchedEffect(Unit) {
-    if(!cameraViewModel.pictureInProgress) {
-      cameraViewModel.onCameraPermissionsLaunch()
+  LaunchedEffect(Unit) { // Note: We only ever want to
+    cameraViewModel.uiState.launchCameraPermissions.getContentIfNotHandled()?.also {
       cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
     }
   }
 
-  LaunchedEffect(cameraViewModel.navigationEventState){
-    cameraViewModel.navigationEventState.getContentIfNotHandled()?.let {
+  LaunchedEffect(cameraViewModel.uiState.navigationEventState){
+    cameraViewModel.uiState.navigationEventState.getContentIfNotHandled()?.let {
       when(it){
         CameraViewModel.NavigationState.Back -> navigateBack()
         CameraViewModel.NavigationState.SystemAppSettings -> {
           systemAppSettingsLauncher.launch()
           navigateBack()
         }
+        is CameraViewModel.NavigationState.TakePicture -> takePictureLauncher.launch(it.tmpPhotoUri)
+        is CameraViewModel.NavigationState.AddArticle -> navigateToAddArticle(it.uriStrings, it.articleId)
       }
     }
   }
 
+  LaunchedEffect(cameraViewModel.uiState.errorState) {
+    cameraViewModel.uiState.errorState.getContentIfNotHandled()?.let { error ->
+      when(error){
+        CameraViewModel.ErrorState.PhotoLost -> context.toast(R.string.sorry_try_again) // TODO: Test to ensure this works
+        CameraViewModel.ErrorState.PermissionsDenied -> context.toast(R.string.camera_permission_required)
+      }
+    }
+  }
+
+  CameraScreen(
+    showPermissionsAlert = cameraViewModel.uiState.showPermissionsAlert,
+    onDismissPermissionsAlert = cameraViewModel::onDismissPermissionsAlert,
+    onConfirmPermissionsAlert = cameraViewModel::onConfirmPermissionsAlert,
+  )
+}
+
+@Composable
+fun CameraScreen(
+    showPermissionsAlert: Boolean,
+    onDismissPermissionsAlert: () -> Unit,
+    onConfirmPermissionsAlert: () -> Unit,
+) {
   CameraPermissionsAlertDialog(
-    visible = cameraViewModel.showPermissionsAlert,
-    onDismiss = cameraViewModel::onDismissPermissionsAlert,
-    onConfirm = cameraViewModel::onConfirmPermissionsAlert,
+    visible = showPermissionsAlert,
+    onDismiss = onDismissPermissionsAlert,
+    onConfirm = onConfirmPermissionsAlert,
   )
 }
 
