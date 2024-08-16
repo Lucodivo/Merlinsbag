@@ -29,17 +29,17 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class ThumbnailUiState(
-    val ensembleArticleThumbnailUris: LazyUriStrings,
-    val addArticleThumbnailUris: LazyUriStrings,
-)
-
 @HiltViewModel(assistedFactory = EnsembleDetailViewModel.EnsembleDetailViewModelFactory::class)
 class EnsembleDetailViewModel @AssistedInject constructor(
     @Assisted private val ensembleId: String,
     private val ensemblesRepository: EnsembleRepository,
     articleRepository: ArticleRepository,
 ): ViewModel() {
+
+  data class ThumbnailUiState(
+      val ensembleArticleThumbnailUris: LazyUriStrings,
+      val addArticleThumbnailUris: LazyUriStrings,
+  )
 
   enum class EditState {
     EnabledGeneral,

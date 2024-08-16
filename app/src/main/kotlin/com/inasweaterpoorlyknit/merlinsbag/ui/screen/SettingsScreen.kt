@@ -768,6 +768,7 @@ fun PreviewUtilSettingsScreen(
   }
 }
 
+// TODO: Animations have made previews unusable. Hoist animation values?
 @SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen()
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen()
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(alertDialogState = SettingsViewModel.AlertDialogState.DeleteAllData)

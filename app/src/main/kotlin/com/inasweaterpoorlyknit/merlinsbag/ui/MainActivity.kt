@@ -34,8 +34,7 @@ class MainActivity: ComponentActivity() {
 
     mainActivityViewModel.processIntent(intent)
 
-    var loading = true
-    splashscreen.setKeepOnScreenCondition { loading }
+    splashscreen.setKeepOnScreenCondition { mainActivityViewModel.uiState == LoadState.Loading }
 
     val context = this
     lifecycleScope.launch { encourageInstallSubjectSegmentationModel(context = context) }
@@ -45,9 +44,8 @@ class MainActivity: ComponentActivity() {
         windowSizeClass = calculateWindowSizeClass(this)
       )
       val userPreferences by mainActivityViewModel.userPreferences.collectAsStateWithLifecycle()
-      if(loading && mainActivityViewModel.uiState == LoadState.Loading) loading = false
 
-      if(!loading && userPreferences.hasCompletedOnboarding) {
+      if(mainActivityViewModel.uiState == LoadState.Success && userPreferences.hasCompletedOnboarding) {
         LaunchedEffect(mainActivityViewModel.intentImageUriArgs) {
           mainActivityViewModel.intentImageUriArgs.getContentIfNotHandled()?.let {
             appState.navController.navigateToAddArticle(it)
