@@ -600,11 +600,12 @@ fun SettingsScreen(
 @Composable
 fun versionName(): String {
   val context = LocalContext.current
+  val unknownVersionName = "?"
   try {
-    return context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    return context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: unknownVersionName
   } catch(e: Exception) {
     e.printStackTrace()
-    return "?"
+    return unknownVersionName
   }
 }
 
