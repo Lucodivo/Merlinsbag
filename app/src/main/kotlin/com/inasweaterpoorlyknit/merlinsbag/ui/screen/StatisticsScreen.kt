@@ -46,6 +46,7 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables
+import kotlin.math.min
 
 @Serializable
 object StatisticsRouteArgs
@@ -76,12 +77,10 @@ fun StatisticsRow(
 @Composable
 fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
   val thumbnailSize = 120.dp
-  var animateTopImagesIndex by remember { mutableStateOf(false) }
+  val lastIndex = uriStrings.size - 1
+  var targetValue by remember { mutableStateOf(0) }
   val animateIndex by animateIntAsState(
-    targetValue =
-    if(!animateTopImagesIndex) 0
-    else if(uriStrings.isNotEmpty()) uriStrings.lastIndex
-    else 0,
+    targetValue = targetValue,
     label = "TopArticleMostImages",
     animationSpec = repeatable(
       iterations = Int.MAX_VALUE,
@@ -92,17 +91,14 @@ fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
       repeatMode = RepeatMode.Restart
     )
   )
-  LaunchedEffect(Unit) { animateTopImagesIndex = true }
+  LaunchedEffect(Unit) { if(uriStrings.isNotEmpty()) targetValue = lastIndex + 1}
   NoopImage(
-    uriString = if(animateIndex < uriStrings.size) uriStrings[animateIndex] else null,
+    uriString = if(animateIndex < uriStrings.size) uriStrings[min(animateIndex, lastIndex)] else null,
     contentDescription = ARTICLE_IMAGE_CONTENT_DESCRIPTION,
     crossFadeMs = 0,
     modifier = modifier
         .padding(vertical = 8.dp)
-        .size(
-          width = thumbnailSize,
-          height = thumbnailSize
-        )
+        .size(width = thumbnailSize, height = thumbnailSize)
   )
 }
 
@@ -111,50 +107,40 @@ fun StatisticsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     uiState: StatisticsViewModel.UiState,
 ){
+
   val layoutDir = LocalLayoutDirection.current
   val padding = 32.dp
   val subListModifier = Modifier.padding(start = padding)
+
   val items = staggeredHorizontallyAnimatedComposables(
     content = mutableListOf<@Composable AnimatedVisibilityScope.() -> Unit>(
       { StatisticsRow(stringResource(R.string.article_count), uiState.articleCount.toString()) },
       { StatisticsRow(stringResource(R.string.article_image_count), uiState.articleImageCount.toString()) },
       { StatisticsRow(stringResource(R.string.ensemble_count), uiState.ensembleCount.toString()) },
-      { StatisticsRow(stringResource(R.string.top_articles), "") },
-      { StatisticsRow(stringResource(R.string.most_ensembles), uiState.articleWithMostEnsembles.first.toString(), modifier = subListModifier) },
-      if(uiState.articleWithMostImages.isNotEmpty()){
-        {
-          StatisticsSlideShow(
-            uriStrings = uiState.articleWithMostEnsembles.second,
-            modifier = subListModifier.padding(start = padding)
-          )
-        }
-      } else{
-        { StatisticsRow("[${stringResource(R.string.no_articles_available)}]", "", modifier = subListModifier) }
-      },
-      { StatisticsRow(stringResource(R.string.most_images), uiState.articleWithMostImages.size.toString(), modifier = subListModifier) },
-      if(uiState.articleWithMostImages.isNotEmpty()){
-        {
-          StatisticsSlideShow(
-            uriStrings = uiState.articleWithMostImages,
-            modifier = subListModifier.padding(start = padding)
-          )
-        }
-      } else{
-        { StatisticsRow("[${stringResource(R.string.no_articles_available)}]", "", modifier = subListModifier) }
-      },
-      { StatisticsRow(stringResource(R.string.top_ensembles), "") },
     ).apply{
-      addAll(
-        if(uiState.ensemblesWithMostArticles.isNotEmpty()){
-          uiState.ensemblesWithMostArticles.map { popularEnsemble ->
-            { StatisticsRow(popularEnsemble.title, popularEnsemble.count.toString(), modifier = subListModifier) }
-          }
-        } else {
-          listOf<@Composable AnimatedVisibilityScope.() -> Unit>(
-            { StatisticsRow("[${stringResource(R.string.no_ensembles_available)}]", "", modifier = subListModifier) }
-          )
+      val showMostEnsembles = uiState.articleWithMostEnsembles.count > 0
+      val showMostImages = uiState.articleWithMostImagesUriStrings.isNotEmpty()
+      val showTopArticles = showMostEnsembles || showMostImages
+      val showTopEnsembles = uiState.ensemblesWithMostArticles.isNotEmpty()
+
+      if(showTopArticles){
+        add { StatisticsRow(stringResource(R.string.top_articles), "") }
+        if(showMostEnsembles) {
+          add { StatisticsRow(stringResource(R.string.most_ensembles), uiState.articleWithMostEnsembles.count.toString(), modifier = subListModifier) }
+          add { StatisticsSlideShow(uriStrings = uiState.articleWithMostEnsembles.uriStrings, modifier = subListModifier.padding(start = padding)) }
         }
-      )
+        if(showMostImages){
+          add { StatisticsRow(stringResource(R.string.most_images), uiState.articleWithMostImagesUriStrings.size.toString(), modifier = subListModifier) }
+          add { StatisticsSlideShow(uriStrings = uiState.articleWithMostImagesUriStrings, modifier = subListModifier.padding(start = padding)) }
+        }
+      }
+
+      if(showTopEnsembles){
+        add { StatisticsRow(stringResource(R.string.top_ensembles), "") }
+        addAll(uiState.ensemblesWithMostArticles.map { popularEnsemble ->
+          { StatisticsRow(popularEnsemble.title, popularEnsemble.count.toString(), modifier = subListModifier) }
+        })
+      }
     }.toList()
   )
   LazyColumn(
@@ -180,8 +166,8 @@ fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleArticleCount>) = 
       articleImageCount = 300_000,
       ensembleCount = 67_890,
       ensemblesWithMostArticles = popularEnsembles,
-      articleWithMostEnsembles = Pair(allTestThumbnailResourceIdsAsStrings.size, allTestThumbnailResourceIdsAsStrings.toList()),
-      articleWithMostImages = allTestThumbnailResourceIdsAsStrings.toList(),
+      articleWithMostEnsembles = StatisticsViewModel.ArticleWithMostEnsembles(allTestThumbnailResourceIdsAsStrings.size, allTestThumbnailResourceIdsAsStrings.toList()),
+      articleWithMostImagesUriStrings = allTestThumbnailResourceIdsAsStrings.toList(),
     )
   )
 }

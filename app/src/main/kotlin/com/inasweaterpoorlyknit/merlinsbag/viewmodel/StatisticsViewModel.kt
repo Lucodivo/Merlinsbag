@@ -20,13 +20,18 @@ class StatisticsViewModel @Inject constructor(
     articleRepository: ArticleRepository,
 ): ViewModel() {
 
+  data class ArticleWithMostEnsembles(
+    val count: Int,
+    val uriStrings: List<String>,
+  )
+
   data class UiState(
       val ensembleCount: Int,
       val articleCount: Int,
       val articleImageCount: Int,
       val ensemblesWithMostArticles: List<EnsembleArticleCount>,
-      val articleWithMostImages: List<String>,
-      val articleWithMostEnsembles: Pair<Int, List<String>>,
+      val articleWithMostImagesUriStrings: List<String>,
+      val articleWithMostEnsembles: ArticleWithMostEnsembles,
   )
 
   companion object {
@@ -42,7 +47,8 @@ class StatisticsViewModel @Inject constructor(
       if(it.isEmpty()) emptyList() else it.getUriStrings(0)
     },
     ensembleRepository.getMostPopularArticlesEnsembleCount(1).map {
-      if(it.first.isEmpty() || it.second.isEmpty()) Pair(0, emptyList()) else Pair(it.first[0], it.second.getUriStrings(0))
+      if(it.first.isEmpty() || it.second.isEmpty()) ArticleWithMostEnsembles(0, emptyList())
+      else ArticleWithMostEnsembles(it.first[0], it.second.getUriStrings(0))
     },
   ) { ensembleCount, articleCount, articleImageCount, ensemblesWithMostArticles, articleWithMostImages, articleWithMostEnsembles ->
     UiState(
@@ -50,7 +56,7 @@ class StatisticsViewModel @Inject constructor(
       articleCount = articleCount,
       articleImageCount = articleImageCount,
       ensemblesWithMostArticles = ensemblesWithMostArticles,
-      articleWithMostImages = articleWithMostImages,
+      articleWithMostImagesUriStrings = articleWithMostImages,
       articleWithMostEnsembles = articleWithMostEnsembles,
     )
   }.stateIn(
@@ -61,8 +67,8 @@ class StatisticsViewModel @Inject constructor(
       articleCount = 0,
       articleImageCount = 0,
       ensemblesWithMostArticles = emptyList(),
-      articleWithMostImages = emptyList(),
-      articleWithMostEnsembles = Pair(0, emptyList()),
+      articleWithMostImagesUriStrings = emptyList(),
+      articleWithMostEnsembles = ArticleWithMostEnsembles(0, emptyList()),
     ),
   )
 }
