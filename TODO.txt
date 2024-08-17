@@ -58,17 +58,32 @@ Refactor:
     - ViewModels should hold a single general UiState instead of individual values
 Bugs:
     - Out of Memory (OOM) crash (or silent PROCESS ENDED while app is in the background due to camera contract) when processing an image in AddArticleScreen
-        - Seen easily running application on an Motorola Z Play, 3GB RAM, API 26
-        - Silent PROCESS ENDED is easy to reproduce on Samsung Galazy A23 if you repeatedly take pictures to catalog articles (occurs within 2-7 attempts usually)
-        - OOM stems from java.nio.HeapFloatBuffer when called in com.google.mlkit.vision.segmentation.subject.internal
-        - Although com.inasweaterpoorlyknit.core.ml.image.SegmentedImage contains multiple bitmaps and large integer arrays, it seems like the bulk of memory is coming from native allocations from ML Kit
-            - Profiling has shown <150MB allocations on the Kotlin side and >1.3GB allocations on the native side
-                - Deallocations obviously matter, but 150MB is not going to cause an OOM exception
-                - This does *NOT* mean that SegmentedImage cannot or should not have it's memory optimized. But it is not the core issue.
-        - CacheManager::trimMemory(20) or similar logging messages can usually be seen before a crash
-        - Potential Solutions:
-            - Reduce image resolution
-            - Reduce image resolution that is sent to ML Kit and interpolated reduced resolution data to full resolution image
+        - [SOLVED] SegmentedImage (which contains ML Kit's SubjectSegmenter) is a singleton in the app
+            - SegmentedImage is about 500MB of memory, which is no small footprint
+            - Pros:
+                - They are expensive so it is good that only one will ever exist
+                - The first solution to prevent OOM crashes on the Motorola Z Play
+            - Cons:
+                - They are expensive and will remain as part of the app footprint for the entirety of a session after a singleton is created
+            - Potential solutions:
+                - Clear the singleton after user is no longer actively logging
+                - Explore processing reduced image resolution
+        - Old Notes:
+            - Seen easily running application on an Motorola Z Play, 3GB RAM, API 26
+            - Silent PROCESS ENDED is easy to reproduce on Samsung Galazy A23 if you repeatedly take pictures to catalog articles (occurs within 2-7 attempts usually)
+            - OOM stems from java.nio.HeapFloatBuffer when called in com.google.mlkit.vision.segmentation.subject.internal
+            - Although com.inasweaterpoorlyknit.core.ml.image.SegmentedImage contains multiple bitmaps and large integer arrays, it seems like the bulk of memory is coming from native allocations from ML Kit
+                - Profiling has shown <150MB allocations on the Kotlin side and >1.3GB allocations on the native side
+                    - Deallocations obviously matter, but 150MB is not going to cause an OOM exception
+                    - This does *NOT* mean that SegmentedImage cannot or should not have it's memory optimized. But it is not the core issue.
+            - CacheManager::trimMemory(20) or similar logging messages can usually be seen before a crash
+            - Solutions:
+                - [Tested] SegmentedImage injected into AddArticleViewModel as a Singleton
+                    - Utilizing a Singleton that never got cleaned up avoided the OOM crash for the Motorola Z Play
+                    - How to cleanup the SegmentedImage when user is no longer processing articles and simply browsing their catalog?
+                    - Make SubjectSegmenter a singleton instead and test?
+                - Reduce image resolution that is sent to ML Kit and interpolated reduced resolution data to full resolution image
+                - Reduce image resolution
     - During screen transitions, the previous screen is still interactable?
     - FTS is imperfect sometimes shows irrelevant results on first character
         - Reproduce: Type one random character in search bar. Sometimes show unrelated results. Have seen unrelated results on pairs of 2 characters.

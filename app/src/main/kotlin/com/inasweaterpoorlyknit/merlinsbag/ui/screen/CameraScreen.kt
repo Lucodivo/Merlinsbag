@@ -63,7 +63,7 @@ fun CameraRoute(
     onNeverAskAgain = cameraViewModel::onNeverAskAgain,
   )
 
-  LaunchedEffect(Unit) { // Note: We only ever want to
+  LaunchedEffect(Unit) { // Note: We only ever want to launch the camera once per CameraRoute taken
     cameraViewModel.uiState.launchCameraPermissions.getContentIfNotHandled()?.also {
       cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
     }

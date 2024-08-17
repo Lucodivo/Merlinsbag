@@ -88,11 +88,6 @@ class AddArticleViewModel @AssistedInject constructor(
 
   init { processNextImage() }
 
-  override fun onCleared() {
-    super.onCleared()
-    segmentedImage.cleanup()
-  }
-
   fun removeAttachedArticle() { attachArticleIndex = null }
   fun addAttachedArticle(articleIndex: Int) { attachArticleIndex = articleIndex }
 

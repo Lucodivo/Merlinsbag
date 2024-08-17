@@ -6,9 +6,8 @@ import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.subject.Subject
-import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentationResult
-import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
+import com.google.mlkit.vision.segmentation.subject.SubjectSegmenter
 import java.nio.FloatBuffer
 import kotlin.math.max
 import kotlin.math.min
@@ -29,7 +28,7 @@ import kotlin.math.min
 //          Image successfully processed by ML Kit: 466ms
 //          Subject alpha masked to IntArray: 27ms
 //          Subject alpha masked IntArray to bitmap: 4ms
-class SegmentedImage {
+class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
   data class BoundingBox(var minX: Int, var minY: Int, var maxX: Int, var maxY: Int) {
     val width: Int
       get() = maxX - minX
@@ -47,15 +46,6 @@ class SegmentedImage {
   private var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
   var subjectIndex: Int = 0
   private var segmentationResult = PLACEHOLDER_RESULT
-  private val subjectSegmenter = SubjectSegmentation.getClient(
-    SubjectSegmenterOptions.Builder()
-        .enableMultipleSubjects(
-          SubjectSegmenterOptions.SubjectResultOptions.Builder()
-              .enableConfidenceMask()
-              .build()
-        )
-        .build()
-  )
 
   companion object {
     private val PLACEHOLDER_INT_ARRAY = IntArray(1)
@@ -79,6 +69,7 @@ class SegmentedImage {
         .addOnFailureListener { Log.e("SegmentedImage", "ML Kit failed to process placeholder bitmap image") }
   }
 
+  // TODO: Never called because SegmentedImage is currently injected as a singleton
   fun cleanup() {
     subjectSegmenter.close()
   }

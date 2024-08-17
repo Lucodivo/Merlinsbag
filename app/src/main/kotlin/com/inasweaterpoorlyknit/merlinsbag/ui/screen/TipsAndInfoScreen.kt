@@ -129,6 +129,7 @@ fun TipsAndInfoScreen(
       title(R.string.messages)
       errorSubtitle(R.string.configuring_try_again_soon)
       body(R.string.ml_model_must_download)
+      // TODO: Remove?
       errorSubtitle(R.string.sorry_try_again)
       body(R.string.article_extraction_is_hard_work, modifier = spacerModifier.padding(bottom = systemBarPaddingValues.calculateBottomPadding()))
     }
