@@ -91,7 +91,7 @@ class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
     }
   }
 
-  fun process(mlkitInputImage: InputImage, successCallback: (ProcessSuccess) -> Unit) {
+  private fun process(mlkitInputImage: InputImage, successCallback: (ProcessSuccess) -> Unit) {
     if(mlkitInputImage.bitmapInternal == null) {
       Log.e("SegmentedImage", "MLKit InputImage did not contain a bitmap")
       successCallback(ProcessSuccess.FAILURE_IMAGE_NOT_RECOGNIZED)
@@ -137,19 +137,6 @@ class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
     if(!subjectsFound || confidenceThreshold == MAX_CONFIDENCE_THRESHOLD) return
     confidenceThreshold += CONFIDENCE_THRESHOLD_INCREMENT
     confidenceThreshold = min(MAX_CONFIDENCE_THRESHOLD, confidenceThreshold)
-    prepareSubjectBitmap()
-  }
-
-  fun prevSubject() {
-    val subjectCount = segmentationResult.subjects.size
-    if(subjectCount <= 1) return
-    confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
-    subjectIndex = (subjectIndex - 1 + subjectCount) % subjectCount
-    val subject = segmentationResult.subjects[subjectIndex]
-    val subjectColorsSize = subject.width * subject.height
-    if(subjectColors.size < subjectColorsSize) {
-      subjectColors = IntArray(subjectColorsSize)
-    }
     prepareSubjectBitmap()
   }
 

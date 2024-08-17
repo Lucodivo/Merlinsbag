@@ -20,10 +20,17 @@ android {
 }
 
 dependencies {
+  testImplementation(projects.core.testing)
+
   implementation(libs.androidx.core.ktx)
 
   // ML Kit
   implementation(libs.play.services.mlkit.subject.segmentation)
+
+  // testing
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.mockk)
 
   // Hilt
   implementation(libs.hilt.android)
