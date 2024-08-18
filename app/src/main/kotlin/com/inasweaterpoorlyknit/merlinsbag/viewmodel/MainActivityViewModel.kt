@@ -31,7 +31,7 @@ class MainActivityViewModel @Inject constructor(
 
   var uiState by mutableStateOf(LoadState.Loading)
   var intentImageUriArgs by mutableStateOf(Event<List<String>>(null))
-  var navigateToCamera by mutableStateOf(Event<Boolean>(null))
+  var navigateToAddArticle by mutableStateOf(Event<Unit>(null))
 
   val userPreferences = userPreferencesRepository.userPreferences
       .onEach { uiState = LoadState.Success }
@@ -73,7 +73,7 @@ class MainActivityViewModel @Inject constructor(
     }
     if(intent.action == Intent.ACTION_VIEW){
       if(intent.dataString?.equals("camera") == true){
-        navigateToCamera = Event(true)
+        navigateToAddArticle = Event(Unit)
       }
     }
   }

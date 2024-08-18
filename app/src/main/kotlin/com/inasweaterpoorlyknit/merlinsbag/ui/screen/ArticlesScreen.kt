@@ -58,7 +58,6 @@ fun NavController.navigateToArticles(navOptions: NavOptions? = null) = navigate(
 @Composable
 fun ArticlesRoute(
     navigateToArticleDetail: (index: Int) -> Unit,
-    navigateToCamera: () -> Unit,
     navigateToSettings: () -> Unit,
     navigateToAddArticle: (uriStrings: List<String>) -> Unit,
     windowSizeClass: WindowSizeClass,
@@ -75,7 +74,6 @@ fun ArticlesRoute(
       when(it) {
         is ArticlesViewModel.NavigationState.AddArticle -> navigateToAddArticle(it.uriStrings)
         is ArticlesViewModel.NavigationState.ArticleDetail -> navigateToArticleDetail(it.index)
-        ArticlesViewModel.NavigationState.Camera -> navigateToCamera()
         ArticlesViewModel.NavigationState.PhotoAlbum -> photoAlbumLauncher.launch()
         ArticlesViewModel.NavigationState.Settings -> navigateToSettings()
       }
@@ -139,6 +137,7 @@ fun ArticlesScreen(
     onClickSettings: () -> Unit,
     onConfirmDeleteArticlesAlert: () -> Unit,
     onDismissDeleteArticlesAlert: () -> Unit,
+
 ) {
 
   val layoutDir = LocalLayoutDirection.current

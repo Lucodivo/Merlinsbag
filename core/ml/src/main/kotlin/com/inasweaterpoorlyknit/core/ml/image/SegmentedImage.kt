@@ -44,7 +44,7 @@ class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
     private set
   var subjectBoundingBox = PLACEHOLDER_BOUNDING_BOX
   private var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
-  var subjectIndex: Int = 0
+  var subjectIndex = 0
   private var segmentationResult = PLACEHOLDER_RESULT
 
   companion object {
@@ -61,15 +61,6 @@ class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
     private val PLACEHOLDER_BOUNDING_BOX = BoundingBox(0, 0, 1, 1)
   }
 
-  init {
-    // warm up the ML Kit Model
-    val mlkitImage = InputImage.fromBitmap(PLACEHOLDER_BITMAP, 0)
-    subjectSegmenter.process(mlkitImage)
-        .addOnSuccessListener { segmentationResult = it }
-        .addOnFailureListener { Log.e("SegmentedImage", "ML Kit failed to process placeholder bitmap image") }
-  }
-
-  // TODO: Never called because SegmentedImage is currently injected as a singleton
   fun cleanup() {
     subjectSegmenter.close()
   }

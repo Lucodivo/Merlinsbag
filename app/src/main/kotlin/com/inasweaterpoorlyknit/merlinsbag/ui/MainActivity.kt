@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import com.inasweaterpoorlyknit.core.ml.encourageInstallSubjectSegmentationModel
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToAddArticle
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToCamera
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel.LoadState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,9 +50,9 @@ class MainActivity: ComponentActivity() {
             appState.navController.navigateToAddArticle(it)
           }
         }
-        LaunchedEffect(mainActivityViewModel.navigateToCamera) {
-          mainActivityViewModel.navigateToCamera.getContentIfNotHandled()?.let {
-            appState.navController.navigateToCamera()
+        LaunchedEffect(mainActivityViewModel.navigateToAddArticle) {
+          mainActivityViewModel.navigateToAddArticle.getContentIfNotHandled()?.let {
+            appState.navController.navigateToAddArticle()
           }
         }
       }

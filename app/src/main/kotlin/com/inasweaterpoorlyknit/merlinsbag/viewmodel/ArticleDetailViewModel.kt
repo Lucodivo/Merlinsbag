@@ -73,9 +73,8 @@ class ArticleDetailViewModel @AssistedInject constructor(
     data object Back: NavigationState
     data object SystemAppSettings: NavigationState
     data object PhotoAlbum: NavigationState
-    data class Camera(val articleId: String): NavigationState
     data class EnsembleDetail(val ensembleId: String): NavigationState
-    data class AddArticle(val uriStrings: List<String>, val articleId: String): NavigationState
+    data class AddArticle(val uriStrings: List<String> = emptyList(), val articleId: String): NavigationState
   }
 
   @AssistedFactory
@@ -175,7 +174,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
 
   fun onClickEdit() { editState = EditState.EnabledGeneral }
   fun onClickMinimizeButtonControl() { editState = EditState.Disabled }
-  fun onClickCamera() = articleId?.let{ navigationEventState = Event(NavigationState.Camera(it)) }
+  fun onClickCamera() = articleId?.let{ navigationEventState = Event(NavigationState.AddArticle(articleId = it)) }
 
   fun onClickAddToEnsemble() { showAddToEnsemblesDialog = true }
   fun onCloseAddToEnsembleDialog() {

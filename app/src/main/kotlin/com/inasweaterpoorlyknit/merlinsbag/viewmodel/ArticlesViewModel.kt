@@ -32,11 +32,10 @@ class ArticlesViewModel @Inject constructor(
   }
 
   sealed interface NavigationState {
-    data object Camera: NavigationState
     data object PhotoAlbum: NavigationState
     data object Settings: NavigationState
     data class ArticleDetail(val index: Int): NavigationState
-    data class AddArticle(val uriStrings: List<String>): NavigationState
+    data class AddArticle(val uriStrings: List<String> = emptyList()): NavigationState
   }
 
   private lateinit var lazyArticleImagesCache: LazyArticleThumbnails
@@ -86,7 +85,7 @@ class ArticlesViewModel @Inject constructor(
     editState = EditState.ENABLED_GENERAL
   }
   fun onClickSettings(){ navigationEventState = Event(NavigationState.Settings) }
-  fun onClickAddPhotoCamera(){ navigationEventState = Event(NavigationState.Camera) }
+  fun onClickAddPhotoCamera(){ navigationEventState = Event(NavigationState.AddArticle()) }
   fun onClickAddPhotoAlbum(){ navigationEventState = Event(NavigationState.PhotoAlbum) }
   fun onPhotoAlbumResults(uris: List<Uri>){
     if(uris.isNotEmpty()) navigationEventState = Event(NavigationState.AddArticle(uris.map{ it.toString() }))

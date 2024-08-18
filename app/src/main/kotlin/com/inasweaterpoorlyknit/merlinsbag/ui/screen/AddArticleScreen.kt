@@ -1,8 +1,12 @@
 package com.inasweaterpoorlyknit.merlinsbag.ui.screen
 
+import android.Manifest.permission
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,13 +26,16 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +50,8 @@ import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
 import com.inasweaterpoorlyknit.core.ui.LandscapePreview
+import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
+import com.inasweaterpoorlyknit.core.ui.animate.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.core.ui.component.IconData
 import com.inasweaterpoorlyknit.core.ui.component.NoopBottomSheetDialog
 import com.inasweaterpoorlyknit.core.ui.component.NoopIconButton
@@ -53,41 +62,90 @@ import com.inasweaterpoorlyknit.core.ui.composePreviewArticleAsset
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.lazyRepeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.previewAssetBitmap
-import com.inasweaterpoorlyknit.core.ui.animate.animateClosestRotationAsState
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.AddArticleViewModel
 import kotlinx.serialization.Serializable
 
+val additionalCameraPermissionsRequired = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
+private val REQUIRED_CAMERA_PERMISSIONS =
+    if(additionalCameraPermissionsRequired) {
+      arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE)
+    } else {
+      arrayOf(permission.CAMERA)
+    }
+
 @Serializable
 data class AddArticleRouteArgs(
-  val imageUriStringList: List<String>,
-  val articleId: String?,
+    val uriStrings: List<String>,
+    val articleId: String?,
 )
 
 fun NavController.navigateToAddArticle(
-    uriStringArray: List<String>,
+    uriStrings: List<String> = emptyList(),
     articleId: String? = null,
     navOptions: NavOptions? = null,
-) = navigate(AddArticleRouteArgs(imageUriStringList = uriStringArray, articleId = articleId), navOptions)
+) = navigate(AddArticleRouteArgs(uriStrings = uriStrings, articleId = articleId), navOptions)
 
 @Composable
 fun AddArticleRoute(
-    imageUriStringList: List<String>,
+    uriStrings: List<String>,
     articleId: String? = null,
     navigateBack: () -> Unit,
     windowSizeClass: WindowSizeClass,
 ) {
+  val context = LocalContext.current
   val addArticleViewModel = hiltViewModel<AddArticleViewModel, AddArticleViewModel.AddArticleViewModelFactory> { factory ->
-    factory.create(imageUriStringList, articleId)
+    factory.create(uriStrings, articleId)
   }
-
-  addArticleViewModel.imageProcessingError.getContentIfNotHandled()?.let { msg -> Toast(msg = msg) }
-  addArticleViewModel.finished.getContentIfNotHandled()?.let { navigateBack() }
+  val systemAppSettingsLauncher = rememberSystemAppSettingsLauncher()
 
   val attachArticleThumbnails by addArticleViewModel.attachArticleThumbnails.collectAsStateWithLifecycle()
   val systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues()
+
+  val takePictureLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.TakePicture(),
+    onResult = { success ->
+      if(!success) navigateBack()
+      addArticleViewModel.onCameraPictureTaken(success)
+    }
+  )
+
+  val cameraWithPermissionsCheckLauncher = rememberLauncherForActivityResultPermissions(
+    onPermissionsGranted = addArticleViewModel::onCameraPermissionsGranted,
+    onPermissionDenied = addArticleViewModel::onCameraPermissionsDenied,
+    onNeverAskAgain = addArticleViewModel::onCameraPermissionsNeverAskAgain,
+  )
+
+  LaunchedEffect(addArticleViewModel.launchCameraPermissions) {
+    addArticleViewModel.launchCameraPermissions.getContentIfNotHandled()?.also {
+      cameraWithPermissionsCheckLauncher.launch(REQUIRED_CAMERA_PERMISSIONS)
+    }
+  }
+
+  LaunchedEffect(addArticleViewModel.navigationEventState){
+    addArticleViewModel.navigationEventState.getContentIfNotHandled()?.let {
+      when(it){
+        AddArticleViewModel.NavigationState.Back -> navigateBack()
+        AddArticleViewModel.NavigationState.SystemAppSettings -> {
+          systemAppSettingsLauncher.launch()
+          navigateBack()
+        }
+        is AddArticleViewModel.NavigationState.TakePicture -> takePictureLauncher.launch(it.tmpPhotoUri)
+      }
+    }
+  }
+
+  LaunchedEffect(addArticleViewModel.errorState) {
+    addArticleViewModel.errorState.getContentIfNotHandled()?.let { error ->
+      when(error){
+        AddArticleViewModel.ErrorState.PhotoLost -> context.toast(R.string.sorry_try_again)
+        AddArticleViewModel.ErrorState.PermissionsDenied -> context.toast(R.string.camera_permission_required)
+        is AddArticleViewModel.ErrorState.ProcessingError -> context.toast(msg = error.msgId)
+      }
+    }
+  }
 
   AddArticleScreen(
     systemBarPaddingValues = systemBarPaddingValues,
@@ -107,6 +165,8 @@ fun AddArticleRoute(
     dialogState = addArticleViewModel.dialogState,
     onDismissDiscardDialog = addArticleViewModel::onDismissDiscardDialog,
     onConfirmDiscardDialog = addArticleViewModel::onDiscard,
+    onDismissCameraPermissionsDialog = addArticleViewModel::onDismissCameraPermissionsAlert,
+    onConfirmCameraPermissionsDialog = addArticleViewModel::onConfirmCameraPermissionsAlert,
     onAttach = addArticleViewModel::onClickAttach,
     onDismissAttachDialog = addArticleViewModel::onDismissAttachDialog,
     removeAttachedArticle = addArticleViewModel::removeAttachedArticle,
@@ -133,6 +193,8 @@ fun AddArticleScreen(
     dialogState: AddArticleViewModel.DialogState,
     onDismissDiscardDialog: () -> Unit,
     onConfirmDiscardDialog: () -> Unit,
+    onDismissCameraPermissionsDialog: () -> Unit,
+    onConfirmCameraPermissionsDialog: () -> Unit,
     onDismissAttachDialog: () -> Unit,
     onNarrowFocusClick: () -> Unit,
     removeAttachedArticle: () -> Unit,
@@ -183,6 +245,11 @@ fun AddArticleScreen(
     visible = dialogState == AddArticleViewModel.DialogState.Discard,
     onDismiss = onDismissDiscardDialog,
     onConfirm = onConfirmDiscardDialog
+  )
+  CameraPermissionsAlertDialog(
+    visible = dialogState == AddArticleViewModel.DialogState.CameraPermissions,
+    onDismiss = onDismissCameraPermissionsDialog,
+    onConfirm = onConfirmCameraPermissionsDialog,
   )
 
   val showAttachDialog = dialogState == AddArticleViewModel.DialogState.Attach
@@ -316,14 +383,31 @@ fun AddArticleControls(
   }
 }
 
+@Composable
+fun CameraPermissionsAlertDialog(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) = NoopSimpleAlertDialog(
+  visible = visible,
+  title = stringResource(id = R.string.permission_alert_title),
+  text = stringResource(
+    if(additionalCameraPermissionsRequired) R.string.camera_permission_alert_justification_additional
+    else R.string.camera_permission_alert_justification
+  ),
+  headerIcon = { Icon(imageVector = NoopIcons.Camera, contentDescription = REDUNDANT_CONTENT_DESCRIPTION) },
+  onDismiss = onDismiss,
+  onConfirm = onConfirm,
+  confirmText = stringResource(id = R.string.permission_alert_positive),
+  cancelText = stringResource(id = R.string.permission_alert_negative),
+)
 
 @Composable
 fun DiscardAlertDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
-) =
-    NoopSimpleAlertDialog(
+) = NoopSimpleAlertDialog(
       visible = visible,
       title = stringResource(id = R.string.discard_article),
       text = stringResource(id = R.string.are_you_sure),
@@ -350,7 +434,7 @@ fun PreviewUtilAddArticleScreen(
     articleAttachmentIndex = 2,
     dialogState = dialogState,
     onBroadenFocusClick = {},
-    onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {}, onAttach = {},
+    onRotateCW = {}, onRotateCCW = {}, onDiscard = {}, onSave = {}, onAttach = {}, onConfirmCameraPermissionsDialog = {}, onDismissCameraPermissionsDialog = {},
     onDismissDiscardDialog = {}, onConfirmDiscardDialog = {}, onDismissAttachDialog = {}, onNarrowFocusClick = {}, removeAttachedArticle = {}, attachToArticle = {}
   )
 }
@@ -360,4 +444,5 @@ fun PreviewUtilAddArticleScreen(
 @Preview @Composable fun PreviewAddArticleScreen_attachToDialog() = PreviewUtilAddArticleScreen(dialogState = AddArticleViewModel.DialogState.Attach)
 @Preview @Composable fun PreviewAddArticleScreen_attachToArticleDisabled() = PreviewUtilAddArticleScreen(attachToArticleEnabled = false)
 @LandscapePreview @Composable fun PreviewAddArticleScreen_attachToArticleDisabled_landscape() = PreviewUtilAddArticleScreen(attachToArticleEnabled = false)
+@Preview @Composable fun PreviewCameraPermissionsAlertDialog() = NoopTheme { CameraPermissionsAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

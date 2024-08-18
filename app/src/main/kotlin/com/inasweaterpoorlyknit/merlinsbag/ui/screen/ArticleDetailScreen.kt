@@ -123,7 +123,6 @@ fun ArticleDetailRoute(
     articleIndex: Int,
     filterEnsembleId: String?,
     navigateBack: () -> Unit,
-    navigateToCamera: (articleId: String) -> Unit,
     navigateToEnsembleDetail: (ensembleId: String) -> Unit,
     navigateToAddArticle: (uriStrings: List<String>, articleId: String?) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -153,7 +152,6 @@ fun ArticleDetailRoute(
       when(it) {
         is ArticleDetailViewModel.NavigationState.AddArticle -> navigateToAddArticle(it.uriStrings, it.articleId)
         ArticleDetailViewModel.NavigationState.Back -> navigateBack()
-        is ArticleDetailViewModel.NavigationState.Camera -> navigateToCamera(it.articleId)
         is ArticleDetailViewModel.NavigationState.EnsembleDetail -> navigateToEnsembleDetail(it.ensembleId)
         ArticleDetailViewModel.NavigationState.PhotoAlbum -> photoAlbumLauncher.launch()
         ArticleDetailViewModel.NavigationState.SystemAppSettings -> systemAppSettingsLauncher.launch()
@@ -795,7 +793,7 @@ fun PreviewUtilArticleDetailScreen(
     filter: String = "",
     darkMode: Boolean = false,
     floatingActionButtonExpanded: EditState = EditState.Disabled,
-    alertDialogMode: AlertDialogState = AlertDialogState.None,
+    alertDialogMode: AlertDialogState = None,
     showAddToEnsembleDialog: Boolean = false,
     selectedEnsembles: Set<Int> = emptySet(),
     addEnsembles: List<Ensemble> = emptyList(),
@@ -850,10 +848,10 @@ fun PreviewUtilArticleDetailScreen(
 
 @PreviewScreenSizes @Composable fun PreviewArticleDetailScreen() = PreviewUtilArticleDetailScreen(filter = "Golden Girls")
 @Preview @Composable fun PreviewArticleDetailScreen_expandedFAB() = PreviewUtilArticleDetailScreen(floatingActionButtonExpanded = EditState.EnabledGeneral, darkMode = true)
-@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = AlertDialogState.DeleteArticle, floatingActionButtonExpanded = EditState.EnabledGeneral, selectedEnsembles = setOf(1))
-@Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = AlertDialogState.ExportPermissions)
-@Preview @Composable fun PreviewArticleDetailScreen_removeFromEnsemblesDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = AlertDialogState.RemoveFromEnsembles)
-@Preview @Composable fun PreviewArticleDetailScreen_removeImages() = PreviewUtilArticleDetailScreen(alertDialogMode = AlertDialogState.RemoveImages)
+@Preview @Composable fun PreviewArticleDetailScreen_deleteDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = DeleteArticle, floatingActionButtonExpanded = EditState.EnabledGeneral, selectedEnsembles = setOf(1))
+@Preview @Composable fun PreviewArticleDetailScreen_permissionsDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = ExportPermissions)
+@Preview @Composable fun PreviewArticleDetailScreen_removeFromEnsemblesDialog() = PreviewUtilArticleDetailScreen(alertDialogMode = RemoveFromEnsembles)
+@Preview @Composable fun PreviewArticleDetailScreen_removeImages() = PreviewUtilArticleDetailScreen(alertDialogMode = RemoveImages)
 @Preview @Composable fun PreviewArticleDetailScreen_addToEnsembleDialog() = PreviewUtilArticleDetailScreen(
   showAddToEnsembleDialog = true,
   addEnsembles = listOf(

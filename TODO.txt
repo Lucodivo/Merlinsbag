@@ -58,13 +58,8 @@ Refactor:
     - ViewModels should hold a single general UiState instead of individual values
 Bugs:
     - Out of Memory (OOM) crash (or silent PROCESS ENDED while app is in the background due to camera contract) when processing an image in AddArticleScreen
-        - [SOLVED] SegmentedImage (which contains ML Kit's SubjectSegmenter) is a singleton in the app
-            - SegmentedImage is about 500MB of memory, which is no small footprint
-            - Pros:
-                - They are expensive so it is good that only one will ever exist
-                - The first solution to prevent OOM crashes on the Motorola Z Play
-            - Cons:
-                - They are expensive and will remain as part of the app footprint for the entirety of a session after a singleton is created
+        - [PARTIALLY SOLVED] AddArticleScreen now launches the camera, allowing AddArticleViewModel.SegmentedImage to persist until photos are no longer taken
+            - Motorola Z Play will still experience OOM exceptions but there is more stability when cataloging using the camera
             - Potential solutions:
                 - Clear the singleton after user is no longer actively logging
                 - Explore processing reduced image resolution

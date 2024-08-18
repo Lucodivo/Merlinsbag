@@ -14,8 +14,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticleDetailRouteArgs
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.ArticlesRouteArgs
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CameraRoute
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.CameraRouteArgs
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsembleDetailRouteArgs
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.EnsemblesRoute
@@ -28,7 +26,6 @@ import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRoute
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.TipsAndInfoRouteArgs
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToAddArticle
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToArticleDetail
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToCamera
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToEnsembleDetail
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToSettings
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToStatistics
@@ -64,7 +61,6 @@ fun NoopNavHost(
       LaunchedEffect(Unit) { hideNavBar(false) }
       ArticlesRoute(
         navigateToArticleDetail = navController::navigateToArticleDetail,
-        navigateToCamera = navController::navigateToCamera,
         navigateToSettings = navController::navigateToSettings,
         navigateToAddArticle = navController::navigateToAddArticle,
         windowSizeClass = appState.windowSizeClass,
@@ -78,20 +74,11 @@ fun NoopNavHost(
         windowSizeClass = appState.windowSizeClass
       )
     }
-    composable<CameraRouteArgs>{ navBackStackEntry ->
-      val cameraRouteArgs: CameraRouteArgs = navBackStackEntry.toRoute()
-      LaunchedEffect(Unit) { hideNavBar(true) }
-      CameraRoute(
-        articleId = cameraRouteArgs.articleId,
-        navigateToAddArticle = navController::navigateToAddArticle,
-        navigateBack = navController::popBackStack,
-      )
-    }
     composable<AddArticleRouteArgs> { navBackStackEntry ->
       val addArticleRouteArgs: AddArticleRouteArgs = navBackStackEntry.toRoute()
       LaunchedEffect(Unit) { hideNavBar(true) }
       AddArticleRoute(
-        imageUriStringList = addArticleRouteArgs.imageUriStringList,
+        uriStrings = addArticleRouteArgs.uriStrings,
         articleId = addArticleRouteArgs.articleId,
         navigateBack = navController::popBackStack,
         windowSizeClass = appState.windowSizeClass,
@@ -103,7 +90,6 @@ fun NoopNavHost(
       ArticleDetailRoute(
         articleIndex = articleDetailRouteArgs.articleIndex,
         navigateBack = navController::popBackStack,
-        navigateToCamera = navController::navigateToCamera,
         navigateToEnsembleDetail = navController::navigateToEnsembleDetail,
         navigateToAddArticle = navController::navigateToAddArticle,
         filterEnsembleId = articleDetailRouteArgs.ensembleId,
