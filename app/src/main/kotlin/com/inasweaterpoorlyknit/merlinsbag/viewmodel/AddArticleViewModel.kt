@@ -51,17 +51,17 @@ class AddArticleViewModel @AssistedInject constructor(
     private val segmentedImage: SegmentedImage
 ): AndroidViewModel(application) {
 
-  companion object {
-    private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
-    private val TAG = "AddArticleViewModel"
-  }
-
   @AssistedFactory
   interface AddArticleViewModelFactory {
     fun create(
         @Assisted("imageUriStrings") uriImageStrings: List<String>,
         @Assisted("articleId") articleId: String?,
     ): AddArticleViewModel
+  }
+
+  companion object {
+    private val rotations = arrayOf(0.0f, 90.0f, 180.0f, 270.0f)
+    private val TAG = "AddArticleViewModel"
   }
 
   enum class DialogState {

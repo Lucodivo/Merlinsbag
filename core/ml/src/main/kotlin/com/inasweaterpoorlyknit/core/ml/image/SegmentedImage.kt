@@ -29,6 +29,7 @@ import kotlin.math.min
 //          Subject alpha masked to IntArray: 27ms
 //          Subject alpha masked IntArray to bitmap: 4ms
 class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
+
   data class BoundingBox(var minX: Int, var minY: Int, var maxX: Int, var maxY: Int) {
     val width: Int
       get() = maxX - minX
@@ -36,16 +37,12 @@ class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
       get() = maxY - minY
   }
 
-  private var rawImageColors = PLACEHOLDER_INT_ARRAY
-  private var rawImageWidth = 1
-  private var rawImageHeight = 1
-  private var subjectColors = PLACEHOLDER_INT_ARRAY
-  var subjectBitmap = PLACEHOLDER_BITMAP
-    private set
-  var subjectBoundingBox = PLACEHOLDER_BOUNDING_BOX
-  private var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
-  var subjectIndex = 0
-  private var segmentationResult = PLACEHOLDER_RESULT
+  enum class ProcessSuccess {
+    SUCCESS,
+    FAILURE_MLKIT_MODULE_WAITING_TO_DOWNLOAD,
+    FAILURE_IMAGE_NOT_FOUND,
+    FAILURE_IMAGE_NOT_RECOGNIZED,
+  }
 
   companion object {
     private val PLACEHOLDER_INT_ARRAY = IntArray(1)
@@ -61,15 +58,26 @@ class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
     private val PLACEHOLDER_BOUNDING_BOX = BoundingBox(0, 0, 1, 1)
   }
 
+  private var rawImageColors = PLACEHOLDER_INT_ARRAY
+  private var rawImageWidth = 1
+  private var rawImageHeight = 1
+  private var subjectColors = PLACEHOLDER_INT_ARRAY
+  var subjectBitmap = PLACEHOLDER_BITMAP
+    private set
+  var subjectBoundingBox = PLACEHOLDER_BOUNDING_BOX
+  private var confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
+  var subjectIndex = 0
+  private var segmentationResult = PLACEHOLDER_RESULT
+
   fun cleanup() {
     subjectSegmenter.close()
-  }
-
-  enum class ProcessSuccess {
-    SUCCESS,
-    FAILURE_MLKIT_MODULE_WAITING_TO_DOWNLOAD,
-    FAILURE_IMAGE_NOT_FOUND,
-    FAILURE_IMAGE_NOT_RECOGNIZED,
+    subjectColors = PLACEHOLDER_INT_ARRAY
+    subjectBitmap = PLACEHOLDER_BITMAP
+    rawImageColors = PLACEHOLDER_INT_ARRAY
+    subjectBoundingBox = PLACEHOLDER_BOUNDING_BOX
+    segmentationResult = PLACEHOLDER_RESULT
+    rawImageWidth = 1
+    rawImageHeight = 1
   }
 
   fun process(context: Context, uri: Uri, successCallback: (ProcessSuccess) -> Unit) {
@@ -83,33 +91,38 @@ class SegmentedImage(private val subjectSegmenter: SubjectSegmenter) {
   }
 
   private fun process(mlkitInputImage: InputImage, successCallback: (ProcessSuccess) -> Unit) {
-    if(mlkitInputImage.bitmapInternal == null) {
+    subjectIndex = -1
+    confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
+    val bitmap = mlkitInputImage.bitmapInternal
+    if(bitmap == null) {
       Log.e("SegmentedImage", "MLKit InputImage did not contain a bitmap")
       successCallback(ProcessSuccess.FAILURE_IMAGE_NOT_RECOGNIZED)
       return
     }
 
-    val bitmap = mlkitInputImage.bitmapInternal!!
     val bitmapSize = bitmap.width * bitmap.height
     if(rawImageColors.size < bitmapSize) {
       rawImageColors = IntArray(bitmapSize)
     }
+    // NOTE: Performance has been demonstrated to be drastically worse when getting individual pixels via bitmap.getPixel(x,y) as opposed to working from an array of values that have been copied
+    // An in-depth analysis could be made (predictable memory access, kinder to the cache), but the simplest reason is that calling a function is more expensive than an array access
+    // and this performance delta matters when there are 16 million pixels.
     bitmap.getPixels(rawImageColors, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
     rawImageWidth = bitmap.width
     rawImageHeight = bitmap.height
-    subjectIndex = -1
-    confidenceThreshold = DEFAULT_CONFIDENCE_THRESHOLD
-    subjectSegmenter.process(mlkitInputImage).addOnSuccessListener { result: SubjectSegmentationResult ->
-      segmentationResult = result
-      if(subjectCount > 0) {
-        subjectIndex = 0
-        prepareSubjectBitmap()
-      }
-      successCallback(ProcessSuccess.SUCCESS)
-    }.addOnFailureListener { exception ->
-      Log.e("SegmentedImage", "ML Kit failed to process image - ${exception.message}")
-      successCallback(ProcessSuccess.FAILURE_MLKIT_MODULE_WAITING_TO_DOWNLOAD)
-    }
+    subjectSegmenter.process(mlkitInputImage)
+        .addOnSuccessListener { result ->
+          segmentationResult = result
+          if(subjectCount > 0) {
+            subjectIndex = 0
+            prepareSubjectBitmap()
+          }
+          successCallback(ProcessSuccess.SUCCESS)
+        }
+        .addOnFailureListener { exception ->
+          Log.e("SegmentedImage", "ML Kit failed to process image - ${exception.message}")
+          successCallback(ProcessSuccess.FAILURE_MLKIT_MODULE_WAITING_TO_DOWNLOAD)
+        }
   }
 
   val subjectCount
