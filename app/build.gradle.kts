@@ -27,11 +27,17 @@ android {
 
     buildTypes {
         debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            isDebuggable = true
+            isJniDebuggable = true
             resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true")
         }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
+            isJniDebuggable = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
             resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")
@@ -130,5 +136,6 @@ dependencies {
     kspTest(libs.hilt.compiler)
     kspAndroidTest(libs.hilt.compiler)
 
+    // Mockk
     testImplementation(libs.mockk)
 }
