@@ -7,12 +7,25 @@ import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel.ArticleWithMostEnsembles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+
+sealed interface StatisticsUiState{
+  data object Loading: StatisticsUiState
+  data class Success(
+      val ensembleCount: Int,
+      val articleCount: Int,
+      val articleImageCount: Int,
+      val ensemblesWithMostArticles: List<EnsembleArticleCount>,
+      val articleWithMostImagesUriStrings: List<String>,
+      val articleWithMostEnsembles: ArticleWithMostEnsembles,
+  ): StatisticsUiState
+}
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
@@ -25,20 +38,11 @@ class StatisticsViewModel @Inject constructor(
     val uriStrings: List<String>,
   )
 
-  data class UiState(
-      val ensembleCount: Int,
-      val articleCount: Int,
-      val articleImageCount: Int,
-      val ensemblesWithMostArticles: List<EnsembleArticleCount>,
-      val articleWithMostImagesUriStrings: List<String>,
-      val articleWithMostEnsembles: ArticleWithMostEnsembles,
-  )
-
   companion object {
     const val TOP_ENSEMBLES_COUNT = 10
   }
 
-  val uiState: StateFlow<UiState> = combine(
+  val uiState: StateFlow<StatisticsUiState> = combine(
     ensembleRepository.getCountEnsembles(),
     articleRepository.getCountArticles(),
     articleRepository.getCountArticleImages(),
@@ -51,7 +55,7 @@ class StatisticsViewModel @Inject constructor(
       else ArticleWithMostEnsembles(it.first[0], it.second.getUriStrings(0))
     },
   ) { ensembleCount, articleCount, articleImageCount, ensemblesWithMostArticles, articleWithMostImages, articleWithMostEnsembles ->
-    UiState(
+    StatisticsUiState.Success(
       ensembleCount = ensembleCount,
       articleCount = articleCount,
       articleImageCount = articleImageCount,
@@ -62,13 +66,6 @@ class StatisticsViewModel @Inject constructor(
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-    initialValue = UiState(
-      ensembleCount = 0,
-      articleCount = 0,
-      articleImageCount = 0,
-      ensemblesWithMostArticles = emptyList(),
-      articleWithMostImagesUriStrings = emptyList(),
-      articleWithMostEnsembles = ArticleWithMostEnsembles(0, emptyList()),
-    ),
+    initialValue = StatisticsUiState.Loading,
   )
 }

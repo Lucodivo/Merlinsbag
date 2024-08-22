@@ -107,6 +107,12 @@ trace("ArticleDetailViewModel: exportArticle"){
 - The answer to solve this problem when legitimate is obvious. However, it can occur on completely fresh installs when it is undesireable to update the database version just to satisfy this error.
 - Solution: Install app. Let it crash at least once. Go into 'App Info' on Android OS -> Storage -> Clear Data. Restart app.
 
-## Test Errors
-### NoClassDefFoundError
+## Test
+
+### Errors
+#### NoClassDefFoundError
 - run tests as with gradle, *NOT* as JUnit tests
+
+### Run all core module unit tests
+- Open gradle window in Android Studio
+- run merlinsbag/core/verification/testReleaseUnitTest

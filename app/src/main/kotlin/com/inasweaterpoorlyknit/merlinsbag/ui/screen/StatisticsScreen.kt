@@ -43,6 +43,7 @@ import com.inasweaterpoorlyknit.core.ui.allTestThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsUiState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables
@@ -105,44 +106,48 @@ fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
 @Composable
 fun StatisticsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    uiState: StatisticsViewModel.UiState,
+    uiState: StatisticsUiState,
 ){
 
   val layoutDir = LocalLayoutDirection.current
   val padding = 32.dp
   val subListModifier = Modifier.padding(start = padding)
 
-  val items = staggeredHorizontallyAnimatedComposables(
-    content = mutableListOf<@Composable AnimatedVisibilityScope.() -> Unit>(
-      { StatisticsRow(stringResource(R.string.article_count), uiState.articleCount.toString()) },
-      { StatisticsRow(stringResource(R.string.article_image_count), uiState.articleImageCount.toString()) },
-      { StatisticsRow(stringResource(R.string.ensemble_count), uiState.ensembleCount.toString()) },
-    ).apply{
-      val showMostEnsembles = uiState.articleWithMostEnsembles.count > 0
-      val showMostImages = uiState.articleWithMostImagesUriStrings.isNotEmpty()
-      val showTopArticles = showMostEnsembles || showMostImages
-      val showTopEnsembles = uiState.ensemblesWithMostArticles.isNotEmpty()
 
-      if(showTopArticles){
-        add { StatisticsRow(stringResource(R.string.top_articles), "") }
-        if(showMostEnsembles) {
-          add { StatisticsRow(stringResource(R.string.most_ensembles), uiState.articleWithMostEnsembles.count.toString(), modifier = subListModifier) }
-          add { StatisticsSlideShow(uriStrings = uiState.articleWithMostEnsembles.uriStrings, modifier = subListModifier.padding(start = padding)) }
+  val items = when(uiState) {
+    StatisticsUiState.Loading -> emptyList()
+    is StatisticsUiState.Success -> staggeredHorizontallyAnimatedComposables(
+      content = mutableListOf<@Composable AnimatedVisibilityScope.() -> Unit>(
+        { StatisticsRow(stringResource(R.string.article_count), uiState.articleCount.toString()) },
+        { StatisticsRow(stringResource(R.string.article_image_count), uiState.articleImageCount.toString()) },
+        { StatisticsRow(stringResource(R.string.ensemble_count), uiState.ensembleCount.toString()) },
+      ).apply {
+        val showMostEnsembles = uiState.articleWithMostEnsembles.count > 0
+        val showMostImages = uiState.articleWithMostImagesUriStrings.isNotEmpty()
+        val showTopArticles = showMostEnsembles || showMostImages
+        val showTopEnsembles = uiState.ensemblesWithMostArticles.isNotEmpty()
+
+        if(showTopArticles) {
+          add { StatisticsRow(stringResource(R.string.top_articles), "") }
+          if(showMostEnsembles) {
+            add { StatisticsRow(stringResource(R.string.most_ensembles), uiState.articleWithMostEnsembles.count.toString(), modifier = subListModifier) }
+            add { StatisticsSlideShow(uriStrings = uiState.articleWithMostEnsembles.uriStrings, modifier = subListModifier.padding(start = padding)) }
+          }
+          if(showMostImages) {
+            add { StatisticsRow(stringResource(R.string.most_images), uiState.articleWithMostImagesUriStrings.size.toString(), modifier = subListModifier) }
+            add { StatisticsSlideShow(uriStrings = uiState.articleWithMostImagesUriStrings, modifier = subListModifier.padding(start = padding)) }
+          }
         }
-        if(showMostImages){
-          add { StatisticsRow(stringResource(R.string.most_images), uiState.articleWithMostImagesUriStrings.size.toString(), modifier = subListModifier) }
-          add { StatisticsSlideShow(uriStrings = uiState.articleWithMostImagesUriStrings, modifier = subListModifier.padding(start = padding)) }
+
+        if(showTopEnsembles) {
+          add { StatisticsRow(stringResource(R.string.top_ensembles), "") }
+          addAll(uiState.ensemblesWithMostArticles.map { popularEnsemble ->
+            { StatisticsRow(popularEnsemble.title, popularEnsemble.count.toString(), modifier = subListModifier) }
+          })
         }
       }
-
-      if(showTopEnsembles){
-        add { StatisticsRow(stringResource(R.string.top_ensembles), "") }
-        addAll(uiState.ensemblesWithMostArticles.map { popularEnsemble ->
-          { StatisticsRow(popularEnsemble.title, popularEnsemble.count.toString(), modifier = subListModifier) }
-        })
-      }
-    }.toList()
-  )
+    )
+  }
   LazyColumn(
     modifier = Modifier
         .fillMaxSize()
@@ -161,7 +166,7 @@ fun StatisticsScreen(
 @Composable
 fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleArticleCount>) = NoopTheme {
   StatisticsScreen(
-      uiState = StatisticsViewModel.UiState(
+    uiState = StatisticsUiState.Success(
       articleCount = 12_345,
       articleImageCount = 300_000,
       ensembleCount = 67_890,
