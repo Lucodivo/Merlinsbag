@@ -1,11 +1,11 @@
 # Forgettable Infrequent Actions
 
-#### import Android material icons for use in .xml files
+## import Android material icons for use in .xml files
 - open Vector Asset
   - Can't open from this file as this file does not exist where the app resources are
 - click "Clip art" to find the icon
 
-#### Find files on device
+## Find files on device
 - Internal App Storage
   - /data/data/{app name}
 - External App Storage
@@ -13,12 +13,12 @@
     - /sdcard/Android/data/{app name}
     - /sdcard/pictures/{app name}
 
-#### Upload ML Kit NDK Debug Symbols (NOTE: There must be a more automatic way to do this.)
+## Upload ML Kit NDK Debug Symbols (NOTE: There must be a more automatic way to do this.)
 - zip everything in the directory app/build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib into a single file
 - In Google Play Console, click the vertical "More" icon
 - Upload the zip as "native debug symbols (.zip)"
 
-#### Change Adaptive App Icon
+## Change Adaptive App Icon
 - Open "Resource Manager"
 - load monochrome icon with "Image Asset" tool using name "ic_launcher_monochrome"
 - load color icon with "Image Asset" tool using name "ic_launcher_color"
@@ -32,7 +32,7 @@
 </adaptive-icon>
 ``` 
 
-#### Analyze performance and hardware usage with traces using androidx.tracing library
+## Analyze performance and hardware usage with traces using androidx.tracing library
 - Use the androidx.tracing library to create a trace
   - Examples:
 ``` 
@@ -75,15 +75,38 @@ trace("ArticleDetailViewModel: exportArticle"){
 }
 ``` 
 
+## App Snapshot
+### Save
+- Install app in debug mode on device
+- Open "device explorer" in Android Studio
+- pull out the following files & directories from /data/data/com.inasweaterpoorlyknit.merlinsbag
+  - databases/
+    - noop-database (SQLite database)
+    - noop-database-wal (may contain uncommitted database writes)
+  - files/datastore/user_preferences.pb (datastore preference values)
+  - files/articles/* (article image data)
+- Remember to reinstall app as release to restore performance
+### Load
+- Install app in debug mode on device
+- Open "device explorer" in Android Studio
+- In /data/data/com.inasweaterpoorlyknit.merlinsbag
+  - databases/
+    - delete all files, insert noop-database and noop-database-wal
+  - files/articles
+    - delete all, replace folder
+  - files/datastore
+    - delete all, insert user_preferences.pb
+- Remember to reinstall app as release to restore performance
+
 ## IDE Errors
-#### Error running 'Android Java Debugger (pid: 28478, debug port: 53060)' Unable to open debugger port (localhost:53060): java.net.SocketException "Connection reset"
+### Error running 'Android Java Debugger (pid: 28478, debug port: 53060)' Unable to open debugger port (localhost:53060): java.net.SocketException "Connection reset"
 - Restart Android Studio (killing adb server did not work)
 
 ## Runtime Errors
-#### java.lang.IllegalStateException: Room cannot verify the data integrity. Looks like you've changed schema but forgot to update the version number. You can simply fix this by increasing the version number.
+### java.lang.IllegalStateException: Room cannot verify the data integrity. Looks like you've changed schema but forgot to update the version number. You can simply fix this by increasing the version number.
 - The answer to solve this problem when legitimate is obvious. However, it can occur on completely fresh installs when it is undesireable to update the database version just to satisfy this error.
 - Solution: Install app. Let it crash at least once. Go into 'App Info' on Android OS -> Storage -> Clear Data. Restart app.
 
 ## Test Errors
-#### NoClassDefFoundError
+### NoClassDefFoundError
 - run tests as with gradle, *NOT* as JUnit tests
