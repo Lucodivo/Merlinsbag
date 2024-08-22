@@ -1,3 +1,5 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -18,13 +20,12 @@ android {
         applicationId = "com.inasweaterpoorlyknit.merlinsbag"
         minSdk = 26
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.0.9"
+        versionCode = 16
+        versionName = "1.0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
-
     buildTypes {
         debug {
             isMinifyEnabled = false
@@ -38,9 +39,13 @@ android {
             isShrinkResources = true
             isDebuggable = false
             isJniDebuggable = false
+            resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
-            resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")
+            configure<CrashlyticsExtension> {
+                nativeSymbolUploadEnabled = true
+                unstrippedNativeLibsDir = "build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib"
+            }
         }
     }
     compileOptions {
