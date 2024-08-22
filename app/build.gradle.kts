@@ -20,7 +20,7 @@ android {
         applicationId = "com.inasweaterpoorlyknit.merlinsbag"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
+        versionCode = 18
         versionName = "1.0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -42,6 +42,8 @@ android {
             resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
+
+            // currently needed for ML Kit debugging
             configure<CrashlyticsExtension> {
                 nativeSymbolUploadEnabled = true
                 unstrippedNativeLibsDir = "build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib"
@@ -110,6 +112,7 @@ dependencies {
     // Firebase (crashlytics)
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.crashlytics.ktx)
+    implementation(libs.google.firebase.crashlytics.ndk) // Necessary due to ML Kit
     implementation(libs.google.firebase.analytics.ktx)
 
     // Coil
