@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
@@ -64,7 +65,13 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsAlertDialogState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsDropdownMenuState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsEvent
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsNavigationState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUiState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables
 
@@ -94,78 +101,45 @@ fun SettingsRoute(
 ) {
   val context = LocalContext.current
   val uriHandler = LocalUriHandler.current
+  val uiState = settingsViewModel.UiState()
 
-  LaunchedEffect(settingsViewModel.cachePurged) {
-    settingsViewModel.cachePurged.getContentIfNotHandled()?.let {
+  LaunchedEffect(uiState.cachePurged) {
+    uiState.cachePurged.getContentIfNotHandled()?.let {
       context.toast(R.string.cache_cleared)
     }
   }
 
-  LaunchedEffect(settingsViewModel.dataDeleted) {
-    settingsViewModel.dataDeleted.getContentIfNotHandled()?.let {
+  LaunchedEffect(uiState.dataDeleted) {
+    uiState.dataDeleted.getContentIfNotHandled()?.let {
       context.toast(msg = context.getString(R.string.all_data_deleted))
       navigateToStartDestination()
     }
   }
 
-  LaunchedEffect(settingsViewModel.rateAndReviewRequest) {
-    settingsViewModel.rateAndReviewRequest.getContentIfNotHandled()?.let {
+  LaunchedEffect(uiState.rateAndReviewRequest) {
+    uiState.rateAndReviewRequest.getContentIfNotHandled()?.let {
       rateAndReviewRequest(
         context = context,
         onCompleted = { context.toast(R.string.thank_you) },
-        onUnableToDisplayInAppReview = settingsViewModel::onUnableToDisplayInAppReview,
+        onUnableToDisplayInAppReview = { settingsViewModel.onEvent(SettingsEvent.UnableToDisplayInAppReview) },
         onError = { context.toast(R.string.try_again_later) },
       )
     }
   }
 
-  LaunchedEffect(settingsViewModel.navigationEventState) {
-    settingsViewModel.navigationEventState.getContentIfNotHandled()?.let {
+  LaunchedEffect(uiState.navigationEventState) {
+    uiState.navigationEventState.getContentIfNotHandled()?.let {
       when(it){
-        SettingsViewModel.NavigationState.Statistics -> navigateToStatistics()
-        SettingsViewModel.NavigationState.TipsAndInfo -> navigateToTipsAndInfo()
-        is SettingsViewModel.NavigationState.Web -> uriHandler.openUri(it.url)
+        SettingsNavigationState.Statistics -> navigateToStatistics()
+        SettingsNavigationState.TipsAndInfo -> navigateToTipsAndInfo()
+        is SettingsNavigationState.Web -> uriHandler.openUri(it.url)
       }
     }
   }
 
-  val userPreferences by settingsViewModel.preferencesState.collectAsState()
   SettingsScreen(
-    alertDialogState = settingsViewModel.alertDialogState,
-    dropdownMenuState = settingsViewModel.dropdownMenuState,
-    highContrastEnabled = settingsViewModel.highContrastEnabled,
-    clearCacheEnabled = settingsViewModel.clearCacheEnabled,
-    preferencesState = userPreferences,
-    onClickDeveloper = settingsViewModel::onClickDeveloper,
-    onClickSource = settingsViewModel::onClickSource,
-    onClickEccohedra = settingsViewModel::onClickEccohedra,
-    onClickDemoVideo = settingsViewModel::onClickDemo,
-    onClickRateAndReview = settingsViewModel::onClickRateAndReview,
-    onClickWelcomePage = settingsViewModel::onClickWelcome,
-    onClickTipsAndInfoPage = settingsViewModel::onClickTipsAndInfo,
-    onClickPrivacyInfo = settingsViewModel::onClickPrivacyInformation,
-    onClickClearCache = settingsViewModel::onClickClearCache,
-    onClickDeleteAllData = settingsViewModel::onClickDeleteAllData,
-    onDismissDeleteAllDataAlertDialog = settingsViewModel::onDismissDeleteAllDataAlertDialog,
-    onConfirmDeleteAllDataAlertDialog = settingsViewModel::onConfirmDeleteAllDataAlertDialog,
-    onDismissImageQualityAlertDialog = settingsViewModel::onDismissImageQualityAlertDialog,
-    onConfirmImageQualityAlertDialog = settingsViewModel::onConfirmImageQualityAlertDialog,
-    onSelectDarkMode = settingsViewModel::setDarkMode,
-    onClickDarkMode = settingsViewModel::onClickDarkMode,
-    onDismissDarkMode = settingsViewModel::onDismissDarkMode,
-    onSelectColorPalette = settingsViewModel::setColorPalette,
-    onClickColorPalette = settingsViewModel::onClickColorPalette,
-    onDismissColorPalette = settingsViewModel::onDismissColorPalette,
-    onSelectHighContrast = settingsViewModel::setHighContrast,
-    onDismissHighContrast = settingsViewModel::onDismissHighContrast,
-    onClickHighContrast = settingsViewModel::onClickHighContrast,
-    onSelectImageQuality = settingsViewModel::onSelectedImageQuality,
-    onDismissImageQuality = settingsViewModel::onDismissImageQualityDropdown,
-    onClickImageQuality = settingsViewModel::onClickImageQuality,
-    onSelectTypography = settingsViewModel::setTypography,
-    onDismissTypography = settingsViewModel::onDismissTypography,
-    onClickTypography = settingsViewModel::onClickTypography,
-    onClickStatistics = settingsViewModel::onClickStatistics,
+    uiState = uiState,
+    onEvent = settingsViewModel::onEvent,
   )
 }
 
@@ -464,41 +438,8 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 @Composable
 fun SettingsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    alertDialogState: SettingsViewModel.AlertDialogState,
-    dropdownMenuState: SettingsViewModel.DropdownMenuState,
-    highContrastEnabled: Boolean,
-    clearCacheEnabled: Boolean,
-    preferencesState: SettingsViewModel.PreferencesState,
-    onClickDeveloper: () -> Unit,
-    onClickSource: () -> Unit,
-    onClickEccohedra: () -> Unit,
-    onClickWelcomePage: () -> Unit,
-    onClickStatistics: () -> Unit,
-    onClickTipsAndInfoPage: () -> Unit,
-    onClickRateAndReview: () -> Unit,
-    onClickPrivacyInfo: () -> Unit,
-    onClickClearCache: () -> Unit,
-    onClickDeleteAllData: () -> Unit,
-    onClickDemoVideo: () -> Unit,
-    onDismissDeleteAllDataAlertDialog: () -> Unit,
-    onConfirmDeleteAllDataAlertDialog: () -> Unit,
-    onDismissImageQualityAlertDialog: () -> Unit,
-    onConfirmImageQualityAlertDialog: () -> Unit,
-    onClickDarkMode: () -> Unit,
-    onDismissDarkMode: () -> Unit,
-    onSelectDarkMode: (DarkMode) -> Unit,
-    onClickColorPalette: () -> Unit,
-    onSelectColorPalette: (ColorPalette) -> Unit,
-    onDismissColorPalette: () -> Unit,
-    onClickHighContrast: () -> Unit,
-    onSelectHighContrast: (HighContrast) -> Unit,
-    onDismissHighContrast: () -> Unit,
-    onClickImageQuality: () -> Unit,
-    onSelectImageQuality: (ImageQuality) -> Unit,
-    onDismissImageQuality: () -> Unit,
-    onClickTypography: () -> Unit,
-    onSelectTypography: (Typography) -> Unit,
-    onDismissTypography: () -> Unit,
+    uiState: SettingsUiState,
+    onEvent: (SettingsEvent) -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
   val settingsRows = staggeredHorizontallyAnimatedComposables(
@@ -506,70 +447,70 @@ fun SettingsScreen(
       { SettingsTitle(stringResource(R.string.appearance)) },
       {
         ColorPaletteRow(
-          selectedColorPalette = preferencesState.colorPalette,
-          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.ColorPalette,
-          onClick = onClickColorPalette,
-          onSelectColorPalette = onSelectColorPalette,
-          onDismiss = onDismissColorPalette,
+          selectedColorPalette = uiState.colorPalette,
+          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.ColorPalette,
+          onClick = { onEvent(SettingsEvent.ClickColorPalette) },
+          onSelectColorPalette = { onEvent(SettingsEvent.SelectColorPalette(it)) },
+          onDismiss = { onEvent(SettingsEvent.ClickDismissColorPalette) },
         )
       },
       {
         TypographyRow(
-          selectedTypography = preferencesState.typography,
-          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.Typography,
-          onClick = onClickTypography,
-          onSelectTypography = onSelectTypography,
-          onDismiss = onDismissTypography,
+          selectedTypography = uiState.typography,
+          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.Typography,
+          onClick = { onEvent(SettingsEvent.ClickTypography) },
+          onSelectTypography = { onEvent(SettingsEvent.SelectTypography(it)) },
+          onDismiss = { onEvent(SettingsEvent.ClickDismissTypography) },
         )
       },
       {
         DarkModeRow(
-          selectedDarkMode = preferencesState.darkMode,
-          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.DarkMode,
-          onClick = onClickDarkMode,
-          onSelectDarkMode = onSelectDarkMode,
-          onDismiss = onDismissDarkMode,
+          selectedDarkMode = uiState.darkMode,
+          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.DarkMode,
+          onClick = { onEvent(SettingsEvent.ClickDarkMode) },
+          onSelectDarkMode = { onEvent(SettingsEvent.SelectDarkMode(it)) },
+          onDismiss = { onEvent(SettingsEvent.ClickDismissDarkMode) },
         )
       },
       {
         HighContrastRow(
-          enabled = highContrastEnabled,
-          selectedHighContrast = preferencesState.highContrast,
-          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.HighContrast,
-          onClick = onClickHighContrast,
-          onSelectHighContrast = onSelectHighContrast,
-          onDismiss = onDismissHighContrast,
+          enabled = uiState.highContrastEnabled,
+          selectedHighContrast = uiState.highContrast,
+          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.HighContrast,
+          onClick = { onEvent(SettingsEvent.ClickHighContrast) },
+          onSelectHighContrast = { onEvent(SettingsEvent.SelectHighContrast(it)) },
+          onDismiss = { onEvent(SettingsEvent.ClickDismissHighContrast) },
         )
       },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.info)) },
-      { DemoVideoRow(onClickDemoVideo) },
-      { TipsAndInfoRow(onClickTipsAndInfoPage) },
-      { WelcomePageRow(onClickWelcomePage) },
-      { StatisticsRow(onClickStatistics) },
+      { DemoVideoRow { onEvent(SettingsEvent.ClickDemo) } },
+      { TipsAndInfoRow { onEvent(SettingsEvent.ClickTipsAndInfo) } },
+      { WelcomePageRow { onEvent(SettingsEvent.ClickWelcome) } },
+      { StatisticsRow { onEvent(SettingsEvent.ClickStatistics) } },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.data)) },
       {
         ImageQualityRow(
-          selectedImageQuality = preferencesState.imageQuality,
-          expandedMenu = dropdownMenuState == SettingsViewModel.DropdownMenuState.ImageQuality,
-          onClick = onClickImageQuality,
-          onSelectImageQuality = onSelectImageQuality,
-          onDismiss = onDismissImageQuality,
+          selectedImageQuality = uiState.imageQuality,
+          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.ImageQuality,
+          onClick = { onEvent(SettingsEvent.ClickImageQuality) },
+          onSelectImageQuality = { onEvent(SettingsEvent.SelectImageQuality(it)) },
+          onDismiss = { onEvent(SettingsEvent.ClickDismissImageQuality) },
         )
       },
-      { PrivacyInfoRow(onClickPrivacyInfo) },
-      { ClearCacheRow(clearCacheEnabled, onClickClearCache) },
-      { DeleteAllDataRow(onClickDeleteAllData) },
+      { PrivacyInfoRow { onEvent(SettingsEvent.ClickPrivacyInfo) } },
+      { ClearCacheRow(uiState.clearCacheEnabled) { onEvent(SettingsEvent.ClickClearCache) } },
+      { DeleteAllDataRow { onEvent(SettingsEvent.ClickDeleteAllData) } },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.about)) },
-      { DeveloperRow(onClickDeveloper) },
-      { SourceRow(onClickSource) },
+      { DeveloperRow { onEvent(SettingsEvent.ClickDeveloper) } },
+      { SourceRow { onEvent(SettingsEvent.ClickSource) } },
       { VersionRow() },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.etc)) },
-      { RateAndReviewRow(onClickRateAndReview) },
-      { EccohedraRow(onClickEccohedra) }
+      { RateAndReviewRow { onEvent(SettingsEvent.ClickRateAndReview) } },
+      { EccohedraRow { onEvent(SettingsEvent.ClickEccohedra) } }
     )
   )
   Row {
@@ -586,14 +527,14 @@ fun SettingsScreen(
     }
   }
   DeleteAllDataAlertDialog(
-    visible = alertDialogState == SettingsViewModel.AlertDialogState.DeleteAllData,
-    onDismiss = onDismissDeleteAllDataAlertDialog,
-    onConfirm = onConfirmDeleteAllDataAlertDialog,
+    visible = uiState.alertDialogState == SettingsAlertDialogState.DeleteAllData,
+    onDismiss = { onEvent(SettingsEvent.ClickDismissDeleteAllDialog) },
+    onConfirm = { onEvent(SettingsEvent.ClickConfirmDeleteAllDialog) },
   )
   ImageQualityAlertDialog(
-    visible = alertDialogState == SettingsViewModel.AlertDialogState.ImageQuality,
-    onDismiss = onDismissImageQualityAlertDialog,
-    onConfirm = onConfirmImageQualityAlertDialog,
+    visible = uiState.alertDialogState == SettingsAlertDialogState.ImageQuality,
+    onDismiss = { onEvent(SettingsEvent.ClickDismissImageQualityDialog) },
+    onConfirm = { onEvent(SettingsEvent.ClickConfirmImageQualityDialog) },
   )
 }
 
@@ -735,35 +676,30 @@ fun DeleteAllDataAlertDialog(
 }
 
 //region COMPOSABLE PREVIEWS
+private val PreviewSettingsUiState = SettingsUiState(
+  clearCacheEnabled = true,
+  highContrastEnabled = false,
+  alertDialogState = SettingsAlertDialogState.None,
+  dropdownMenuState = SettingsDropdownMenuState.None,
+  darkMode = DarkMode.DARK,
+  colorPalette = ColorPalette.ROAD_WARRIOR,
+  highContrast = HighContrast.OFF,
+  imageQuality = ImageQuality.STANDARD,
+  typography = Typography.DEFAULT,
+  cachePurged = Event(null),
+  dataDeleted = Event(null),
+  rateAndReviewRequest = Event(null),
+  navigationEventState = Event(null),
+)
+
 @Composable
 fun PreviewUtilSettingsScreen(
-    alertDialogState: SettingsViewModel.AlertDialogState = SettingsViewModel.AlertDialogState.None,
-    dropdownMenuState: SettingsViewModel.DropdownMenuState = SettingsViewModel.DropdownMenuState.None,
-    highContrastEnabled: Boolean = true,
-    clearCacheEnabled: Boolean = true,
-    preferencesState: SettingsViewModel.PreferencesState = SettingsViewModel.PreferencesState(
-      darkMode = DarkMode.DARK,
-      colorPalette = ColorPalette.ROAD_WARRIOR,
-      highContrast = HighContrast.OFF,
-      imageQuality = ImageQuality.STANDARD,
-      typography = Typography.DEFAULT,
-    )
-) = NoopTheme(darkMode = preferencesState.darkMode) {
+    uiState: SettingsUiState = PreviewSettingsUiState
+) = NoopTheme(darkMode = uiState.darkMode) {
   Surface {
     SettingsScreen(
-      alertDialogState = alertDialogState,
-      dropdownMenuState = dropdownMenuState,
-      highContrastEnabled = highContrastEnabled,
-      clearCacheEnabled = clearCacheEnabled,
-      preferencesState = preferencesState,
-      onClickDeveloper = {}, onClickSource = {}, onClickEccohedra = {},
-      onClickWelcomePage = {}, onClickTipsAndInfoPage = {}, onClickPrivacyInfo = {},
-      onClickClearCache = {}, onClickDeleteAllData = {}, onClickStatistics = {},
-      onClickDemoVideo = {}, onConfirmDeleteAllDataAlertDialog = {}, onClickDarkMode = {},
-      onDismissDarkMode = {}, onSelectDarkMode = {}, onClickColorPalette = {}, onSelectColorPalette = {},
-      onDismissColorPalette = {}, onClickHighContrast = {}, onSelectHighContrast = {}, onClickRateAndReview = {},
-      onDismissHighContrast = {}, onClickTypography = {}, onSelectTypography = {}, onDismissTypography = {}, onDismissDeleteAllDataAlertDialog = {},
-      onClickImageQuality = {}, onSelectImageQuality = {}, onDismissImageQuality = {}, onDismissImageQualityAlertDialog = {}, onConfirmImageQualityAlertDialog = {},
+      uiState = uiState,
+      onEvent = {},
     )
   }
 }
@@ -771,6 +707,12 @@ fun PreviewUtilSettingsScreen(
 // TODO: Animations have made previews unusable. Hoist animation values?
 @SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen()
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen()
-@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(alertDialogState = SettingsViewModel.AlertDialogState.DeleteAllData)
-@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
+
+@Preview @Composable
+fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(
+  uiState = PreviewSettingsUiState.copy(alertDialogState = SettingsAlertDialogState.DeleteAllData)
+)
+
+@Preview @Composable
+fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

@@ -2,6 +2,9 @@
 
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.moleculeFlow
+import app.cash.turbine.test
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.ImageQuality
@@ -14,10 +17,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -56,62 +56,70 @@ class SettingsViewModelTest {
 
   @Test
   fun `Dialogs are hidden by default`() = runTest {
-    assertEquals(SettingsViewModel.AlertDialogState.None, viewModel.alertDialogState)
+    moleculeFlow(RecompositionMode.Immediate) { viewModel.UiState() }.test {
+      skipItems(1)
+      assertEquals(SettingsAlertDialogState.None, awaitItem().alertDialogState)
+    }
   }
 
   @Test
   fun `Show delete all data alert dialog`() = runTest {
-    viewModel.onClickDeleteAllData()
-    assertEquals(SettingsViewModel.AlertDialogState.DeleteAllData, viewModel.alertDialogState)
+    moleculeFlow(RecompositionMode.Immediate) { viewModel.UiState() }.test {
+      skipItems(2)
+      viewModel.onEvent(SettingsEvent.ClickDeleteAllData)
+      assertEquals(SettingsAlertDialogState.DeleteAllData, awaitItem().alertDialogState)
+    }
   }
 
   @Test
   fun `Selecting a higher image quality triggers alert dialog`() = runTest {
-    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.preferencesState.collect() }
 
-    viewModel.onSelectedImageQuality(
-        ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal + 1]
-    )
-
-    assertEquals(SettingsViewModel.AlertDialogState.ImageQuality, viewModel.alertDialogState)
-
-    collectJob.cancel()
+    moleculeFlow(RecompositionMode.Immediate) { viewModel.UiState() }.test {
+      skipItems(2)
+      viewModel.onEvent(
+        SettingsEvent.SelectImageQuality(ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal + 1])
+      )
+      assertEquals(SettingsAlertDialogState.ImageQuality, awaitItem().alertDialogState)
+    }
   }
 
   @Test
   fun `Selecting a lower image quality does not triggers alert dialog`() = runTest {
-    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.preferencesState.collect() }
-
     val lowerImageQuality = ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal - 1]
     coJustRun { userPreferencesRepository.setImageQuality(lowerImageQuality) }
+    moleculeFlow(RecompositionMode.Immediate) { viewModel.UiState() }.test {
+      skipItems(1)
 
-    viewModel.onSelectedImageQuality(lowerImageQuality)
+      viewModel.onEvent(SettingsEvent.SelectImageQuality(lowerImageQuality))
 
-    assertEquals(SettingsViewModel.AlertDialogState.None, viewModel.alertDialogState)
-    coVerify(exactly = 1) { userPreferencesRepository.setImageQuality(lowerImageQuality) }
-
-    collectJob.cancel()
+      assertEquals(SettingsAlertDialogState.None, awaitItem().alertDialogState)
+      coVerify(exactly = 1) { userPreferencesRepository.setImageQuality(lowerImageQuality) }
+    }
   }
 
   @Test
   fun `Selecting a equal image quality does not triggers alert dialog`() = runTest {
-    val collectJob = launch(UnconfinedTestDispatcher()) { viewModel.preferencesState.collect() }
+    moleculeFlow(RecompositionMode.Immediate) { viewModel.UiState() }.test {
+      skipItems(1)
 
-    viewModel.onSelectedImageQuality(testInitialUserPreferences.imageQuality)
+      viewModel.onEvent(SettingsEvent.SelectImageQuality(testInitialUserPreferences.imageQuality))
 
-    assertEquals(SettingsViewModel.AlertDialogState.None, viewModel.alertDialogState)
-
-    collectJob.cancel()
+      assertEquals(SettingsAlertDialogState.None, awaitItem().alertDialogState)
+    }
   }
 
   @Test
   fun `Clearing cache disables button and notifies user`() = runTest {
     coJustRun { purgeRepository.purgeCache() }
+    moleculeFlow(RecompositionMode.Immediate) { viewModel.UiState() }.test {
+      skipItems(2)
 
-    viewModel.onClickClearCache()
+      viewModel.onEvent(SettingsEvent.ClickClearCache)
 
-    verify(exactly = 1) { purgeRepository.purgeCache() }
-    assertFalse(viewModel.clearCacheEnabled)
-    assertNotNull(viewModel.cachePurged.getContentIfNotHandled())
+      val result = awaitItem()
+      assertFalse(result.clearCacheEnabled)
+      assertNotNull(result.cachePurged.getContentIfNotHandled())
+      verify(exactly = 1) { purgeRepository.purgeCache() }
+    }
   }
 }

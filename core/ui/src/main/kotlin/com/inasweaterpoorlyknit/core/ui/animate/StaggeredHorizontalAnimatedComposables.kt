@@ -18,7 +18,7 @@ fun staggeredHorizontallyAnimatedComposables(
   val targetValue = content.size * 0.1f + 0.1f // +0.1 as a safety buffer
   val initialValue = if(isComposePreview) targetValue else 0.0f
   val animationFloat = remember { Animatable(initialValue = initialValue) }
-  LaunchedEffect(content.size) {
+  LaunchedEffect(Unit) {
     animationFloat.animateTo(
       targetValue = targetValue,
       animationSpec = TweenSpec(

@@ -66,6 +66,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests {
+            // necessary for testing with molecule
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
@@ -146,4 +152,7 @@ dependencies {
 
     // Mockk
     testImplementation(libs.mockk)
+
+    testImplementation("app.cash.molecule:molecule-runtime:2.0.0")
+    testImplementation("app.cash.turbine:turbine:1.1.0")
 }
