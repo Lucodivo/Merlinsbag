@@ -1,8 +1,5 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.Event
@@ -17,89 +14,154 @@ import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+enum class SettingsDropdownMenuState {
+  None,
+  DarkMode,
+  ColorPalette,
+  HighContrast,
+  Typography,
+  ImageQuality,
+}
+
+enum class SettingsAlertDialogState {
+  None,
+  DeleteAllData,
+  ImageQuality,
+}
+
+sealed interface SettingsNavigationState {
+  data object TipsAndInfo: SettingsNavigationState
+  data object Statistics: SettingsNavigationState
+  data class Web(val url: String): SettingsNavigationState
+}
+
+data class SettingsUIState (
+    val cachePurged: Event<Unit>,
+    val dataDeleted: Event<Unit>,
+    val rateAndReviewRequest: Event<Unit>,
+    val navigationEventState: Event<SettingsNavigationState>,
+    val clearCacheEnabled: Boolean,
+    val highContrastEnabled: Boolean,
+    val dropdownMenuState: SettingsDropdownMenuState,
+    val alertDialogState: SettingsAlertDialogState,
+    val darkMode: DarkMode,
+    val colorPalette: ColorPalette,
+    val highContrast: HighContrast,
+    val imageQuality: ImageQuality,
+    val typography: Typography,
+)
+
+interface SettingsUIStateChanger {
+  fun onClickClearCache()
+  fun onClickDeleteAllData()
+  fun onDismissDeleteAllDataAlertDialog()
+  fun onConfirmDeleteAllDataAlertDialog()
+  fun onClickDarkMode()
+  fun onDismissDarkMode()
+  fun onSelectDarkMode(darkMode: DarkMode)
+  fun onClickColorPalette()
+  fun onDismissColorPalette()
+  fun onSelectColorPalette(colorPalette: ColorPalette)
+  fun onClickHighContrast()
+  fun onDismissHighContrast()
+  fun onSelectHighContrast(highContrast: HighContrast)
+  fun onClickTypography()
+  fun onDismissTypography()
+  fun onSelectTypography(typography: Typography)
+  fun onClickImageQuality()
+  fun onDismissImageQualityDropdown()
+  fun onSelectedImageQuality(newImageQuality: ImageQuality)
+  fun onDismissImageQualityAlertDialog()
+  fun onConfirmImageQualityAlertDialog()
+  fun onClickWelcome()
+  fun onClickRateAndReview()
+  fun onClickStatistics()
+  fun onClickTipsAndInfo()
+  fun onClickDemo()
+  fun onClickSource()
+  fun onClickDeveloper()
+  fun onClickEccohedra()
+  fun onClickPrivacyInformation()
+  fun onUnableToDisplayInAppReview()
+}
+
+object WebUrls {
+  const val AUTHOR = "https://lucodivo.github.io/"
+  const val SOURCE_CODE = "https://github.com/Lucodivo/Merlinsbag"
+  const val ECCOHEDRA = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
+  const val MERLINSBAG = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"
+  const val PRIVACY_POLICY = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
+  const val DEMO_VIDEO = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
+}
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val purgeRepository: PurgeRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
-): ViewModel() {
+): ViewModel(), SettingsUIStateChanger {
 
-  companion object {
-    private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
-    private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
-    private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
-    private const val MERLINSBAG_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"
-    private const val PRIVACY_INFO_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
-    private const val DEMO_VIDEO_URL = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
-  }
-
-  enum class DropdownMenuState {
-    None,
-    DarkMode,
-    ColorPalette,
-    HighContrast,
-    Typography,
-    ImageQuality,
-  }
-
-  enum class AlertDialogState {
-    None,
-    DeleteAllData,
-    ImageQuality,
-  }
-
-  data class PreferencesState(
-      val darkMode: DarkMode,
-      val colorPalette: ColorPalette,
-      val highContrast: HighContrast,
-      val imageQuality: ImageQuality,
-      val typography: Typography,
+  private data class LocallyManagedState (
+      val cachePurged: Event<Unit> = Event(null),
+      val dataDeleted: Event<Unit> = Event(null),
+      val rateAndReviewRequest: Event<Unit> = Event(null),
+      val navigationEventState: Event<SettingsNavigationState> = Event(null),
+      val clearCacheEnabled: Boolean = true,
+      val dropdownMenuState: SettingsDropdownMenuState = SettingsDropdownMenuState.None,
+      val alertDialogState: SettingsAlertDialogState = SettingsAlertDialogState.None,
   )
+  private val locallyManagedState = MutableStateFlow(LocallyManagedState())
 
-  sealed interface NavigationState {
-    data object TipsAndInfo: NavigationState
-    data object Statistics: NavigationState
-    data class Web(val url: String): NavigationState
-  }
+  private fun highContrastIsEnabled(colorPalette: ColorPalette) = colorPalette != ColorPalette.SYSTEM_DYNAMIC
 
-  var cachePurged by mutableStateOf(Event<Unit>(null))
-  var dataDeleted by mutableStateOf(Event<Unit>(null))
-  var rateAndReviewRequest by mutableStateOf(Event<Unit>(null))
-  var navigationEventState by mutableStateOf(Event<NavigationState>(null))
-  var clearCacheEnabled by mutableStateOf(true)
-  var highContrastEnabled by mutableStateOf(true)
-  var dropdownMenuState by mutableStateOf(DropdownMenuState.None)
-  var alertDialogState by mutableStateOf(AlertDialogState.None)
-  val preferencesState = userPreferencesRepository.userPreferences.onEach {
+  val uiState: StateFlow<SettingsUIState> = combine(
+    userPreferencesRepository.userPreferences,
+    locallyManagedState,
+  ) { userPreferences, locallyManagedState ->
     // System dynamic color schemes do not currently support high contrast
-    if(it.colorPalette == ColorPalette.SYSTEM_DYNAMIC) {
-      if(highContrastEnabled) highContrastEnabled = false
-    } else if(!highContrastEnabled) highContrastEnabled = true
-    cachedImageQuality = it.imageQuality
-  }.map {
-    PreferencesState(
-      darkMode = it.darkMode,
-      colorPalette = it.colorPalette,
-      highContrast = if(it.colorPalette != ColorPalette.SYSTEM_DYNAMIC) it.highContrast else HighContrast.OFF,
-      imageQuality = it.imageQuality,
-      typography = it.typography,
+    val highContrastEnabled = highContrastIsEnabled(userPreferences.colorPalette)
+    cachedImageQuality = userPreferences.imageQuality
+    SettingsUIState(
+      cachePurged = locallyManagedState.cachePurged,
+      dataDeleted = locallyManagedState.dataDeleted,
+      rateAndReviewRequest = locallyManagedState.rateAndReviewRequest,
+      navigationEventState = locallyManagedState.navigationEventState,
+      clearCacheEnabled = locallyManagedState.clearCacheEnabled,
+      dropdownMenuState = locallyManagedState.dropdownMenuState,
+      alertDialogState = locallyManagedState.alertDialogState,
+      highContrastEnabled = highContrastEnabled,
+      darkMode = userPreferences.darkMode,
+      colorPalette = userPreferences.colorPalette,
+      highContrast = if(highContrastEnabled) userPreferences.highContrast else HighContrast.OFF,
+      imageQuality = userPreferences.imageQuality,
+      typography = userPreferences.typography,
     )
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-    initialValue = with(UserPreferences()) {
-      PreferencesState(
-        darkMode = darkMode,
-        colorPalette = colorPalette,
-        highContrast = highContrast,
-        imageQuality = imageQuality,
-        typography = typography,
+    initialValue = with(locallyManagedState.value){
+      val defaultPreferences = UserPreferences()
+      SettingsUIState(
+        cachePurged = cachePurged,
+        dataDeleted = dataDeleted,
+        rateAndReviewRequest = rateAndReviewRequest,
+        navigationEventState = navigationEventState,
+        clearCacheEnabled = clearCacheEnabled,
+        dropdownMenuState = dropdownMenuState,
+        alertDialogState = alertDialogState,
+        highContrastEnabled = highContrastIsEnabled(defaultPreferences.colorPalette),
+        darkMode = defaultPreferences.darkMode,
+        colorPalette = defaultPreferences.colorPalette,
+        highContrast = defaultPreferences.highContrast,
+        imageQuality = defaultPreferences.imageQuality,
+        typography = defaultPreferences.typography,
       )
     },
   )
@@ -108,125 +170,127 @@ class SettingsViewModel @Inject constructor(
   private var selectedImageQuality: ImageQuality? = null
 
   private fun dismissDropdownMenu() {
-    dropdownMenuState = DropdownMenuState.None
+    locallyManagedState.value = locallyManagedState.value.copy(dropdownMenuState = SettingsDropdownMenuState.None)
   }
 
   private fun dismissAlertDialog() {
-    alertDialogState = AlertDialogState.None
-  }
-
-  fun onClickClearCache() {
-    // Disable clearing cache until view model is recreated
-    clearCacheEnabled = false
-    viewModelScope.launch(Dispatchers.IO) {
-      purgeRepository.purgeCache()
-      cachePurged = Event(Unit)
-    }
-  }
-
-  fun onClickDeleteAllData() {
-    alertDialogState = AlertDialogState.DeleteAllData
-  }
-
-  fun onDismissDeleteAllDataAlertDialog() = dismissAlertDialog()
-  fun onConfirmDeleteAllDataAlertDialog() {
-    dismissAlertDialog()
-    viewModelScope.launch(Dispatchers.IO) {
-      purgeRepository.purgeUserData()
-      dataDeleted = Event(Unit)
-    }
-  }
-
-
-  fun onClickDarkMode() {
-    dropdownMenuState = DropdownMenuState.DarkMode
-  }
-
-  fun onDismissDarkMode() = dismissDropdownMenu()
-  fun setDarkMode(darkMode: DarkMode) {
-    dismissDropdownMenu()
-    viewModelScope.launch(Dispatchers.IO) {
-      userPreferencesRepository.setDarkMode(darkMode)
-    }
-  }
-
-  fun onClickColorPalette() {
-    dropdownMenuState = DropdownMenuState.ColorPalette
-  }
-
-  fun onDismissColorPalette() = dismissDropdownMenu()
-  fun setColorPalette(colorPalette: ColorPalette) {
-    dismissDropdownMenu()
-    viewModelScope.launch(Dispatchers.IO) {
-      userPreferencesRepository.setColorPalette(colorPalette)
-    }
-  }
-
-  fun onClickHighContrast() {
-    dropdownMenuState = DropdownMenuState.HighContrast
-  }
-
-  fun onDismissHighContrast() = dismissDropdownMenu()
-  fun setHighContrast(highContrast: HighContrast) {
-    dismissDropdownMenu()
-    viewModelScope.launch(Dispatchers.IO) {
-      userPreferencesRepository.setHighContrast(highContrast)
-    }
-  }
-
-  fun onClickTypography() {
-    dropdownMenuState = DropdownMenuState.Typography
-  }
-
-  fun onDismissTypography() = dismissDropdownMenu()
-  fun setTypography(typography: Typography) {
-    dismissDropdownMenu()
-    viewModelScope.launch(Dispatchers.IO) {
-      userPreferencesRepository.setTypography(typography)
-    }
+    locallyManagedState.value = locallyManagedState.value.copy(alertDialogState = SettingsAlertDialogState.None)
   }
 
   private fun setImageQuality(imageQuality: ImageQuality) = viewModelScope.launch(Dispatchers.IO) {
     userPreferencesRepository.setImageQuality(imageQuality)
   }
 
-  fun onClickImageQuality() {
-    dropdownMenuState = DropdownMenuState.ImageQuality
+  override fun onClickClearCache() {
+    // Disable clearing cache until view model is recreated
+    locallyManagedState.value = locallyManagedState.value.copy(clearCacheEnabled = false)
+    viewModelScope.launch(Dispatchers.IO) {
+      purgeRepository.purgeCache()
+      locallyManagedState.value = locallyManagedState.value.copy(cachePurged = Event(Unit))
+    }
   }
 
-  fun onDismissImageQualityDropdown() = dismissDropdownMenu()
-  fun onSelectedImageQuality(newImageQuality: ImageQuality) {
+  override fun onClickDeleteAllData() {
+    locallyManagedState.value = locallyManagedState.value.copy(alertDialogState = SettingsAlertDialogState.DeleteAllData)
+  }
+
+  override fun onDismissDeleteAllDataAlertDialog() = dismissAlertDialog()
+  override fun onConfirmDeleteAllDataAlertDialog() {
+    dismissAlertDialog()
+    viewModelScope.launch(Dispatchers.IO) {
+      purgeRepository.purgeUserData()
+      locallyManagedState.value = locallyManagedState.value.copy(dataDeleted = Event(Unit))
+    }
+  }
+
+
+  override fun onClickDarkMode() {
+    locallyManagedState.value = locallyManagedState.value.copy(dropdownMenuState = SettingsDropdownMenuState.DarkMode)
+  }
+
+  override fun onDismissDarkMode() = dismissDropdownMenu()
+  override fun onSelectDarkMode(darkMode: DarkMode) {
+    dismissDropdownMenu()
+    viewModelScope.launch(Dispatchers.IO) {
+      userPreferencesRepository.setDarkMode(darkMode)
+    }
+  }
+
+  override fun onClickColorPalette() {
+    locallyManagedState.value = locallyManagedState.value.copy(dropdownMenuState = SettingsDropdownMenuState.ColorPalette)
+  }
+
+  override fun onDismissColorPalette() = dismissDropdownMenu()
+  override fun onSelectColorPalette(colorPalette: ColorPalette) {
+    dismissDropdownMenu()
+    viewModelScope.launch(Dispatchers.IO) {
+      userPreferencesRepository.setColorPalette(colorPalette)
+    }
+  }
+
+  override fun onClickHighContrast() {
+    locallyManagedState.value = locallyManagedState.value.copy(dropdownMenuState = SettingsDropdownMenuState.HighContrast)
+  }
+
+  override fun onDismissHighContrast() = dismissDropdownMenu()
+  override fun onSelectHighContrast(highContrast: HighContrast) {
+    dismissDropdownMenu()
+    viewModelScope.launch(Dispatchers.IO) {
+      userPreferencesRepository.setHighContrast(highContrast)
+    }
+  }
+
+  override fun onClickTypography() {
+    locallyManagedState.value = locallyManagedState.value.copy(dropdownMenuState = SettingsDropdownMenuState.Typography)
+  }
+
+  override fun onDismissTypography() = dismissDropdownMenu()
+  override fun onSelectTypography(typography: Typography) {
+    dismissDropdownMenu()
+    viewModelScope.launch(Dispatchers.IO) {
+      userPreferencesRepository.setTypography(typography)
+    }
+  }
+
+  override fun onClickImageQuality() {
+    locallyManagedState.value = locallyManagedState.value.copy(dropdownMenuState = SettingsDropdownMenuState.ImageQuality)
+  }
+
+  override fun onDismissImageQualityDropdown() = dismissDropdownMenu()
+  override fun onSelectedImageQuality(newImageQuality: ImageQuality) {
     dismissDropdownMenu()
     cachedImageQuality?.let { oldImageQuality ->
       if(oldImageQuality == newImageQuality) return
       val imageQualityRaised = oldImageQuality.ordinal < newImageQuality.ordinal
       if(imageQualityRaised) {
         selectedImageQuality = newImageQuality
-        alertDialogState = AlertDialogState.ImageQuality
+        locallyManagedState.value = locallyManagedState.value.copy(alertDialogState = SettingsAlertDialogState.ImageQuality)
       } else {
         setImageQuality(newImageQuality)
       }
     }
   }
 
-  fun onDismissImageQualityAlertDialog() = dismissAlertDialog()
-  fun onConfirmImageQualityAlertDialog() {
+  override fun onDismissImageQualityAlertDialog() = dismissAlertDialog()
+  override fun onConfirmImageQualityAlertDialog() {
     dismissAlertDialog()
     selectedImageQuality?.let { setImageQuality(it) }
     selectedImageQuality = null
   }
 
-  fun onClickWelcome() = viewModelScope.launch(Dispatchers.IO) {
-    userPreferencesRepository.setHasCompletedOnboarding(false)
+  override fun onClickWelcome() {
+    viewModelScope.launch(Dispatchers.IO) {
+      userPreferencesRepository.setHasCompletedOnboarding(false)
+    }
   }
 
-  fun onClickRateAndReview() { rateAndReviewRequest = Event(Unit) }
-  fun onClickStatistics() { navigationEventState = Event(NavigationState.Statistics) }
-  fun onClickTipsAndInfo() { navigationEventState = Event(NavigationState.TipsAndInfo) }
-  fun onClickDemo() { navigationEventState = Event(NavigationState.Web(DEMO_VIDEO_URL)) }
-  fun onClickSource() { navigationEventState = Event(NavigationState.Web(SOURCE_CODE_URL)) }
-  fun onClickDeveloper() { navigationEventState = Event(NavigationState.Web(AUTHOR_WEBSITE_URL)) }
-  fun onClickEccohedra() { navigationEventState = Event(NavigationState.Web(ECCOHEDRA_URL)) }
-  fun onClickPrivacyInformation() { navigationEventState = Event(NavigationState.Web(PRIVACY_INFO_URL)) }
-  fun onUnableToDisplayInAppReview() { navigationEventState = Event(NavigationState.Web(MERLINSBAG_URL)) }
+  override fun onClickRateAndReview() { locallyManagedState.value = locallyManagedState.value.copy(rateAndReviewRequest = Event(Unit)) }
+  override fun onClickStatistics() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.Statistics)) }
+  override fun onClickTipsAndInfo() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.TipsAndInfo)) }
+  override fun onClickDemo() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.Web(WebUrls.DEMO_VIDEO))) }
+  override fun onClickSource() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.Web(WebUrls.SOURCE_CODE))) }
+  override fun onClickDeveloper() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.Web(WebUrls.AUTHOR))) }
+  override fun onClickEccohedra() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.Web(WebUrls.ECCOHEDRA))) }
+  override fun onClickPrivacyInformation() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.Web(WebUrls.PRIVACY_POLICY))) }
+  override fun onUnableToDisplayInAppReview() { locallyManagedState.value = locallyManagedState.value.copy(navigationEventState = Event(SettingsNavigationState.Web(WebUrls.MERLINSBAG))) }
 }
