@@ -189,46 +189,69 @@ private fun OnboardingInternal(
   val getStartedAlpha = max(0.0f, (pagerState.currentPage + pagerState.currentPageOffsetFraction) - (pagerState.pageCount - 2))
   val bottomPadding = systemBarPaddingValues.calculateBottomPadding()
   val skipButtonPadding = PaddingValues(start = 10.dp, end = 10.dp, bottom = bottomPadding + 10.dp)
+
   Surface(
-    modifier = Modifier.fillMaxSize(),
-  ) {
-    Column (
-      verticalArrangement = Arrangement.Bottom,
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
+    modifier = Modifier
+        .fillMaxSize()
+  ){
+    // Slide Indicator & "Get Started" Column
+    Box(
+      contentAlignment = Alignment.BottomCenter,
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(bottom = bottomPadding + 16.dp)
+    ){
+      HorizontalPageIndicator(
+        pageIndicatorState = pagerIndicatorState,
+        selectedColor = MaterialTheme.colorScheme.onSurface,
+        spacing = pagerIndicatorSpacing,
+        indicatorSize = pagerIndicatorSize,
+        modifier = Modifier
+            .sizeIn(maxHeight = pagerIndicatorSize)
+      )
+    }
+
+    // Slide Pager
+    Box (
+      contentAlignment = Alignment.Center,
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(bottom = bottomPadding)
     ) {
       HorizontalPager(
         state = pagerState,
-        modifier = Modifier.weight(1.0f)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 32.dp)
       ) { page ->
         slides[page]()
       }
+    }
+
+    // "Get Started" button
+    if(getStartedAlpha > 0.0f){
       Box(
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.BottomCenter,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
-      ){
-        HorizontalPageIndicator(
-          pageIndicatorState = pagerIndicatorState,
-          selectedColor = MaterialTheme.colorScheme.onSurface,
-          spacing = pagerIndicatorSpacing,
-          indicatorSize = pagerIndicatorSize,
-          modifier = Modifier.sizeIn(maxHeight = pagerIndicatorSize)
-        )
-        ElevatedButton (
-          onClick = if(getStartedAlpha > 0.0f) onClickGetStarted else { {} },
+            .padding(bottom = bottomPadding)
+      ) {
+        ElevatedButton(
+          onClick = onClickGetStarted,
           modifier = Modifier
               .alpha(getStartedAlpha)
               .fillMaxWidth()
-              .padding(horizontal = getStartedButtonHorizontalPadding),
-        ){
+              .padding(
+                horizontal = getStartedButtonHorizontalPadding,
+                vertical = pagerIndicatorSize + 32.dp
+              ),
+        ) {
           Text(text = stringResource(R.string.get_started))
         }
       }
     }
 
-    // skip button
+    // "Skip" button
     if(getStartedAlpha < 1.0f){
       Box(
         contentAlignment = Alignment.BottomEnd,
@@ -238,7 +261,8 @@ private fun OnboardingInternal(
       ){
         TextButton(
           onClick = onClickSkip,
-          modifier = Modifier.alpha(1.0f - getStartedAlpha)
+          modifier = Modifier
+              .alpha(1.0f - getStartedAlpha)
         ) {
           Text(
             text = stringResource(R.string.skip),
@@ -248,6 +272,8 @@ private fun OnboardingInternal(
       }
     }
   }
+
+
 }
 
 private fun setPortraitOrientationOnly(context: Context) {
