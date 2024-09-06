@@ -97,6 +97,11 @@ trace("ArticleDetailViewModel: exportArticle"){
 ### Error running 'Android Java Debugger (pid: 28478, debug port: 53060)' Unable to open debugger port (localhost:53060): java.net.SocketException "Connection reset"
 - Restart Android Studio (killing adb server did not work)
 
+### java.lang.IllegalStateException: Storage for [...] is already registered
+- Some Kotlin gradle daemon has gone haywire.
+  - run in terminal: ./gradlew --stop
+  - nuclear option: restart your computer because it probably deserves it anyways
+
 ## Runtime Errors
 ### java.lang.IllegalStateException: Room cannot verify the data integrity. Looks like you've changed schema but forgot to update the version number. You can simply fix this by increasing the version number.
 - The answer to solve this problem when legitimate is obvious. However, it can occur on completely fresh installs when it is undesireable to update the database version just to satisfy this error.
