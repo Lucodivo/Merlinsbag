@@ -146,4 +146,6 @@ dependencies {
 
     // Mockk
     testImplementation(libs.mockk)
+
+    testImplementation("app.cash.turbine:turbine:1.1.0")
 }

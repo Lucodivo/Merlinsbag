@@ -46,10 +46,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.model.ColorPalette
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.HighContrast
@@ -67,9 +69,9 @@ import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsAlertDialogState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsDropdownMenuState
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsNavigationState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEffect
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIStateChanger
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEvent
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables
@@ -99,47 +101,42 @@ fun SettingsRoute(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
   val context = LocalContext.current
+  val lifecycle = LocalLifecycleOwner.current.lifecycle
   val uriHandler = LocalUriHandler.current
 
-  val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
-
-  LaunchedEffect(uiState.cachePurged) {
-    uiState.cachePurged.getContentIfNotHandled()?.let {
-      context.toast(R.string.cache_cleared)
-    }
-  }
-
-  LaunchedEffect(uiState.dataDeleted) {
-    uiState.dataDeleted.getContentIfNotHandled()?.let {
-      context.toast(msg = context.getString(R.string.all_data_deleted))
-      navigateToStartDestination()
-    }
-  }
-
-  LaunchedEffect(uiState.rateAndReviewRequest) {
-    uiState.rateAndReviewRequest.getContentIfNotHandled()?.let {
-      rateAndReviewRequest(
-        context = context,
-        onCompleted = { context.toast(R.string.thank_you) },
-        onUnableToDisplayInAppReview = settingsViewModel::onUnableToDisplayInAppReview,
-        onError = { context.toast(R.string.try_again_later) },
-      )
-    }
-  }
-
-  LaunchedEffect(uiState.navigationEventState) {
-    uiState.navigationEventState.getContentIfNotHandled()?.let {
-      when(it){
-        SettingsNavigationState.Statistics -> navigateToStatistics()
-        SettingsNavigationState.TipsAndInfo -> navigateToTipsAndInfo()
-        is SettingsNavigationState.Web -> uriHandler.openUri(it.url)
+  LaunchedEffect(Unit) {
+    lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+      settingsViewModel.uiEffect.collect{ uiEvent ->
+        when(uiEvent){
+          SettingsUIEffect.AllDataDeleted -> {
+            context.toast(msg = context.getString(R.string.all_data_deleted))
+            navigateToStartDestination()
+          }
+          SettingsUIEffect.CachePurged -> {
+            context.toast(R.string.cache_cleared)
+          }
+          SettingsUIEffect.RateAndReviewRequest -> {
+            rateAndReviewRequest(
+              context = context,
+              onCompleted = { context.toast(R.string.thank_you) },
+              onUnableToDisplayInAppReview = { settingsViewModel.onEvent(SettingsUIEvent.UnableToDisplayInAppReview) },
+              onError = { context.toast(R.string.try_again_later) },
+            )
+          }
+          is SettingsUIEffect.Navigation -> when(uiEvent.dest) {
+            SettingsUIEffect.NavigationDestination.Statistics -> navigateToStatistics()
+            SettingsUIEffect.NavigationDestination.TipsAndInfo -> navigateToTipsAndInfo()
+            is SettingsUIEffect.NavigationDestination.Web -> uriHandler.openUri(uiEvent.dest.url)
+          }
+        }
       }
     }
   }
 
+  val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
   SettingsScreen(
     uiState = uiState,
-    uiStateChanger = settingsViewModel
+    onEvent = settingsViewModel::onEvent
   )
 }
 
@@ -439,7 +436,7 @@ fun DeleteAllDataRow(onClick: () -> Unit) {
 fun SettingsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
     uiState: SettingsUIState,
-    uiStateChanger: SettingsUIStateChanger,
+    onEvent: (SettingsUIEvent) -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
   val settingsRows = staggeredHorizontallyAnimatedComposables(
@@ -449,27 +446,27 @@ fun SettingsScreen(
         ColorPaletteRow(
           selectedColorPalette = uiState.colorPalette,
           expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.ColorPalette,
-          onClick = uiStateChanger::onClickColorPalette,
-          onSelectColorPalette = uiStateChanger::onSelectColorPalette,
-          onDismiss = uiStateChanger::onDismissColorPalette,
+          onClick = { onEvent(SettingsUIEvent.ClickColorPalette) },
+          onSelectColorPalette = { onEvent(SettingsUIEvent.SelectColorPalette(it)) },
+          onDismiss = { onEvent(SettingsUIEvent.DismissColorPalette) },
         )
       },
       {
         TypographyRow(
           selectedTypography = uiState.typography,
           expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.Typography,
-          onClick = uiStateChanger::onClickTypography,
-          onSelectTypography = uiStateChanger::onSelectTypography,
-          onDismiss = uiStateChanger::onDismissTypography,
+          onClick = { onEvent(SettingsUIEvent.ClickTypography) },
+          onSelectTypography = { onEvent(SettingsUIEvent.SelectTypography(it)) },
+          onDismiss = { onEvent(SettingsUIEvent.DismissTypography) },
         )
       },
       {
         DarkModeRow(
           selectedDarkMode = uiState.darkMode,
           expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.DarkMode,
-          onClick = uiStateChanger::onClickDarkMode,
-          onSelectDarkMode = uiStateChanger::onSelectDarkMode,
-          onDismiss = uiStateChanger::onDismissDarkMode,
+          onClick = { onEvent(SettingsUIEvent.ClickDarkMode) },
+          onSelectDarkMode = { onEvent(SettingsUIEvent.SelectDarkMode(it)) },
+          onDismiss = { onEvent(SettingsUIEvent.DismissDarkMode) },
         )
       },
       {
@@ -477,40 +474,40 @@ fun SettingsScreen(
           enabled = uiState.highContrastEnabled,
           selectedHighContrast = uiState.highContrast,
           expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.HighContrast,
-          onClick = uiStateChanger::onClickHighContrast,
-          onSelectHighContrast = uiStateChanger::onSelectHighContrast,
-          onDismiss = uiStateChanger::onDismissHighContrast,
+          onClick = { onEvent(SettingsUIEvent.ClickHighContrast) },
+          onSelectHighContrast = { onEvent(SettingsUIEvent.SelectHighContrast(it)) },
+          onDismiss = { onEvent(SettingsUIEvent.DismissHighContrast) },
         )
       },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.info)) },
-      { DemoVideoRow(uiStateChanger::onClickDemo) },
-      { TipsAndInfoRow(uiStateChanger::onClickTipsAndInfo) },
-      { WelcomePageRow(uiStateChanger::onClickWelcome) },
-      { StatisticsRow(uiStateChanger::onClickStatistics) },
+      { DemoVideoRow{ onEvent(SettingsUIEvent.ClickDemo) } },
+      { TipsAndInfoRow{ onEvent(SettingsUIEvent.ClickTipsAndInfo) } },
+      { WelcomePageRow{ onEvent(SettingsUIEvent.ClickWelcome) } },
+      { StatisticsRow{ onEvent(SettingsUIEvent.ClickStatistics) } },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.data)) },
       {
         ImageQualityRow(
           selectedImageQuality = uiState.imageQuality,
           expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.ImageQuality,
-          onClick = uiStateChanger::onClickImageQuality,
-          onSelectImageQuality = uiStateChanger::onSelectedImageQuality,
-          onDismiss = uiStateChanger::onDismissImageQualityDropdown,
+          onClick = { onEvent(SettingsUIEvent.ClickImageQuality) },
+          onSelectImageQuality = { onEvent(SettingsUIEvent.SelectedImageQuality(it)) },
+          onDismiss = { onEvent(SettingsUIEvent.DismissImageQualityDropdown) },
         )
       },
-      { PrivacyInfoRow(uiStateChanger::onClickPrivacyInformation) },
-      { ClearCacheRow(uiState.clearCacheEnabled, uiStateChanger::onClickClearCache) },
-      { DeleteAllDataRow(uiStateChanger::onClickDeleteAllData) },
+      { PrivacyInfoRow{ onEvent(SettingsUIEvent.ClickPrivacyInformation) } },
+      { ClearCacheRow(uiState.clearCacheEnabled){ onEvent(SettingsUIEvent.ClickClearCache)} },
+      { DeleteAllDataRow{ onEvent(SettingsUIEvent.ClickDeleteAllData) } },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.about)) },
-      { DeveloperRow(uiStateChanger::onClickDeveloper) },
-      { SourceRow(uiStateChanger::onClickSource) },
+      { DeveloperRow{ onEvent(SettingsUIEvent.ClickDeveloper) } },
+      { SourceRow{ onEvent(SettingsUIEvent.ClickSource) } },
       { VersionRow() },
       { HorizontalDivider(thickness = dividerThickness, modifier = dividerModifier) },
       { SettingsTitle(stringResource(R.string.etc)) },
-      { RateAndReviewRow(uiStateChanger::onClickRateAndReview) },
-      { EccohedraRow(uiStateChanger::onClickEccohedra) }
+      { RateAndReviewRow{ onEvent(SettingsUIEvent.ClickRateAndReview) } },
+      { EccohedraRow{ onEvent(SettingsUIEvent.ClickEccohedra) } }
     )
   )
   Row {
@@ -528,13 +525,13 @@ fun SettingsScreen(
   }
   DeleteAllDataAlertDialog(
     visible = uiState.alertDialogState == SettingsAlertDialogState.DeleteAllData,
-    onDismiss = uiStateChanger::onDismissDeleteAllDataAlertDialog,
-    onConfirm = uiStateChanger::onConfirmDeleteAllDataAlertDialog,
+    onDismiss = { onEvent(SettingsUIEvent.DismissDeleteAllDataAlertDialog) },
+    onConfirm = { onEvent(SettingsUIEvent.ConfirmDeleteAllDataAlertDialog) },
   )
   ImageQualityAlertDialog(
     visible = uiState.alertDialogState == SettingsAlertDialogState.ImageQuality,
-    onDismiss = uiStateChanger::onDismissImageQualityAlertDialog,
-    onConfirm = uiStateChanger::onConfirmImageQualityAlertDialog,
+    onDismiss = { onEvent(SettingsUIEvent.DismissImageQualityAlertDialog) },
+    onConfirm = { onEvent(SettingsUIEvent.ConfirmImageQualityAlertDialog) },
   )
 }
 
@@ -691,10 +688,6 @@ fun PreviewUtilSettingsScreen(
   Surface {
     SettingsScreen(
       uiState = SettingsUIState(
-        cachePurged = Event(null),
-        dataDeleted = Event(null),
-        navigationEventState = Event(null),
-        rateAndReviewRequest = Event(null),
         alertDialogState = alertDialogState,
         dropdownMenuState = dropdownMenuState,
         highContrastEnabled = highContrastEnabled,
@@ -705,39 +698,7 @@ fun PreviewUtilSettingsScreen(
         imageQuality = imageQuality,
         typography = typography,
       ),
-      uiStateChanger = object: SettingsUIStateChanger {
-        override fun onClickClearCache() {}
-        override fun onClickDeleteAllData() {}
-        override fun onDismissDeleteAllDataAlertDialog() {}
-        override fun onConfirmDeleteAllDataAlertDialog() {}
-        override fun onClickDarkMode() {}
-        override fun onDismissDarkMode() {}
-        override fun onSelectDarkMode(darkMode: DarkMode) {}
-        override fun onClickColorPalette() {}
-        override fun onDismissColorPalette() {}
-        override fun onSelectColorPalette(colorPalette: ColorPalette) {}
-        override fun onClickHighContrast() {}
-        override fun onDismissHighContrast() {}
-        override fun onSelectHighContrast(highContrast: HighContrast) {}
-        override fun onClickTypography() {}
-        override fun onDismissTypography() {}
-        override fun onSelectTypography(typography: Typography) {}
-        override fun onClickImageQuality() {}
-        override fun onDismissImageQualityDropdown() {}
-        override fun onSelectedImageQuality(newImageQuality: ImageQuality) {}
-        override fun onDismissImageQualityAlertDialog() {}
-        override fun onConfirmImageQualityAlertDialog() {}
-        override fun onClickWelcome() {}
-        override fun onClickRateAndReview() {}
-        override fun onClickStatistics() {}
-        override fun onClickTipsAndInfo() {}
-        override fun onClickDemo() {}
-        override fun onClickSource() {}
-        override fun onClickDeveloper() {}
-        override fun onClickEccohedra() {}
-        override fun onClickPrivacyInformation() {}
-        override fun onUnableToDisplayInAppReview() {}
-      },
+      onEvent = {},
     )
   }
 }
