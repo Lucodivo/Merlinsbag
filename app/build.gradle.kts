@@ -153,6 +153,6 @@ dependencies {
     // Mockk
     testImplementation(libs.mockk)
 
-    testImplementation("app.cash.molecule:molecule-runtime:2.0.0")
-    testImplementation("app.cash.turbine:turbine:1.1.0")
+    implementation(libs.molecule.runtime)
+    testImplementation(libs.turbine)
 }

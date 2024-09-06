@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.2"
+agp = "8.6.0"
 coil = "2.6.0"
 coreTesting = "2.2.0"
 datastore = "1.1.1"
@@ -10,6 +10,7 @@ kotlin = "2.0.20"
 kotlinxSerializationCore = "1.6.3"
 ksp = "2.0.20-1.0.24"
 mockk = "1.13.12"
+moleculeRuntime = "2.0.0"
 protobuf = "4.26.0"
 protobufPlugin = "0.9.4"
 androidxCoreSplashscreen = "1.0.1"
@@ -34,6 +35,7 @@ composeMaterial = "1.4.0"
 googleServices = "4.4.2"
 firebaseCrashlytics = "3.0.2"
 material3AdaptiveNavigationSuiteAndroid = "1.3.0"
+turbine = "1.1.0"
 
 [libraries]
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
@@ -83,6 +85,7 @@ androidx-compose-material3 = { module = "androidx.compose.material3:material3", 
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+molecule-runtime = { module = "app.cash.molecule:molecule-runtime", version.ref = "moleculeRuntime" }
 play-services-mlkit-subject-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "playServicesMlkitSubjectSegmentation" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "composeActivity" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
@@ -94,6 +97,7 @@ review = { module = "com.google.android.play:review", version.ref = "review" }
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "review" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-material3-adaptive-navigation-suite-android = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite-android", version.ref = "material3AdaptiveNavigationSuiteAndroid" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
