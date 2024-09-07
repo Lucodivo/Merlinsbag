@@ -1,6 +1,5 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,7 +9,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.common.Event
+import app.cash.molecule.AndroidUiDispatcher
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.launchMolecule
+import app.cash.molecule.moleculeFlow
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.ColorPalette
@@ -20,8 +22,12 @@ import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,206 +46,242 @@ enum class SettingsAlertDialogState {
   ImageQuality,
 }
 
-sealed interface SettingsNavigationState {
-  data object TipsAndInfo: SettingsNavigationState
-  data object Statistics: SettingsNavigationState
-  data class Web(val url: String): SettingsNavigationState
-}
-
-sealed interface SettingsEvent {
-  data object ClickRateAndReview: SettingsEvent
-  data object ClickStatistics: SettingsEvent
-  data object ClickTipsAndInfo: SettingsEvent
-  data object ClickDemo: SettingsEvent
-  data object ClickSource: SettingsEvent
-  data object ClickDeveloper: SettingsEvent
-  data object ClickEccohedra: SettingsEvent
-  data object ClickPrivacyInfo: SettingsEvent
-  data object ClickWelcome: SettingsEvent
-  data object ClickClearCache: SettingsEvent
-  data object UnableToDisplayInAppReview: SettingsEvent
-  data object ClickDeleteAllData: SettingsEvent
-  data object ClickDismissDeleteAllDialog: SettingsEvent
-  data object ClickConfirmDeleteAllDialog: SettingsEvent
-  data object ClickDarkMode: SettingsEvent
-  data object ClickDismissDarkMode: SettingsEvent
-  data class SelectDarkMode(val darkMode: DarkMode): SettingsEvent
-  data object ClickHighContrast: SettingsEvent
-  data object ClickDismissHighContrast: SettingsEvent
-  data class SelectHighContrast(val highContrast: HighContrast): SettingsEvent
-  data object ClickTypography: SettingsEvent
-  data object ClickDismissTypography: SettingsEvent
-  data class SelectTypography(val typography: Typography): SettingsEvent
-  data object ClickColorPalette: SettingsEvent
-  data object ClickDismissColorPalette: SettingsEvent
-  data class SelectColorPalette(val colorPalette: ColorPalette): SettingsEvent
-  data object ClickImageQuality: SettingsEvent
-  data object ClickDismissImageQuality: SettingsEvent
-  data class SelectImageQuality(val imageQuality: ImageQuality): SettingsEvent
-  data object ClickDismissImageQualityDialog: SettingsEvent
-  data object ClickConfirmImageQualityDialog: SettingsEvent
-}
-
-data class SettingsUiState(
+data class SettingsUIState (
+    val clearCacheEnabled: Boolean,
+    val highContrastEnabled: Boolean,
+    val dropdownMenuState: SettingsDropdownMenuState,
+    val alertDialogState: SettingsAlertDialogState,
     val darkMode: DarkMode,
     val colorPalette: ColorPalette,
     val highContrast: HighContrast,
     val imageQuality: ImageQuality,
     val typography: Typography,
-    var clearCacheEnabled: Boolean,
-    var highContrastEnabled: Boolean,
-    var dropdownMenuState: SettingsDropdownMenuState,
-    var alertDialogState: SettingsAlertDialogState,
-    var cachePurged: Event<Unit>,
-    var dataDeleted: Event<Unit>,
-    var rateAndReviewRequest: Event<Unit>,
-    var navigationEventState: Event<SettingsNavigationState>,
 )
+
+sealed interface SettingsUIEffect {
+  sealed interface NavigationDestination {
+    data object TipsAndInfo: NavigationDestination
+    data object Statistics: NavigationDestination
+    data class Web(val url: String): NavigationDestination
+  }
+  data object CachePurged: SettingsUIEffect
+  data object AllDataDeleted: SettingsUIEffect
+  data object RateAndReviewRequest: SettingsUIEffect
+  data class Navigation(val dest: NavigationDestination): SettingsUIEffect
+}
+
+sealed interface SettingsUIEvent {
+  data object ClickClearCache: SettingsUIEvent
+  data object ClickDeleteAllData: SettingsUIEvent
+  data object DismissDeleteAllDataAlertDialog: SettingsUIEvent
+  data object ConfirmDeleteAllDataAlertDialog: SettingsUIEvent
+  data object ClickDarkMode: SettingsUIEvent
+  data object DismissDarkMode: SettingsUIEvent
+  data class SelectDarkMode(val darkMode: DarkMode): SettingsUIEvent
+  data object ClickColorPalette: SettingsUIEvent
+  data object DismissColorPalette: SettingsUIEvent
+  data class SelectColorPalette(val colorPalette: ColorPalette): SettingsUIEvent
+  data object ClickHighContrast: SettingsUIEvent
+  data object DismissHighContrast: SettingsUIEvent
+  data class SelectHighContrast(val highContrast: HighContrast): SettingsUIEvent
+  data object ClickTypography: SettingsUIEvent
+  data object DismissTypography: SettingsUIEvent
+  data class SelectTypography(val typography: Typography): SettingsUIEvent
+  data object ClickImageQuality: SettingsUIEvent
+  data object DismissImageQualityDropdown: SettingsUIEvent
+  data class SelectedImageQuality(val newImageQuality: ImageQuality): SettingsUIEvent
+  data object DismissImageQualityAlertDialog: SettingsUIEvent
+  data object ConfirmImageQualityAlertDialog: SettingsUIEvent
+  data object ClickWelcome: SettingsUIEvent
+  data object ClickRateAndReview: SettingsUIEvent
+  data object ClickStatistics: SettingsUIEvent
+  data object ClickTipsAndInfo: SettingsUIEvent
+  data object ClickDemo: SettingsUIEvent
+  data object ClickSource: SettingsUIEvent
+  data object ClickDeveloper: SettingsUIEvent
+  data object ClickEccohedra: SettingsUIEvent
+  data object ClickPrivacyInformation: SettingsUIEvent
+  data object UnableToDisplayInAppReview: SettingsUIEvent
+}
+
+object WebUrls {
+  const val AUTHOR = "https://lucodivo.github.io/"
+  const val SOURCE_CODE = "https://github.com/Lucodivo/Merlinsbag"
+  const val ECCOHEDRA = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
+  const val MERLINSBAG = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"
+  const val PRIVACY_POLICY = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
+  const val DEMO_VIDEO = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
+}
+
+abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>: ViewModel() {
+  private val uiScope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
+
+  private val _uiEvents = MutableSharedFlow<UIEvent>(extraBufferCapacity = 20)
+  private val _uiEffects = MutableSharedFlow<UIEffect>(extraBufferCapacity = 20)
+
+  val uiEffect: SharedFlow<UIEffect> = _uiEffects
+
+  val uiState: StateFlow<UIState> by lazy(LazyThreadSafetyMode.NONE) {
+    uiScope.launchMolecule(mode = RecompositionMode.ContextClock) {
+      uiState(_uiEvents, ::launchUiEffect)
+    }
+  }
+
+  @Composable
+  protected abstract fun uiState(
+      uiEvents: Flow<UIEvent>,
+      launchUiEffect: (UIEffect) -> Unit,
+  ): UIState
+
+  fun onUiEvent(uiEvent: UIEvent) {
+    if(!_uiEvents.tryEmit(uiEvent)) {
+      error("SettingsViewModel: UI event buffer overflow.")
+    }
+  }
+
+  private fun launchUiEffect(uiEffect: UIEffect){
+    if(!_uiEffects.tryEmit(uiEffect)) {
+      error("SettingsViewModel: UI effect buffer overflow.")
+    }
+  }
+}
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val purgeRepository: PurgeRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
-): ViewModel() {
-
-  companion object {
-    private const val TAG = "SettingsViewModel"
-    private const val AUTHOR_WEBSITE_URL = "https://lucodivo.github.io/"
-    private const val SOURCE_CODE_URL = "https://github.com/Lucodivo/Merlinsbag"
-    private const val ECCOHEDRA_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.learnopengl_androidport"
-    private const val MERLINSBAG_URL = "https://play.google.com/store/apps/details?id=com.inasweaterpoorlyknit.merlinsbag"
-    private const val PRIVACY_INFO_URL = "https://lucodivo.github.io/merlinsbag_android_privacy_policy.html"
-    private const val DEMO_VIDEO_URL = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
-  }
-
-  private val events = MutableSharedFlow<SettingsEvent>(extraBufferCapacity = 20)
-
-  private fun setImageQuality(imageQuality: ImageQuality) = viewModelScope.launch(Dispatchers.IO) {
-    userPreferencesRepository.setImageQuality(imageQuality)
-  }
-
-  fun onEvent(event: SettingsEvent) {
-    if(!events.tryEmit(event)){
-      Log.e(TAG, "Event buffer overflow")
-    }
-  }
-
-  private var cachePurged by mutableStateOf(Event<Unit>(null))
-  private var dataDeleted by mutableStateOf(Event<Unit>(null))
-  private var rateAndReviewRequest by mutableStateOf(Event<Unit>(null))
-  private var navigationEventState by mutableStateOf(Event<SettingsNavigationState>(null))
-  private var clearCacheEnabled by mutableStateOf(true)
-  private var dropdownMenuState by mutableStateOf(SettingsDropdownMenuState.None)
-  private var alertDialogState by mutableStateOf(SettingsAlertDialogState.None)
-
+): MoleculeViewModel<SettingsUIEvent, SettingsUIState, SettingsUIEffect>() {
   @Composable
-  fun UiState(): SettingsUiState {
-    val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(UserPreferences())
+  override fun uiState(
+      uiEvents: Flow<SettingsUIEvent>,
+      launchUiEffect: (SettingsUIEffect) -> Unit,
+  ): SettingsUIState =
+    settingsUIState(
+      uiEvents = uiEvents,
+      launchUiEffect = launchUiEffect,
+      purgeRepository = purgeRepository,
+      userPreferencesRepository = userPreferencesRepository
+    )
+}
 
-    var selectedImageQuality: ImageQuality? = remember { null }
+@Composable
+fun settingsUIState(
+    uiEvents: Flow<SettingsUIEvent>,
+    launchUiEffect: (SettingsUIEffect) -> Unit,
+    purgeRepository: PurgeRepository,
+    userPreferencesRepository: UserPreferencesRepository,
+): SettingsUIState {
+  var clearCacheEnabled by remember { mutableStateOf(true) }
+  var dropdownMenuState by remember { mutableStateOf(SettingsDropdownMenuState.None) }
+  var alertDialogState by remember { mutableStateOf(SettingsAlertDialogState.None) }
+  val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(UserPreferences())
+  var selectedImageQuality by remember { mutableStateOf<ImageQuality?>(null) }
 
-    LaunchedEffect(Unit) {
-      events.collect { event ->
-        when(event){
-          SettingsEvent.ClickDemo -> navigationEventState = Event(SettingsNavigationState.Web(DEMO_VIDEO_URL))
-          SettingsEvent.ClickDeveloper -> navigationEventState = Event(SettingsNavigationState.Web(AUTHOR_WEBSITE_URL))
-          SettingsEvent.ClickEccohedra -> navigationEventState = Event(SettingsNavigationState.Web(ECCOHEDRA_URL))
-          SettingsEvent.ClickPrivacyInfo -> navigationEventState = Event(SettingsNavigationState.Web(PRIVACY_INFO_URL))
-          SettingsEvent.ClickRateAndReview -> rateAndReviewRequest = Event(Unit)
-          SettingsEvent.ClickSource -> navigationEventState = Event(SettingsNavigationState.Web(SOURCE_CODE_URL))
-          SettingsEvent.ClickStatistics -> navigationEventState = Event(SettingsNavigationState.Statistics)
-          SettingsEvent.ClickTipsAndInfo -> navigationEventState = Event(SettingsNavigationState.TipsAndInfo)
-          SettingsEvent.UnableToDisplayInAppReview -> navigationEventState = Event(SettingsNavigationState.Web(MERLINSBAG_URL))
-          SettingsEvent.ClickColorPalette -> dropdownMenuState = SettingsDropdownMenuState.ColorPalette
-          SettingsEvent.ClickDarkMode -> dropdownMenuState = SettingsDropdownMenuState.DarkMode
-          SettingsEvent.ClickDeleteAllData -> alertDialogState = SettingsAlertDialogState.DeleteAllData
-          SettingsEvent.ClickDismissColorPalette -> dropdownMenuState = SettingsDropdownMenuState.None
-          SettingsEvent.ClickDismissDarkMode -> dropdownMenuState = SettingsDropdownMenuState.None
-          SettingsEvent.ClickDismissDeleteAllDialog -> alertDialogState = SettingsAlertDialogState.None
-          SettingsEvent.ClickDismissHighContrast -> dropdownMenuState = SettingsDropdownMenuState.None
-          SettingsEvent.ClickDismissImageQuality -> dropdownMenuState = SettingsDropdownMenuState.None
-          SettingsEvent.ClickDismissImageQualityDialog -> alertDialogState = SettingsAlertDialogState.None
-          SettingsEvent.ClickDismissTypography -> dropdownMenuState = SettingsDropdownMenuState.None
-          SettingsEvent.ClickHighContrast -> dropdownMenuState = SettingsDropdownMenuState.HighContrast
-          SettingsEvent.ClickImageQuality -> dropdownMenuState = SettingsDropdownMenuState.ImageQuality
-          SettingsEvent.ClickTypography -> dropdownMenuState = SettingsDropdownMenuState.Typography
-          SettingsEvent.ClickWelcome -> userPreferencesRepository.setHasCompletedOnboarding(false)
-          SettingsEvent.ClickClearCache -> {
-            // Disable clearing cache until view model is recreated
-            clearCacheEnabled = false
-            viewModelScope.launch(Dispatchers.IO) {
-              purgeRepository.purgeCache()
-              cachePurged = Event(Unit)
-            }
+  fun dismissDropdownMenu() { dropdownMenuState = SettingsDropdownMenuState.None }
+  fun dismissAlertDialog() { alertDialogState = SettingsAlertDialogState.None }
+
+  LaunchedEffect(Unit) {
+    fun setImageQuality(imageQuality: ImageQuality) = launch(Dispatchers.IO) {
+      userPreferencesRepository.setImageQuality(imageQuality)
+    }
+    uiEvents.collect { uiEvent ->
+      when(uiEvent) {
+        SettingsUIEvent.ClickClearCache -> {
+          // Disable clearing cache until view model is recreated
+          clearCacheEnabled = false
+          launch(Dispatchers.IO) {
+            purgeRepository.purgeCache()
+            launchUiEffect(SettingsUIEffect.CachePurged)
           }
-          SettingsEvent.ClickConfirmDeleteAllDialog -> {
-            alertDialogState = SettingsAlertDialogState.None
-            viewModelScope.launch(Dispatchers.IO) {
-              purgeRepository.purgeUserData()
-              dataDeleted = Event(Unit)
-            }
+        }
+        SettingsUIEvent.ClickColorPalette -> dropdownMenuState = SettingsDropdownMenuState.ColorPalette
+        SettingsUIEvent.ClickDarkMode -> dropdownMenuState = SettingsDropdownMenuState.DarkMode
+        SettingsUIEvent.ClickDeleteAllData -> alertDialogState = SettingsAlertDialogState.DeleteAllData
+        SettingsUIEvent.ClickHighContrast -> dropdownMenuState = SettingsDropdownMenuState.HighContrast
+        SettingsUIEvent.ClickImageQuality -> dropdownMenuState = SettingsDropdownMenuState.ImageQuality
+        SettingsUIEvent.ClickTypography -> dropdownMenuState = SettingsDropdownMenuState.Typography
+        SettingsUIEvent.ClickWelcome -> launch(Dispatchers.IO) {
+          userPreferencesRepository.setHasCompletedOnboarding(false)
+        }
+        SettingsUIEvent.ClickDemo -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.DEMO_VIDEO)))
+        SettingsUIEvent.ClickDeveloper -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.AUTHOR)))
+        SettingsUIEvent.ClickEccohedra -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.ECCOHEDRA)))
+        SettingsUIEvent.ClickPrivacyInformation -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.PRIVACY_POLICY)))
+        SettingsUIEvent.ClickRateAndReview -> launchUiEffect(SettingsUIEffect.RateAndReviewRequest)
+        SettingsUIEvent.ClickSource -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.SOURCE_CODE)))
+        SettingsUIEvent.ClickStatistics -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Statistics))
+        SettingsUIEvent.ClickTipsAndInfo -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.TipsAndInfo))
+        SettingsUIEvent.UnableToDisplayInAppReview -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.MERLINSBAG)))
+        SettingsUIEvent.ConfirmDeleteAllDataAlertDialog -> {
+          dismissAlertDialog()
+          launch(Dispatchers.IO) {
+            purgeRepository.purgeUserData()
+            launchUiEffect(SettingsUIEffect.AllDataDeleted)
           }
-          SettingsEvent.ClickConfirmImageQualityDialog -> {
-            alertDialogState = SettingsAlertDialogState.None
-            selectedImageQuality?.let { setImageQuality(it) }
-            selectedImageQuality = null
+        }
+        SettingsUIEvent.ConfirmImageQualityAlertDialog -> {
+          dismissAlertDialog()
+          selectedImageQuality?.let { setImageQuality(it) }
+          selectedImageQuality = null
+        }
+        SettingsUIEvent.DismissColorPalette -> dismissDropdownMenu()
+        SettingsUIEvent.DismissDarkMode -> dismissDropdownMenu()
+        SettingsUIEvent.DismissHighContrast -> dismissDropdownMenu()
+        SettingsUIEvent.DismissImageQualityDropdown -> dismissDropdownMenu()
+        SettingsUIEvent.DismissTypography -> dismissDropdownMenu()
+        SettingsUIEvent.DismissImageQualityAlertDialog -> dismissAlertDialog()
+        SettingsUIEvent.DismissDeleteAllDataAlertDialog -> dismissAlertDialog()
+        is SettingsUIEvent.SelectColorPalette -> {
+          dismissDropdownMenu()
+          launch(Dispatchers.IO) {
+            userPreferencesRepository.setColorPalette(uiEvent.colorPalette)
           }
-          is SettingsEvent.SelectColorPalette -> {
-            dropdownMenuState = SettingsDropdownMenuState.None
-            viewModelScope.launch(Dispatchers.IO) {
-              userPreferencesRepository.setColorPalette(event.colorPalette)
-            }
+        }
+        is SettingsUIEvent.SelectDarkMode -> {
+          dismissDropdownMenu()
+          launch(Dispatchers.IO) {
+            userPreferencesRepository.setDarkMode(uiEvent.darkMode)
           }
-          is SettingsEvent.SelectDarkMode -> {
-            dropdownMenuState = SettingsDropdownMenuState.None
-            viewModelScope.launch(Dispatchers.IO) {
-              userPreferencesRepository.setDarkMode(event.darkMode)
-            }
+        }
+        is SettingsUIEvent.SelectHighContrast -> {
+          dismissDropdownMenu()
+          launch(Dispatchers.IO) {
+            userPreferencesRepository.setHighContrast(uiEvent.highContrast)
           }
-          is SettingsEvent.SelectHighContrast -> {
-            dropdownMenuState = SettingsDropdownMenuState.None
-            viewModelScope.launch(Dispatchers.IO) {
-              userPreferencesRepository.setHighContrast(event.highContrast)
-            }
+        }
+        is SettingsUIEvent.SelectTypography -> {
+          dismissDropdownMenu()
+          launch(Dispatchers.IO) {
+            userPreferencesRepository.setTypography(uiEvent.typography)
           }
-          is SettingsEvent.SelectImageQuality -> {
-            dropdownMenuState = SettingsDropdownMenuState.None
-            userPreferences.imageQuality.let { oldImageQuality ->
-              if(oldImageQuality != event.imageQuality) {
-                val imageQualityRaised = oldImageQuality.ordinal < event.imageQuality.ordinal
-                if(imageQualityRaised) {
-                  selectedImageQuality = event.imageQuality
-                  alertDialogState = SettingsAlertDialogState.ImageQuality
-                } else {
-                  setImageQuality(event.imageQuality)
-                }
-              }
-            }
-          }
-          is SettingsEvent.SelectTypography -> {
-            dropdownMenuState = SettingsDropdownMenuState.None
-            viewModelScope.launch(Dispatchers.IO) {
-              userPreferencesRepository.setTypography(event.typography)
+        }
+        is SettingsUIEvent.SelectedImageQuality -> {
+          val newImageQuality = uiEvent.newImageQuality
+          dismissDropdownMenu()
+          if(userPreferences.imageQuality != newImageQuality) {
+            val imageQualityRaised = userPreferences.imageQuality.ordinal < newImageQuality.ordinal
+            if(imageQualityRaised) {
+              selectedImageQuality = newImageQuality
+              alertDialogState = SettingsAlertDialogState.ImageQuality
+            } else {
+              setImageQuality(newImageQuality)
             }
           }
         }
       }
     }
-
-    return SettingsUiState(
-      darkMode = userPreferences.darkMode,
-      colorPalette = userPreferences.colorPalette,
-      highContrast = userPreferences.highContrast,
-      imageQuality = userPreferences.imageQuality,
-      typography = userPreferences.typography,
-      clearCacheEnabled = clearCacheEnabled,
-      highContrastEnabled = userPreferences.colorPalette != ColorPalette.SYSTEM_DYNAMIC,
-      dropdownMenuState = dropdownMenuState,
-      alertDialogState = alertDialogState,
-      cachePurged = cachePurged,
-      dataDeleted = dataDeleted,
-      rateAndReviewRequest = rateAndReviewRequest,
-      navigationEventState = navigationEventState,
-    )
   }
+
+  val highContrastEnabled = userPreferences.colorPalette != ColorPalette.SYSTEM_DYNAMIC
+  return SettingsUIState(
+    clearCacheEnabled = clearCacheEnabled,
+    dropdownMenuState = dropdownMenuState,
+    alertDialogState = alertDialogState,
+    highContrastEnabled = highContrastEnabled,
+    darkMode = userPreferences.darkMode,
+    colorPalette = userPreferences.colorPalette,
+    typography = userPreferences.typography,
+    imageQuality = userPreferences.imageQuality,
+    highContrast = if(highContrastEnabled) userPreferences.highContrast else HighContrast.OFF,
+  )
 }
