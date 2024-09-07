@@ -70,8 +70,8 @@ import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsAlertDialogState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsDropdownMenuState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEffect
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEvent
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables

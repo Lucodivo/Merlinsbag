@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.molecule.AndroidUiDispatcher
 import app.cash.molecule.RecompositionMode
-import app.cash.molecule.launchMolecule
 import app.cash.molecule.moleculeFlow
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
@@ -21,13 +20,17 @@ import com.inasweaterpoorlyknit.core.model.HighContrast
 import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -113,22 +116,33 @@ object WebUrls {
   const val DEMO_VIDEO = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
 }
 
-abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>: ViewModel() {
+abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>(
+  initialState: UIState,
+): ViewModel() {
   private val uiScope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
 
   private val _uiEvents = MutableSharedFlow<UIEvent>(extraBufferCapacity = 20)
   private val _uiEffects = MutableSharedFlow<UIEffect>(extraBufferCapacity = 20)
 
+  private var cachedUiState: UIState = initialState
+
   val uiEffect: SharedFlow<UIEffect> = _uiEffects
 
   val uiState: StateFlow<UIState> by lazy(LazyThreadSafetyMode.NONE) {
-    uiScope.launchMolecule(mode = RecompositionMode.ContextClock) {
-      uiState(_uiEvents, ::launchUiEffect)
-    }
+    moleculeFlow(mode = RecompositionMode.ContextClock) {
+      uiState(cachedUiState, _uiEvents, ::launchUiEffect)
+    }.onEach { uiState ->
+      cachedUiState = uiState
+    }.stateIn(
+      scope = uiScope,
+      started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
+      initialValue = cachedUiState,
+    )
   }
 
   @Composable
   protected abstract fun uiState(
+      initialState: UIState,
       uiEvents: Flow<UIEvent>,
       launchUiEffect: (UIEffect) -> Unit,
   ): UIState
@@ -150,13 +164,29 @@ abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>: ViewModel() {
 class SettingsViewModel @Inject constructor(
     private val purgeRepository: PurgeRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
-): MoleculeViewModel<SettingsUIEvent, SettingsUIState, SettingsUIEffect>() {
+): MoleculeViewModel<SettingsUIEvent, SettingsUIState, SettingsUIEffect>(
+  initialState = with(UserPreferences()){
+    SettingsUIState(
+      clearCacheEnabled = true,
+      highContrastEnabled = true,
+      dropdownMenuState = SettingsDropdownMenuState.None,
+      alertDialogState = SettingsAlertDialogState.None,
+      darkMode = darkMode,
+      colorPalette = colorPalette,
+      highContrast = highContrast,
+      imageQuality = imageQuality,
+      typography = typography,
+    )
+  }
+) {
   @Composable
   override fun uiState(
+      initialState: SettingsUIState,
       uiEvents: Flow<SettingsUIEvent>,
       launchUiEffect: (SettingsUIEffect) -> Unit,
   ): SettingsUIState =
     settingsUIState(
+      initialState = initialState,
       uiEvents = uiEvents,
       launchUiEffect = launchUiEffect,
       purgeRepository = purgeRepository,
@@ -166,15 +196,24 @@ class SettingsViewModel @Inject constructor(
 
 @Composable
 fun settingsUIState(
+    initialState: SettingsUIState,
     uiEvents: Flow<SettingsUIEvent>,
     launchUiEffect: (SettingsUIEffect) -> Unit,
     purgeRepository: PurgeRepository,
     userPreferencesRepository: UserPreferencesRepository,
 ): SettingsUIState {
-  var clearCacheEnabled by remember { mutableStateOf(true) }
-  var dropdownMenuState by remember { mutableStateOf(SettingsDropdownMenuState.None) }
-  var alertDialogState by remember { mutableStateOf(SettingsAlertDialogState.None) }
-  val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(UserPreferences())
+  var clearCacheEnabled by remember { mutableStateOf(initialState.clearCacheEnabled) }
+  var dropdownMenuState by remember { mutableStateOf(initialState.dropdownMenuState) }
+  var alertDialogState by remember { mutableStateOf(initialState.alertDialogState) }
+  val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(
+    UserPreferences().copy(
+      darkMode = initialState.darkMode,
+      colorPalette = initialState.colorPalette,
+      highContrast = initialState.highContrast,
+      imageQuality = initialState.imageQuality,
+      typography = initialState.typography,
+    )
+  )
   var selectedImageQuality by remember { mutableStateOf<ImageQuality?>(null) }
 
   fun dismissDropdownMenu() { dropdownMenuState = SettingsDropdownMenuState.None }
