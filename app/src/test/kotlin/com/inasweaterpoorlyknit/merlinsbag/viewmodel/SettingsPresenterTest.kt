@@ -28,7 +28,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class SettingsUIStateTest {
+class SettingsPresenterTest {
   @get:Rule val mockkRule = MockKRule(this)
   @get:Rule val dispatcherRule = MainDispatcherRule()
 
@@ -36,36 +36,27 @@ class SettingsUIStateTest {
   @MockK lateinit var userPreferencesRepository: UserPreferencesRepository
 
   val testInitialUserPreferences = UserPreferences(imageQuality = ImageQuality.VERY_HIGH)
-  val testInitialUiState = with(testInitialUserPreferences){
-    SettingsUIState(
-      clearCacheEnabled = true,
-      highContrastEnabled = true,
-      dropdownMenuState = SettingsDropdownMenuState.None,
-      alertDialogState = SettingsAlertDialogState.None,
-      darkMode = darkMode,
-      colorPalette = colorPalette,
-      highContrast = highContrast,
-      imageQuality = imageQuality,
-      typography = typography,
-    )
-  }
+  lateinit var settingsPresenter: SettingsPresenter
 
   @Before
   fun beforeEach() = runTest {
     every { userPreferencesRepository.userPreferences } returns flowOf(testInitialUserPreferences)
     justRun { purgeRepository.purgeCache() }
+    settingsPresenter = SettingsPresenter(
+      purgeRepository = purgeRepository,
+      userPreferencesRepository = userPreferencesRepository,
+    )
   }
 
   @Test
   fun `on launch, no alert dialogs or dropdown menus`() = runTest {
     moleculeFlow(mode = RecompositionMode.Immediate){
-      settingsUIState(
-        initialState = testInitialUiState,
-        uiEvents = emptyFlow(), launchUiEffect = {},
-        purgeRepository = purgeRepository,
-        userPreferencesRepository = userPreferencesRepository,
+      settingsPresenter.uiState(
+        uiEvents = emptyFlow(),
+        launchUiEffect = {},
       )
     }.test {
+      skipItems(1) // skip initial emission
       val loadedState: SettingsUIState = awaitItem()
       assertEquals(
         loadedState.copy(
@@ -79,19 +70,17 @@ class SettingsUIStateTest {
 
   @Test
   fun `Clear cache disables button and triggers effect`() = runTest {
-    val events = Channel<SettingsUIEvent>()
+    val uiEvents = Channel<SettingsUIEvent>()
     val uiEffects = ArrayList<SettingsUIEffect>()
     moleculeFlow(mode = RecompositionMode.Immediate){
-      settingsUIState(
-        initialState = testInitialUiState,
-        events.receiveAsFlow(),
-        { uiEffects.add(it) },
-        purgeRepository = purgeRepository,
-        userPreferencesRepository = userPreferencesRepository,
+      settingsPresenter.uiState(
+        uiEvents = uiEvents.receiveAsFlow(),
+        launchUiEffect = { uiEffects.add(it) },
       )
     }.test {
+      skipItems(1) // skip initial emission
       assertTrue(awaitItem().clearCacheEnabled)
-      events.send(SettingsUIEvent.ClickClearCache)
+      uiEvents.send(SettingsUIEvent.ClickClearCache)
       assertFalse(awaitItem().clearCacheEnabled)
       assertEquals(1, uiEffects.size)
       assertEquals(SettingsUIEffect.CachePurged, uiEffects[0])
@@ -101,19 +90,17 @@ class SettingsUIStateTest {
 
   @Test
   fun `Selecting a higher image quality triggers alert dialog`() = runTest {
-    val events = Channel<SettingsUIEvent>()
+    val uiEvents = Channel<SettingsUIEvent>()
     val uiEffects = MutableSharedFlow<SettingsUIEffect>(extraBufferCapacity = 20)
     moleculeFlow(mode = RecompositionMode.Immediate){
-      settingsUIState(
-        initialState = testInitialUiState,
-        events.receiveAsFlow(),
-        { uiEffects.tryEmit(it) },
-        purgeRepository = purgeRepository,
-        userPreferencesRepository = userPreferencesRepository,
+      settingsPresenter.uiState(
+        uiEvents = uiEvents.receiveAsFlow(),
+        launchUiEffect = { uiEffects.tryEmit(it) },
       )
     }.test {
+      skipItems(1) // skip initial emission
       assertEquals(SettingsAlertDialogState.None, awaitItem().alertDialogState)
-      events.send(
+      uiEvents.send(
         SettingsUIEvent.SelectedImageQuality(
           ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal + 1]
         )

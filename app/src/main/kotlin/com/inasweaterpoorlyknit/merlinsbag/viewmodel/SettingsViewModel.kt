@@ -116,36 +116,36 @@ object WebUrls {
   const val DEMO_VIDEO = "https://www.youtube.com/watch?v=uUQYMU2N4kA"
 }
 
+interface ComposePresenter<UIEvent, UIState, UIEffect> {
+  @Composable
+  fun uiState(
+      uiEvents: Flow<UIEvent>,
+      launchUiEffect: (UIEffect) -> Unit,
+  ): UIState
+  val cachedState: UIState
+}
+
 abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>(
-  initialState: UIState,
+  val composePresenter: ComposePresenter<UIEvent, UIState, UIEffect>
 ): ViewModel() {
   private val uiScope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
 
   private val _uiEvents = MutableSharedFlow<UIEvent>(extraBufferCapacity = 20)
   private val _uiEffects = MutableSharedFlow<UIEffect>(extraBufferCapacity = 20)
 
-  private var cachedUiState: UIState = initialState
-
   val uiEffect: SharedFlow<UIEffect> = _uiEffects
-
   val uiState: StateFlow<UIState> by lazy(LazyThreadSafetyMode.NONE) {
     moleculeFlow(mode = RecompositionMode.ContextClock) {
-      uiState(cachedUiState, _uiEvents, ::launchUiEffect)
-    }.onEach { uiState ->
-      cachedUiState = uiState
+      composePresenter.uiState(
+        uiEvents = _uiEvents,
+        launchUiEffect = ::launchUiEffect
+      )
     }.stateIn(
       scope = uiScope,
       started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-      initialValue = cachedUiState,
+      initialValue = composePresenter.cachedState,
     )
   }
-
-  @Composable
-  protected abstract fun uiState(
-      initialState: UIState,
-      uiEvents: Flow<UIEvent>,
-      launchUiEffect: (UIEffect) -> Unit,
-  ): UIState
 
   fun onUiEvent(uiEvent: UIEvent) {
     if(!_uiEvents.tryEmit(uiEvent)) {
@@ -161,11 +161,14 @@ abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>(
 }
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val purgeRepository: PurgeRepository,
-    private val userPreferencesRepository: UserPreferencesRepository,
-): MoleculeViewModel<SettingsUIEvent, SettingsUIState, SettingsUIEffect>(
-  initialState = with(UserPreferences()){
+class SettingsViewModel @Inject constructor(settingsPresenter: SettingsPresenter)
+  : MoleculeViewModel<SettingsUIEvent, SettingsUIState, SettingsUIEffect>(composePresenter = settingsPresenter)
+
+class SettingsPresenter @Inject constructor(
+  val purgeRepository: PurgeRepository,
+  val userPreferencesRepository: UserPreferencesRepository,
+): ComposePresenter<SettingsUIEvent, SettingsUIState, SettingsUIEffect> {
+  override var cachedState = with(UserPreferences()) {
     SettingsUIState(
       clearCacheEnabled = true,
       highContrastEnabled = true,
@@ -178,149 +181,136 @@ class SettingsViewModel @Inject constructor(
       typography = typography,
     )
   }
-) {
+
+  var selectedImageQuality: ImageQuality? = null
+
   @Composable
   override fun uiState(
-      initialState: SettingsUIState,
       uiEvents: Flow<SettingsUIEvent>,
-      launchUiEffect: (SettingsUIEffect) -> Unit,
-  ): SettingsUIState =
-    settingsUIState(
-      initialState = initialState,
-      uiEvents = uiEvents,
-      launchUiEffect = launchUiEffect,
-      purgeRepository = purgeRepository,
-      userPreferencesRepository = userPreferencesRepository
+      launchUiEffect: (SettingsUIEffect) -> Unit
+  ): SettingsUIState {
+    var clearCacheEnabled by remember { mutableStateOf(cachedState.clearCacheEnabled) }
+    var dropdownMenuState by remember { mutableStateOf(cachedState.dropdownMenuState) }
+    var alertDialogState by remember { mutableStateOf(cachedState.alertDialogState) }
+    val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(
+      UserPreferences(
+        darkMode = cachedState.darkMode,
+        colorPalette = cachedState.colorPalette,
+        highContrast = cachedState.highContrast,
+        imageQuality = cachedState.imageQuality,
+        typography = cachedState.typography,
+      )
     )
-}
 
-@Composable
-fun settingsUIState(
-    initialState: SettingsUIState,
-    uiEvents: Flow<SettingsUIEvent>,
-    launchUiEffect: (SettingsUIEffect) -> Unit,
-    purgeRepository: PurgeRepository,
-    userPreferencesRepository: UserPreferencesRepository,
-): SettingsUIState {
-  var clearCacheEnabled by remember { mutableStateOf(initialState.clearCacheEnabled) }
-  var dropdownMenuState by remember { mutableStateOf(initialState.dropdownMenuState) }
-  var alertDialogState by remember { mutableStateOf(initialState.alertDialogState) }
-  val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(
-    UserPreferences().copy(
-      darkMode = initialState.darkMode,
-      colorPalette = initialState.colorPalette,
-      highContrast = initialState.highContrast,
-      imageQuality = initialState.imageQuality,
-      typography = initialState.typography,
-    )
-  )
-  var selectedImageQuality by remember { mutableStateOf<ImageQuality?>(null) }
-
-  fun dismissDropdownMenu() { dropdownMenuState = SettingsDropdownMenuState.None }
-  fun dismissAlertDialog() { alertDialogState = SettingsAlertDialogState.None }
-
-  LaunchedEffect(Unit) {
-    fun setImageQuality(imageQuality: ImageQuality) = launch(Dispatchers.IO) {
-      userPreferencesRepository.setImageQuality(imageQuality)
-    }
-    uiEvents.collect { uiEvent ->
-      when(uiEvent) {
-        SettingsUIEvent.ClickClearCache -> {
-          // Disable clearing cache until view model is recreated
-          clearCacheEnabled = false
-          launch(Dispatchers.IO) {
-            purgeRepository.purgeCache()
-            launchUiEffect(SettingsUIEffect.CachePurged)
+    fun dismissDropdownMenu() { dropdownMenuState = SettingsDropdownMenuState.None }
+    fun dismissAlertDialog() { alertDialogState = SettingsAlertDialogState.None }
+    LaunchedEffect(Unit) {
+      uiEvents.collect { uiEvent ->
+        when(uiEvent) {
+          SettingsUIEvent.ClickClearCache -> {
+            // Disable clearing cache until state is recreated
+            clearCacheEnabled = false
+            launch(Dispatchers.IO) {
+              purgeRepository.purgeCache()
+              launchUiEffect(SettingsUIEffect.CachePurged)
+            }
           }
-        }
-        SettingsUIEvent.ClickColorPalette -> dropdownMenuState = SettingsDropdownMenuState.ColorPalette
-        SettingsUIEvent.ClickDarkMode -> dropdownMenuState = SettingsDropdownMenuState.DarkMode
-        SettingsUIEvent.ClickDeleteAllData -> alertDialogState = SettingsAlertDialogState.DeleteAllData
-        SettingsUIEvent.ClickHighContrast -> dropdownMenuState = SettingsDropdownMenuState.HighContrast
-        SettingsUIEvent.ClickImageQuality -> dropdownMenuState = SettingsDropdownMenuState.ImageQuality
-        SettingsUIEvent.ClickTypography -> dropdownMenuState = SettingsDropdownMenuState.Typography
-        SettingsUIEvent.ClickWelcome -> launch(Dispatchers.IO) {
-          userPreferencesRepository.setHasCompletedOnboarding(false)
-        }
-        SettingsUIEvent.ClickDemo -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.DEMO_VIDEO)))
-        SettingsUIEvent.ClickDeveloper -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.AUTHOR)))
-        SettingsUIEvent.ClickEccohedra -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.ECCOHEDRA)))
-        SettingsUIEvent.ClickPrivacyInformation -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.PRIVACY_POLICY)))
-        SettingsUIEvent.ClickRateAndReview -> launchUiEffect(SettingsUIEffect.RateAndReviewRequest)
-        SettingsUIEvent.ClickSource -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.SOURCE_CODE)))
-        SettingsUIEvent.ClickStatistics -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Statistics))
-        SettingsUIEvent.ClickTipsAndInfo -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.TipsAndInfo))
-        SettingsUIEvent.UnableToDisplayInAppReview -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.MERLINSBAG)))
-        SettingsUIEvent.ConfirmDeleteAllDataAlertDialog -> {
-          dismissAlertDialog()
-          launch(Dispatchers.IO) {
-            purgeRepository.purgeUserData()
-            launchUiEffect(SettingsUIEffect.AllDataDeleted)
+          SettingsUIEvent.ClickColorPalette -> dropdownMenuState = SettingsDropdownMenuState.ColorPalette
+          SettingsUIEvent.ClickDarkMode -> dropdownMenuState = SettingsDropdownMenuState.DarkMode
+          SettingsUIEvent.ClickDeleteAllData -> alertDialogState = SettingsAlertDialogState.DeleteAllData
+          SettingsUIEvent.ClickHighContrast -> dropdownMenuState = SettingsDropdownMenuState.HighContrast
+          SettingsUIEvent.ClickImageQuality -> dropdownMenuState = SettingsDropdownMenuState.ImageQuality
+          SettingsUIEvent.ClickTypography -> dropdownMenuState = SettingsDropdownMenuState.Typography
+          SettingsUIEvent.ClickWelcome -> launch(Dispatchers.IO) {
+            userPreferencesRepository.setHasCompletedOnboarding(false)
           }
-        }
-        SettingsUIEvent.ConfirmImageQualityAlertDialog -> {
-          dismissAlertDialog()
-          selectedImageQuality?.let { setImageQuality(it) }
-          selectedImageQuality = null
-        }
-        SettingsUIEvent.DismissColorPalette -> dismissDropdownMenu()
-        SettingsUIEvent.DismissDarkMode -> dismissDropdownMenu()
-        SettingsUIEvent.DismissHighContrast -> dismissDropdownMenu()
-        SettingsUIEvent.DismissImageQualityDropdown -> dismissDropdownMenu()
-        SettingsUIEvent.DismissTypography -> dismissDropdownMenu()
-        SettingsUIEvent.DismissImageQualityAlertDialog -> dismissAlertDialog()
-        SettingsUIEvent.DismissDeleteAllDataAlertDialog -> dismissAlertDialog()
-        is SettingsUIEvent.SelectColorPalette -> {
-          dismissDropdownMenu()
-          launch(Dispatchers.IO) {
-            userPreferencesRepository.setColorPalette(uiEvent.colorPalette)
+          SettingsUIEvent.ClickDemo -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.DEMO_VIDEO)))
+          SettingsUIEvent.ClickDeveloper -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.AUTHOR)))
+          SettingsUIEvent.ClickEccohedra -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.ECCOHEDRA)))
+          SettingsUIEvent.ClickPrivacyInformation -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.PRIVACY_POLICY)))
+          SettingsUIEvent.ClickRateAndReview -> launchUiEffect(SettingsUIEffect.RateAndReviewRequest)
+          SettingsUIEvent.ClickSource -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.SOURCE_CODE)))
+          SettingsUIEvent.ClickStatistics -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Statistics))
+          SettingsUIEvent.ClickTipsAndInfo -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.TipsAndInfo))
+          SettingsUIEvent.UnableToDisplayInAppReview -> launchUiEffect(SettingsUIEffect.Navigation(SettingsUIEffect.NavigationDestination.Web(WebUrls.MERLINSBAG)))
+          SettingsUIEvent.ConfirmDeleteAllDataAlertDialog -> {
+            dismissAlertDialog()
+            launch(Dispatchers.IO) {
+              purgeRepository.purgeUserData()
+              launchUiEffect(SettingsUIEffect.AllDataDeleted)
+            }
           }
-        }
-        is SettingsUIEvent.SelectDarkMode -> {
-          dismissDropdownMenu()
-          launch(Dispatchers.IO) {
-            userPreferencesRepository.setDarkMode(uiEvent.darkMode)
+          SettingsUIEvent.ConfirmImageQualityAlertDialog -> {
+            dismissAlertDialog()
+            selectedImageQuality?.let {
+              launch(Dispatchers.IO) {
+                userPreferencesRepository.setImageQuality(it)
+              }
+            }
+            selectedImageQuality = null
           }
-        }
-        is SettingsUIEvent.SelectHighContrast -> {
-          dismissDropdownMenu()
-          launch(Dispatchers.IO) {
-            userPreferencesRepository.setHighContrast(uiEvent.highContrast)
+          SettingsUIEvent.DismissColorPalette -> dismissDropdownMenu()
+          SettingsUIEvent.DismissDarkMode -> dismissDropdownMenu()
+          SettingsUIEvent.DismissHighContrast -> dismissDropdownMenu()
+          SettingsUIEvent.DismissImageQualityDropdown -> dismissDropdownMenu()
+          SettingsUIEvent.DismissTypography -> dismissDropdownMenu()
+          SettingsUIEvent.DismissImageQualityAlertDialog -> dismissAlertDialog()
+          SettingsUIEvent.DismissDeleteAllDataAlertDialog -> dismissAlertDialog()
+          is SettingsUIEvent.SelectColorPalette -> {
+            dismissDropdownMenu()
+            launch(Dispatchers.IO) {
+              userPreferencesRepository.setColorPalette(uiEvent.colorPalette)
+            }
           }
-        }
-        is SettingsUIEvent.SelectTypography -> {
-          dismissDropdownMenu()
-          launch(Dispatchers.IO) {
-            userPreferencesRepository.setTypography(uiEvent.typography)
+          is SettingsUIEvent.SelectDarkMode -> {
+            dismissDropdownMenu()
+            launch(Dispatchers.IO) {
+              userPreferencesRepository.setDarkMode(uiEvent.darkMode)
+            }
           }
-        }
-        is SettingsUIEvent.SelectedImageQuality -> {
-          val newImageQuality = uiEvent.newImageQuality
-          dismissDropdownMenu()
-          if(userPreferences.imageQuality != newImageQuality) {
-            val imageQualityRaised = userPreferences.imageQuality.ordinal < newImageQuality.ordinal
-            if(imageQualityRaised) {
-              selectedImageQuality = newImageQuality
-              alertDialogState = SettingsAlertDialogState.ImageQuality
-            } else {
-              setImageQuality(newImageQuality)
+          is SettingsUIEvent.SelectHighContrast -> {
+            dismissDropdownMenu()
+            launch(Dispatchers.IO) {
+              userPreferencesRepository.setHighContrast(uiEvent.highContrast)
+            }
+          }
+          is SettingsUIEvent.SelectTypography -> {
+            dismissDropdownMenu()
+            launch(Dispatchers.IO) {
+              userPreferencesRepository.setTypography(uiEvent.typography)
+            }
+          }
+          is SettingsUIEvent.SelectedImageQuality -> {
+            val newImageQuality = uiEvent.newImageQuality
+            dismissDropdownMenu()
+            if(userPreferences.imageQuality != newImageQuality) {
+              val imageQualityRaised = userPreferences.imageQuality.ordinal < newImageQuality.ordinal
+              if(imageQualityRaised) {
+                selectedImageQuality = newImageQuality
+                alertDialogState = SettingsAlertDialogState.ImageQuality
+              } else {
+                launch(Dispatchers.IO) {
+                  userPreferencesRepository.setImageQuality(newImageQuality)
+                }
+              }
             }
           }
         }
       }
     }
-  }
 
-  val highContrastEnabled = userPreferences.colorPalette != ColorPalette.SYSTEM_DYNAMIC
-  return SettingsUIState(
-    clearCacheEnabled = clearCacheEnabled,
-    dropdownMenuState = dropdownMenuState,
-    alertDialogState = alertDialogState,
-    highContrastEnabled = highContrastEnabled,
-    darkMode = userPreferences.darkMode,
-    colorPalette = userPreferences.colorPalette,
-    typography = userPreferences.typography,
-    imageQuality = userPreferences.imageQuality,
-    highContrast = if(highContrastEnabled) userPreferences.highContrast else HighContrast.OFF,
-  )
+    val highContrastEnabled = userPreferences.colorPalette != ColorPalette.SYSTEM_DYNAMIC
+    cachedState = SettingsUIState(
+      clearCacheEnabled = clearCacheEnabled,
+      dropdownMenuState = dropdownMenuState,
+      alertDialogState = alertDialogState,
+      highContrastEnabled = highContrastEnabled,
+      darkMode = userPreferences.darkMode,
+      colorPalette = userPreferences.colorPalette,
+      typography = userPreferences.typography,
+      imageQuality = userPreferences.imageQuality,
+      highContrast = if(highContrastEnabled) userPreferences.highContrast else HighContrast.OFF,
+    )
+    return cachedState
+  }
 }
