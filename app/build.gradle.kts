@@ -72,6 +72,11 @@ android {
             isReturnDefaultValues = true
         }
     }
+    // Stability information available @ Merlinsbag/app/build/compose_compiler/app_release-classes.txt
+    composeCompiler {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    }
 }
 
 dependencies {
