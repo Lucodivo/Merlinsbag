@@ -64,10 +64,10 @@ import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings_EveryOtherIndexSet
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.Constants.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import kotlinx.serialization.Serializable
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledSelectedArticles
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.Disabled
@@ -278,6 +278,7 @@ fun EnsembleDetailScreen(
             ),
       ) {
         if(editingTitle) {
+          // TODO: Edit title text should be hoisted
           val (editTitle, setEditTitle) = remember { mutableStateOf("") }
           val focusRequester = FocusRequester()
           OutlinedTextField(

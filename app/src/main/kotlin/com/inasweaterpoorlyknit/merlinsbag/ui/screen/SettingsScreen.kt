@@ -67,8 +67,8 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsAlertDialogState
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsDropdownMenuState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.DropdownMenuState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEffect
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEvent
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState
@@ -123,11 +123,9 @@ fun SettingsRoute(
               onError = { context.toast(R.string.try_again_later) },
             )
           }
-          is SettingsUIEffect.Navigation -> when(uiEvent.dest) {
-            SettingsUIEffect.NavigationDestination.Statistics -> navigateToStatistics()
-            SettingsUIEffect.NavigationDestination.TipsAndInfo -> navigateToTipsAndInfo()
-            is SettingsUIEffect.NavigationDestination.Web -> uriHandler.openUri(uiEvent.dest.url)
-          }
+          SettingsUIEffect.NavigateToStatistics -> navigateToStatistics()
+          SettingsUIEffect.NavigateToTipsAndInfo -> navigateToTipsAndInfo()
+          is SettingsUIEffect.NavigateToWeb -> uriHandler.openUri(uiEvent.url)
         }
       }
     }
@@ -445,7 +443,7 @@ fun SettingsScreen(
       {
         ColorPaletteRow(
           selectedColorPalette = uiState.colorPalette,
-          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.ColorPalette,
+          expandedMenu = uiState.dropdownMenu == DropdownMenuState.ColorPalette,
           onClick = { onUiEvent(SettingsUIEvent.ClickColorPalette) },
           onSelectColorPalette = { onUiEvent(SettingsUIEvent.SelectColorPalette(it)) },
           onDismiss = { onUiEvent(SettingsUIEvent.DismissColorPalette) },
@@ -454,7 +452,7 @@ fun SettingsScreen(
       {
         TypographyRow(
           selectedTypography = uiState.typography,
-          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.Typography,
+          expandedMenu = uiState.dropdownMenu == DropdownMenuState.Typography,
           onClick = { onUiEvent(SettingsUIEvent.ClickTypography) },
           onSelectTypography = { onUiEvent(SettingsUIEvent.SelectTypography(it)) },
           onDismiss = { onUiEvent(SettingsUIEvent.DismissTypography) },
@@ -463,7 +461,7 @@ fun SettingsScreen(
       {
         DarkModeRow(
           selectedDarkMode = uiState.darkMode,
-          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.DarkMode,
+          expandedMenu = uiState.dropdownMenu == DropdownMenuState.DarkMode,
           onClick = { onUiEvent(SettingsUIEvent.ClickDarkMode) },
           onSelectDarkMode = { onUiEvent(SettingsUIEvent.SelectDarkMode(it)) },
           onDismiss = { onUiEvent(SettingsUIEvent.DismissDarkMode) },
@@ -473,7 +471,7 @@ fun SettingsScreen(
         HighContrastRow(
           enabled = uiState.highContrastEnabled,
           selectedHighContrast = uiState.highContrast,
-          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.HighContrast,
+          expandedMenu = uiState.dropdownMenu == DropdownMenuState.HighContrast,
           onClick = { onUiEvent(SettingsUIEvent.ClickHighContrast) },
           onSelectHighContrast = { onUiEvent(SettingsUIEvent.SelectHighContrast(it)) },
           onDismiss = { onUiEvent(SettingsUIEvent.DismissHighContrast) },
@@ -490,7 +488,7 @@ fun SettingsScreen(
       {
         ImageQualityRow(
           selectedImageQuality = uiState.imageQuality,
-          expandedMenu = uiState.dropdownMenuState == SettingsDropdownMenuState.ImageQuality,
+          expandedMenu = uiState.dropdownMenu == DropdownMenuState.ImageQuality,
           onClick = { onUiEvent(SettingsUIEvent.ClickImageQuality) },
           onSelectImageQuality = { onUiEvent(SettingsUIEvent.SelectedImageQuality(it)) },
           onDismiss = { onUiEvent(SettingsUIEvent.DismissImageQualityDropdown) },
@@ -524,12 +522,12 @@ fun SettingsScreen(
     }
   }
   DeleteAllDataAlertDialog(
-    visible = uiState.alertDialogState == SettingsAlertDialogState.DeleteAllData,
+    visible = uiState.alertDialog == AlertDialogState.DeleteAllData,
     onDismiss = { onUiEvent(SettingsUIEvent.DismissDeleteAllDataAlertDialog) },
     onConfirm = { onUiEvent(SettingsUIEvent.ConfirmDeleteAllDataAlertDialog) },
   )
   ImageQualityAlertDialog(
-    visible = uiState.alertDialogState == SettingsAlertDialogState.ImageQuality,
+    visible = uiState.alertDialog == AlertDialogState.ImageQuality,
     onDismiss = { onUiEvent(SettingsUIEvent.DismissImageQualityAlertDialog) },
     onConfirm = { onUiEvent(SettingsUIEvent.ConfirmImageQualityAlertDialog) },
   )
@@ -675,8 +673,8 @@ fun DeleteAllDataAlertDialog(
 //region COMPOSABLE PREVIEWS
 @Composable
 fun PreviewUtilSettingsScreen(
-    alertDialogState: SettingsAlertDialogState = SettingsAlertDialogState.None,
-    dropdownMenuState: SettingsDropdownMenuState = SettingsDropdownMenuState.None,
+    alertDialogState: AlertDialogState = AlertDialogState.None,
+    dropdownMenuState: DropdownMenuState = DropdownMenuState.None,
     highContrastEnabled: Boolean = true,
     clearCacheEnabled: Boolean = true,
     darkMode: DarkMode = DarkMode.DARK,
@@ -688,8 +686,8 @@ fun PreviewUtilSettingsScreen(
   Surface {
     SettingsScreen(
       uiState = SettingsUIState(
-        alertDialogState = alertDialogState,
-        dropdownMenuState = dropdownMenuState,
+        alertDialog = alertDialogState,
+        dropdownMenu = dropdownMenuState,
         highContrastEnabled = highContrastEnabled,
         clearCacheEnabled = clearCacheEnabled,
         darkMode = darkMode,
@@ -706,6 +704,6 @@ fun PreviewUtilSettingsScreen(
 // TODO: Animations have made previews unusable. Hoist animation values?
 @SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen()
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen()
-@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(alertDialogState = SettingsAlertDialogState.DeleteAllData)
+@Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(alertDialogState = AlertDialogState.DeleteAllData)
 @Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

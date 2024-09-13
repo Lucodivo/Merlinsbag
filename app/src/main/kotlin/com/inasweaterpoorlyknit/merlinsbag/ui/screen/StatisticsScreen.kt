@@ -43,8 +43,8 @@ import com.inasweaterpoorlyknit.core.ui.allTestThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsUiState
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsUIState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsNoopViewModel
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables
 import kotlin.math.min
@@ -55,7 +55,7 @@ object StatisticsRouteArgs
 fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigate(StatisticsRouteArgs, navOptions)
 
 @Composable
-fun StatisticsRoute(statisticsViewModel: StatisticsViewModel = hiltViewModel()) {
+fun StatisticsRoute(statisticsViewModel: StatisticsNoopViewModel = hiltViewModel()) {
   val uiState by statisticsViewModel.uiState.collectAsStateWithLifecycle()
   StatisticsScreen(uiState = uiState)
 }
@@ -106,7 +106,7 @@ fun StatisticsSlideShow(uriStrings: List<String>, modifier: Modifier) {
 @Composable
 fun StatisticsScreen(
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    uiState: StatisticsUiState,
+    uiState: StatisticsUIState,
 ){
 
   val layoutDir = LocalLayoutDirection.current
@@ -115,8 +115,8 @@ fun StatisticsScreen(
 
 
   val items = when(uiState) {
-    StatisticsUiState.Loading -> emptyList()
-    is StatisticsUiState.Success -> staggeredHorizontallyAnimatedComposables(
+    StatisticsUIState.Loading -> emptyList()
+    is StatisticsUIState.Success -> staggeredHorizontallyAnimatedComposables(
       content = mutableListOf<@Composable AnimatedVisibilityScope.() -> Unit>(
         { StatisticsRow(stringResource(R.string.article_count), uiState.articleCount.toString()) },
         { StatisticsRow(stringResource(R.string.article_image_count), uiState.articleImageCount.toString()) },
@@ -166,12 +166,12 @@ fun StatisticsScreen(
 @Composable
 fun PreviewUtilStatisticsScreen(popularEnsembles: List<EnsembleArticleCount>) = NoopTheme {
   StatisticsScreen(
-    uiState = StatisticsUiState.Success(
+    uiState = StatisticsUIState.Success(
       articleCount = 12_345,
       articleImageCount = 300_000,
       ensembleCount = 67_890,
       ensemblesWithMostArticles = popularEnsembles,
-      articleWithMostEnsembles = StatisticsViewModel.ArticleWithMostEnsembles(allTestThumbnailResourceIdsAsStrings.size, allTestThumbnailResourceIdsAsStrings.toList()),
+      articleWithMostEnsembles = StatisticsUIState.ArticleWithMostEnsembles(allTestThumbnailResourceIdsAsStrings.size, allTestThumbnailResourceIdsAsStrings.toList()),
       articleWithMostImagesUriStrings = allTestThumbnailResourceIdsAsStrings.toList(),
     )
   )

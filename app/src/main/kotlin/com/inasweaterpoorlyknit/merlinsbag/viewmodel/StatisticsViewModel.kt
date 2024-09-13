@@ -1,22 +1,31 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.inasweaterpoorlyknit.core.common.combine
+import com.inasweaterpoorlyknit.core.common.multiIfLet
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel.ArticleWithMostEnsembles
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsUIState.ArticleWithMostEnsembles
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-sealed interface StatisticsUiState{
-  data object Loading: StatisticsUiState
+object StatisticsUIEffect
+object StatisticsUIEvent
+
+sealed interface StatisticsUIState{
+  data class ArticleWithMostEnsembles(
+      val count: Int,
+      val uriStrings: List<String>,
+  )
+
+  data object Loading: StatisticsUIState
   data class Success(
       val ensembleCount: Int,
       val articleCount: Int,
@@ -24,48 +33,92 @@ sealed interface StatisticsUiState{
       val ensemblesWithMostArticles: List<EnsembleArticleCount>,
       val articleWithMostImagesUriStrings: List<String>,
       val articleWithMostEnsembles: ArticleWithMostEnsembles,
-  ): StatisticsUiState
+  ): StatisticsUIState
+}
+
+const val TOP_ENSEMBLES_COUNT = 10
+
+// TODO: Remove?
+@HiltViewModel
+class StatisticsNoopViewModel @Inject constructor(
+    val ensembleRepository: EnsembleRepository,
+    val articleRepository: ArticleRepository,
+): NoopViewModel<StatisticsUIEvent, StatisticsUIState, StatisticsUIEffect>() {
+  override fun initialUiState(): StatisticsUIState = StatisticsUIState.Loading
+  override suspend fun handleUiEvent(uiEvent: StatisticsUIEvent){}
+  override fun uiStateFlow(): Flow<StatisticsUIState> =
+      combine(
+        ensembleRepository.getCountEnsembles(),
+        articleRepository.getCountArticles(),
+        articleRepository.getCountArticleImages(),
+        ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT),
+        articleRepository.getMostPopularArticlesImageCount(1).map {
+          if(it.isEmpty()) emptyList() else it.getUriStrings(0)
+        },
+        ensembleRepository.getMostPopularArticlesEnsembleCount(1).map {
+          if(it.first.isEmpty() || it.second.isEmpty()) ArticleWithMostEnsembles(0, emptyList())
+          else ArticleWithMostEnsembles(it.first[0], it.second.getUriStrings(0))
+        },
+      ) { ensembleCount, articleCount, articleImageCount, ensemblesWithMostArticles, articleWithMostImages, articleWithMostEnsembles ->
+        StatisticsUIState.Success(
+          ensembleCount = ensembleCount,
+          articleCount = articleCount,
+          articleImageCount = articleImageCount,
+          ensemblesWithMostArticles = ensemblesWithMostArticles,
+          articleWithMostImagesUriStrings = articleWithMostImages,
+          articleWithMostEnsembles = articleWithMostEnsembles,
+        )
+      }
 }
 
 @HiltViewModel
-class StatisticsViewModel @Inject constructor(
-    ensembleRepository: EnsembleRepository,
-    articleRepository: ArticleRepository,
-): ViewModel() {
+class StatisticsComposeViewModel @Inject constructor(
+  val statisticsPresenter: StatisticsUIStateManager
+): MoleculeViewModel<StatisticsUIEvent, StatisticsUIState, StatisticsUIEffect>(uiStateManager = statisticsPresenter)
 
-  data class ArticleWithMostEnsembles(
-    val count: Int,
-    val uriStrings: List<String>,
-  )
+class StatisticsUIStateManager @Inject constructor(
+    val articleRepository: ArticleRepository,
+    val ensembleRepository: EnsembleRepository,
+): ComposeUIStateManager<StatisticsUIEvent, StatisticsUIState, StatisticsUIEffect> {
+  override var cachedState = StatisticsUIState.Loading
 
-  companion object {
-    const val TOP_ENSEMBLES_COUNT = 10
+  @Composable
+  override fun uiState(
+      uiEvents: Flow<StatisticsUIEvent>,
+      launchUiEffect: (StatisticsUIEffect) -> Unit
+  ): StatisticsUIState {
+    val ensembleCount by remember { ensembleRepository.getCountEnsembles () }.collectAsState(null)
+    val articleCount by remember { articleRepository.getCountArticles() }.collectAsState(null)
+    val articleImageCount by remember { articleRepository.getCountArticleImages() }.collectAsState(null)
+    val mostPopularEnsembles by remember { ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT) }.collectAsState(null)
+    val mostPopularArticleByImages by remember {
+      articleRepository.getMostPopularArticlesImageCount(1)
+          .map {
+            if(it.isEmpty()) emptyList() else it.getUriStrings(0)
+          }
+    }.collectAsState(null)
+    val mostPopularArticleByEnsembles by remember {
+      ensembleRepository.getMostPopularArticlesEnsembleCount(1)
+          .map {
+            if(it.first.isEmpty() || it.second.isEmpty()) ArticleWithMostEnsembles(0, emptyList())
+            else ArticleWithMostEnsembles(it.first[0], it.second.getUriStrings(0))
+          }
+    }.collectAsState(null)
+
+    LaunchedEffect(Unit) {
+      uiEvents.collect { /* actions */ }
+    }
+
+    return multiIfLet(ensembleCount, articleCount, articleImageCount, mostPopularEnsembles, mostPopularArticleByImages, mostPopularArticleByEnsembles){
+      ensembleCount, articleCount, articleImageCount, mostPopularEnsembles, mostPopularArticleByImages, mostPopularArticleByEnsembles ->
+      StatisticsUIState.Success(
+        ensembleCount = ensembleCount,
+        articleCount = articleCount,
+        articleImageCount = articleImageCount,
+        ensemblesWithMostArticles = mostPopularEnsembles,
+        articleWithMostImagesUriStrings = mostPopularArticleByImages,
+        articleWithMostEnsembles = mostPopularArticleByEnsembles,
+      )
+    } ?: StatisticsUIState.Loading
   }
-
-  val uiState: StateFlow<StatisticsUiState> = combine(
-    ensembleRepository.getCountEnsembles(),
-    articleRepository.getCountArticles(),
-    articleRepository.getCountArticleImages(),
-    ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT),
-    articleRepository.getMostPopularArticlesImageCount(1).map {
-      if(it.isEmpty()) emptyList() else it.getUriStrings(0)
-    },
-    ensembleRepository.getMostPopularArticlesEnsembleCount(1).map {
-      if(it.first.isEmpty() || it.second.isEmpty()) ArticleWithMostEnsembles(0, emptyList())
-      else ArticleWithMostEnsembles(it.first[0], it.second.getUriStrings(0))
-    },
-  ) { ensembleCount, articleCount, articleImageCount, ensemblesWithMostArticles, articleWithMostImages, articleWithMostEnsembles ->
-    StatisticsUiState.Success(
-      ensembleCount = ensembleCount,
-      articleCount = articleCount,
-      articleImageCount = articleImageCount,
-      ensemblesWithMostArticles = ensemblesWithMostArticles,
-      articleWithMostImagesUriStrings = articleWithMostImages,
-      articleWithMostEnsembles = articleWithMostEnsembles,
-    )
-  }.stateIn(
-    scope = viewModelScope,
-    started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-    initialValue = StatisticsUiState.Loading,
-  )
 }

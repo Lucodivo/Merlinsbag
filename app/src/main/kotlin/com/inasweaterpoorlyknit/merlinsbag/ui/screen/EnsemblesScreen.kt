@@ -44,7 +44,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -58,7 +60,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.model.DarkMode
@@ -87,9 +92,18 @@ import com.inasweaterpoorlyknit.core.ui.shoeDrawables
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.topDrawables
+import com.inasweaterpoorlyknit.merlinsbag.Constants
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesComposeViewModel
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEffect
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEvent
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEvent.*
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIState.*
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIState.DialogState.*
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesViewModel
 import kotlinx.serialization.Serializable
+import kotlin.math.min
 
 private val thumbnailsPadding = 10.dp
 private val maxThumbnailSize = 70.dp
@@ -111,43 +125,26 @@ fun EnsemblesRoute(
     navigateToEnsembleDetail: (ensembleId: String) -> Unit,
     navigateToSettings: () -> Unit,
     windowSizeClass: WindowSizeClass,
-    ensemblesViewModel: EnsemblesViewModel = hiltViewModel(),
+    ensemblesViewModel: EnsemblesComposeViewModel = hiltViewModel(),
 ) {
-  BackHandler(enabled = ensemblesViewModel.onBackEnabled, onBack = ensemblesViewModel::onBack)
+  val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-  val lazyEnsembleThumbnails by ensemblesViewModel.lazyEnsembles.collectAsStateWithLifecycle()
-  val addEnsembleDialogArticles by ensemblesViewModel.addArticleThumbnails.collectAsStateWithLifecycle()
-
-  LaunchedEffect(ensemblesViewModel.navigateToEnsembleDetail) {
-    ensemblesViewModel.navigateToEnsembleDetail.getContentIfNotHandled()?.let{ navigateToEnsembleDetail(it) }
+  LaunchedEffect(Unit) {
+    lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+      ensemblesViewModel.uiEffect.collect { uiEvent ->
+        when(uiEvent){
+          EnsemblesUIEffect.NavigateToSettings -> navigateToSettings()
+          is EnsemblesUIEffect.NavigateToEnsembleDetail -> navigateToEnsembleDetail(uiEvent.ensembleId)
+        }
+      }
+    }
   }
 
+  val uiState by ensemblesViewModel.uiState.collectAsStateWithLifecycle()
   EnsemblesScreen(
     windowSizeClass = windowSizeClass,
-    lazyEnsembleThumbnails = lazyEnsembleThumbnails,
-    dialogState = ensemblesViewModel.dialogState,
-    editMode = ensemblesViewModel.editMode,
-    selectedEnsembleIndices = ensemblesViewModel.selectedEnsembleIndices,
-    showPlaceholder = ensemblesViewModel.showPlaceholder,
-    searchQuery = ensemblesViewModel.searchQuery,
-    addEnsembleDialogArticles = addEnsembleDialogArticles,
-    onLongPressEnsemble = ensemblesViewModel::onLongPressEnsemble,
-    onClickEnsemble = ensemblesViewModel::onClickEnsemble,
-    onClickSettings = navigateToSettings,
-    onClickAddEnsemble = ensemblesViewModel::onClickAddEnsemble,
-    onClickMinimizeButtonControl = ensemblesViewModel::onClickMinimizeButtonControl,
-    onClickSaveEnsemble = ensemblesViewModel::onClickSaveAddEnsembleDialog,
-    ensembleTitleError = ensemblesViewModel.ensembleTitleError,
-    onCloseAddEnsembleDialog = ensemblesViewModel::onClickCloseAddEnsembleDialog,
-    onUpdateSearchQuery = ensemblesViewModel::onSearchQueryUpdate,
-    onClearSearchQuery = ensemblesViewModel::onSearchQueryClear,
-    onClickDeleteSelected = ensemblesViewModel::onClickDeleteSelectedEnsembles,
-    onDeleteEnsemblesAlertDialogDismiss = ensemblesViewModel::onDismissDeleteEnsemblesAlertDialog,
-    onDeleteEnsemblesAlertDialogPositive = ensemblesViewModel::onDeleteEnsemblesAlertDialogPositive,
-    onClickArticleNewEnsemble = ensemblesViewModel::onClickNewEnsembleArticle,
-    newEnsembleTitle = ensemblesViewModel.newEnsembleTitle,
-    onUpdateNewEnsembleTitle = ensemblesViewModel::onUpdateNewEnsembleTitle,
-    newEnsembleSelectedArticleIndices = ensemblesViewModel.selectedNewEnsembleArticles,
+    uiState = uiState,
+    onUiEvent = ensemblesViewModel::onUiEvent,
   )
 }
 
@@ -156,32 +153,13 @@ fun EnsemblesRoute(
 fun EnsemblesScreen(
     windowSizeClass: WindowSizeClass,
     systemBarPaddingValues: PaddingValues = WindowInsets.systemBars.asPaddingValues(),
-    lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
-    editMode: Boolean,
-    dialogState: EnsemblesViewModel.DialogState,
-    selectedEnsembleIndices: Set<Int>,
-    showPlaceholder: Boolean,
-    addEnsembleDialogArticles: LazyUriStrings,
-    searchQuery: String,
-    onClickSettings: () -> Unit,
-    onClickEnsemble: (index: Int) -> Unit,
-    onLongPressEnsemble: (index: Int) -> Unit,
-    onClickAddEnsemble: () -> Unit,
-    onClickMinimizeButtonControl: () -> Unit,
-    newEnsembleTitle: String,
-    onClickSaveEnsemble: () -> Unit,
-    onClickArticleNewEnsemble: (index: Int) -> Unit,
-    onUpdateNewEnsembleTitle: (newTitle: String) -> Unit,
-    newEnsembleSelectedArticleIndices: Set<Int>,
-    ensembleTitleError: Int?,
-    onDeleteEnsemblesAlertDialogPositive: () -> Unit,
-    onCloseAddEnsembleDialog: () -> Unit,
-    onUpdateSearchQuery: (String) -> Unit,
-    onClearSearchQuery: () -> Unit,
-    onClickDeleteSelected: () -> Unit,
-    onDeleteEnsemblesAlertDialogDismiss: () -> Unit,
+    uiState: EnsemblesUIState,
+    onUiEvent: (EnsemblesUIEvent) -> Unit,
 ) {
   val layoutDir = LocalLayoutDirection.current
+
+  BackHandler(enabled = uiState.handleBackPress){ onUiEvent(Back) }
+
   Surface(
     modifier = Modifier
         .fillMaxSize()
@@ -192,55 +170,49 @@ fun EnsemblesScreen(
         ),
   ) {
     EnsembleScreensMainContent(
-      showPlaceholder = showPlaceholder,
+      showPlaceholder = uiState.showPlaceholder,
       windowSizeClass = windowSizeClass,
-      searchQuery = searchQuery,
-      onUpdateSearchQuery = onUpdateSearchQuery,
-      onClickSettings = onClickSettings,
-      onClearSearchQuery = onClearSearchQuery,
-      selectedEnsembleIndices = selectedEnsembleIndices,
-      editMode = editMode,
-      lazyEnsembleThumbnails = lazyEnsembleThumbnails,
-      onClickEnsemble = onClickEnsemble,
-      onLongPressEnsemble = onLongPressEnsemble,
-      onClickAddEnsemble = onClickAddEnsemble,
+      onUpdateSearchQuery = { onUiEvent(UpdateSearchQuery(it)) },
+      onClickSettings = { onUiEvent(ClickSettings) },
+      selectedEnsembleIndices = uiState.selectedEnsembleIndices,
+      editMode = uiState.editMode,
+      lazyEnsembleThumbnails = uiState.lazyEnsembles,
+      onClickEnsemble = { onUiEvent(ClickEnsemble(it)) },
+      onLongPressEnsemble = { onUiEvent(LongPressEnsemble(it)) },
+      onClickAddEnsemble = { onUiEvent(ClickAddEnsemble) },
     )
     NoopBottomEndButtonContainer {
       EditEnsemblesExpandingActionButton(
-        expanded = editMode,
-        onClickAddEnsemble = onClickAddEnsemble,
-        onClickMinimizeButtonControl = onClickMinimizeButtonControl,
-        onClickDeleteSelected = onClickDeleteSelected,
+        expanded = uiState.editMode,
+        onClickAddEnsemble = { onUiEvent(ClickAddEnsemble) },
+        onClickMinimizeButtonControl = { onUiEvent(ClickMinimizeButtonControl) },
+        onClickDeleteSelected = { onUiEvent(ClickDeleteSelectedEnsembles) },
       )
     }
   }
 
   AddEnsembleDialog(
-    visible = dialogState == EnsemblesViewModel.DialogState.AddEnsemble,
-    userInputTitle = newEnsembleTitle,
-    articleThumbnails = addEnsembleDialogArticles,
-    onClickSave = onClickSaveEnsemble,
-    onClickClose = onCloseAddEnsembleDialog,
-    ensembleTitleError = ensembleTitleError,
-    onTitleChange = onUpdateNewEnsembleTitle,
-    onClickArticle = onClickArticleNewEnsemble,
-    selectedArticleIndices = newEnsembleSelectedArticleIndices,
+    visible = uiState.dialogState == AddEnsemble,
+    articleThumbnails = uiState.addArticleThumbnails,
+    onClickSave = { onUiEvent(ClickSaveAddEnsembleDialog(it)) },
+    onClickClose = { onUiEvent(ClickCloseAddEnsembleDialog) },
+    ensembleTitleError = uiState.newEnsembleTitleError,
+    onClickArticle = { onUiEvent(ClickNewEnsembleArticle(it)) },
+    selectedArticleIndices = uiState.selectedNewEnsembleArticles,
   )
 
   DeleteEnsemblesAlertDialog(
-    visible = dialogState == EnsemblesViewModel.DialogState.DeleteEnsembleAlert,
-    onDismiss = onDeleteEnsemblesAlertDialogDismiss,
-    onConfirm = onDeleteEnsemblesAlertDialogPositive
+    visible = uiState.dialogState == DeleteEnsembleAlert,
+    onDismiss = { onUiEvent(DismissDeleteEnsemblesAlertDialog) },
+    onConfirm = { onUiEvent(ConfirmDeleteEnsemblesAlertDialog) },
   )
 }
 
 @Composable fun EnsembleScreensMainContent(
     showPlaceholder: Boolean,
     windowSizeClass: WindowSizeClass,
-    searchQuery: String,
     onUpdateSearchQuery: (String) -> Unit,
     onClickSettings: () -> Unit,
-    onClearSearchQuery: () -> Unit,
     selectedEnsembleIndices: Set<Int>,
     editMode: Boolean,
     lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
@@ -260,9 +232,7 @@ fun EnsemblesScreen(
       EnsemblesScreenSearchBox(
         windowSizeClass = windowSizeClass,
         onClickSettings = onClickSettings,
-        searchQuery = searchQuery,
         onUpdateSearchQuery = onUpdateSearchQuery,
-        onClearSearchQuery = onClearSearchQuery
       )
       Spacer(modifier = Modifier.height(bottomPadding).fillMaxWidth())
       EnsemblesOverlappingImageRowColumn(
@@ -297,9 +267,7 @@ fun EnsemblesScreen(
 private fun EnsemblesScreenSearchBox(
     windowSizeClass: WindowSizeClass,
     onClickSettings: () -> Unit,
-    searchQuery: String,
     onUpdateSearchQuery: (String) -> Unit,
-    onClearSearchQuery: () -> Unit,
 ){
   Row(verticalAlignment = Alignment.CenterVertically){
     if(windowSizeClass.compactWidth()){
@@ -311,11 +279,10 @@ private fun EnsemblesScreenSearchBox(
       }
     }
     NoopSearchBox(
-      query = searchQuery,
       placeholder = stringResource(R.string.search),
       onQueryChange = onUpdateSearchQuery,
-      onClearQuery = onClearSearchQuery,
-      modifier = Modifier.fillMaxWidth()
+      modifier = Modifier.fillMaxWidth(),
+      maxQueryLength = Constants.MAX_ENSEMBLE_TITLE_LENGTH
     )
   }
 }
@@ -341,28 +308,34 @@ private fun EditEnsemblesExpandingActionButton(
 @Composable
 private fun AddEnsembleDialog(
     visible: Boolean,
-    userInputTitle: String,
     articleThumbnails: LazyUriStrings,
     selectedArticleIndices: Set<Int>,
-    onTitleChange: (String) -> Unit,
     onClickArticle: (index: Int) -> Unit,
-    onClickSave: () -> Unit,
+    onClickSave: (title: String) -> Unit,
     onClickClose: () -> Unit,
     ensembleTitleError: Int?,
 ) {
+  val (userInputTitle, setUserInputTitle) = rememberSaveable { mutableStateOf("") }
   NoopBottomSheetDialog(
     visible = visible,
     title = stringResource(id = R.string.add_ensemble),
     positiveButtonText = stringResource(id = R.string.save),
     positiveButtonEnabled = selectedArticleIndices.isNotEmpty() || userInputTitle.isNotEmpty(),
-    onClose = onClickClose,
-    onPositive = onClickSave,
+    onClose = {
+      setUserInputTitle("")
+      onClickClose()
+    },
+    onPositive = {
+      onClickSave(userInputTitle)
+    },
   ) {
     Column {
       OutlinedTextField(
         value = userInputTitle,
         placeholder = { Text(text = stringResource(id = R.string.goth_2_boss)) },
-        onValueChange = onTitleChange,
+        onValueChange = { value ->
+          setUserInputTitle(value.substring(0..(min(Constants.MAX_ENSEMBLE_TITLE_LENGTH, value.lastIndex))))
+        },
         label = { Text(text = stringResource(id = R.string.ensemble_title)) },
         singleLine = true,
       )
@@ -644,23 +617,22 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
 fun PreviewUtilEnsembleScreen(
     ensembles: List<Pair<String, LazyUriStrings>> = previewEnsembles,
     darkMode: Boolean = false,
-    dialogState: EnsemblesViewModel.DialogState = EnsemblesViewModel.DialogState.None,
+    dialogState: DialogState = None,
     showPlaceholder: Boolean = false,
 ) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
   EnsemblesScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
-    lazyEnsembleThumbnails = ensembles,
-    editMode = false,
-    dialogState = dialogState,
-    selectedEnsembleIndices = setOf(1, 3),
-    showPlaceholder = showPlaceholder,
-    addEnsembleDialogArticles = lazyRepeatedThumbnailResourceIdsAsStrings,
-    searchQuery = "Goth 2 Boss",
-    newEnsembleSelectedArticleIndices = setOf(0, 2),
-    newEnsembleTitle = "Goth 2 Boss",
-    onClickSettings = {}, onClickEnsemble = {}, onLongPressEnsemble = {}, onClickAddEnsemble = {}, onClickMinimizeButtonControl = {}, onClickSaveEnsemble = {}, ensembleTitleError = null,
-    onDeleteEnsemblesAlertDialogPositive = {}, onCloseAddEnsembleDialog = {}, onUpdateSearchQuery = {}, onClearSearchQuery = {}, onClickDeleteSelected = {}, onDeleteEnsemblesAlertDialogDismiss = {},
-    onUpdateNewEnsembleTitle = {}, onClickArticleNewEnsemble = {},
+    uiState = EnsemblesUIState(
+      showPlaceholder = showPlaceholder,
+      dialogState = dialogState,
+      editMode = false,
+      newEnsembleTitleError = null,
+      selectedNewEnsembleArticles = setOf(0, 2),
+      selectedEnsembleIndices = setOf(1, 3),
+      addArticleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
+      lazyEnsembles = ensembles,
+    ),
+    onUiEvent = {}
   )
 }
 
@@ -674,8 +646,7 @@ fun PreviewUtilAddEnsembleDialog(
     articleThumbnails = thumbnails,
     ensembleTitleError = ensembleTitleError,
     selectedArticleIndices = setOf(0, 1),
-    userInputTitle = "Goth 2 Boss",
-    onClickSave = {}, onClickClose = {}, onClickArticle = {}, onTitleChange = {}
+    onClickSave = {}, onClickClose = {}, onClickArticle = {}
   )
 }
 

@@ -36,13 +36,13 @@ class SettingsPresenterTest {
   @MockK lateinit var userPreferencesRepository: UserPreferencesRepository
 
   val testInitialUserPreferences = UserPreferences(imageQuality = ImageQuality.VERY_HIGH)
-  lateinit var settingsPresenter: SettingsPresenter
+  lateinit var settingsPresenter: SettingsUIStateManager
 
   @Before
   fun beforeEach() = runTest {
     every { userPreferencesRepository.userPreferences } returns flowOf(testInitialUserPreferences)
     justRun { purgeRepository.purgeCache() }
-    settingsPresenter = SettingsPresenter(
+    settingsPresenter = SettingsUIStateManager(
       purgeRepository = purgeRepository,
       userPreferencesRepository = userPreferencesRepository,
     )
@@ -60,8 +60,8 @@ class SettingsPresenterTest {
       val loadedState: SettingsUIState = awaitItem()
       assertEquals(
         loadedState.copy(
-          alertDialogState = SettingsAlertDialogState.None,
-          dropdownMenuState = SettingsDropdownMenuState.None
+          alertDialog = SettingsAlertDialogState.None,
+          dropdownMenu = SettingsDropdownMenuState.None
         ),
         loadedState
       )
@@ -99,13 +99,13 @@ class SettingsPresenterTest {
       )
     }.test {
       skipItems(1) // skip initial emission
-      assertEquals(SettingsAlertDialogState.None, awaitItem().alertDialogState)
+      assertEquals(SettingsAlertDialogState.None, awaitItem().alertDialog)
       uiEvents.send(
         SettingsUIEvent.SelectedImageQuality(
           ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal + 1]
         )
       )
-      assertEquals(SettingsAlertDialogState.ImageQuality, awaitItem().alertDialogState)
+      assertEquals(SettingsAlertDialogState.ImageQuality, awaitItem().alertDialog)
     }
   }
 }

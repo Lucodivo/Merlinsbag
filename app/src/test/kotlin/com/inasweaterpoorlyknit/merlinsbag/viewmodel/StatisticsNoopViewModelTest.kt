@@ -19,7 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class StatisticsViewModelTest {
+class StatisticsNoopViewModelTest {
   @get:Rule
   val mockkRule = MockKRule(this)
 
@@ -29,7 +29,7 @@ class StatisticsViewModelTest {
   @MockK lateinit var ensembleRepository: EnsembleRepository
   @MockK lateinit var articleRepository: ArticleRepository
 
-  lateinit var viewModel: StatisticsViewModel
+  lateinit var viewModel: StatisticsNoopViewModel
 
   companion object {
     val articleCount = 100
@@ -68,7 +68,7 @@ class StatisticsViewModelTest {
     coEvery { ensembleRepository.getCountEnsembles() } returns flowOf(ensembleCount)
     coEvery { ensembleRepository.getMostPopularEnsembles(any()) } returns flowOf(ensembleArticleCounts)
     coEvery { ensembleRepository.getMostPopularArticlesEnsembleCount(any()) } returns flowOf(mostPopularArticleEnsemblesCount)
-    viewModel = StatisticsViewModel(
+    viewModel = StatisticsNoopViewModel(
       ensembleRepository = ensembleRepository,
       articleRepository = articleRepository,
     )
@@ -77,15 +77,15 @@ class StatisticsViewModelTest {
 
   @Test
   fun `UI state`() = runTest {
-    assertTrue(viewModel.uiState.value is StatisticsUiState.Success)
-    val state = viewModel.uiState.value as StatisticsUiState.Success
+    assertTrue(viewModel.uiState.value is StatisticsUIState.Success)
+    val state = viewModel.uiState.value as StatisticsUIState.Success
     assertEquals(articleCount, state.articleCount)
     assertEquals(articleImagesCount, state.articleImageCount)
     assertEquals(ensembleCount, state.ensembleCount)
     assertEquals(ensembleArticleCounts, state.ensemblesWithMostArticles)
     assertEquals(popularArticleThumbnails.getUriStrings(0), state.articleWithMostImagesUriStrings)
     assertEquals(
-      StatisticsViewModel.ArticleWithMostEnsembles(
+      StatisticsUIState.ArticleWithMostEnsembles(
         mostPopularArticleEnsemblesCount.first[0],
         mostPopularArticleEnsemblesCount.second.getUriStrings(0)
       ),
