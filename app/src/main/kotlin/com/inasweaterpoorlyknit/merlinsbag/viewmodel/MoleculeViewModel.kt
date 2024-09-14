@@ -23,15 +23,16 @@ abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>(
   private val uiScope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
 
   // Unlike a MutableSharedFlow, Channels will hold onto values
-  // until an observer is present to consumes them
+  // until an observer is present to consume them
   // This is important when ::onUiEvent gets called before uiStateManager
   // can subscribe to the uiEvent Flow. This can happen on the initial
   // startup of the viewmodel or after resuming from system-initiated
-  // process death.
+  // process death. The negative side effect is that only one collector
+  // is able to receive.
   private val _uiEvents = Channel<UIEvent>(capacity = 20)
-  private val _uiEffects = Channel<UIEffect>(capacity = 20)
+  private val _uiEffects = MutableSharedFlow<UIEffect>(extraBufferCapacity = 20)
 
-  val uiEffect: Flow<UIEffect> = _uiEffects.receiveAsFlow()
+  val uiEffect: SharedFlow<UIEffect> = _uiEffects
   val uiState: StateFlow<UIState> = moleculeFlow(mode = RecompositionMode.ContextClock) {
       uiStateManager.uiState(
         uiEvents = _uiEvents.receiveAsFlow(),
@@ -46,6 +47,9 @@ abstract class MoleculeViewModel<UIEvent, UIState, UIEffect>(
   fun onUiEvent(uiEvent: UIEvent) =
       viewModelScope.launch { _uiEvents.send(uiEvent) }
 
-  private fun launchUiEffect(uiEffect: UIEffect) =
-      viewModelScope.launch { _uiEffects.send(uiEffect) }
+  private fun launchUiEffect(uiEffect: UIEffect)  {
+    if(!_uiEffects.tryEmit(uiEffect)) {
+      error("SettingsViewModel: UI event buffer overflow.")
+    }
+  }
 }

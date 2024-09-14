@@ -44,7 +44,7 @@ import com.inasweaterpoorlyknit.core.ui.component.NoopImage
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsUIState
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsNoopViewModel
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.StatisticsViewModel
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables
 import kotlin.math.min
@@ -55,7 +55,7 @@ object StatisticsRouteArgs
 fun NavController.navigateToStatistics(navOptions: NavOptions? = null) = navigate(StatisticsRouteArgs, navOptions)
 
 @Composable
-fun StatisticsRoute(statisticsViewModel: StatisticsNoopViewModel = hiltViewModel()) {
+fun StatisticsRoute(statisticsViewModel: StatisticsViewModel = hiltViewModel()) {
   val uiState by statisticsViewModel.uiState.collectAsStateWithLifecycle()
   StatisticsScreen(uiState = uiState)
 }

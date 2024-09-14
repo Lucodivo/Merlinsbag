@@ -2,6 +2,7 @@
 
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +52,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -102,137 +104,6 @@ sealed interface EnsemblesUIEvent {
 }
 
 @HiltViewModel
-class EnsemblesOldViewModel @Inject constructor(
-    articleRepository: ArticleRepository,
-    val ensembleRepository: EnsembleRepository,
-): ViewModel() {
-  private lateinit var articleImages: LazyArticleThumbnails
-  private lateinit var ensembles: List<LazyEnsembleThumbnails>
-  private var searchEnsemblesQuery: MutableSharedFlow<String> = MutableStateFlow("")
-
-  var showPlaceholder by mutableStateOf(false)
-  var dialogState by mutableStateOf(DialogState.None)
-  var editMode by mutableStateOf(false)
-  var navigateToEnsembleDetail by mutableStateOf(Event<String>(null))
-  var ensembleTitleError by mutableStateOf<Int?>(null)
-  var searchQuery by mutableStateOf("")
-  var newEnsembleTitle by mutableStateOf("")
-  var selectedNewEnsembleArticles = mutableStateSetOf<Int>()
-  val selectedEnsembleIndices = mutableStateSetOf<Int>()
-  val addArticleThumbnails: StateFlow<LazyUriStrings> = articleRepository.getAllArticlesWithThumbnails()
-      .onEach { articleImages = it }
-      .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = LazyUriStrings.Empty
-      )
-  val lazyEnsembles: StateFlow<List<Pair<String, LazyUriStrings>>> =
-      combine(
-        ensembleRepository.getAllEnsembleArticleThumbnails().onEach {
-          if(it.isEmpty()){
-            if(!showPlaceholder) showPlaceholder = true
-          } else if(showPlaceholder) {
-            showPlaceholder = false
-          }
-        },
-        searchEnsemblesQuery,
-        searchEnsemblesQuery.flatMapLatest { query ->
-          ensembleRepository.searchEnsembleArticleThumbnails(query)
-        },
-      ) { allEnsembleArticleThumbnails, searchQuery, searchEnsembleArticleThumbnails ->
-        if(searchQuery.isEmpty()) allEnsembleArticleThumbnails else searchEnsembleArticleThumbnails
-      }.onEach {
-        ensembles = it
-      }.listMap {
-        Pair(it.ensemble.title, it.thumbnails)
-      }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
-        initialValue = emptyList()
-      )
-
-  private fun dismissDialog() {
-    if(dialogState != DialogState.None) dialogState = DialogState.None
-  }
-
-  fun onClickAddEnsemble() { dialogState = DialogState.AddEnsemble }
-  fun onClickCloseAddEnsembleDialog() = dismissDialog()
-
-  fun onClickMinimizeButtonControl() {
-    editMode = false
-    if(selectedEnsembleIndices.isNotEmpty()) selectedEnsembleIndices.clear()
-  }
-
-  fun onSearchQueryClear() { onSearchQueryUpdate("") }
-
-  fun onLongPressEnsemble(index: Int){
-    if(!editMode) {
-      editMode = true
-      selectedEnsembleIndices.clear()
-    }
-    toggleSelectedEnsemble(index)
-  }
-
-  fun onClickEnsemble(index: Int) =
-    if(editMode) toggleSelectedEnsemble(index)
-    else navigateToEnsembleDetail = Event(ensembles[index].ensemble.id)
-
-  fun onUpdateNewEnsembleTitle(newTitle: String){
-    if(newTitle.length <= MAX_ENSEMBLE_TITLE_LENGTH) newEnsembleTitle = newTitle
-  }
-
-  fun onClickNewEnsembleArticle(articleIndex: Int) =
-    if(selectedNewEnsembleArticles.contains(articleIndex)) {
-      selectedNewEnsembleArticles.remove(articleIndex)
-    } else selectedNewEnsembleArticles.add(articleIndex)
-
-  fun onClickSaveAddEnsembleDialog() {
-    val articleIds = selectedNewEnsembleArticles.map { articleImages.getArticleId(it) }
-    val title = newEnsembleTitle
-    newEnsembleTitle = ""
-    selectedNewEnsembleArticles.clear()
-    viewModelScope.launch(Dispatchers.IO) {
-      val ensembleTitleUnique = ensembleRepository.isEnsembleTitleUnique(title).first()
-      if(ensembleTitleUnique){
-        dismissDialog()
-        ensembleRepository.insertEnsemble(
-          title,
-          articleIds,
-        )
-      } else ensembleTitleError = R.string.ensemble_with_title_already_exists
-    }
-  }
-
-  fun onSearchQueryUpdate(query: String) {
-    editMode = false
-    searchQuery = query
-    searchEnsemblesQuery.tryEmit(if(query.isEmpty()) "" else "$query*")
-  }
-
-  fun onBack() = onClickMinimizeButtonControl()
-
-  fun onClickDeleteSelectedEnsembles() {
-    dialogState = DialogState.DeleteEnsembleAlert
-  }
-  fun onDismissDeleteEnsemblesAlertDialog() = dismissDialog()
-  fun onDeleteEnsemblesAlertDialogPositive() {
-    dismissDialog()
-    editMode = false
-    val ensembleIds = selectedEnsembleIndices.map { ensembles[it].ensemble.id }
-    viewModelScope.launch(Dispatchers.IO) { ensembleRepository.deleteEnsembles(ensembleIds) }
-  }
-
-  private fun toggleSelectedEnsemble(index: Int){
-    if(selectedEnsembleIndices.contains(index)) selectedEnsembleIndices.remove(index)
-    else selectedEnsembleIndices.add(index)
-    if(selectedEnsembleIndices.isEmpty()) editMode = false
-  }
-}
-
-// Currently contains at least one bug.
-// The search box fails to properly adjust cursor when adding
-// characters to the end of the search. Weird.
-@HiltViewModel
 class EnsemblesComposeViewModel @Inject constructor(ensemblesPresenter: EnsemblesUIStateManager)
   : MoleculeViewModel<EnsemblesUIEvent, EnsemblesUIState, EnsemblesUIEffect>(uiStateManager = ensemblesPresenter)
 
@@ -251,7 +122,7 @@ class EnsemblesUIStateManager @Inject constructor(
     lazyEnsembles = emptyList(),
   )
 
-  val _searchQuery = MutableStateFlow("")
+  private val _searchQuery = MutableStateFlow("")
 
   @Composable
   override fun uiState(
@@ -266,8 +137,10 @@ class EnsemblesUIStateManager @Inject constructor(
 
     val ensembleCount by remember { ensembleRepository.getCountEnsembles() }.collectAsState(-1)
 
-    val addArticleThumbnails by remember {
-      articleRepository.getAllArticlesWithThumbnails()
+    var addEnsembleTriggered by remember { mutableStateOf(false) }
+    val addArticleThumbnails by remember(addEnsembleTriggered) {
+      if(addEnsembleTriggered) articleRepository.getAllArticlesWithThumbnails()
+      else emptyFlow()
     }.collectAsState(LazyArticleThumbnails.Empty)
 
     val searchQuery by remember { _searchQuery }.collectAsState("")
@@ -282,10 +155,9 @@ class EnsemblesUIStateManager @Inject constructor(
             else ensembleRepository.searchEnsembleArticleThumbnails("$searchQuery*")
           }
     }.collectAsState(emptyList())
-    val ensembleArticleThumbnails = remember(searchQuery, allEnsembleArticles, searchEnsembleArticles) {
+    val ensembleArticleThumbnails =
       if(searchQuery.isEmpty()) allEnsembleArticles
       else searchEnsembleArticles
-    }
 
     val ensembleNamesAndThumbnailUris = remember(ensembleArticleThumbnails.value) {
       ensembleArticleThumbnails.value.map { ensembleThumbnails ->
@@ -306,7 +178,10 @@ class EnsemblesUIStateManager @Inject constructor(
       }
       uiEvents.collect { uiEvent ->
         when(uiEvent) {
-          ClickAddEnsemble -> { dialogState = DialogState.AddEnsemble }
+          ClickAddEnsemble -> {
+            addEnsembleTriggered = true
+            dialogState = DialogState.AddEnsemble
+          }
           ClickCloseAddEnsembleDialog -> {
             dialogState = DialogState.None
             newEnsembleTitleError = null
@@ -387,166 +262,6 @@ class EnsemblesUIStateManager @Inject constructor(
       selectedEnsembleIndices = selectedEnsembleIndices,
       addArticleThumbnails = addArticleThumbnails,
       lazyEnsembles = ensembleNamesAndThumbnailUris,
-    ).also { cachedState = it }
-  }
-}
-
-@HiltViewModel
-class EnsemblesViewModel @Inject constructor(
-    val articleRepository: ArticleRepository,
-    val ensembleRepository: EnsembleRepository,
-): NoopViewModel2<EnsemblesUIEvent, EnsemblesUIState, EnsemblesUIEffect>() {
-
-  private data class LocallyManagedState (
-    val dialogState: DialogState = DialogState.None,
-    val editMode: Boolean = false,
-    val searchQuery: String = "",
-    val newEnsembleTitle: String = "",
-    val newEnsembleTitleError: Int? = null,
-    val selectedNewEnsembleArticles: Set<Int> = mutableSetOf(),
-    val selectedEnsembleIndices: Set<Int> = mutableSetOf(),
-  )
-  private val locallyManagedState = MutableStateFlow(LocallyManagedState())
-  private var cachedEnsembleIds: List<String> = emptyList()
-  private var cachedArticleIds: List<String> = emptyList()
-
-  override fun initialUiState() = EnsemblesUIState(
-    showPlaceholder = false,
-    dialogState = DialogState.None,
-    editMode = false,
-    newEnsembleTitleError = null,
-    selectedNewEnsembleArticles = emptySet(),
-    selectedEnsembleIndices = emptySet(),
-    addArticleThumbnails = LazyUriStrings.Empty,
-    lazyEnsembles = emptyList(),
-  )
-  override fun uiStateFlow(): Flow<EnsemblesUIState> = combine(
-    locallyManagedState,
-    articleRepository.getAllArticlesWithThumbnails().onEach { articlesWithThumbnails ->
-      cachedArticleIds = articlesWithThumbnails.articleIds()
-    },
-    ensembleRepository.getCountEnsembles(),
-    locallyManagedState
-        .map { it.searchQuery }
-        .distinctUntilChanged()
-        .flatMapLatest { searchQuery ->
-          if(searchQuery.isEmpty()){
-            ensembleRepository.getAllEnsembleArticleThumbnails()
-          } else {
-            ensembleRepository
-                .searchEnsembleArticleThumbnails("$searchQuery*")
-                .debounce(250L)
-          }
-        }.onEach { lazyEnsembleThumbnails ->
-          cachedEnsembleIds = lazyEnsembleThumbnails.map { it.ensemble.id }
-        }.listMap {
-          Pair(it.ensemble.title, it.thumbnails)
-        }
-  ) {
-    lms: LocallyManagedState,
-    lazyArticleThumbnails: LazyArticleThumbnails,
-    ensembleCount: Int,
-    lazyEnsembles: List<Pair<String, LazyArticleThumbnails>> ->
-    EnsemblesUIState(
-      showPlaceholder = ensembleCount == 0,
-      dialogState = lms.dialogState,
-      editMode = lms.editMode,
-      newEnsembleTitleError = lms.newEnsembleTitleError,
-      selectedNewEnsembleArticles = lms.selectedNewEnsembleArticles,
-      selectedEnsembleIndices = lms.selectedEnsembleIndices,
-      addArticleThumbnails = lazyArticleThumbnails,
-      lazyEnsembles = lazyEnsembles,
     )
-  }
-  override fun onUiEvent(uiEvent: EnsemblesUIEvent) {
-    with(locallyManagedState.value){
-      fun dismissDialog() {
-        locallyManagedState.update { it.copy(dialogState = DialogState.None) }
-      }
-      fun toggleSelectedEnsemble(index: Int) {
-        val newSelectedEnsembleIndices =
-          if(selectedEnsembleIndices.contains(index)) selectedEnsembleIndices - index
-          else selectedEnsembleIndices + index
-        locallyManagedState.value = copy(
-          selectedEnsembleIndices = newSelectedEnsembleIndices,
-          editMode = newSelectedEnsembleIndices.isNotEmpty(),
-        )
-      }
-      fun updateSearchQuery(query: String) {
-        locallyManagedState.value = copy(
-          editMode = false,
-          selectedEnsembleIndices = emptySet(),
-          searchQuery = query,
-        )
-      }
-      fun exitEditMode() {
-        locallyManagedState.value = copy(
-          editMode = false,
-          selectedEnsembleIndices = emptySet(),
-        )
-      }
-      when(uiEvent) {
-        ClickAddEnsemble -> {
-          locallyManagedState.value = copy(dialogState = DialogState.AddEnsemble)
-        }
-        ClickCloseAddEnsembleDialog -> dismissDialog()
-        DismissDeleteEnsemblesAlertDialog -> dismissDialog()
-        Back -> exitEditMode()
-        ClickDeleteSelectedEnsembles -> {
-          locallyManagedState.value = copy(dialogState = DialogState.DeleteEnsembleAlert)
-        }
-        is ClickEnsemble -> {
-          if(editMode) toggleSelectedEnsemble(uiEvent.index)
-          else launchUiEffect(NavigateToEnsembleDetail(cachedEnsembleIds[uiEvent.index]))
-        }
-        ClickMinimizeButtonControl -> exitEditMode()
-        is ClickNewEnsembleArticle -> {
-          locallyManagedState.value = copy(
-            selectedNewEnsembleArticles =
-              if(selectedNewEnsembleArticles.contains(uiEvent.articleIndex))
-                selectedNewEnsembleArticles - uiEvent.articleIndex
-              else selectedNewEnsembleArticles + uiEvent.articleIndex
-          )
-        }
-        is ClickSaveAddEnsembleDialog -> {
-          viewModelScope.launch(Dispatchers.IO) {
-            val newTitle = uiEvent.newTitle
-            val ensembleTitleUnique = ensembleRepository.isEnsembleTitleUnique(newTitle).first()
-            if(ensembleTitleUnique){
-              ensembleRepository.insertEnsemble(
-                newTitle,
-                selectedNewEnsembleArticles.map { cachedArticleIds[it] },
-              )
-              locallyManagedState.value = copy(
-                newEnsembleTitle = "",
-                selectedNewEnsembleArticles = emptySet(),
-                dialogState = DialogState.None,
-                newEnsembleTitleError = null,
-              )
-            } else {
-              locallyManagedState.value = copy(
-                newEnsembleTitleError = R.string.ensemble_with_title_already_exists,
-              )
-            }
-          }
-        }
-        ConfirmDeleteEnsemblesAlertDialog -> {
-          val ensembleIds = selectedEnsembleIndices.map { cachedEnsembleIds[it] }
-          locallyManagedState.value = copy(
-            dialogState = DialogState.None,
-            editMode = false,
-            selectedEnsembleIndices = emptySet(),
-          )
-          viewModelScope.launch(Dispatchers.IO) {
-            ensembleRepository.deleteEnsembles(ensembleIds)
-          }
-        }
-        is LongPressEnsemble -> toggleSelectedEnsemble(uiEvent.index)
-        is UpdateSearchQuery -> {
-          updateSearchQuery(uiEvent.query)
-        }
-        ClickSettings -> launchUiEffect(NavigateToSettings)
-      }
-    }
   }
 }

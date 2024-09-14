@@ -38,41 +38,8 @@ sealed interface StatisticsUIState{
 
 const val TOP_ENSEMBLES_COUNT = 10
 
-// TODO: Remove?
 @HiltViewModel
-class StatisticsNoopViewModel @Inject constructor(
-    val ensembleRepository: EnsembleRepository,
-    val articleRepository: ArticleRepository,
-): NoopViewModel<StatisticsUIEvent, StatisticsUIState, StatisticsUIEffect>() {
-  override fun initialUiState(): StatisticsUIState = StatisticsUIState.Loading
-  override suspend fun handleUiEvent(uiEvent: StatisticsUIEvent){}
-  override fun uiStateFlow(): Flow<StatisticsUIState> =
-      combine(
-        ensembleRepository.getCountEnsembles(),
-        articleRepository.getCountArticles(),
-        articleRepository.getCountArticleImages(),
-        ensembleRepository.getMostPopularEnsembles(TOP_ENSEMBLES_COUNT),
-        articleRepository.getMostPopularArticlesImageCount(1).map {
-          if(it.isEmpty()) emptyList() else it.getUriStrings(0)
-        },
-        ensembleRepository.getMostPopularArticlesEnsembleCount(1).map {
-          if(it.first.isEmpty() || it.second.isEmpty()) ArticleWithMostEnsembles(0, emptyList())
-          else ArticleWithMostEnsembles(it.first[0], it.second.getUriStrings(0))
-        },
-      ) { ensembleCount, articleCount, articleImageCount, ensemblesWithMostArticles, articleWithMostImages, articleWithMostEnsembles ->
-        StatisticsUIState.Success(
-          ensembleCount = ensembleCount,
-          articleCount = articleCount,
-          articleImageCount = articleImageCount,
-          ensemblesWithMostArticles = ensemblesWithMostArticles,
-          articleWithMostImagesUriStrings = articleWithMostImages,
-          articleWithMostEnsembles = articleWithMostEnsembles,
-        )
-      }
-}
-
-@HiltViewModel
-class StatisticsComposeViewModel @Inject constructor(
+class StatisticsViewModel @Inject constructor(
   val statisticsPresenter: StatisticsUIStateManager
 ): MoleculeViewModel<StatisticsUIEvent, StatisticsUIState, StatisticsUIEffect>(uiStateManager = statisticsPresenter)
 
