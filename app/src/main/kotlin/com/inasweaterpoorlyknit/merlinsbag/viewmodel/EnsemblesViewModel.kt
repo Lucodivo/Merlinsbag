@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,9 +51,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -270,14 +271,14 @@ class EnsemblesUIStateManager @Inject constructor(
     }.collectAsState(LazyArticleThumbnails.Empty)
 
     val searchQuery by remember { _searchQuery }.collectAsState("")
-    val allEnsembleArticles by remember {
+    val allEnsembleArticles = remember {
       ensembleRepository.getAllEnsembleArticleThumbnails()
     }.collectAsState(emptyList())
-    val searchEnsembleArticles by remember {
+    val searchEnsembleArticles = remember {
       _searchQuery
           .debounce(250L)
           .flatMapLatest { searchQuery ->
-            if(searchQuery.isEmpty()) emptyFlow()
+            if(searchQuery.isEmpty()) flowOf(emptyList())
             else ensembleRepository.searchEnsembleArticleThumbnails("$searchQuery*")
           }
     }.collectAsState(emptyList())
@@ -286,35 +287,29 @@ class EnsemblesUIStateManager @Inject constructor(
       else searchEnsembleArticles
     }
 
-    val ensembleNamesAndThumbnailUris = remember(ensembleArticleThumbnails) {
-      ensembleArticleThumbnails.map { ensembleThumbnails ->
+    val ensembleNamesAndThumbnailUris = remember(ensembleArticleThumbnails.value) {
+      ensembleArticleThumbnails.value.map { ensembleThumbnails ->
         Pair(ensembleThumbnails.ensemble.title, ensembleThumbnails.thumbnails)
       }
     }
 
-    // TODO: Why does this not work? Index out of bounds exception inside uiEvent.collect{}...
-    fun getEnsembleId(index: Int) =
-      ensembleArticleThumbnails[index].ensemble.id
-
     LaunchedEffect(Unit) {
+      fun getEnsembleId(index: Int) = ensembleArticleThumbnails.value[index].ensemble.id
       fun toggleSelectedEnsemble(index: Int) {
         if(selectedEnsembleIndices.contains(index)) selectedEnsembleIndices.remove(index)
         else selectedEnsembleIndices.add(index)
         if(selectedEnsembleIndices.isEmpty()) editMode = false
       }
-      fun updateSearchQuery(query: String) {
-        editMode = false
-        _searchQuery.value = query
-      }
       fun exitEditMode() {
         editMode = false
-        if(selectedEnsembleIndices.isNotEmpty()) selectedEnsembleIndices.clear()
+        selectedEnsembleIndices.clear()
       }
       uiEvents.collect { uiEvent ->
         when(uiEvent) {
           ClickAddEnsemble -> { dialogState = DialogState.AddEnsemble }
           ClickCloseAddEnsembleDialog -> {
             dialogState = DialogState.None
+            newEnsembleTitleError = null
             selectedNewEnsembleArticles.clear()
           }
           DismissDeleteEnsemblesAlertDialog -> {
@@ -327,9 +322,11 @@ class EnsemblesUIStateManager @Inject constructor(
           is ClickEnsemble -> {
             if(editMode) toggleSelectedEnsemble(uiEvent.index)
             else {
-              val ensembleId =
+              val ensembleId = getEnsembleId(uiEvent.index)
+/*
                 if(searchQuery.isEmpty()) { allEnsembleArticles[uiEvent.index].ensemble.id }
                 else { searchEnsembleArticles[uiEvent.index].ensemble.id }
+*/
               launchUiEffect(NavigateToEnsembleDetail(ensembleId))
             }
           }
@@ -342,11 +339,12 @@ class EnsemblesUIStateManager @Inject constructor(
           is ClickSaveAddEnsembleDialog -> {
             val articleIds = selectedNewEnsembleArticles.map { addArticleThumbnails.getArticleId(it) }
             val title = uiEvent.newTitle
-            selectedNewEnsembleArticles.clear()
             launch(Dispatchers.IO) {
               val ensembleTitleUnique = ensembleRepository.isEnsembleTitleUnique(title).first()
               if(ensembleTitleUnique){
                 dialogState = DialogState.None
+                newEnsembleTitleError = null
+                selectedNewEnsembleArticles.clear()
                 ensembleRepository.insertEnsemble(
                   title,
                   articleIds,
@@ -359,8 +357,8 @@ class EnsemblesUIStateManager @Inject constructor(
             editMode = false
             val ensembleIds =
                 selectedEnsembleIndices.map {
-                  if(searchQuery.isEmpty()) allEnsembleArticles[it].ensemble.id
-                  else searchEnsembleArticles[it].ensemble.id
+                  if(searchQuery.isEmpty()) allEnsembleArticles.value[it].ensemble.id
+                  else searchEnsembleArticles.value[it].ensemble.id
                 }
             launch(Dispatchers.IO) { ensembleRepository.deleteEnsembles(ensembleIds) }
           }
@@ -372,7 +370,8 @@ class EnsemblesUIStateManager @Inject constructor(
             toggleSelectedEnsemble(uiEvent.index)
           }
           is UpdateSearchQuery -> {
-            updateSearchQuery(uiEvent.query)
+            editMode = false
+            _searchQuery.value = uiEvent.query
           }
           ClickSettings -> launchUiEffect(NavigateToSettings)
         }

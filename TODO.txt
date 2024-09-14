@@ -9,6 +9,7 @@ Add Article:
     - Primary / Secondary color classifications?
     - Add to ensemble?
     - Wait for ML Model to download? Inform user that they need internet?
+    - Utilize WorkManager when storing bitmaps as webp's and inserting database entries
 Ensemble Detail:
     - Add new article?
 Article Detail:
@@ -85,6 +86,7 @@ Bugs:
         - Maybe expected due to efficient imperfect hashing?
     - Passing indices instead of ids from a screen to it's associated ViewModel may be more buggy than simply passing ids.
         - The idea of using indices was that the UI doesn't need to know about a database ID, but maybe it is worth the trade for stability?
+        - ids can also be used as unique identifiers in UI. For example, using key & remember pairs in Compose UI with the ID as the key.
     - The ML Kit model does not actually install with the application or even after the application is installed. It seems to only attempt to install by either an attempted use or an explicit call to installation.
     - Error with no known ill effect in AddArticleScreen
         - The following error occurs twice EVERY time:

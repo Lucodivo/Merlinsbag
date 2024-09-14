@@ -326,6 +326,7 @@ private fun AddEnsembleDialog(
       onClickClose()
     },
     onPositive = {
+      setUserInputTitle("")
       onClickSave(userInputTitle)
     },
   ) {

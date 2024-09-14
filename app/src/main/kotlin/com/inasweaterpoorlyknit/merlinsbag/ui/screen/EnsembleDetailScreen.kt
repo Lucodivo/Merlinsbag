@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -278,7 +279,6 @@ fun EnsembleDetailScreen(
             ),
       ) {
         if(editingTitle) {
-          // TODO: Edit title text should be hoisted
           val (editTitle, setEditTitle) = remember { mutableStateOf("") }
           val focusRequester = FocusRequester()
           OutlinedTextField(
@@ -295,21 +295,18 @@ fun EnsembleDetailScreen(
           )
           LaunchedEffect(Unit) { focusRequester.requestFocus() }
         } else {
-          val titleModifier = Modifier
-          val iconModifier = Modifier.padding(start = if(compactWidth) 0.dp else 16.dp, end = 4.dp)
-          val titleAlign = if(compactWidth) TextAlign.Center else TextAlign.Start
-          val titleFontSize = MaterialTheme.typography.titleLarge.fontSize
-          Row{
-            Icon(NoopIcons.ensembles(), stringResource(R.string.hashtag), modifier = iconModifier)
-            if(title.isNotEmpty()) {
-              Text(text = title, textAlign = titleAlign, fontSize = titleFontSize, modifier = titleModifier)
-            } else {
-              Text(text = "[untitled]", textAlign = titleAlign, fontSize = titleFontSize, color = Color.Gray, modifier = titleModifier)
-            }
-          }
+          Text(
+            text = "#${title.ifEmpty{ stringResource(R.string.untitled_ensemble) }}",
+            fontSize = MaterialTheme.typography.titleLarge.fontSize,
+            color = if(title.isNotEmpty()) Color.Unspecified else Color.Gray,
+          )
         }
       }
-      Box(modifier = Modifier.fillMaxSize()) {
+      Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 8.dp)
+      ) {
         SelectableStaggeredThumbnailGrid(
           selectable = editState == EnabledSelectedArticles,
           onSelect = onClickArticle,
