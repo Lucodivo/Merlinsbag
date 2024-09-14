@@ -16,6 +16,10 @@ class LazyArticleThumbnails(
   override fun getUriStrings(index: Int): List<String> = paths[index].thumbnailPaths.map { "$directory${it.filenameThumb}" }
   fun filter(keep: (ArticleThumbnails) -> Boolean) = LazyArticleThumbnails(directory, paths.filter(keep).toMutableList())
   fun articleIds() = paths.map { it.articleId }
+
+  companion object {
+    val Empty = LazyArticleThumbnails(directory = "", articleThumbnailPaths = emptyList())
+  }
 }
 
 class LazyEnsembleThumbnails(

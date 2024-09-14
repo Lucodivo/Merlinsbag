@@ -92,6 +92,7 @@ import com.inasweaterpoorlyknit.core.ui.component.SelectableNoopImage
 import com.inasweaterpoorlyknit.core.ui.currentWindowAdaptiveInfo
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
+import com.inasweaterpoorlyknit.merlinsbag.Constants
 import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticleDetailViewModel.AlertDialogState
@@ -783,6 +784,7 @@ private fun AddToEnsembleDialog(
       modifier = Modifier
           .fillMaxWidth()
           .padding(15.dp),
+      maxQueryLength = Constants.MAX_ENSEMBLE_TITLE_LENGTH,
     )
   }
 }
