@@ -10,6 +10,8 @@ import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
 import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.core.testing.MainDispatcherRule
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.DropdownMenuState
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
@@ -28,7 +30,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class SettingsPresenterTest {
+class SettingsUIStateManagerTest {
   @get:Rule val mockkRule = MockKRule(this)
   @get:Rule val dispatcherRule = MainDispatcherRule()
 
@@ -36,13 +38,14 @@ class SettingsPresenterTest {
   @MockK lateinit var userPreferencesRepository: UserPreferencesRepository
 
   val testInitialUserPreferences = UserPreferences(imageQuality = ImageQuality.VERY_HIGH)
-  lateinit var settingsPresenter: SettingsUIStateManager
+  lateinit var settingsUIStateManager: SettingsUIStateManager
 
   @Before
   fun beforeEach() = runTest {
     every { userPreferencesRepository.userPreferences } returns flowOf(testInitialUserPreferences)
     justRun { purgeRepository.purgeCache() }
-    settingsPresenter = SettingsUIStateManager(
+
+    settingsUIStateManager = SettingsUIStateManager(
       purgeRepository = purgeRepository,
       userPreferencesRepository = userPreferencesRepository,
     )
@@ -51,7 +54,7 @@ class SettingsPresenterTest {
   @Test
   fun `on launch, no alert dialogs or dropdown menus`() = runTest {
     moleculeFlow(mode = RecompositionMode.Immediate){
-      settingsPresenter.uiState(
+      settingsUIStateManager.uiState(
         uiEvents = emptyFlow(),
         launchUiEffect = {},
       )
@@ -60,8 +63,8 @@ class SettingsPresenterTest {
       val loadedState: SettingsUIState = awaitItem()
       assertEquals(
         loadedState.copy(
-          alertDialog = SettingsAlertDialogState.None,
-          dropdownMenu = SettingsDropdownMenuState.None
+          alertDialog = AlertDialogState.None,
+          dropdownMenu = DropdownMenuState.None
         ),
         loadedState
       )
@@ -73,7 +76,7 @@ class SettingsPresenterTest {
     val uiEvents = Channel<SettingsUIEvent>()
     val uiEffects = ArrayList<SettingsUIEffect>()
     moleculeFlow(mode = RecompositionMode.Immediate){
-      settingsPresenter.uiState(
+      settingsUIStateManager.uiState(
         uiEvents = uiEvents.receiveAsFlow(),
         launchUiEffect = { uiEffects.add(it) },
       )
@@ -93,19 +96,19 @@ class SettingsPresenterTest {
     val uiEvents = Channel<SettingsUIEvent>()
     val uiEffects = MutableSharedFlow<SettingsUIEffect>(extraBufferCapacity = 20)
     moleculeFlow(mode = RecompositionMode.Immediate){
-      settingsPresenter.uiState(
+      settingsUIStateManager.uiState(
         uiEvents = uiEvents.receiveAsFlow(),
         launchUiEffect = { uiEffects.tryEmit(it) },
       )
     }.test {
       skipItems(1) // skip initial emission
-      assertEquals(SettingsAlertDialogState.None, awaitItem().alertDialog)
+      assertEquals(AlertDialogState.None, awaitItem().alertDialog)
       uiEvents.send(
         SettingsUIEvent.SelectedImageQuality(
           ImageQuality.entries[testInitialUserPreferences.imageQuality.ordinal + 1]
         )
       )
-      assertEquals(SettingsAlertDialogState.ImageQuality, awaitItem().alertDialog)
+      assertEquals(AlertDialogState.ImageQuality, awaitItem().alertDialog)
     }
   }
 }

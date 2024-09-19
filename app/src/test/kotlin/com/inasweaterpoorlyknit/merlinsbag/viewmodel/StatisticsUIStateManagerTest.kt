@@ -1,5 +1,8 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.moleculeFlow
+import app.cash.turbine.test
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
@@ -10,7 +13,7 @@ import com.inasweaterpoorlyknit.core.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -19,7 +22,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class StatisticsNoopViewModelTest {
+class StatisticsUIStateManagerTest {
   @get:Rule
   val mockkRule = MockKRule(this)
 
@@ -29,7 +32,7 @@ class StatisticsNoopViewModelTest {
   @MockK lateinit var ensembleRepository: EnsembleRepository
   @MockK lateinit var articleRepository: ArticleRepository
 
-  lateinit var viewModel: StatisticsNoopViewModel
+  lateinit var statisticsUIStateManager: StatisticsUIStateManager
 
   companion object {
     val articleCount = 100
@@ -48,7 +51,7 @@ class StatisticsNoopViewModelTest {
         )
       },
     )
-    val ensembleArticleCounts = List(10){ ensembleIndex ->
+    val ensembleWithMostArticles = List(10){ ensembleIndex ->
       EnsembleArticleCount(
         title = "ensembleTitle $ensembleIndex",
         count = ensembleIndex.toLong(),
@@ -66,30 +69,38 @@ class StatisticsNoopViewModelTest {
     coEvery { articleRepository.getCountArticleImages() } returns flowOf(articleImagesCount)
     coEvery { articleRepository.getMostPopularArticlesImageCount(any()) } returns flowOf(popularArticleThumbnails)
     coEvery { ensembleRepository.getCountEnsembles() } returns flowOf(ensembleCount)
-    coEvery { ensembleRepository.getMostPopularEnsembles(any()) } returns flowOf(ensembleArticleCounts)
+    coEvery { ensembleRepository.getMostPopularEnsembles(any()) } returns flowOf(ensembleWithMostArticles)
     coEvery { ensembleRepository.getMostPopularArticlesEnsembleCount(any()) } returns flowOf(mostPopularArticleEnsemblesCount)
-    viewModel = StatisticsNoopViewModel(
+    statisticsUIStateManager = StatisticsUIStateManager(
       ensembleRepository = ensembleRepository,
       articleRepository = articleRepository,
     )
-    viewModel.uiState.first()
   }
 
   @Test
   fun `UI state`() = runTest {
-    assertTrue(viewModel.uiState.value is StatisticsUIState.Success)
-    val state = viewModel.uiState.value as StatisticsUIState.Success
-    assertEquals(articleCount, state.articleCount)
-    assertEquals(articleImagesCount, state.articleImageCount)
-    assertEquals(ensembleCount, state.ensembleCount)
-    assertEquals(ensembleArticleCounts, state.ensemblesWithMostArticles)
-    assertEquals(popularArticleThumbnails.getUriStrings(0), state.articleWithMostImagesUriStrings)
-    assertEquals(
-      StatisticsUIState.ArticleWithMostEnsembles(
-        mostPopularArticleEnsemblesCount.first[0],
-        mostPopularArticleEnsemblesCount.second.getUriStrings(0)
-      ),
-      state.articleWithMostEnsembles
-    )
+    moleculeFlow(mode = RecompositionMode.Immediate){
+      statisticsUIStateManager.uiState(uiEvents = emptyFlow(), launchUiEffect = {})
+    }.test {
+      val initialState: StatisticsUIState = awaitItem()
+      assertTrue(initialState is StatisticsUIState.Loading)
+      val loadedState: StatisticsUIState = awaitItem()
+      assertTrue(loadedState is StatisticsUIState.Success)
+      val successState = loadedState as StatisticsUIState.Success
+      assertEquals(
+        successState.copy(
+          articleCount = articleCount,
+          articleImageCount = articleImagesCount,
+          ensembleCount = ensembleCount,
+          ensemblesWithMostArticles = ensembleWithMostArticles,
+          articleWithMostImagesUriStrings = popularArticleThumbnails.getUriStrings(0),
+          articleWithMostEnsembles = StatisticsUIState.ArticleWithMostEnsembles(
+            mostPopularArticleEnsemblesCount.first[0],
+            mostPopularArticleEnsemblesCount.second.getUriStrings(0)
+          ),
+        ),
+        successState
+      )
+    }
   }
 }
