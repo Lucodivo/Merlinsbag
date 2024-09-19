@@ -66,6 +66,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
+import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
+import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
+import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnails
+import com.inasweaterpoorlyknit.core.database.model.Ensemble
+import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
 import com.inasweaterpoorlyknit.core.model.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
@@ -214,7 +219,7 @@ fun EnsemblesScreen(
     onClickSettings: () -> Unit,
     selectedEnsembleIndices: Set<Int>,
     editMode: Boolean,
-    lazyEnsembleThumbnails: List<Pair<String, LazyUriStrings>>,
+    lazyEnsembleThumbnails: List<LazyEnsembleThumbnails>,
     onClickEnsemble: (index: Int) -> Unit,
     onLongPressEnsemble: (index: Int) -> Unit,
     onClickAddEnsemble: () -> Unit,
@@ -461,7 +466,7 @@ fun EnsemblesOverlappingImageRowColumn(
     windowSizeClass: WindowSizeClass,
     selectedEnsembleIndices: Set<Int>,
     selectable: Boolean,
-    lazyTitleAndUriStrings: List<Pair<String, LazyUriStrings>>,
+    lazyTitleAndUriStrings: List<LazyEnsembleThumbnails>,
     onClick: (index: Int) -> Unit,
     onLongPress: (index: Int) -> Unit,
 ) {
@@ -477,11 +482,12 @@ fun EnsemblesOverlappingImageRowColumn(
     state = lazyGridState,
   ){
     items(lazyTitleAndUriStrings.size) { index ->
-      val (rowTitle, lazyStrings) = lazyTitleAndUriStrings[index]
-      key(rowTitle){ // ensemble titles are constrained to be unique
+      val ensembleWithArticleThumbnails = lazyTitleAndUriStrings[index]
+      val ensemble = ensembleWithArticleThumbnails.ensemble
+      key(ensemble.id){ // ensemble titles are constrained to be unique
         EnsembleOverlappingImageRow(
-          title = rowTitle,
-          lazyUriStrings = lazyStrings,
+          title = ensemble.title,
+          lazyUriStrings = ensembleWithArticleThumbnails.thumbnails,
           selected = selectedEnsembleIndices.contains(index),
           selectable = selectable,
           modifier = Modifier
@@ -589,7 +595,7 @@ fun EnsemblesOverlappingPlaceholderRowColumn(windowSizeClass: WindowSizeClass) {
 }
 
 //region COMPOSABLE PREVIEWS
-val previewEnsembles: List<Pair<String, LazyUriStrings>> =
+val previewEnsembles: List<LazyEnsembleThumbnails> =
     repeatedThumbnailResourceIdsAsStrings.let { thumbnails ->
       listOf(
         thumbnails.slice(4..4),
@@ -602,20 +608,29 @@ val previewEnsembles: List<Pair<String, LazyUriStrings>> =
         thumbnails.slice(5..11),
         thumbnails.slice(7..11),
         thumbnails.slice(12..17),
-      ).mapIndexed { index, thumbnailUriStrings ->
-        Pair(
-          if(index == 3 || index == 4) "" else "Row ${index + 1}",
-          object: LazyUriStrings {
-            override val size: Int = thumbnailUriStrings.size
-            override fun getUriStrings(index: Int): List<String> = listOf(thumbnailUriStrings[index])
-          }
+      ).mapIndexed { ensembleIndex, thumbnailUriStrings ->
+        val title = if(ensembleIndex == 3 || ensembleIndex == 4) "" else "Row ${ensembleIndex + 1}"
+        LazyEnsembleThumbnails(
+          ensemble = Ensemble(
+            id = title,
+            title = title,
+          ),
+          thumbnails = LazyArticleThumbnails(
+            directory = "",
+            articleThumbnailPaths = thumbnailUriStrings.mapIndexed { thumbnailIndex, thumbnailStrings ->
+              object: ArticleThumbnails{
+                override val articleId: String = "$title - article $thumbnailIndex"
+                override val thumbnailPaths: List<ThumbnailFilename> = listOf(ThumbnailFilename(filenameThumb = thumbnailStrings))
+              }
+            }
+          )
         )
       }
     }
 
 @Composable
 fun PreviewUtilEnsembleScreen(
-    ensembles: List<Pair<String, LazyUriStrings>> = previewEnsembles,
+    ensembles: List<LazyEnsembleThumbnails> = previewEnsembles,
     darkMode: Boolean = false,
     dialogState: DialogState = None,
     showPlaceholder: Boolean = false,
@@ -651,11 +666,11 @@ fun PreviewUtilAddEnsembleDialog(
 }
 
 @Preview @Composable fun PreviewEnsembleOverlappingImageRow() = NoopTheme(darkMode = DarkMode.DARK) {
-  EnsembleOverlappingImageRow(title = "Road Warrior", lazyUriStrings = previewEnsembles[1].second, selected = false, selectable = false, modifier = Modifier.fillMaxWidth())
+  EnsembleOverlappingImageRow(title = "Road Warrior", lazyUriStrings = previewEnsembles[1].thumbnails, selected = false, selectable = false, modifier = Modifier.fillMaxWidth())
 }
 
 @Preview @Composable fun PreviewEnsembleOverlappingImageRowOverflow() = NoopTheme {
-  EnsembleOverlappingImageRow(title = "Road Warrior", lazyUriStrings = previewEnsembles[2].second, selected = true, selectable = true, modifier = Modifier.fillMaxWidth())
+  EnsembleOverlappingImageRow(title = "Road Warrior", lazyUriStrings = previewEnsembles[2].thumbnails, selected = true, selectable = true, modifier = Modifier.fillMaxWidth())
 }
 
 @Preview

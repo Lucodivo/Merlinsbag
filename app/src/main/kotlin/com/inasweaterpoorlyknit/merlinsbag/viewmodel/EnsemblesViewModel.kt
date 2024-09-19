@@ -2,28 +2,20 @@
 
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.inasweaterpoorlyknit.core.common.Event
-import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.Constants.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEffect.NavigateToEnsembleDetail
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEffect.NavigateToSettings
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEvent.Back
@@ -45,21 +37,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -76,7 +59,7 @@ data class EnsemblesUIState(
   val selectedNewEnsembleArticles: Set<Int>,
   val selectedEnsembleIndices: Set<Int>,
   val addArticleThumbnails: LazyUriStrings,
-  val lazyEnsembles: List<Pair<String, LazyUriStrings>>
+  val lazyEnsembles: List<LazyEnsembleThumbnails>
 ) {
   val handleBackPress: Boolean
     get() = editMode
@@ -104,8 +87,8 @@ sealed interface EnsemblesUIEvent {
 }
 
 @HiltViewModel
-class EnsemblesComposeViewModel @Inject constructor(ensemblesPresenter: EnsemblesUIStateManager)
-  : MoleculeViewModel<EnsemblesUIEvent, EnsemblesUIState, EnsemblesUIEffect>(uiStateManager = ensemblesPresenter)
+class EnsemblesComposeViewModel @Inject constructor(ensemblesStateManager: EnsemblesUIStateManager)
+  : MoleculeViewModel<EnsemblesUIEvent, EnsemblesUIState, EnsemblesUIEffect>(uiStateManager = ensemblesStateManager)
 
 class EnsemblesUIStateManager @Inject constructor(
     val articleRepository: ArticleRepository,
@@ -158,12 +141,6 @@ class EnsemblesUIStateManager @Inject constructor(
     val ensembleArticleThumbnails =
       if(searchQuery.isEmpty()) allEnsembleArticles
       else searchEnsembleArticles
-
-    val ensembleNamesAndThumbnailUris = remember(ensembleArticleThumbnails.value) {
-      ensembleArticleThumbnails.value.map { ensembleThumbnails ->
-        Pair(ensembleThumbnails.ensemble.title, ensembleThumbnails.thumbnails)
-      }
-    }
 
     LaunchedEffect(Unit) {
       fun getEnsembleId(index: Int) = ensembleArticleThumbnails.value[index].ensemble.id
@@ -261,7 +238,7 @@ class EnsemblesUIStateManager @Inject constructor(
       selectedNewEnsembleArticles = selectedNewEnsembleArticles,
       selectedEnsembleIndices = selectedEnsembleIndices,
       addArticleThumbnails = addArticleThumbnails,
-      lazyEnsembles = ensembleNamesAndThumbnailUris,
+      lazyEnsembles = ensembleArticleThumbnails.value,
     )
   }
 }
