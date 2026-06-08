@@ -15,7 +15,7 @@ import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.entity.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
 import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings

@@ -1,7 +1,7 @@
 package com.inasweaterpoorlyknit.core.database
 
-import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
-import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleArticleEntity
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

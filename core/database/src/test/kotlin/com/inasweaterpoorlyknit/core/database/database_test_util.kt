@@ -1,8 +1,8 @@
 package com.inasweaterpoorlyknit.core.database
 
-import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
-import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
-import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
+import com.inasweaterpoorlyknit.core.database.entity.ArticleEntity
+import com.inasweaterpoorlyknit.core.database.entity.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleEntity
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
 import com.inasweaterpoorlyknit.core.testing.Counter
 import com.inasweaterpoorlyknit.core.testing.createFakeUriString

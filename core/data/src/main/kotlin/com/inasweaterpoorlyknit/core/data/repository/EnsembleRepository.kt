@@ -6,9 +6,8 @@ import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
-import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleCount
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings

@@ -10,10 +10,10 @@ import com.inasweaterpoorlyknit.core.database.model.ArticleWithFullImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleEntity
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
-import com.inasweaterpoorlyknit.core.database.model.EnsembleEntity
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -1,4 +1,4 @@
-package com.inasweaterpoorlyknit.core.database.model
+package com.inasweaterpoorlyknit.core.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

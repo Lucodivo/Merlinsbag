@@ -5,8 +5,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.inasweaterpoorlyknit.core.database.model.ArticleEntity
-import com.inasweaterpoorlyknit.core.database.model.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.entity.ArticleEntity
+import com.inasweaterpoorlyknit.core.database.entity.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithFullImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
