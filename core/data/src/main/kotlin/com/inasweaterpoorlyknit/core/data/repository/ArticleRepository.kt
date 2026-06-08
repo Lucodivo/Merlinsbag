@@ -11,11 +11,16 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.graphics.scale
 import com.inasweaterpoorlyknit.core.common.timestampFileName
+import com.inasweaterpoorlyknit.core.data.articleFilesDir
+import com.inasweaterpoorlyknit.core.data.articleFilesDirStr
+import com.inasweaterpoorlyknit.core.data.exportDir
+import com.inasweaterpoorlyknit.core.data.exportDirBeforeAndroidQ
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
 import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.entity.ArticleImageEntity
+import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
 import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
@@ -119,7 +124,7 @@ class ArticleRepository(
       val contentValues = ContentValues()
       contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, exportFilname)
       contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-      contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, exportDirGreaterEqualQ)
+      contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, exportDir)
       // TODO: MediaStore.MediaColumns.IN_PROGRESS
       exportUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
       exportUri?.let { uri ->
@@ -131,7 +136,7 @@ class ArticleRepository(
         }
       }
     } else {
-      val exportFile = File(exportDirLessThanQ, exportFilname)
+      val exportFile = File(exportDirBeforeAndroidQ, exportFilname)
       try {
         FileOutputStream(exportFile).let { fileOutputStream ->
           bitmapToExport.compress(exportFormat, 100, fileOutputStream)
@@ -149,10 +154,16 @@ class ArticleRepository(
     return if(success) exportUri else null
   }
 
-  fun getCountArticles() = articleDao.getCountArticles()
-  fun getCountArticleImages() = articleDao.getCountArticleImages()
-  fun getMostPopularArticlesImageCount(count: Int): Flow<LazyUriStrings> = articleDao.getMostPopularArticleThumbnails(count).map{ LazyArticleThumbnails(articleFilesDirStr(context), it) }
-  fun getAllArticlesWithThumbnails() = articleDao.getAllArticlesWithThumbnails().map { LazyArticleThumbnails(articleFilesDirStr(context), it) }
+  fun getCountArticles(): Flow<Int> = articleDao.getCountArticles()
+  fun getCountArticleImages(): Flow<Int> = articleDao.getCountArticleImages()
+  fun getMostPopularArticlesImageCount(count: Int): Flow<LazyUriStrings> =
+    articleDao.getMostPopularArticleThumbnails(count).map{
+      LazyArticleThumbnails(articleFilesDirStr(context), it)
+    }
+  fun getAllArticlesWithThumbnails(): Flow<LazyArticleThumbnails> =
+    articleDao.getAllArticlesWithThumbnails().map {
+      LazyArticleThumbnails(articleFilesDirStr(context), it)
+    }
   fun getArticlesWithImages(ensembleId: String? = null): Flow<LazyArticlesWithImages> =
       if(ensembleId == null) { articleDao.getAllArticlesWithImages() }
       else { ensembleDao.getEnsembleArticleWithImages(ensembleId) }

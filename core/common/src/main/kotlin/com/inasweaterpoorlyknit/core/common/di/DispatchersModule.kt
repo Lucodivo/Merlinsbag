@@ -13,11 +13,7 @@ import javax.inject.Qualifier
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Dispatcher(val dispatcher: InjectDispatcher)
-
-enum class InjectDispatcher {
-  Default,
-  IO,
-}
+enum class InjectDispatcher { Default, IO, }
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -303,7 +303,7 @@ class ArticleDetailViewModel @AssistedInject constructor(
     newlyAddedEnsembles.add(title)
     viewModelScope.launch(Dispatchers.IO) {
       val isUnique = ensembleRepository.isEnsembleTitleUnique(title).first()
-      if(isUnique) ensembleRepository.insertEnsemble(title, listOf(articleId))
+      if(isUnique) ensembleRepository.addEnsemble(title, listOf(articleId))
     }
   }
 

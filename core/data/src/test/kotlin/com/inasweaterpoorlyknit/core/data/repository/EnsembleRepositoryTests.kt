@@ -3,7 +3,6 @@ package com.inasweaterpoorlyknit.core.data.repository
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.testing.createFakeUriString
@@ -65,7 +64,7 @@ class EnsembleRepositoryTests {
 
     // act
     for (ensembleSize in ensembleSizes) {
-      ensembleRepository.insertEnsemble("ensemble$ensembleSize", articleIds.slice(0..<ensembleSize))
+      ensembleRepository.addEnsemble("ensemble$ensembleSize", articleIds.slice(0..<ensembleSize))
     }
     var ensembles: List<LazyEnsembleThumbnails>
     runBlocking { ensembles = ensembleRepository.getAllEnsembleArticleThumbnails().first() }

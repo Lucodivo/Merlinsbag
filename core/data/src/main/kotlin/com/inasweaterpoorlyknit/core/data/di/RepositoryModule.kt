@@ -20,20 +20,32 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
-  /* Repositories */
   @Provides
   @Singleton
-  fun providesArticleRepository(@ApplicationContext context: Context, articleDao: ArticleDao, ensembleDao: EnsembleDao): ArticleRepository = ArticleRepository(context, articleDao, ensembleDao)
+  fun providesArticleRepository(
+    @ApplicationContext context: Context,
+    articleDao: ArticleDao,
+    ensembleDao: EnsembleDao
+  ): ArticleRepository = ArticleRepository(context, articleDao, ensembleDao)
 
   @Provides
   @Singleton
-  fun providesEnsembleRepository(@ApplicationContext context: Context, ensembleDao: EnsembleDao, articleDao: ArticleDao): EnsembleRepository = EnsembleRepository(context, ensembleDao, articleDao)
+  fun providesEnsembleRepository(
+    @ApplicationContext context: Context,
+    ensembleDao: EnsembleDao
+  ): EnsembleRepository = EnsembleRepository(context, ensembleDao)
 
   @Provides
   @Singleton
-  fun providesPurgeRepository(@ApplicationContext context: Context, purgeDatabaseDao: PurgeDatabaseDao, purgeDataStoreDao: PurgeDataStoreDao): PurgeRepository = PurgeRepository(context, purgeDatabaseDao, purgeDataStoreDao)
+  fun providesPurgeRepository(
+    @ApplicationContext context: Context,
+    purgeDatabaseDao: PurgeDatabaseDao,
+    purgeDataStoreDao: PurgeDataStoreDao
+  ): PurgeRepository = PurgeRepository(context, purgeDatabaseDao, purgeDataStoreDao)
 
   @Provides
   @Singleton
-  fun providesUserPreferencesRepository(userPreferencesDao: UserPreferencesDao): UserPreferencesRepository = UserPreferencesRepository(userPreferencesDao)
+  fun providesUserPreferencesRepository(
+    userPreferencesDao: UserPreferencesDao
+  ): UserPreferencesRepository = UserPreferencesRepository(userPreferencesDao)
 }
