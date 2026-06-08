@@ -200,7 +200,7 @@ fun EnsemblesScreen(
     articleThumbnails = uiState.addArticleThumbnails,
     onClickSave = { onUiEvent(ClickSaveAddEnsembleDialog(it)) },
     onClickClose = { onUiEvent(ClickCloseAddEnsembleDialog) },
-    ensembleTitleError = uiState.newEnsembleTitleError,
+    showTitleError = uiState.showNewEnsembleTitleError,
     onClickArticle = { onUiEvent(ClickNewEnsembleArticle(it)) },
     selectedArticleIndices = uiState.selectedNewEnsembleArticles,
   )
@@ -317,7 +317,7 @@ private fun AddEnsembleDialog(
     onClickArticle: (index: Int) -> Unit,
     onClickSave: (title: String) -> Unit,
     onClickClose: () -> Unit,
-    ensembleTitleError: Int?,
+    showTitleError: Boolean,
 ) {
   val (userInputTitle, setUserInputTitle) = rememberSaveable { mutableStateOf("") }
   NoopBottomSheetDialog(
@@ -344,9 +344,9 @@ private fun AddEnsembleDialog(
         label = { Text(text = stringResource(id = R.string.ensemble_title)) },
         singleLine = true,
       )
-      if(ensembleTitleError != null) {
+      if(showTitleError) {
         Text(
-          text = "* ${stringResource(id = ensembleTitleError)}",
+          text = "* ${stringResource(id = R.string.ensemble_with_title_already_exists)}",
           color = MaterialTheme.colorScheme.error,
           modifier = Modifier.padding(top = 4.dp)
         )
@@ -641,7 +641,7 @@ fun PreviewUtilEnsembleScreen(
       showPlaceholder = showPlaceholder,
       dialogState = dialogState,
       editMode = false,
-      newEnsembleTitleError = null,
+      showNewEnsembleTitleError = false,
       selectedNewEnsembleArticles = setOf(0, 2),
       selectedEnsembleIndices = setOf(1, 3),
       addArticleThumbnails = lazyRepeatedThumbnailResourceIdsAsStrings,
@@ -653,13 +653,13 @@ fun PreviewUtilEnsembleScreen(
 
 @Composable
 fun PreviewUtilAddEnsembleDialog(
-    thumbnails: LazyUriStrings = lazyRepeatedThumbnailResourceIdsAsStrings,
-    ensembleTitleError: Int? = null,
+  thumbnails: LazyUriStrings = lazyRepeatedThumbnailResourceIdsAsStrings,
+  showEnsembleTitleError: Boolean = false,
 ) = NoopTheme(DarkMode.DARK) {
   AddEnsembleDialog(
     visible = true,
     articleThumbnails = thumbnails,
-    ensembleTitleError = ensembleTitleError,
+    showTitleError = showEnsembleTitleError,
     selectedArticleIndices = setOf(0, 1),
     onClickSave = {}, onClickClose = {}, onClickArticle = {}
   )
@@ -692,7 +692,7 @@ fun PreviewEnsembleOverlappingPlaceholderRowOverflow() = NoopTheme {
 
 @Preview @Composable fun PreviewAddEnsembleDialog() = PreviewUtilAddEnsembleDialog()
 @Preview @Composable fun PreviewAddEnsembleDialog_NoArticles() = PreviewUtilAddEnsembleDialog(thumbnails = LazyUriStrings.Empty)
-@Preview @Composable fun PreviewAddEnsembleDialog_EnsembleTitleError() = PreviewUtilAddEnsembleDialog(ensembleTitleError = R.string.ensemble_with_title_already_exists)
+@Preview @Composable fun PreviewAddEnsembleDialog_EnsembleTitleError() = PreviewUtilAddEnsembleDialog(showEnsembleTitleError = true)
 
 @Preview @Composable fun PreviewDeleteEnsemblesAlertDialog() = NoopTheme { DeleteEnsemblesAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

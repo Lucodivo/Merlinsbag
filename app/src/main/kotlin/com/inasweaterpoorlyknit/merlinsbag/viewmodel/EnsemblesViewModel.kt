@@ -2,7 +2,6 @@
 
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,7 +14,6 @@ import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
-import com.inasweaterpoorlyknit.merlinsbag.R
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEffect.NavigateToEnsembleDetail
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEffect.NavigateToSettings
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsemblesUIEvent.Back
@@ -55,7 +53,7 @@ data class EnsemblesUIState(
   val showPlaceholder: Boolean,
   val dialogState: DialogState,
   val editMode: Boolean,
-  @StringRes val newEnsembleTitleError: Int?,
+  val showNewEnsembleTitleError: Boolean,
   val selectedNewEnsembleArticles: Set<Int>,
   val selectedEnsembleIndices: Set<Int>,
   val addArticleThumbnails: LazyUriStrings,
@@ -98,7 +96,7 @@ class EnsemblesUIStateManager @Inject constructor(
     showPlaceholder = false,
     dialogState = DialogState.None,
     editMode = false,
-    newEnsembleTitleError = null,
+    showNewEnsembleTitleError = false,
     selectedNewEnsembleArticles = emptySet(),
     selectedEnsembleIndices = emptySet(),
     addArticleThumbnails = LazyUriStrings.Empty,
@@ -114,12 +112,13 @@ class EnsemblesUIStateManager @Inject constructor(
   ): EnsemblesUIState {
     var dialogState by remember { mutableStateOf(DialogState.None) }
     var editMode by remember { mutableStateOf(false) }
-    var newEnsembleTitleError by remember { mutableStateOf<Int?>(null) }
+    var showNewEnsembleTitleError by remember { mutableStateOf(false) }
     val selectedNewEnsembleArticles = remember { mutableStateSetOf<Int>() }
     val selectedEnsembleIndices = remember { mutableStateSetOf<Int>() }
 
     val ensembleCount by remember { ensembleRepository.getCountEnsembles() }.collectAsState(-1)
 
+    // Don't acquire article thumbnails until needed
     var addEnsembleTriggered by remember { mutableStateOf(false) }
     val addArticleThumbnails by remember(addEnsembleTriggered) {
       if(addEnsembleTriggered) articleRepository.getAllArticlesWithThumbnails()
@@ -161,7 +160,7 @@ class EnsemblesUIStateManager @Inject constructor(
           }
           ClickCloseAddEnsembleDialog -> {
             dialogState = DialogState.None
-            newEnsembleTitleError = null
+            showNewEnsembleTitleError = false
             selectedNewEnsembleArticles.clear()
           }
           DismissDeleteEnsemblesAlertDialog -> {
@@ -195,13 +194,13 @@ class EnsemblesUIStateManager @Inject constructor(
               val ensembleTitleUnique = ensembleRepository.isEnsembleTitleUnique(title).first()
               if(ensembleTitleUnique){
                 dialogState = DialogState.None
-                newEnsembleTitleError = null
+                showNewEnsembleTitleError = false
                 selectedNewEnsembleArticles.clear()
-                ensembleRepository.insertEnsemble(
+                ensembleRepository.addEnsemble(
                   title,
                   articleIds,
                 )
-              } else newEnsembleTitleError = R.string.ensemble_with_title_already_exists
+              } else showNewEnsembleTitleError = true
             }
           }
           ConfirmDeleteEnsemblesAlertDialog -> {
@@ -234,7 +233,7 @@ class EnsemblesUIStateManager @Inject constructor(
       showPlaceholder = ensembleCount == 0,
       dialogState = dialogState,
       editMode = editMode,
-      newEnsembleTitleError = newEnsembleTitleError,
+      showNewEnsembleTitleError = showNewEnsembleTitleError,
       selectedNewEnsembleArticles = selectedNewEnsembleArticles,
       selectedEnsembleIndices = selectedEnsembleIndices,
       addArticleThumbnails = addArticleThumbnails,

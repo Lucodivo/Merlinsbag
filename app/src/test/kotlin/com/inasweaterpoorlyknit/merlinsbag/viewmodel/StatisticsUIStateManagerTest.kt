@@ -23,11 +23,8 @@ import org.junit.Rule
 import org.junit.Test
 
 class StatisticsUIStateManagerTest {
-  @get:Rule
-  val mockkRule = MockKRule(this)
-
-  @get:Rule
-  val dispatcherRule = MainDispatcherRule()
+  @get:Rule val mockkRule = MockKRule(this)
+  @get:Rule val dispatcherRule = MainDispatcherRule()
 
   @MockK lateinit var ensembleRepository: EnsembleRepository
   @MockK lateinit var articleRepository: ArticleRepository
@@ -35,9 +32,9 @@ class StatisticsUIStateManagerTest {
   lateinit var statisticsUIStateManager: StatisticsUIStateManager
 
   companion object {
-    val articleCount = 100
-    val articleImagesCount = articleCount + 50
-    val ensembleCount = 70
+    const val articleCount = 100
+    const val articleImagesCount = articleCount + 50
+    const val ensembleCount = 70
     val popularArticleThumbnails = LazyArticleThumbnails(
       directory = "file://",
       articleThumbnailPaths = List(1){ articleIndex ->

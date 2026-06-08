@@ -24,11 +24,8 @@ import org.junit.Rule
 import org.junit.Test
 
 class EnsemblesUIStateManagerTest {
-  @get:Rule
-  val mockkRule = MockKRule(this)
-
-  @get:Rule
-  val dispatcherRule = MainDispatcherRule()
+  @get:Rule val mockkRule = MockKRule(this)
+  @get:Rule val dispatcherRule = MainDispatcherRule()
 
   @MockK lateinit var ensembleRepository: EnsembleRepository
   @MockK lateinit var articleRepository: ArticleRepository
