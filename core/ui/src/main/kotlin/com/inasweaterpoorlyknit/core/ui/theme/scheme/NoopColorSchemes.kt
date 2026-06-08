@@ -6,8 +6,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.inasweaterpoorlyknit.core.model.ColorPalette
-import com.inasweaterpoorlyknit.core.model.HighContrast
+import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.preference.HighContrast
 
 object NoopColorSchemes {
   val colorPaletteSchemes = arrayOf(
@@ -21,9 +21,9 @@ object NoopColorSchemes {
 
   @Composable
   fun colorScheme(
-      colorPalette: ColorPalette,
-      darkMode: Boolean,
-      highContrast: HighContrast,
+    colorPalette: ColorPalette,
+    darkMode: Boolean,
+    highContrast: HighContrast,
   ): ColorScheme {
     val context = LocalContext.current
     // Note: Samsung's One UI seems to not respect this whatsoever. Always a shade of blue...

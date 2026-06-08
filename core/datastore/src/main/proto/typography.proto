@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "com.inasweaterpoorlyknit.merlinsbag";
+option java_multiple_files = true;
+
+enum Typography {
+  Typography_Default = 0;
+  Typography_Montserrat = 1;
+  Typography_JetBrainsMono = 2;
+  Typography_Cinzel = 3;
+  Typography_ConcertOne = 4;
+  Typography_Macondo = 5;
+  Typography_Tiny5 = 6;
+}

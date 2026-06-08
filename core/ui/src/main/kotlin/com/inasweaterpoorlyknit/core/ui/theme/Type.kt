@@ -14,7 +14,7 @@ import com.inasweaterpoorlyknit.core.ui.R
   Create a new FontFamily using the resource id, as seen below
   Create a new Typography from the FontFamily, as seen below
   Edit user_preferences.proto to add a new enum for the new font family
-  Use the same enum order in user_preferences.proto to edit com.inasweaterpoorlyknit.core.model.Typography enum
+  Use the same enum order in typography.proto to edit com.inasweaterpoorlyknit.core.model.preferences.Typography enum
   Add option in SettingsScreen.kt
   Add option in NoopTheme.kt
 

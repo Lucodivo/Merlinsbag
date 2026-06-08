@@ -9,11 +9,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
-import com.inasweaterpoorlyknit.core.model.ColorPalette
-import com.inasweaterpoorlyknit.core.model.DarkMode
-import com.inasweaterpoorlyknit.core.model.HighContrast
-import com.inasweaterpoorlyknit.core.model.ImageQuality
-import com.inasweaterpoorlyknit.core.model.Typography
+import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.preference.HighContrast
+import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.preference.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.merlinsbag.Constants.WebUrls
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState
@@ -27,15 +27,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class SettingsUIState (
-    val clearCacheEnabled: Boolean,
-    val highContrastEnabled: Boolean,
-    val dropdownMenu: DropdownMenuState,
-    val alertDialog: AlertDialogState,
-    val darkMode: DarkMode,
-    val colorPalette: ColorPalette,
-    val highContrast: HighContrast,
-    val imageQuality: ImageQuality,
-    val typography: Typography,
+  val clearCacheEnabled: Boolean,
+  val highContrastEnabled: Boolean,
+  val dropdownMenu: DropdownMenuState,
+  val alertDialog: AlertDialogState,
+  val darkMode: DarkMode,
+  val colorPalette: ColorPalette,
+  val highContrast: HighContrast,
+  val imageQuality: ImageQuality,
+  val typography: Typography,
 ){
   enum class DropdownMenuState {
     None,

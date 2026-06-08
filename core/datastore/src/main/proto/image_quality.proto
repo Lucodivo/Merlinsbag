@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_package = "com.inasweaterpoorlyknit.merlinsbag";
+option java_multiple_files = true;
+
+enum ImageQuality {
+  ImageQuality_Standard = 0;
+  ImageQuality_High = 1;
+  ImageQuality_VeryHigh = 2;
+  ImageQuality_Perfect = 3;
+}

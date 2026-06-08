@@ -100,7 +100,10 @@ trace("ArticleDetailViewModel: exportArticle"){
 ### java.lang.IllegalStateException: Storage for [...] is already registered
 - Some Kotlin gradle daemon has gone haywire.
   - run in terminal: ./gradlew --stop
-  - nuclear option: restart your computer because it probably deserves it anyways
+    - Potentially run multiple times *shrugs*
+  - nuclear options: 
+    - restart your computer because it probably deserves it anyways
+    - add `ksp.incremental=false` to `gradle.properties`
 
 ## Runtime Errors
 ### java.lang.IllegalStateException: Room cannot verify the data integrity. Looks like you've changed schema but forgot to update the version number. You can simply fix this by increasing the version number.

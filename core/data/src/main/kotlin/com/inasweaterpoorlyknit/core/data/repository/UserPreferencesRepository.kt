@@ -1,11 +1,11 @@
 package com.inasweaterpoorlyknit.core.data.repository
 
 import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
-import com.inasweaterpoorlyknit.core.model.ColorPalette
-import com.inasweaterpoorlyknit.core.model.DarkMode
-import com.inasweaterpoorlyknit.core.model.HighContrast
-import com.inasweaterpoorlyknit.core.model.ImageQuality
-import com.inasweaterpoorlyknit.core.model.Typography
+import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.preference.HighContrast
+import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.preference.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 

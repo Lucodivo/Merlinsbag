@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "com.inasweaterpoorlyknit.merlinsbag";
+option java_multiple_files = true;
+
+enum ColorPalette {
+  ColorPalette_SystemDynamic = 0;
+  ColorPalette_RoadWarrior = 1;
+  ColorPalette_Retro = 2;
+  ColorPalette_Sky = 3;
+  ColorPalette_Crimson = 4;
+  ColorPalette_NinetyFive = 5;
+}

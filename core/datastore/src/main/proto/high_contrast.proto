@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "com.inasweaterpoorlyknit.merlinsbag";
+option java_multiple_files = true;
+
+enum HighContrast {
+  HighContrast_Off = 0;
+  HighContrast_Medium = 1;
+  HighContrast_High = 2;
+}

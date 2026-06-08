@@ -38,7 +38,6 @@ class EnsembleRepositoryTests {
     ensembleRepository = EnsembleRepository(
       context = context,
       ensembleDao = database.EnsembleDao(),
-      articleDao = database.ArticleDao(),
     )
   }
 

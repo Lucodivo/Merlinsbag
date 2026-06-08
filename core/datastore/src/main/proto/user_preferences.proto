@@ -1,45 +1,13 @@
 syntax = "proto3";
 
+import "dark_mode.proto";
+import "typography.proto";
+import "color_palette.proto";
+import "high_contrast.proto";
+import "image_quality.proto";
+
 option java_package = "com.inasweaterpoorlyknit.merlinsbag";
 option java_multiple_files = true;
-
-enum DarkMode {
-  DarkMode_System = 0;
-  DarkMode_Light = 1;
-  DarkMode_Dark = 2;
-}
-
-enum Typography {
-  Typography_Default = 0;
-  Typography_Montserrat = 1;
-  Typography_JetBrainsMono = 2;
-  Typography_Cinzel = 3;
-  Typography_ConcertOne = 4;
-  Typography_Macondo = 5;
-  Typography_Tiny5 = 6;
-}
-
-enum ColorPalette {
-  ColorPalette_SystemDynamic = 0;
-  ColorPalette_RoadWarrior = 1;
-  ColorPalette_Retro = 2;
-  ColorPalette_Sky = 3;
-  ColorPalette_Crimson = 4;
-  ColorPalette_NinetyFive = 5;
-}
-
-enum HighContrast {
-  HighContrast_Off = 0;
-  HighContrast_Medium = 1;
-  HighContrast_High = 2;
-}
-
-enum ImageQuality {
-  ImageQuality_Standard = 0;
-  ImageQuality_High = 1;
-  ImageQuality_VeryHigh = 2;
-  ImageQuality_Perfect = 3;
-}
 
 message UserPreferences {
   bool has_completed_onboarding = 1;

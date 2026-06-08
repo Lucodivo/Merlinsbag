@@ -1,45 +1,10 @@
 package com.inasweaterpoorlyknit.core.model
 
-// NOTE: This class is and should continue to be *TIGHTLY* coupled with user_preferences.proto
-//   - ordinal of enums matter!
-
-enum class DarkMode {
-  SYSTEM,
-  LIGHT,
-  DARK,
-}
-
-enum class ColorPalette {
-  SYSTEM_DYNAMIC,
-  ROAD_WARRIOR,
-  RETRO,
-  SKY,
-  CRIMSON,
-  NINETY_FIVE,
-}
-
-enum class HighContrast {
-  OFF,
-  MEDIUM,
-  HIGH,
-}
-
-enum class Typography {
-  DEFAULT,
-  MONTSERRAT,
-  JETBRAINS_MONO,
-  CINZEL,
-  CONCERT_ONE,
-  MACONDO,
-  TINY_5,
-}
-
-enum class ImageQuality {
-  STANDARD,
-  HIGH,
-  VERY_HIGH,
-  PERFECT,
-}
+import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.preference.HighContrast
+import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.preference.Typography
 
 data class UserPreferences(
     val hasCompletedOnboarding: Boolean = false,

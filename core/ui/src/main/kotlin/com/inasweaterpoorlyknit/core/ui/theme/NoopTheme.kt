@@ -3,10 +3,10 @@ package com.inasweaterpoorlyknit.core.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import com.inasweaterpoorlyknit.core.model.ColorPalette
-import com.inasweaterpoorlyknit.core.model.DarkMode
-import com.inasweaterpoorlyknit.core.model.HighContrast
-import com.inasweaterpoorlyknit.core.model.Typography
+import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.preference.HighContrast
+import com.inasweaterpoorlyknit.core.model.preference.Typography
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 
 @Composable
