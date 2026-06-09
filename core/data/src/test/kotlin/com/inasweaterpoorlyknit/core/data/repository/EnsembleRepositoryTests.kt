@@ -3,8 +3,8 @@ package com.inasweaterpoorlyknit.core.data.repository
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
+import com.inasweaterpoorlyknit.core.database.NoopDatabase
 import com.inasweaterpoorlyknit.core.testing.createFakeUriString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

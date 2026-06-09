@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
+import com.inasweaterpoorlyknit.core.model.UserPreferencesDefault
 import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette
 import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette.ColorPalette_SystemDynamic
 import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode
@@ -16,7 +17,6 @@ import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast
 import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Off
 import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography
-import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.merlinsbag.Constants.WebUrls
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.DropdownMenuState
@@ -106,7 +106,7 @@ class SettingsUIStateManager @Inject constructor(
   val purgeRepository: PurgeRepository,
   val userPreferencesRepository: UserPreferencesRepository,
 ): ComposeUIStateManager<SettingsUIEvent, SettingsUIState, SettingsUIEffect> {
-  override var cachedState = with(UserPreferences()) {
+  override var cachedState = with(UserPreferencesDefault) {
     SettingsUIState(
       clearCacheEnabled = true,
       highContrastEnabled = true,
@@ -130,15 +130,7 @@ class SettingsUIStateManager @Inject constructor(
     var clearCacheEnabled by remember { mutableStateOf(cachedState.clearCacheEnabled) }
     var dropdownMenu by remember { mutableStateOf(cachedState.dropdownMenu) }
     var alertDialog by remember { mutableStateOf(cachedState.alertDialog) }
-    val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(
-      UserPreferences(
-        darkMode = cachedState.darkMode,
-        colorPalette = cachedState.colorPalette,
-        highContrast = cachedState.highContrast,
-        imageQuality = cachedState.imageQuality,
-        typography = cachedState.typography,
-      )
-    )
+    val userPreferences by remember { userPreferencesRepository.userPreferences }.collectAsState(UserPreferencesDefault)
 
     fun dismissDropdownMenu() { dropdownMenu = DropdownMenuState.None }
     fun dismissAlertDialog() { alertDialog = AlertDialogState.None }

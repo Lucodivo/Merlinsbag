@@ -6,18 +6,18 @@ import androidx.compose.runtime.Composable
 import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette
 import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette.ColorPalette_RoadWarrior
 import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode
-import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_System
-import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Light
 import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Dark
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Light
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_System
 import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast
 import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Off
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography
-import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Default
-import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Montserrat
-import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_JetBrainsMono
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Cinzel
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_ConcertOne
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Default
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_JetBrainsMono
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Macondo
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Montserrat
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Tiny5
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 

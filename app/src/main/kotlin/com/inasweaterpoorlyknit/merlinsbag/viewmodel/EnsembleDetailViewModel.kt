@@ -12,10 +12,10 @@ import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.merlinsbag.R
+import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.Disabled
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledGeneral
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledSelectedArticles
-import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

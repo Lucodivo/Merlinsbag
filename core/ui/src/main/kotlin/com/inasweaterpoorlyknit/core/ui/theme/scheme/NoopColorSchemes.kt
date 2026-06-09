@@ -9,9 +9,9 @@ import androidx.compose.ui.platform.LocalContext
 import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette
 import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette.ColorPalette_SystemDynamic
 import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast
-import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Off
 import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_High
 import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Medium
+import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Off
 
 object NoopColorSchemes {
   val colorPaletteSchemes = arrayOf(

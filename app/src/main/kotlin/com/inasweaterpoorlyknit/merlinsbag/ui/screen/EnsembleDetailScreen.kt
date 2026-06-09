@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -40,7 +38,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,12 +64,12 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.Constants.Companion.MAX_ENSEMBLE_TITLE_LENGTH
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel
-import kotlinx.serialization.Serializable
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledSelectedArticles
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.Disabled
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledGeneral
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.EnsembleDetailViewModel.EditState.EnabledSelectedArticles
+import kotlinx.serialization.Serializable
 
 
 @Serializable

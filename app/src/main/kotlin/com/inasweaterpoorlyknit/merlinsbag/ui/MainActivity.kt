@@ -15,8 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import com.inasweaterpoorlyknit.core.ml.encourageInstallSubjectSegmentationModel
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.navigateToAddArticle
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel.LoadState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.MainActivityViewModel.LoadState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

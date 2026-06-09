@@ -6,7 +6,7 @@ import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode
 import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast
 import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography
-import com.inasweaterpoorlyknit.core.model.UserPreferences
+import com.inasweaterpoorlyknit.core.model.proto.preference.UserPreferences
 import kotlinx.coroutines.flow.Flow
 
 class UserPreferencesRepository(

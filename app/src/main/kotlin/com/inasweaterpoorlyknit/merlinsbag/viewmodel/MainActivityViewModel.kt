@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
-import com.inasweaterpoorlyknit.core.model.UserPreferences
+import com.inasweaterpoorlyknit.core.model.UserPreferencesDefault
 import com.inasweaterpoorlyknit.merlinsbag.ui.screen.WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,9 +37,7 @@ class MainActivityViewModel @Inject constructor(
       .onEach { uiState = LoadState.Success }
       .stateIn(
         scope = viewModelScope,
-        initialValue = UserPreferences(
-          hasCompletedOnboarding = true,
-        ),
+        initialValue = UserPreferencesDefault,
         started = SharingStarted.WhileSubscribed(WHILE_SUBSCRIBED_STOP_TIMEOUT_MILLIS),
       )
 

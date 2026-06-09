@@ -91,14 +91,16 @@ dependencies {
     testImplementation(projects.core.testing)
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.protobuf.kotlin.lite)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.tracing.ktx)
     implementation(libs.androidx.core.splashscreen)
+
     implementation(libs.kotlinx.serialization.core) // used for @Serializable compose route objects / data classes
+
+    implementation(libs.protobuf.kotlin.lite) // necessary for proto models
 
     // Compose
     implementation(libs.androidx.activity.compose)

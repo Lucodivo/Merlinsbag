@@ -33,7 +33,8 @@ dependencies {
   implementation(projects.core.model)
 
   implementation(libs.androidx.core.ktx)
-  implementation(libs.protobuf.kotlin.lite)
+
+  implementation(libs.protobuf.kotlin.lite) // necessary for proto models
 
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.compose.ui.tooling)

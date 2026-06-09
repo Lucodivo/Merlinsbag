@@ -72,11 +72,11 @@ import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.core.ui.theme.scheme.NoopColorSchemes
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.DropdownMenuState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEffect
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIEvent
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.DropdownMenuState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsViewModel
 import kotlinx.serialization.Serializable
 import staggeredHorizontallyAnimatedComposables

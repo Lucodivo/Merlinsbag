@@ -1,7 +1,6 @@
 package com.inasweaterpoorlyknit.merlinsbag.viewmodel
 
 import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
-import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
@@ -14,7 +13,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before

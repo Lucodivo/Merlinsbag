@@ -21,12 +21,12 @@ import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.entity.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
-import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
-import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Standard
-import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Perfect
-import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_High
-import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_VeryHigh
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_High
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Perfect
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Standard
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_VeryHigh
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

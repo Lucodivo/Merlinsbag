@@ -5,15 +5,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleArticleEntity
+import com.inasweaterpoorlyknit.core.database.entity.EnsembleEntity
 import com.inasweaterpoorlyknit.core.database.model.ArticleEnsembleCount
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithFullImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.database.entity.EnsembleArticleEntity
-import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
-import com.inasweaterpoorlyknit.core.database.entity.EnsembleEntity
+import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleThumbnails
 import kotlinx.coroutines.flow.Flow
 
 @Dao

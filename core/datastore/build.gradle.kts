@@ -32,9 +32,10 @@ dependencies {
 
   implementation(libs.androidx.core.ktx)
 
+  implementation(libs.protobuf.kotlin.lite) // necessary for proto models
+
   // Proto DataStore
   implementation(libs.androidx.datastore)
-  implementation(libs.protobuf.kotlin.lite)
 
   // Testing
   testImplementation(libs.junit)

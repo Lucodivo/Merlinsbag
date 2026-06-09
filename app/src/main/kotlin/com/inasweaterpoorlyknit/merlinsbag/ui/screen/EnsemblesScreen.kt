@@ -71,9 +71,9 @@ import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
+import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Dark
 import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Light
-import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION

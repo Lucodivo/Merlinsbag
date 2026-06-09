@@ -46,8 +46,8 @@ import com.inasweaterpoorlyknit.core.ui.repeatedThumbnailResourceIdsAsStrings
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
 import com.inasweaterpoorlyknit.merlinsbag.R
-import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel.EditState
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel
+import com.inasweaterpoorlyknit.merlinsbag.viewmodel.ArticlesViewModel.EditState
 import kotlinx.serialization.Serializable
 
 @Serializable
