@@ -2,19 +2,19 @@ package com.inasweaterpoorlyknit.core.data.repository
 
 import android.content.Context
 import com.inasweaterpoorlyknit.core.common.listMap
-import com.inasweaterpoorlyknit.core.data.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.data.model.LazyArticleThumbnails
 import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.entity.EnsembleArticleEntity
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.EnsembleArticleCount
+import com.inasweaterpoorlyknit.core.image.articleFilesDirStr
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class EnsembleRepository(context: Context, private val ensembleDao: EnsembleDao) {
-  val articleImagesDirStr = articleFilesDirStr(context)
+  private val articleImagesDirStr = articleFilesDirStr(context)
 
   fun addEnsemble(title: String, articleIds: List<String>) = ensembleDao.insertEnsembleWithArticles(title, articleIds)
   fun addArticlesToEnsemble(ensembleId: String, articleIds: List<String>) {

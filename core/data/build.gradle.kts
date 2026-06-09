@@ -29,6 +29,7 @@ dependencies {
   implementation(projects.core.common)
   implementation(projects.core.datastore)
   implementation(projects.core.model)
+  implementation(projects.core.image)
   testImplementation(projects.core.testing)
 
   implementation(libs.androidx.core.ktx)
