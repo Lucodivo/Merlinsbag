@@ -2,6 +2,7 @@ plugins {
   alias(libs.plugins.androidLibrary)
   alias(libs.plugins.jetbrainsKotlinAndroid)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.protobuf)
 }
 
 android {
@@ -21,4 +22,23 @@ android {
 
 dependencies {
   implementation(libs.androidx.core.ktx)
+  implementation(libs.protobuf.kotlin.lite)
+}
+
+protobuf {
+  protoc {
+    artifact = libs.protobuf.protoc.get().toString()
+  }
+  generateProtoTasks {
+    all().forEach { task ->
+      task.builtins {
+        register("java") {
+          option("lite")
+        }
+        register("kotlin") {
+          option("lite")
+        }
+      }
+    }
+  }
 }

@@ -50,24 +50,6 @@ dependencies {
   kspAndroidTest(libs.hilt.compiler)
 }
 
-protobuf {
-  protoc {
-    artifact = libs.protobuf.protoc.get().toString()
-  }
-  generateProtoTasks {
-    all().forEach { task ->
-      task.builtins {
-        register("java") {
-          option("lite")
-        }
-        register("kotlin") {
-          option("lite")
-        }
-      }
-    }
-  }
-}
-
 // NOTE: Pulled from ksp issues. Ensures that proto datastore generated files are included in the source set.
 // https://github.com/google/ksp/issues/1590
 androidComponents {

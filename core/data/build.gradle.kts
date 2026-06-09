@@ -32,6 +32,7 @@ dependencies {
   testImplementation(projects.core.testing)
 
   implementation(libs.androidx.core.ktx)
+  implementation(libs.protobuf.kotlin.lite)
 
   // Testing
   testImplementation(libs.junit)

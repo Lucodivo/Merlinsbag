@@ -1,38 +1,27 @@
 package com.inasweaterpoorlyknit.core.datastore.dao
 
 import androidx.datastore.core.DataStore
-import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
-import com.inasweaterpoorlyknit.core.model.preference.DarkMode
-import com.inasweaterpoorlyknit.core.model.preference.HighContrast
-import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
-import com.inasweaterpoorlyknit.core.model.preference.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import com.inasweaterpoorlyknit.merlinsbag.ColorPalette as ColorPaletteDataStore
-import com.inasweaterpoorlyknit.merlinsbag.DarkMode as DarkModeDataStore
-import com.inasweaterpoorlyknit.merlinsbag.HighContrast as HighContrastDataStore
-import com.inasweaterpoorlyknit.merlinsbag.ImageQuality as ImageQualityDataStore
-import com.inasweaterpoorlyknit.merlinsbag.Typography as TypographyDataStore
-import com.inasweaterpoorlyknit.merlinsbag.UserPreferences as UserPreferencesDataStore
+import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography
+import com.inasweaterpoorlyknit.core.model.proto.preference.UserPreferences as UserPreferencesDataStore
 
 class UserPreferencesDao(
     private val preferencesDataStore: DataStore<UserPreferencesDataStore>
 ) {
-  private fun DarkModeDataStore.fromDataStore() = DarkMode.entries[ordinal]
-  private fun ColorPaletteDataStore.fromDataStore() = ColorPalette.entries[ordinal]
-  private fun HighContrastDataStore.fromDataStore() = HighContrast.entries[ordinal]
-  private fun TypographyDataStore.fromDataStore() = Typography.entries[ordinal]
-  private fun ImageQualityDataStore.fromDataStore() = ImageQuality.entries[ordinal]
-
   val userPreferences: Flow<UserPreferences> = preferencesDataStore.data.map {
     UserPreferences(
       hasCompletedOnboarding = it.hasCompletedOnboarding,
-      darkMode = it.darkMode.fromDataStore(),
-      colorPalette = it.colorPalette.fromDataStore(),
-      highContrast = it.highContrast.fromDataStore(),
-      typography = it.typography.fromDataStore(),
-      imageQuality = it.imageQuality.fromDataStore(),
+      darkMode = it.darkMode,
+      colorPalette = it.colorPalette,
+      highContrast = it.highContrast,
+      typography = it.typography,
+      imageQuality = it.imageQuality,
     )
   }
 

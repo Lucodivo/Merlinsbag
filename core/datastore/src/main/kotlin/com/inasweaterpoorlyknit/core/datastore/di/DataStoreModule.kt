@@ -11,7 +11,7 @@ import com.inasweaterpoorlyknit.core.common.di.InjectDispatcher
 import com.inasweaterpoorlyknit.core.datastore.UserPreferencesSerializer
 import com.inasweaterpoorlyknit.core.datastore.dao.PurgeDataStoreDao
 import com.inasweaterpoorlyknit.core.datastore.dao.UserPreferencesDao
-import com.inasweaterpoorlyknit.merlinsbag.UserPreferences
+import com.inasweaterpoorlyknit.core.model.proto.preference.UserPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

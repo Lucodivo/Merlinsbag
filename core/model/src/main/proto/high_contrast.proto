@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "com.inasweaterpoorlyknit.merlinsbag";
+option java_package = "com.inasweaterpoorlyknit.core.model.proto.preference";
 option java_multiple_files = true;
 
 enum HighContrast {

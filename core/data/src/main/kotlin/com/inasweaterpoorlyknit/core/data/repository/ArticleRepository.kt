@@ -21,7 +21,11 @@ import com.inasweaterpoorlyknit.core.database.dao.ArticleDao
 import com.inasweaterpoorlyknit.core.database.dao.EnsembleDao
 import com.inasweaterpoorlyknit.core.database.entity.ArticleImageEntity
 import com.inasweaterpoorlyknit.core.database.model.ImageFilenames
-import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Standard
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Perfect
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_High
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_VeryHigh
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -42,21 +46,22 @@ import kotlin.math.min
 
 val useDeprecatedWebpFormat = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
 
-fun ImageQuality.compressionFormat(): Bitmap.CompressFormat = when{
+fun ImageQuality.compressionFormat(): Bitmap.CompressFormat = when {
   useDeprecatedWebpFormat -> Bitmap.CompressFormat.WEBP
-  this == ImageQuality.PERFECT -> Bitmap.CompressFormat.WEBP_LOSSLESS
+  this == ImageQuality_Perfect -> Bitmap.CompressFormat.WEBP_LOSSLESS
   else -> Bitmap.CompressFormat.WEBP_LOSSY
 }
 
 fun ImageQuality.compressionQuality(): Int = when(this){
-  ImageQuality.PERFECT -> 100
-  ImageQuality.VERY_HIGH -> if(useDeprecatedWebpFormat) 90 else 100
-  ImageQuality.HIGH -> if(useDeprecatedWebpFormat) 80 else 90
-  ImageQuality.STANDARD -> if(useDeprecatedWebpFormat) 70 else 80
+  ImageQuality_Perfect -> 100
+  ImageQuality_VeryHigh -> if(useDeprecatedWebpFormat) 90 else 100
+  ImageQuality_High -> if(useDeprecatedWebpFormat) 80 else 90
+  ImageQuality_Standard,
+  ImageQuality.UNRECOGNIZED -> if(useDeprecatedWebpFormat) 70 else 80
 }
 
-val compressionFormatThumb = ImageQuality.STANDARD.compressionFormat()
-val compressionQualityThumb = ImageQuality.STANDARD.compressionQuality()
+val compressionFormatThumb = ImageQuality_Standard.compressionFormat()
+val compressionQualityThumb = ImageQuality_Standard.compressionQuality()
 val exportFormat = Bitmap.CompressFormat.PNG
 
 class ArticleRepository(

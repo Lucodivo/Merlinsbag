@@ -52,11 +52,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
-import com.inasweaterpoorlyknit.core.model.preference.DarkMode
-import com.inasweaterpoorlyknit.core.model.preference.HighContrast
-import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
-import com.inasweaterpoorlyknit.core.model.preference.Typography
+import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette.ColorPalette_RoadWarrior
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Dark
+import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast
+import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Off
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Standard
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Default
 import com.inasweaterpoorlyknit.core.ui.LargeFontSizePreview
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.SystemUiPreview
@@ -276,11 +281,11 @@ fun DarkModeRow(
 
 @Composable
 fun TypographyRow(
-  selectedTypography: Typography,
-  expandedMenu: Boolean,
-  onClick: () -> Unit,
-  onSelectTypography: (Typography) -> Unit,
-  onDismiss: () -> Unit,
+    selectedTypography: Typography,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectTypography: (Typography) -> Unit,
+    onDismiss: () -> Unit,
 ) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
@@ -313,11 +318,11 @@ fun TypographyRow(
 
 @Composable
 fun ColorPaletteRow(
-  selectedColorPalette: ColorPalette,
-  expandedMenu: Boolean,
-  onClick: () -> Unit,
-  onSelectColorPalette: (ColorPalette) -> Unit,
-  onDismiss: () -> Unit,
+    selectedColorPalette: ColorPalette,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectColorPalette: (ColorPalette) -> Unit,
+    onDismiss: () -> Unit,
 ) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = NoopColorSchemes.colorPaletteSchemes.map { scheme ->
@@ -343,12 +348,12 @@ fun ColorPaletteRow(
 
 @Composable
 fun HighContrastRow(
-  enabled: Boolean,
-  selectedHighContrast: HighContrast,
-  expandedMenu: Boolean,
-  onClick: () -> Unit,
-  onSelectHighContrast: (HighContrast) -> Unit,
-  onDismiss: () -> Unit,
+    enabled: Boolean,
+    selectedHighContrast: HighContrast,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectHighContrast: (HighContrast) -> Unit,
+    onDismiss: () -> Unit,
 ) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
@@ -377,11 +382,11 @@ fun HighContrastRow(
 
 @Composable
 fun ImageQualityRow(
-  selectedImageQuality: ImageQuality,
-  expandedMenu: Boolean,
-  onClick: () -> Unit,
-  onSelectImageQuality: (ImageQuality) -> Unit,
-  onDismiss: () -> Unit,
+    selectedImageQuality: ImageQuality,
+    expandedMenu: Boolean,
+    onClick: () -> Unit,
+    onSelectImageQuality: (ImageQuality) -> Unit,
+    onDismiss: () -> Unit,
 ) {
   // Note: This order matters as we are taking advantage of the ordinal of the DarkMode enum
   val dropdownData = listOf(
@@ -677,11 +682,11 @@ fun PreviewUtilSettingsScreen(
   dropdownMenuState: DropdownMenuState = DropdownMenuState.None,
   highContrastEnabled: Boolean = true,
   clearCacheEnabled: Boolean = true,
-  darkMode: DarkMode = DarkMode.DARK,
-  colorPalette: ColorPalette = ColorPalette.ROAD_WARRIOR,
-  highContrast: HighContrast = HighContrast.OFF,
-  imageQuality: ImageQuality = ImageQuality.STANDARD,
-  typography: Typography = Typography.DEFAULT,
+  darkMode: DarkMode = DarkMode_Dark,
+  colorPalette: ColorPalette = ColorPalette_RoadWarrior,
+  highContrast: HighContrast = HighContrast_Off,
+  imageQuality: ImageQuality = ImageQuality_Standard,
+  typography: Typography = Typography_Default,
 ) = NoopTheme(darkMode = darkMode) {
   Surface {
     SettingsScreen(
@@ -705,5 +710,5 @@ fun PreviewUtilSettingsScreen(
 @SystemUiPreview @Composable fun PreviewSettingsScreen() = PreviewUtilSettingsScreen()
 @LargeFontSizePreview @Composable fun PreviewSettingsScreen_largeFont() = PreviewUtilSettingsScreen()
 @Preview @Composable fun PreviewSettingsScreen_AlertDialog() = PreviewUtilSettingsScreen(alertDialogState = AlertDialogState.DeleteAllData)
-@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode.DARK) { DeleteAllDataAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
+@Preview @Composable fun PreviewDeleteAllDataAlertDialog() = NoopTheme(darkMode = DarkMode_Dark) { DeleteAllDataAlertDialog(visible = true, onConfirm = {}, onDismiss = {}) }
 //endregion

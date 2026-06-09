@@ -71,7 +71,8 @@ import com.inasweaterpoorlyknit.core.data.model.LazyEnsembleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnails
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
 import com.inasweaterpoorlyknit.core.database.model.ThumbnailFilename
-import com.inasweaterpoorlyknit.core.model.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Dark
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Light
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
@@ -634,7 +635,7 @@ fun PreviewUtilEnsembleScreen(
     darkMode: Boolean = false,
     dialogState: DialogState = None,
     showPlaceholder: Boolean = false,
-) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
+) = NoopTheme(darkMode = if(darkMode) DarkMode_Dark else DarkMode_Light) {
   EnsemblesScreen(
     windowSizeClass = currentWindowAdaptiveInfo(),
     uiState = EnsemblesUIState(
@@ -655,7 +656,7 @@ fun PreviewUtilEnsembleScreen(
 fun PreviewUtilAddEnsembleDialog(
   thumbnails: LazyUriStrings = lazyRepeatedThumbnailResourceIdsAsStrings,
   showEnsembleTitleError: Boolean = false,
-) = NoopTheme(DarkMode.DARK) {
+) = NoopTheme(DarkMode_Dark) {
   AddEnsembleDialog(
     visible = true,
     articleThumbnails = thumbnails,
@@ -665,7 +666,7 @@ fun PreviewUtilAddEnsembleDialog(
   )
 }
 
-@Preview @Composable fun PreviewEnsembleOverlappingImageRow() = NoopTheme(darkMode = DarkMode.DARK) {
+@Preview @Composable fun PreviewEnsembleOverlappingImageRow() = NoopTheme(darkMode = DarkMode_Dark) {
   EnsembleOverlappingImageRow(title = "Road Warrior", lazyUriStrings = previewEnsembles[1].thumbnails, selected = false, selectable = false, modifier = Modifier.fillMaxWidth())
 }
 
@@ -675,7 +676,7 @@ fun PreviewUtilAddEnsembleDialog(
 
 @Preview
 @Composable
-fun PreviewEnsembleOverlappingPlaceholderRow() = NoopTheme(darkMode = DarkMode.DARK) {
+fun PreviewEnsembleOverlappingPlaceholderRow() = NoopTheme(darkMode = DarkMode_Dark) {
   EnsembleOverlappingPlaceholderRow(title = "Road Warrior", drawables = drawablePlaceholders[1].second, modifier = Modifier.fillMaxWidth())
 }
 

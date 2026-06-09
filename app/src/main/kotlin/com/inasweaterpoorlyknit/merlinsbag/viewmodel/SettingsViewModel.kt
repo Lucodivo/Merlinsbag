@@ -9,11 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
-import com.inasweaterpoorlyknit.core.model.preference.ColorPalette
-import com.inasweaterpoorlyknit.core.model.preference.DarkMode
-import com.inasweaterpoorlyknit.core.model.preference.HighContrast
-import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
-import com.inasweaterpoorlyknit.core.model.preference.Typography
+import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette
+import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette.ColorPalette_SystemDynamic
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast
+import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Off
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.merlinsbag.Constants.WebUrls
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState
@@ -233,7 +235,7 @@ class SettingsUIStateManager @Inject constructor(
       }
     }
 
-    val highContrastEnabled = userPreferences.colorPalette != ColorPalette.SYSTEM_DYNAMIC
+    val highContrastEnabled = userPreferences.colorPalette != ColorPalette_SystemDynamic
     cachedState = SettingsUIState(
       clearCacheEnabled = clearCacheEnabled,
       dropdownMenu = dropdownMenu,
@@ -243,7 +245,7 @@ class SettingsUIStateManager @Inject constructor(
       colorPalette = userPreferences.colorPalette,
       typography = userPreferences.typography,
       imageQuality = userPreferences.imageQuality,
-      highContrast = if(highContrastEnabled) userPreferences.highContrast else HighContrast.OFF,
+      highContrast = if(highContrastEnabled) userPreferences.highContrast else HighContrast_Off,
     )
     return cachedState
   }

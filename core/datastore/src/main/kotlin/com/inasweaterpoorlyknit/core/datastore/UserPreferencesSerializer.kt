@@ -6,12 +6,12 @@ import com.google.protobuf.InvalidProtocolBufferException
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
-import com.inasweaterpoorlyknit.merlinsbag.ColorPalette as ColorPaletteDataStore
-import com.inasweaterpoorlyknit.merlinsbag.DarkMode as DarkModeDataStore
-import com.inasweaterpoorlyknit.merlinsbag.HighContrast as HighContrastDataStore
-import com.inasweaterpoorlyknit.merlinsbag.ImageQuality as ImageQualityDataStore
-import com.inasweaterpoorlyknit.merlinsbag.Typography as TypographyDataStore
-import com.inasweaterpoorlyknit.merlinsbag.UserPreferences as UserPreferencesDataStore
+import com.inasweaterpoorlyknit.core.model.proto.preference.ColorPalette.ColorPalette_RoadWarrior
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_System
+import com.inasweaterpoorlyknit.core.model.proto.preference.HighContrast.HighContrast_Off
+import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQuality_Standard
+import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Default
+import com.inasweaterpoorlyknit.core.model.proto.preference.UserPreferences as UserPreferencesDataStore
 
 class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferencesDataStore> {
   override val defaultValue: UserPreferencesDataStore = defaultUserPreferences
@@ -32,11 +32,11 @@ class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferenc
   companion object {
     val defaultUserPreferences: UserPreferencesDataStore = UserPreferencesDataStore.newBuilder()
         .setHasCompletedOnboarding(false)
-        .setDarkMode(DarkModeDataStore.DarkMode_System)
-        .setColorPalette(ColorPaletteDataStore.ColorPalette_RoadWarrior)
-        .setHighContrast(HighContrastDataStore.HighContrast_Off)
-        .setTypography(TypographyDataStore.Typography_Default)
-        .setImageQuality(ImageQualityDataStore.ImageQuality_Standard)
+        .setDarkMode(DarkMode_System)
+        .setColorPalette(ColorPalette_RoadWarrior)
+        .setHighContrast(HighContrast_Off)
+        .setTypography(Typography_Default)
+        .setImageQuality(ImageQuality_Standard)
         .build()
 
   }

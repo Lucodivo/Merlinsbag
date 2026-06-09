@@ -45,7 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.model.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Dark
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.DevicePreviews
@@ -422,7 +422,7 @@ fun DiscardAlertDialog(
 fun PreviewUtilAddArticleScreen(
     dialogState: AddArticleViewModel.DialogState =  AddArticleViewModel.DialogState.None,
     attachToArticleEnabled: Boolean = true,
-) = NoopTheme(darkMode = DarkMode.DARK) {
+) = NoopTheme(darkMode = DarkMode_Dark) {
   AddArticleScreen(
     systemBarPaddingValues = WindowInsets.systemBars.asPaddingValues(),
     windowSizeClass = currentWindowAdaptiveInfo(),

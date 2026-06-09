@@ -7,7 +7,7 @@ import app.cash.molecule.moleculeFlow
 import app.cash.turbine.test
 import com.inasweaterpoorlyknit.core.data.repository.PurgeRepository
 import com.inasweaterpoorlyknit.core.data.repository.UserPreferencesRepository
-import com.inasweaterpoorlyknit.core.model.preference.ImageQuality
+import com.inasweaterpoorlyknit.core.model.ImageQuality
 import com.inasweaterpoorlyknit.core.model.UserPreferences
 import com.inasweaterpoorlyknit.core.testing.MainDispatcherRule
 import com.inasweaterpoorlyknit.merlinsbag.viewmodel.SettingsUIState.AlertDialogState

@@ -91,6 +91,7 @@ dependencies {
     testImplementation(projects.core.testing)
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.protobuf.kotlin.lite)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)

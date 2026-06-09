@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import com.inasweaterpoorlyknit.core.model.preference.DarkMode
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Dark
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.theme.NoopIcons
 import com.inasweaterpoorlyknit.core.ui.theme.NoopTheme
@@ -138,5 +138,5 @@ fun TipsAndInfoScreen(
 
 //region COMPOSABLE PREVIEWS
 @Preview(name = "__", device = "spec:shape=Normal,width=360,height=2800,unit=dp,dpi=480")
-@Composable fun PreviewTipsAndInfoScreen() = NoopTheme(DarkMode.DARK) { TipsAndInfoScreen() }
+@Composable fun PreviewTipsAndInfoScreen() = NoopTheme(DarkMode_Dark) { TipsAndInfoScreen() }
 //endregion

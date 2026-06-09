@@ -33,6 +33,7 @@ dependencies {
   implementation(projects.core.model)
 
   implementation(libs.androidx.core.ktx)
+  implementation(libs.protobuf.kotlin.lite)
 
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.compose.ui.tooling)

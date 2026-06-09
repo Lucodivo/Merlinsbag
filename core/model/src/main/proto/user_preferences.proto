@@ -6,7 +6,7 @@ import "color_palette.proto";
 import "high_contrast.proto";
 import "image_quality.proto";
 
-option java_package = "com.inasweaterpoorlyknit.merlinsbag";
+option java_package = "com.inasweaterpoorlyknit.core.model.proto.preference";
 option java_multiple_files = true;
 
 message UserPreferences {

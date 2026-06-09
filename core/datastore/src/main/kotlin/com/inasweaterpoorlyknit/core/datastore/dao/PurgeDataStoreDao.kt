@@ -2,7 +2,7 @@ package com.inasweaterpoorlyknit.core.datastore.dao
 
 import androidx.datastore.core.DataStore
 import com.inasweaterpoorlyknit.core.datastore.UserPreferencesSerializer
-import com.inasweaterpoorlyknit.merlinsbag.UserPreferences
+import com.inasweaterpoorlyknit.core.model.proto.preference.UserPreferences
 
 class PurgeDataStoreDao(
     private val preferencesDataStore: DataStore<UserPreferences>

@@ -74,8 +74,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
-import com.inasweaterpoorlyknit.core.model.preference.DarkMode
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Dark
+import com.inasweaterpoorlyknit.core.model.proto.preference.DarkMode.DarkMode_Light
 import com.inasweaterpoorlyknit.core.ui.ARTICLE_IMAGE_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.REDUNDANT_CONTENT_DESCRIPTION
 import com.inasweaterpoorlyknit.core.ui.allTestFullResourceIdsAsStrings
@@ -799,7 +800,7 @@ fun PreviewUtilArticleDetailScreen(
     showAddToEnsembleDialog: Boolean = false,
     selectedEnsembles: Set<Int> = emptySet(),
     addEnsembles: List<Ensemble> = emptyList(),
-) = NoopTheme(darkMode = if(darkMode) DarkMode.DARK else DarkMode.LIGHT) {
+) = NoopTheme(darkMode = if(darkMode) DarkMode_Dark else DarkMode_Light) {
   val articlesWithImages = object: LazyFilenames {
     val fullImageUris = allTestFullResourceIdsAsStrings
     val thumbImageUris = allTestThumbnailResourceIdsAsStrings
@@ -864,7 +865,7 @@ fun PreviewUtilArticleDetailScreen(
   )
 )
 
-@Preview @Composable fun PreviewAddToEnsembleDialog() = NoopTheme(darkMode = DarkMode.DARK) {
+@Preview @Composable fun PreviewAddToEnsembleDialog() = NoopTheme(darkMode = DarkMode_Dark) {
   AddToEnsembleDialog(
     visible = true,
     ensemblesToAdd = listOf(
