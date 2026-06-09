@@ -4,7 +4,7 @@ import com.inasweaterpoorlyknit.core.database.model.ArticleThumbnails
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 
 class LazyArticleThumbnails(
-  val directory: String,
+  private val directory: String,
   articleThumbnailPaths: List<ArticleThumbnails>
 ): LazyUriStrings {
   val paths = articleThumbnailPaths.toMutableList()

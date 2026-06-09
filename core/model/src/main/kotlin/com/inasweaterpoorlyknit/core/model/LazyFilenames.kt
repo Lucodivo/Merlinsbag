@@ -1,6 +1,4 @@
-package com.inasweaterpoorlyknit.core.data.model
-
-import com.inasweaterpoorlyknit.core.model.LazyUriStrings
+package com.inasweaterpoorlyknit.core.model
 
 interface LazyFilenames {
   val lazyFullImageUris: LazyUriStrings

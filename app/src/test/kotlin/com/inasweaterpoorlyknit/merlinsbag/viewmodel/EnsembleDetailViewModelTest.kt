@@ -31,12 +31,13 @@ class EnsembleDetailViewModelTest {
   lateinit var viewModel: EnsembleDetailViewModel
 
   companion object {
+    const val testDirectory = "file://"
     val testEnsemble = Ensemble(
       id = "1234",
       title = "testEnsemble"
     )
     val allArticleThumbnails = LazyArticleThumbnails(
-      directory = "file://",
+      directory = testDirectory,
       articleThumbnailPaths = List(10){ articleIndex ->
         ArticleWithThumbnails(
           articleId = "articleId $articleIndex",
@@ -49,7 +50,7 @@ class EnsembleDetailViewModelTest {
       },
     )
     val ensembleArticleThumbnails = LazyArticleThumbnails(
-      directory = allArticleThumbnails.directory,
+      directory = testDirectory,
       articleThumbnailPaths = allArticleThumbnails.paths.subList(0, 2)
     )
   }

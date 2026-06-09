@@ -1,10 +1,11 @@
 package com.inasweaterpoorlyknit.core.data.model
 
 import com.inasweaterpoorlyknit.core.database.model.ArticleWithImages
+import com.inasweaterpoorlyknit.core.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.model.LazyUriStrings
 
 class LazyArticlesWithImages(
-    val directory: String,
+    private val directory: String,
     articlesWithImages: List<ArticleWithImages>
 ): LazyFilenames {
   val articleWithImages = articlesWithImages.toMutableList()

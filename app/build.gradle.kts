@@ -83,7 +83,7 @@ dependencies {
 
     // Project Modules
     implementation(projects.core.data)
-    implementation(projects.core.database) // TODO: app module shouldn't rely on database but mapping every database query seems wasteful 🤷‍♀️
+    implementation(projects.core.database) // TODO: app module shouldn't rely on database but mapping every database model to a domain model seems wasteful 🤷‍♀️
     implementation(projects.core.common)
     implementation(projects.core.model)
     implementation(projects.core.ui)

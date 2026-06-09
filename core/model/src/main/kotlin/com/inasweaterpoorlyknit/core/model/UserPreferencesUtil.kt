@@ -7,7 +7,7 @@ import com.inasweaterpoorlyknit.core.model.proto.preference.ImageQuality.ImageQu
 import com.inasweaterpoorlyknit.core.model.proto.preference.Typography.Typography_Default
 import com.inasweaterpoorlyknit.core.model.proto.preference.UserPreferences
 
-val UserPreferencesDefault = UserPreferences.newBuilder()
+val UserPreferencesDefault: UserPreferences = UserPreferences.newBuilder()
         .setHasCompletedOnboarding(false)
         .setDarkMode(DarkMode_System)
         .setColorPalette(ColorPalette_RoadWarrior)

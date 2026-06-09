@@ -13,7 +13,7 @@ import androidx.lifecycle.viewModelScope
 import com.inasweaterpoorlyknit.core.common.Event
 import com.inasweaterpoorlyknit.core.common.listMap
 import com.inasweaterpoorlyknit.core.data.model.LazyArticlesWithImages
-import com.inasweaterpoorlyknit.core.data.model.LazyFilenames
+import com.inasweaterpoorlyknit.core.model.LazyFilenames
 import com.inasweaterpoorlyknit.core.data.repository.ArticleRepository
 import com.inasweaterpoorlyknit.core.data.repository.EnsembleRepository
 import com.inasweaterpoorlyknit.core.database.model.Ensemble
